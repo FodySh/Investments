@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>محفظتي الاستثمارية</title>
+<title>My Wallet 💰خزنتي </title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <!-- Firebase SDK -->
 <script type="module">
@@ -12,8 +12,7 @@
     from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
   import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged }
     from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-  import { getFirestore, initializeFirestore, persistentLocalCache,
-           persistentMultipleTabManager, doc, setDoc, getDoc, onSnapshot }
+  import { getFirestore, doc, setDoc, getDoc, onSnapshot }
     from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const firebaseConfig = {
@@ -26,10 +25,16 @@ appId:             “1:964948881361:web:2801b8127489d953717af0”,
 measurementId:     “G-GCHGEV3FF2”
 };
 
-let app, auth, db, provider;
+let auth, db, provider;
 let _unsubSnapshot = null;
 let _syncing       = false;
 let _currentUid    = null;
+
+// ── Set placeholders immediately so onclick handlers never get “undefined” ──
+window.googleSignIn = () => {
+if (typeof showToast === ‘function’) showToast(‘⏳ جاري التحميل… حاول مرة أخرى’);
+};
+window.googleSignOut = () => {};
 
 const paths = uid => ({
 investments: [‘users’, uid, ‘portfolio’, ‘investments’],
@@ -52,7 +57,7 @@ try {
 const snap = await getDoc(doc(db, …paths(uid)[col]));
 if (!snap.exists()) return null;
 const d = snap.data();
-if (d.uid && d.uid !== uid) return null;
+if (d.uid && d.uid !== uid) return null; // guard: never serve another user’s data
 return d.data ?? null;
 } catch(e) { console.warn(‘fbRead:’, e.message); return null; }
 }
@@ -82,6 +87,7 @@ if (remoteInv && Array.isArray(remoteInv) && remoteInv.length > 0) {
   window.__investments.length = 0;
   remoteInv.forEach(r => window.__investments.push(r));
 } else {
+  // First login: save local seed data to this user's space
   await fbWrite(uid, 'investments', [...window.__investments]);
 }
 
@@ -121,6 +127,7 @@ const gate = document.getElementById(‘auth-gate’);
 if (gate) gate.style.display = show ? ‘flex’ : ‘none’;
 }
 
+// ── Exposed save functions ─────────────────────────────
 window.fbSaveInvestments = async () => {
 if (!_currentUid) return;
 _syncing = true;
@@ -134,6 +141,7 @@ window.fbSaveDebts = async () => {
 if (_currentUid) await fbWrite(_currentUid, ‘debts’, […window.debtsData]);
 };
 
+// ── Sync badge ─────────────────────────────────────────
 function showSyncBadge(state) {
 const map = {
 loading: { text:‘⟳ جاري المزامنة…’, c:’#38d9a9’ },
@@ -148,87 +156,81 @@ if (badge) { badge.textContent = s.text; badge.style.color = s.c; badge.style.di
 if (mob)   { mob.textContent   = s.text; mob.style.color   = s.c; }
 }
 
+// ── Auth UI ────────────────────────────────────────────
 function updateAuthUI(user) {
-const ids = {
-signin:   document.getElementById(‘auth-signin-btn’),
-card:     document.getElementById(‘auth-user-card’),
-name:     document.getElementById(‘auth-user-name’),
-email:    document.getElementById(‘auth-user-email’),
-initials: document.getElementById(‘auth-avatar-initials’),
-badge:    document.getElementById(‘sync-badge’),
-mobBtn:   document.getElementById(‘mob-signin-btn’),
-mobCard:  document.getElementById(‘mob-user-card’),
-mobAv:    document.getElementById(‘mob-avatar’),
-mobName:  document.getElementById(‘mob-user-name’),
-mobEmail: document.getElementById(‘mob-menu-email’),
-};
+const get = id => document.getElementById(id);
 if (user) {
-if (ids.signin)   ids.signin.style.display = ‘none’;
-if (ids.card)     ids.card.classList.add(‘show’);
-if (ids.name)     ids.name.textContent    = user.displayName || ‘مستخدم’;
-if (ids.email)    ids.email.textContent   = user.email || ‘’;
-if (ids.initials) {
-ids.initials.textContent = (user.displayName||‘U’)[0];
-if (user.photoURL) ids.initials.innerHTML = `<img src="${user.photoURL}" style="width:32px;height:32px;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer"/>`;
-}
-if (ids.mobBtn)   ids.mobBtn.style.display  = ‘none’;
-if (ids.mobCard)  ids.mobCard.style.display  = ‘flex’;
-if (ids.mobName)  ids.mobName.textContent    = user.displayName?.split(’ ‘)[0] || ‘مستخدم’;
-if (ids.mobEmail) ids.mobEmail.textContent   = user.email || ‘’;
-if (ids.mobAv) {
-if (user.photoURL)
-ids.mobAv.innerHTML = `<img src="${user.photoURL}" style="width:30px;height:30px;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer"/>`;
-else
-ids.mobAv.textContent = (user.displayName||‘U’)[0];
-}
-if (typeof showToast === ‘function’) showToast(‘✅ مرحباً ’ + (user.displayName?.split(’ ‘)[0]||’’));
-} else {
-if (ids.signin)   ids.signin.style.display  = ‘flex’;
-if (ids.card)     ids.card.classList.remove(‘show’);
-if (ids.badge)    ids.badge.style.display   = ‘none’;
-if (ids.mobBtn)   ids.mobBtn.style.display  = ‘flex’;
-if (ids.mobCard)  ids.mobCard.style.display = ‘none’;
-}
-}
-
-try {
-app      = initializeApp(firebaseConfig);
-auth     = getAuth(app);
-provider = new GoogleAuthProvider();
-provider.setCustomParameters({ prompt: ‘select_account’, hl: ‘ar’ });
-try {
-db = initializeFirestore(app, {
-localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
-});
-} catch { db = getFirestore(app); }
+const displayName = user.displayName || ‘مستخدم’;
+const firstLetter = displayName[0];
+const photo       = user.photoURL;
+const photoTag    = src => `<img src="${src}" style="width:32px;height:32px;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer"/>`;
+const photoTagSm  = src => `<img src="${src}" style="width:30px;height:30px;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer"/>`;
 
 ```
-onAuthStateChanged(auth, async user => {
-  window.__firebaseUser = user;
-  updateAuthUI(user);
-  if (user) { _currentUid = user.uid; await loadUserData(user.uid); }
-  else       { clearUserData(); }
-});
+  const el = (id, v, isHTML) => { const e=get(id); if(e){ if(isHTML) e.innerHTML=v; else e.textContent=v; } };
+  const show = (id, disp) => { const e=get(id); if(e) e.style.display=disp; };
+  const cls  = (id, add, cls) => { const e=get(id); if(e) e.classList[add?'add':'remove'](cls); };
 
+  show('auth-signin-btn', 'none');
+  cls('auth-user-card', true, 'show');
+  el('auth-user-name', displayName);
+  el('auth-user-email', user.email || '');
+  el('auth-avatar-initials', photo ? photoTag(photo) : firstLetter, !!photo);
+  show('mob-signin-btn', 'none');
+  show('mob-user-card', 'flex');
+  el('mob-user-name', displayName.split(' ')[0]);
+  el('mob-menu-email', user.email || '');
+  el('mob-avatar', photo ? photoTagSm(photo) : firstLetter, !!photo);
+  show('auth-gate', 'none'); // hide gate immediately on auth
+
+  if (typeof showToast === 'function')
+    showToast('✅ مرحباً ' + displayName.split(' ')[0]);
+} else {
+  const show = (id, disp) => { const e=document.getElementById(id); if(e) e.style.display=disp; };
+  const cls  = (id, rm, cls) => { const e=document.getElementById(id); if(e) e.classList.remove(cls); };
+  show('auth-signin-btn', 'flex');
+  cls('auth-user-card', false, 'show');
+  const badge = get('sync-badge');
+  if (badge) badge.style.display = 'none';
+  show('mob-signin-btn', 'flex');
+  show('mob-user-card', 'none');
+}
+```
+
+}
+
+// ── Bootstrap ──────────────────────────────────────────
+const app  = initializeApp(firebaseConfig);
+auth     = getAuth(app);
+db       = getFirestore(app);
+provider = new GoogleAuthProvider();
+provider.setCustomParameters({ prompt: ‘select_account’, hl: ‘ar’ });
+
+// Now override the placeholder with the real implementation
 window.googleSignIn = async () => {
-  try { await signInWithPopup(auth, provider); }
-  catch(e) {
-    if (e.code !== 'auth/popup-closed-by-user')
-      if (typeof showToast === 'function') showToast('❌ ' + e.message);
-  }
+try {
+await signInWithPopup(auth, provider);
+} catch(e) {
+if (e.code !== ‘auth/popup-closed-by-user’ && e.code !== ‘auth/cancelled-popup-request’)
+if (typeof showToast === ‘function’) showToast(’❌ ’ + e.message);
+}
 };
 
 window.googleSignOut = async () => {
-  await signOut(auth);
-  if (typeof showToast === 'function') showToast('👋 تم تسجيل الخروج');
+await signOut(auth);
+if (typeof showToast === ‘function’) showToast(‘👋 تم تسجيل الخروج’);
 };
-```
 
-} catch(e) {
-console.error(‘Firebase init error:’, e);
-window.googleSignIn  = () => window.demoSignIn?.();
-window.googleSignOut = () => window.demoSignOut?.();
+onAuthStateChanged(auth, async user => {
+window.__firebaseUser = user;
+updateAuthUI(user);
+if (user) {
+_currentUid = user.uid;
+await loadUserData(user.uid);
+} else {
+clearUserData();
 }
+});
 
 window.__updateAuthUI         = updateAuthUI;
 window.IS_FIREBASE_CONFIGURED = true;
