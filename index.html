@@ -4,43 +4,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Invesments 💰محفظتي الاستثمارية</title>
+<title>محفظتي الاستثمارية</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <!-- Firebase SDK -->
 <script type="module">
   import { initializeApp }                                        from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
   import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged }
                                                                   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-  import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, enableIndexedDbPersistence }
+  import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
+                   doc, setDoc, getDoc, onSnapshot }
                                                                   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 // ══════════════════════════════════════════════════════
 //  FIREBASE CONFIG — استبدل هذه القيم بقيمك من Firebase Console
 //  console.firebase.google.com → Project Settings → Your Apps → Web App
 // ══════════════════════════════════════════════════════
-
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME",
-    authDomain: "investments-page.firebaseapp.com",
-    projectId: "investments-page",
-    storageBucket: "investments-page.firebasestorage.app",
-    messagingSenderId: "964948881361",
-    appId: "1:964948881361:web:2801b8127489d953717af0",
-    measurementId: "G-GCHGEV3FF2"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
+const firebaseConfig = {
+apiKey:            “AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME”,
+authDomain:        “investments-page.firebaseapp.com”,
+projectId:         “investments-page”,
+storageBucket:     “investments-page.firebasestorage.app”,
+messagingSenderId: “964948881361”,
+appId:             “1:964948881361:web:2801b8127489d953717af0”,
+measurementId:     “G-GCHGEV3FF2”
+};
 // ══════════════════════════════════════════════════════
 
 const IS_CONFIGURED = !firebaseConfig.apiKey.startsWith(“YOUR_”);
@@ -191,23 +178,45 @@ const nameEl    = document.getElementById(‘auth-user-name’);
 const emailEl   = document.getElementById(‘auth-user-email’);
 const initials  = document.getElementById(‘auth-avatar-initials’);
 const syncBadge = document.getElementById(‘sync-badge’);
-if (!signinBtn) return;
+// Mobile topbar elements
+const mobSignin  = document.getElementById(‘mob-signin-btn’);
+const mobUser    = document.getElementById(‘mob-user-card’);
+const mobAvatar  = document.getElementById(‘mob-avatar’);
+const mobName    = document.getElementById(‘mob-user-name’);
+const mobEmail   = document.getElementById(‘mob-menu-email’);
 
 ```
 if (user) {
-  signinBtn.style.display  = 'none';
-  userCard.classList.add('show');
-  nameEl.textContent  = user.displayName || 'مستخدم';
-  emailEl.textContent = user.email || '';
-  initials.textContent = (user.displayName || 'U')[0];
-  if (user.photoURL) {
+  // Desktop sidebar
+  if (signinBtn) signinBtn.style.display = 'none';
+  if (userCard)  userCard.classList.add('show');
+  if (nameEl)    nameEl.textContent  = user.displayName || 'مستخدم';
+  if (emailEl)   emailEl.textContent = user.email || '';
+  if (initials)  initials.textContent = (user.displayName || 'U')[0];
+  if (initials && user.photoURL) {
     initials.innerHTML = `<img src="${user.photoURL}" style="width:32px;height:32px;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer"/>`;
+  }
+  // Mobile topbar
+  if (mobSignin) mobSignin.style.display = 'none';
+  if (mobUser)   mobUser.style.display   = 'flex';
+  if (mobName)   mobName.textContent     = user.displayName?.split(' ')[0] || 'مستخدم';
+  if (mobEmail)  mobEmail.textContent    = user.email || '';
+  if (mobAvatar) {
+    if (user.photoURL) {
+      mobAvatar.innerHTML = `<img src="${user.photoURL}" style="width:30px;height:30px;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer"/>`;
+    } else {
+      mobAvatar.textContent = (user.displayName || 'U')[0];
+    }
   }
   if (typeof showToast === 'function') showToast('✅ مرحباً ' + (user.displayName?.split(' ')[0] || ''));
 } else {
-  signinBtn.style.display = 'flex';
-  userCard.classList.remove('show');
+  // Desktop sidebar
+  if (signinBtn) signinBtn.style.display = 'flex';
+  if (userCard)  userCard.classList.remove('show');
   if (syncBadge) syncBadge.style.display = 'none';
+  // Mobile topbar
+  if (mobSignin) mobSignin.style.display = 'flex';
+  if (mobUser)   mobUser.style.display   = 'none';
   if (_unsubSnapshot) { _unsubSnapshot(); _unsubSnapshot = null; }
 }
 ```
@@ -219,14 +228,18 @@ if (IS_CONFIGURED) {
 try {
 app      = initializeApp(firebaseConfig);
 auth     = getAuth(app);
-db       = getFirestore(app);
+// Use initializeFirestore with persistent cache (replaces deprecated enableIndexedDbPersistence)
+try {
+db = initializeFirestore(app, {
+localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+});
+} catch(cacheErr) {
+db = getFirestore(app); // fallback for Safari/private mode
+}
 provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: ‘select_account’, hl: ‘ar’ });
 
 ```
-  // Enable offline persistence
-  enableIndexedDbPersistence(db).catch(e => console.warn('Persistence:', e.code));
-
   onAuthStateChanged(auth, async (user) => {
     window.__firebaseUser = user;
     updateAuthUI(user);
@@ -760,9 +773,15 @@ window.IS_FIREBASE_CONFIGURED = IS_CONFIGURED;
     display: flex;
     height: 100%;
     align-items: stretch;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
+  .mobile-nav-inner::-webkit-scrollbar { display: none; }
   .mnav-item {
-    flex: 1;
+    flex: 0 0 auto;
+    min-width: 60px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -773,7 +792,7 @@ window.IS_FIREBASE_CONFIGURED = IS_CONFIGURED;
     font-size: 9px;
     font-weight: 600;
     letter-spacing: 0.3px;
-    padding: 6px 2px;
+    padding: 6px 8px;
     transition: all .2s;
     border-radius: 12px;
     margin: 6px 2px;
@@ -1643,10 +1662,66 @@ window.IS_FIREBASE_CONFIGURED = IS_CONFIGURED;
     <div class="mobile-topbar-title" id="mob-page-title">لوحة التحكم</div>
     <div class="mobile-topbar-logo">PORTFOLIO</div>
   </div>
-  <div class="mobile-topbar-sub">
-    <span class="live-dot" style="margin-left:4px"></span> محدّث 12/03/2026
+  <!-- Mobile Auth -->
+  <div style="display:flex;align-items:center;gap:8px">
+    <!-- Sign-in button (compact) -->
+    <button id="mob-signin-btn" onclick="googleSignIn()" style="
+      display:flex;align-items:center;gap:6px;
+      background:rgba(255,255,255,0.08);
+      border:1px solid var(--border);
+      border-radius:20px;padding:5px 10px 5px 6px;
+      cursor:pointer;color:var(--white);
+      font-family:'IBM Plex Sans Arabic',sans-serif;
+      font-size:11px;font-weight:600;
+      transition:all .2s;
+    ">
+      <svg width="16" height="16" viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+      تسجيل الدخول
+    </button>
+    <!-- Logged-in avatar (hidden by default) -->
+    <div id="mob-user-card" style="display:none;align-items:center;gap:6px;cursor:pointer" onclick="toggleMobUserMenu()">
+      <div id="mob-avatar" style="
+        width:30px;height:30px;border-radius:50%;
+        background:linear-gradient(135deg,var(--gold),var(--gold2));
+        display:flex;align-items:center;justify-content:center;
+        font-size:13px;font-weight:700;color:var(--navy);
+        border:2px solid var(--gold);overflow:hidden;flex-shrink:0;
+      ">؟</div>
+      <span id="mob-user-name" style="font-size:11px;font-weight:600;color:var(--white);max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+      <span style="font-size:9px;color:var(--muted)">▾</span>
+    </div>
   </div>
 </div>
+
+<!-- Mobile User Dropdown -->
+<div id="mob-user-menu" style="
+  display:none;position:fixed;top:56px;left:12px;
+  background:var(--sidebar-bg);border:1px solid var(--border);
+  border-radius:12px;padding:8px;z-index:400;
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  backdrop-filter:blur(20px);min-width:180px;
+  animation:fadeUp .2s ease;
+">
+  <div id="mob-menu-email" style="padding:8px 12px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border);margin-bottom:4px"></div>
+  <div id="mob-sync-status" style="padding:6px 12px;font-size:11px;color:var(--green)">☁️ مزامن</div>
+  <button onclick="googleSignOut();closeMobUserMenu()" style="
+    width:100%;display:flex;align-items:center;gap:10px;
+    background:rgba(255,77,77,0.08);border:none;
+    padding:9px 12px;color:var(--red);
+    font-family:'IBM Plex Sans Arabic',sans-serif;
+    font-size:12px;font-weight:600;cursor:pointer;
+    border-radius:8px;margin-top:4px;text-align:right;
+    transition:background .15s;
+  " onmouseover="this.style.background='rgba(255,77,77,0.15)'" onmouseout="this.style.background='rgba(255,77,77,0.08)'">
+    <span>🚪</span> تسجيل الخروج
+  </button>
+</div>
+<div id="mob-user-overlay" onclick="closeMobUserMenu()" style="display:none;position:fixed;inset:0;z-index:399"></div>
 
 <!-- ═══════════════════════════════════════════════ -->
 <!-- PAGE: DASHBOARD -->
@@ -3468,16 +3543,62 @@ window.IS_FIREBASE_CONFIGURED = IS_CONFIGURED;
       <div class="mnav-icon-wrap"><span class="mnav-icon">📈</span></div>
       <span class="mnav-label">الأسهم</span>
     </div>
-    <div class="mnav-item" id="mnav-analyst" onclick="showPage('analyst', this, '🔍 رأي المحلل')">
-      <div class="mnav-icon-wrap"><span class="mnav-icon">🔍</span></div>
-      <span class="mnav-label">المحلل</span>
+    <div class="mnav-item" id="mnav-loans" onclick="showPage('loans', this, '🏦 القروض البنكية')">
+      <div class="mnav-icon-wrap"><span class="mnav-icon">🏦</span></div>
+      <span class="mnav-label">القروض</span>
     </div>
-    <div class="mnav-item" id="mnav-db" onclick="showPage('db', this, '🗄️ قاعدة البيانات')">
-      <div class="mnav-icon-wrap"><span class="mnav-icon">🗄️</span></div>
-      <span class="mnav-label">البيانات</span>
+    <div class="mnav-item" id="mnav-debts" onclick="showPage('debts', this, '💸 الديون الشخصية')">
+      <div class="mnav-icon-wrap"><span class="mnav-icon">💸</span></div>
+      <span class="mnav-label">الديون</span>
+    </div>
+    <div class="mnav-item" id="mnav-more" onclick="toggleMobileMore()">
+      <div class="mnav-icon-wrap"><span class="mnav-icon">⋯</span></div>
+      <span class="mnav-label">المزيد</span>
     </div>
   </div>
 </nav>
+
+<!-- Mobile More Menu -->
+
+<div id="mobile-more-menu" style="
+  display:none;
+  position:fixed;
+  bottom:76px;
+  left:50%;
+  transform:translateX(-50%);
+  background:var(--sidebar-bg);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:8px;
+  z-index:300;
+  box-shadow:0 -8px 40px rgba(0,0,0,0.4);
+  backdrop-filter:blur(20px);
+  min-width:220px;
+  animation:fadeUp .2s ease;
+">
+  <div style="font-size:10px;color:var(--muted);padding:6px 12px 4px;letter-spacing:.5px;text-transform:uppercase">المزيد من الصفحات</div>
+  <button onclick="showPage('analyst', document.getElementById('mnav-more'), '🔍 رأي المحلل'); closeMobileMore()" style="
+    width:100%;display:flex;align-items:center;gap:12px;
+    background:none;border:none;padding:10px 14px;
+    color:var(--white);font-family:'IBM Plex Sans Arabic',sans-serif;
+    font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;
+    transition:background .15s;text-align:right;
+  " onmouseover="this.style.background='rgba(76,175,130,0.1)'" onmouseout="this.style.background='none'">
+    <span style="font-size:18px">🔍</span> رأي المحلل
+  </button>
+  <button onclick="showPage('db', document.getElementById('mnav-more'), '🗄️ قاعدة البيانات'); closeMobileMore()" style="
+    width:100%;display:flex;align-items:center;gap:12px;
+    background:none;border:none;padding:10px 14px;
+    color:var(--white);font-family:'IBM Plex Sans Arabic',sans-serif;
+    font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;
+    transition:background .15s;text-align:right;
+  " onmouseover="this.style.background='rgba(125,211,252,0.1)'" onmouseout="this.style.background='none'">
+    <span style="font-size:18px">🗄️</span> قاعدة البيانات
+  </button>
+</div>
+<div id="mobile-more-overlay" onclick="closeMobileMore()" style="
+  display:none;position:fixed;inset:0;z-index:299;
+"></div>
 
 <div class="toast" id="toast"></div>
 
@@ -4315,20 +4436,24 @@ const PAGE_TITLES = {
 };
 
 function showPage(id, navEl, mobileTitle){
+  window.__currentPage = id;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
 
   // Desktop sidebar
   document.querySelectorAll('.sidebar .nav-item').forEach(n=>n.classList.remove('active'));
-  // Find matching sidebar nav item
   const sidebarMatch = [...document.querySelectorAll('.sidebar .nav-item')]
     .find(n => n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+id+"'"));
   if (sidebarMatch) sidebarMatch.classList.add('active');
 
-  // Mobile bottom nav
+  // Mobile bottom nav — if analyst or db, highlight the "more" button
   document.querySelectorAll('.mnav-item').forEach(n=>n.classList.remove('active'));
-  const mobMatch = document.getElementById('mnav-'+id);
-  if (mobMatch) mobMatch.classList.add('active');
+  if (['analyst','db'].includes(id)) {
+    document.getElementById('mnav-more')?.classList.add('active');
+  } else {
+    const mobMatch = document.getElementById('mnav-'+id);
+    if (mobMatch) mobMatch.classList.add('active');
+  }
 
   // Mobile top bar title
   const titleEl = document.getElementById('mob-page-title');
@@ -5504,35 +5629,93 @@ applyTheme(isLightMode);
 
 // ── DEMO AUTH (when Firebase not configured) ───────────────────────────────────
 function demoSignIn() {
-  const demoUser = {
-    displayName: 'فهد',
-    email: 'fahad@example.com',
-    photoURL: null
-  };
+  const name = 'فهد';
+  const email = 'fahad@example.com';
+  // Desktop
   const signinBtn = document.getElementById('auth-signin-btn');
   const userCard  = document.getElementById('auth-user-card');
-  const nameEl    = document.getElementById('auth-user-name');
-  const emailEl   = document.getElementById('auth-user-email');
-  const initials  = document.getElementById('auth-avatar-initials');
   if (signinBtn) signinBtn.style.display = 'none';
   if (userCard)  userCard.classList.add('show');
-  if (nameEl)    nameEl.textContent  = demoUser.displayName;
-  if (emailEl)   emailEl.textContent = demoUser.email;
-  if (initials)  initials.textContent = 'ف';
+  const nameEl   = document.getElementById('auth-user-name');
+  const emailEl  = document.getElementById('auth-user-email');
+  const initials = document.getElementById('auth-avatar-initials');
+  if (nameEl)   nameEl.textContent   = name;
+  if (emailEl)  emailEl.textContent  = email;
+  if (initials) initials.textContent = 'ف';
+  // Mobile
+  const mobSignin = document.getElementById('mob-signin-btn');
+  const mobUser   = document.getElementById('mob-user-card');
+  const mobAvatar = document.getElementById('mob-avatar');
+  const mobName   = document.getElementById('mob-user-name');
+  const mobEmail  = document.getElementById('mob-menu-email');
+  if (mobSignin) mobSignin.style.display = 'none';
+  if (mobUser)   mobUser.style.display   = 'flex';
+  if (mobAvatar) mobAvatar.textContent   = 'ف';
+  if (mobName)   mobName.textContent     = name;
+  if (mobEmail)  mobEmail.textContent    = email;
   showToast('✅ وضع تجريبي — سجّل Firebase لتفعيل Google');
 }
 
 function demoSignOut() {
+  // Desktop
   const signinBtn = document.getElementById('auth-signin-btn');
   const userCard  = document.getElementById('auth-user-card');
   if (signinBtn) signinBtn.style.display = 'flex';
   if (userCard)  userCard.classList.remove('show');
+  // Mobile
+  const mobSignin = document.getElementById('mob-signin-btn');
+  const mobUser   = document.getElementById('mob-user-card');
+  if (mobSignin) mobSignin.style.display = 'flex';
+  if (mobUser)   mobUser.style.display   = 'none';
+  closeMobUserMenu();
   showToast('👋 تم تسجيل الخروج');
 }
 
 // Fallback if Firebase module failed
 if (!window.googleSignIn) window.googleSignIn = demoSignIn;
 if (!window.googleSignOut) window.googleSignOut = demoSignOut;
+
+function toggleMobUserMenu() {
+  const menu    = document.getElementById('mob-user-menu');
+  const overlay = document.getElementById('mob-user-overlay');
+  const isOpen  = menu.style.display === 'block';
+  if (isOpen) { closeMobUserMenu(); }
+  else {
+    menu.style.display    = 'block';
+    overlay.style.display = 'block';
+  }
+}
+
+function closeMobUserMenu() {
+  document.getElementById('mob-user-menu').style.display    = 'none';
+  document.getElementById('mob-user-overlay').style.display = 'none';
+}
+
+// Also update demoSignIn/demoSignOut to update mobile UI
+
+function toggleMobileMore() {
+  const menu    = document.getElementById('mobile-more-menu');
+  const overlay = document.getElementById('mobile-more-overlay');
+  const btn     = document.getElementById('mnav-more');
+  const isOpen  = menu.style.display === 'block';
+  if (isOpen) {
+    closeMobileMore();
+  } else {
+    menu.style.display    = 'block';
+    overlay.style.display = 'block';
+    btn.classList.add('active');
+  }
+}
+
+function closeMobileMore() {
+  document.getElementById('mobile-more-menu').style.display    = 'none';
+  document.getElementById('mobile-more-overlay').style.display = 'none';
+  // Only remove active from "more" btn if another page isn't active via it
+  const btn = document.getElementById('mnav-more');
+  if (btn && !['analyst','db'].includes(window.__currentPage)) {
+    btn.classList.remove('active');
+  }
+}
 
 
 </script>
