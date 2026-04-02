@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>محفظتي الاستثمارية</title>
+<title>My Invesments 💰 محفظتي الاستثمارية</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <!-- Firebase SDK -->
 <script type="module">
@@ -14,13 +14,18 @@
   // ── CONFIGURE YOUR FIREBASE PROJECT HERE ──────────────
   // Replace with your own Firebase config after creating a project at console.firebase.google.com
   const firebaseConfig = {
-    apiKey:            "YOUR_API_KEY",
-    authDomain:        "YOUR_PROJECT.firebaseapp.com",
-    projectId:         "YOUR_PROJECT_ID",
-    storageBucket:     "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId:             "YOUR_APP_ID"
+  apiKey: "AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME",
+  authDomain: "investments-page.firebaseapp.com",
+  projectId: "investments-page",
+  storageBucket: "investments-page.firebasestorage.app",
+  messagingSenderId: "964948881361",
+  appId: "1:964948881361:web:2801b8127489d953717af0",
+  measurementId: "G-GCHGEV3FF2"
   };
+   // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
   // ─────────────────────────────────────────────────────
 
   let app, auth, provider;
