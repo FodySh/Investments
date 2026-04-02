@@ -18,14 +18,29 @@
 //  FIREBASE CONFIG — استبدل هذه القيم بقيمك من Firebase Console
 //  console.firebase.google.com → Project Settings → Your Apps → Web App
 // ══════════════════════════════════════════════════════
-const firebaseConfig = {
-apiKey:            “YOUR_API_KEY”,
-authDomain:        “YOUR_PROJECT.firebaseapp.com”,
-projectId:         “YOUR_PROJECT_ID”,
-storageBucket:     “YOUR_PROJECT.appspot.com”,
-messagingSenderId: “YOUR_SENDER_ID”,
-appId:             “YOUR_APP_ID”
-};
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME",
+    authDomain: "investments-page.firebaseapp.com",
+    projectId: "investments-page",
+    storageBucket: "investments-page.firebasestorage.app",
+    messagingSenderId: "964948881361",
+    appId: "1:964948881361:web:2801b8127489d953717af0",
+    measurementId: "G-GCHGEV3FF2"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
 // ══════════════════════════════════════════════════════
 
 const IS_CONFIGURED = !firebaseConfig.apiKey.startsWith(“YOUR_”);
