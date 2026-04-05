@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>محفظتي الاستثمارية</title>
+<title>محفظتي المالية </title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <!-- Firebase SDK -->
 
@@ -3454,11 +3454,11 @@ window.__investments = investments;
 //  AUTO-SYNC HOOK: called after every local change 
 function triggerSync(collection) {
   if (typeof window.fbSaveInvestments !== 'function') return;
-  if (collection === 'investments' || !collection) {
-    window.fbSaveInvestments().catch(()=>{});
-  }
-  if (collection === 'loans') window.fbSaveLoans?.().catch(()=>{});
-  if (collection === 'debts') window.fbSaveDebts?.().catch(()=>{});
+  try {
+    if (collection === 'investments' || !collection) window.fbSaveInvestments();
+    if (collection === 'loans')  window.fbSaveLoans();
+    if (collection === 'debts')  window.fbSaveDebts();
+  } catch(e) { console.warn('triggerSync:', e); }
 }
 
 //  RENDER TABLES 
@@ -5537,6 +5537,7 @@ function _ref(uid, col) {
 
 function _write(uid, col, data) {
   if (!uid) return;
+  _badge("loading");
   _ref(uid, col).set(
     { data: data, uid: uid, ts: new Date().toISOString() },
     { merge: true }
@@ -5674,28 +5675,30 @@ window.fbSaveInvestments = function() {
   setTimeout(function(){ _syncing = false; }, 2000);
 };
 window.fbSaveLoans = function() {
-  if (_uid) _write(_uid, "loans", Array.from(window.loansData));
+  if (!_uid) return;
+  _write(_uid, "loans", Array.from(window.loansData));
 };
 window.fbSaveDebts = function() {
-  if (_uid) _write(_uid, "debts", Array.from(window.debtsData));
+  if (!_uid) return;
+  _write(_uid, "debts", Array.from(window.debtsData));
 };
 
-//  Auth: use redirect on mobile, popup on desktop 
-var _isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
+//  Auth: popup on all platforms (redirect breaks on GitHub Pages / iOS Safari)
 window.googleSignIn = function() {
-  if (_isMobile) {
-    _auth.signInWithRedirect(_provider);
-  } else {
-    _auth.signInWithPopup(_provider).catch(function(e) {
-      if (e.code !== "auth/popup-closed-by-user"
-       && e.code !== "auth/cancelled-popup-request") {
-        console.error("popup error:", e.code, e.message);
-        // Fallback to redirect
-        _auth.signInWithRedirect(_provider);
-      }
-    });
-  }
+  _auth.signInWithPopup(_provider).then(function(result) {
+    // success handled by onAuthStateChanged
+  }).catch(function(e) {
+    if (e.code === "auth/popup-blocked") {
+      // Popup was blocked by browser — show guidance
+      if (typeof showToast === "function")
+        showToast("Please allow popups for this site");
+    } else if (e.code !== "auth/popup-closed-by-user"
+            && e.code !== "auth/cancelled-popup-request") {
+      console.error("SignIn error:", e.code, e.message);
+      if (typeof showToast === "function")
+        showToast("Login failed: " + e.code);
+    }
+  });
 };
 
 window.googleSignOut = function() {
@@ -5704,13 +5707,6 @@ window.googleSignOut = function() {
     if (typeof closeMobUserMenu === "function") closeMobUserMenu();
   });
 };
-
-// Handle redirect result first (for mobile)
-_auth.getRedirectResult().then(function(result) {
-  // result.user is null if no redirect happened  that's fine
-}).catch(function(e) {
-  console.warn("getRedirectResult:", e.code, e.message);
-});
 
 // Auth state listener
 _auth.onAuthStateChanged(function(user) {
