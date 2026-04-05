@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>محفظتي المالية </title>
+<title>محفظتي المالية</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <!-- Firebase SDK -->
 
@@ -354,6 +354,10 @@
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(20px); }
     to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spin {
+    from { display:inline-block; transform: rotate(0deg); }
+    to   { display:inline-block; transform: rotate(360deg); }
   }
   .fade-up { animation: fadeUp .5s ease both; }
   .delay-1 { animation-delay: .05s; }
@@ -1740,6 +1744,15 @@
           <div class="page-sub">أسعار محدّثة من السوق السعودي — 12/03/2026</div>
         </div>
         <div class="date-badge" id="stocks-total-badge">جاري الحساب...</div>
+      <button onclick="fetchLiveStockPrices()" id="stocks-refresh-btn" style="
+        background:rgba(56,217,169,0.1);border:1px solid rgba(56,217,169,0.3);
+        border-radius:8px;padding:8px 14px;font-size:11px;font-weight:600;
+        color:#38d9a9;cursor:pointer;font-family:'IBM Plex Sans Arabic',sans-serif;
+        transition:all .2s;display:flex;align-items:center;gap:6px;
+      " onmouseover="this.style.background='rgba(56,217,169,0.2)'"
+         onmouseout="this.style.background='rgba(56,217,169,0.1)'">
+        <span id="stocks-refresh-icon">⟳</span> تحديث الأسعار
+      </button>
       </div>
 
       <!-- Stocks table -->
@@ -3556,17 +3569,102 @@ function renderAll(){
     </tr>`;
   }).join('');
 }
+// Stock prices — updated live from Yahoo Finance (Tadawul: ticker.SR)
 const STOCK_PRICES = {
-  '2280': { price: 44.20,  chg: -0.265,  color: 'dn' },
-  '2222': { price: 27.16,  chg: -0.09,   color: 'dn' },
-  '2284': { price: 28.70,  chg:  1.87,   color: 'up' },
-  '4017': { price: 38.90,  chg:  2.89,   color: 'up' },
-  '2084': { price: 14.91,  chg:  0.18,   color: 'up' },
-  '4143': { price: 40.16,  chg:  3.02,   color: 'up' },
-  '1834': { price:  5.28,  chg: -0.472,  color: 'dn' },
-  '4163': { price: null,   chg: null,    color: ''   },
-  '5110': { price: null,   chg: null,    color: ''   },
+  '2280': { price: null, chg: null, color: '' },
+  '2222': { price: null, chg: null, color: '' },
+  '2284': { price: null, chg: null, color: '' },
+  '4017': { price: null, chg: null, color: '' },
+  '2084': { price: null, chg: null, color: '' },
+  '4143': { price: null, chg: null, color: '' },
+  '1834': { price: null, chg: null, color: '' },
+  '4163': { price: null, chg: null, color: '' },
+  '5110': { price: null, chg: null, color: '' },
 };
+
+// Fetch live prices from Yahoo Finance (free, no API key needed)
+async function fetchLiveStockPrices() {
+  const tickers = Object.keys(STOCK_PRICES);
+  const symbols = tickers.map(t => t + '.SR').join(',');
+  const url = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + symbols
+            + '&fields=regularMarketPrice,regularMarketChangePercent';
+
+  // Show loading state
+  const icon = document.getElementById('stocks-refresh-icon');
+  const btn  = document.getElementById('stocks-refresh-btn');
+  if (icon) icon.style.animation = 'spin 1s linear infinite';
+  if (btn)  btn.style.opacity = '0.6';
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    const quotes = json?.quoteResponse?.result || [];
+
+    quotes.forEach(function(q) {
+      const ticker = q.symbol.replace('.SR', '');
+      if (!STOCK_PRICES[ticker]) return;
+      const price  = q.regularMarketPrice;
+      const chgPct = (q.regularMarketChangePercent || 0) / 100;
+      STOCK_PRICES[ticker] = {
+        price: price,
+        chg:   chgPct,
+        color: chgPct >= 0 ? 'up' : 'dn'
+      };
+    });
+
+    renderStocks();
+    const now = new Date().toLocaleTimeString('ar-SA', {hour:'2-digit', minute:'2-digit'});
+    if (btn) btn.title = 'آخر تحديث: ' + now;
+    console.log('Stock prices updated:', now);
+
+  } catch(e) {
+    console.warn('Stock price fetch failed:', e.message);
+    fetchLiveStockPricesFallback(tickers);
+  } finally {
+    if (icon) icon.style.animation = '';
+    if (btn)  btn.style.opacity = '1';
+  }
+}
+
+// Fallback: use allorigins CORS proxy
+async function fetchLiveStockPricesFallback(tickers) {
+  for (const ticker of tickers) {
+    try {
+      const apiUrl = 'https://query2.finance.yahoo.com/v8/finance/chart/' + ticker + '.SR?interval=1d&range=1d';
+      const proxy  = 'https://api.allorigins.win/get?url=' + encodeURIComponent(apiUrl);
+      const res    = await fetch(proxy);
+      const json   = await res.json();
+      const data   = JSON.parse(json.contents);
+      const meta   = data?.chart?.result?.[0]?.meta;
+      if (!meta) continue;
+
+      const price      = meta.regularMarketPrice;
+      const prevClose  = meta.previousClose || meta.chartPreviousClose;
+      const chgPct     = prevClose ? (price - prevClose) / prevClose : 0;
+
+      STOCK_PRICES[ticker] = {
+        price: price,
+        chg:   chgPct,
+        color: chgPct >= 0 ? 'up' : 'dn'
+      };
+    } catch(e) {
+      console.warn('Fallback failed for', ticker, e.message);
+    }
+  }
+  renderStocks();
+}
+
+// Auto-refresh prices every 5 minutes while page is open
+function startStockPriceUpdater() {
+  fetchLiveStockPrices(); // immediate on load
+  setInterval(fetchLiveStockPrices, 5 * 60 * 1000); // every 5 min
+}
+
+// Start after DOM ready
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(startStockPriceUpdater, 1500); // slight delay to let page render first
+});
 
 function renderStocks() {
   const stockData = investments.filter(x => x.type === 'سهم');
@@ -5542,8 +5640,15 @@ function _write(uid, col, data) {
     { data: data, uid: uid, ts: new Date().toISOString() },
     { merge: true }
   )
-  .then(function()  { _badge("synced"); })
-  .catch(function(e){ console.warn("write:", e.message); _badge("error"); });
+  .then(function() { _badge("synced"); })
+  .catch(function(e) {
+    console.error("Firestore write error [" + col + "]:", e.code, e.message);
+    if (e.code === "permission-denied") {
+      _badge("rules");
+    } else {
+      _badge("error");
+    }
+  });
 }
 
 function _read(uid, col) {
@@ -5556,11 +5661,23 @@ function _read(uid, col) {
 }
 
 function _badge(state) {
-  var labels = { loading:"syncing...", synced:"synced", error:"error" };
-  var colors = { loading:"#38d9a9",   synced:"var(--green)", error:"var(--red)" };
+  var labels = {
+    loading: "syncing...",
+    synced:  "synced",
+    error:   "error - check console",
+    rules:   "permission denied - set Firestore rules",
+    offline: "offline"
+  };
+  var colors = {
+    loading: "#38d9a9",
+    synced:  "var(--green)",
+    error:   "var(--red)",
+    rules:   "var(--orange)",
+    offline: "var(--orange)"
+  };
   var b = document.getElementById("sync-badge");
   var m = document.getElementById("mob-sync-status");
-  var t = labels[state] || "offline";
+  var t = labels[state] || state;
   var k = colors[state] || "var(--orange)";
   if (b) { b.textContent = t; b.style.color = k; b.style.display = "flex"; }
   if (m) { m.textContent = t; m.style.color = k; }
