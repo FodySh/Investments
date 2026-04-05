@@ -7,235 +7,6 @@
 <title>محفظتي الاستثمارية</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script>
-(function() {
-  var firebaseConfig = {
-    apiKey: "AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME",
-    authDomain: "investments-page.firebaseapp.com",
-    projectId: "investments-page",
-    storageBucket: "investments-page.firebasestorage.app",
-    messagingSenderId: "964948881361",
-    appId: "1:964948881361:web:2801b8127489d953717af0"
-  };
-
-var app      = firebase.initializeApp(firebaseConfig);
-var auth     = firebase.auth();
-var db       = firebase.firestore();
-var provider = new firebase.auth.GoogleAuthProvider();
-provider.setCustomParameters({ prompt: “select_account”, hl: “ar” });
-
-var _unsubSnapshot = null;
-var _syncing       = false;
-var _currentUid    = null;
-
-function docRef(uid, col) {
-return db.collection(“users”).doc(uid).collection(“portfolio”).doc(col);
-}
-
-function fbWrite(uid, col, data) {
-if (!uid) return Promise.resolve();
-return docRef(uid, col).set(
-{ data: data, uid: uid, updatedAt: new Date().toISOString() },
-{ merge: true }
-).then(function() {
-showSyncBadge(“synced”);
-}).catch(function(e) {
-console.warn(“fbWrite:”, e.message);
-showSyncBadge(“error”);
-});
-}
-
-function fbRead(uid, col) {
-if (!uid) return Promise.resolve(null);
-return docRef(uid, col).get().then(function(snap) {
-if (!snap.exists) return null;
-var d = snap.data();
-if (d.uid && d.uid !== uid) return null;
-return d.data || null;
-}).catch(function(e) {
-console.warn(“fbRead:”, e.message);
-return null;
-});
-}
-
-function attachRealtimeSync(uid) {
-if (_unsubSnapshot) _unsubSnapshot();
-_unsubSnapshot = docRef(uid, “investments”).onSnapshot(function(snap) {
-if (!snap.exists || _syncing) return;
-var d = snap.data();
-if (d.uid && d.uid !== uid) return;
-var remote = d.data;
-if (!Array.isArray(remote)) return;
-window.__investments.length = 0;
-remote.forEach(function(r) { window.__investments.push(r); });
-[“renderAll”,“renderSukuk”,“renderFunds”,“renderStocks”].forEach(function(fn) {
-if (typeof window[fn] === “function”) window[fn]();
-});
-}, function(err) { console.warn(“Snapshot:”, err.message); });
-}
-
-function showAuthGate(show) {
-var gate = document.getElementById(“auth-gate”);
-if (gate) gate.style.display = show ? “flex” : “none”;
-}
-
-function showSyncBadge(state) {
-var labels = {
-loading: “syncing…”,
-synced:  “synced”,
-offline: “offline”,
-error:   “error”
-};
-var colors = {
-loading: “#38d9a9”,
-synced:  “var(–green)”,
-offline: “var(–orange)”,
-error:   “var(–red)”
-};
-var badge = document.getElementById(“sync-badge”);
-var mob   = document.getElementById(“mob-sync-status”);
-var txt   = labels[state] || “offline”;
-var col   = colors[state] || “var(–orange)”;
-if (badge) { badge.textContent = txt; badge.style.color = col; badge.style.display = “flex”; }
-if (mob)   { mob.textContent   = txt; mob.style.color   = col; }
-}
-
-function updateAuthUI(user) {
-function el(id) { return document.getElementById(id); }
-function show(id, d) { var e = el(id); if (e) e.style.display = d; }
-function txt(id, v)  { var e = el(id); if (e) e.textContent  = v; }
-function htm(id, v)  { var e = el(id); if (e) e.innerHTML    = v; }
-
-```
-if (user) {
-  var name   = user.displayName || "User";
-  var first  = name.split(" ")[0];
-  var letter = name[0];
-  var photo  = user.photoURL;
-  var img32  = photo ? "<img src='" + photo + "' style='width:32px;height:32px;border-radius:50%;object-fit:cover' referrerpolicy='no-referrer'/>" : letter;
-  var img30  = photo ? "<img src='" + photo + "' style='width:30px;height:30px;border-radius:50%;object-fit:cover' referrerpolicy='no-referrer'/>" : letter;
-
-  show("auth-signin-btn", "none");
-  var card = el("auth-user-card"); if (card) card.classList.add("show");
-  txt("auth-user-name",     name);
-  txt("auth-user-email",    user.email || "");
-  htm("auth-avatar-initials", img32);
-  show("mob-signin-btn", "none");
-  show("mob-user-card",  "flex");
-  txt("mob-user-name",   first);
-  txt("mob-menu-email",  user.email || "");
-  htm("mob-avatar",      img30);
-  show("auth-gate", "none");
-  if (typeof showToast === "function") showToast("Welcome " + first);
-} else {
-  show("auth-signin-btn", "flex");
-  var card2 = el("auth-user-card"); if (card2) card2.classList.remove("show");
-  var badge = el("sync-badge"); if (badge) badge.style.display = "none";
-  show("mob-signin-btn", "flex");
-  show("mob-user-card",  "none");
-}
-```
-
-}
-
-function loadUserData(uid) {
-showSyncBadge(“loading”);
-showAuthGate(false);
-
-```
-return fbRead(uid, "investments").then(function(remoteInv) {
-  if (remoteInv && Array.isArray(remoteInv) && remoteInv.length > 0) {
-    window.__investments.length = 0;
-    remoteInv.forEach(function(r) { window.__investments.push(r); });
-  } else {
-    return fbWrite(uid, "investments", Array.from(window.__investments));
-  }
-}).then(function() {
-  return fbRead(uid, "loans");
-}).then(function(remoteLoans) {
-  if (remoteLoans && Array.isArray(remoteLoans)) {
-    window.loansData.length = 0;
-    remoteLoans.forEach(function(r) { window.loansData.push(r); });
-  }
-  return fbRead(uid, "debts");
-}).then(function(remoteDebts) {
-  if (remoteDebts && Array.isArray(remoteDebts)) {
-    window.debtsData.length = 0;
-    remoteDebts.forEach(function(r) { window.debtsData.push(r); });
-  }
-  ["renderAll","renderSukuk","renderFunds","renderStocks","renderLoans","renderDebts"].forEach(function(fn) {
-    if (typeof window[fn] === "function") window[fn]();
-  });
-  showSyncBadge("synced");
-  attachRealtimeSync(uid);
-});
-```
-
-}
-
-function clearUserData() {
-if (_unsubSnapshot) { _unsubSnapshot(); _unsubSnapshot = null; }
-_currentUid = null;
-window.__investments.length = 0;
-window.loansData.length = 0;
-window.debtsData.length = 0;
-[“renderAll”,“renderSukuk”,“renderFunds”,“renderStocks”,“renderLoans”,“renderDebts”].forEach(function(fn) {
-if (typeof window[fn] === “function”) window[fn]();
-});
-showAuthGate(true);
-}
-
-window.fbSaveInvestments = function() {
-if (!_currentUid) return Promise.resolve();
-_syncing = true;
-return fbWrite(_currentUid, “investments”, Array.from(window.__investments)).then(function() {
-_syncing = false;
-});
-};
-window.fbSaveLoans = function() {
-if (_currentUid) return fbWrite(_currentUid, “loans”, Array.from(window.loansData));
-return Promise.resolve();
-};
-window.fbSaveDebts = function() {
-if (_currentUid) return fbWrite(_currentUid, “debts”, Array.from(window.debtsData));
-return Promise.resolve();
-};
-
-window.googleSignIn = function() {
-auth.signInWithPopup(provider).catch(function(e) {
-if (e.code !== “auth/popup-closed-by-user” && e.code !== “auth/cancelled-popup-request”) {
-console.error(“SignIn error:”, e);
-if (typeof showToast === “function”) showToast(“Error: “ + e.code);
-}
-});
-};
-
-window.googleSignOut = function() {
-auth.signOut().then(function() {
-if (typeof showToast === “function”) showToast(“Signed out”);
-});
-};
-
-auth.onAuthStateChanged(function(user) {
-window.__firebaseUser = user;
-updateAuthUI(user);
-if (user) {
-_currentUid = user.uid;
-loadUserData(user.uid);
-} else {
-clearUserData();
-}
-});
-
-window.__updateAuthUI         = updateAuthUI;
-window.IS_FIREBASE_CONFIGURED = true;
-window.showSyncBadge          = showSyncBadge;
-
-})();
-</script>
 
 <style>
   /* ── DARK MODE (default) ── Forest Green Theme ───────── */
@@ -5746,5 +5517,230 @@ function closeMobileMore() {
   <button class="db-btn db-btn-export" onclick="dbUndo()" style="padding:5px 14px;font-size:11px">↩ تراجع</button>
   <button onclick="dbCloseUndo()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px">×</button>
 </div>
+<!-- Firebase Compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+// ── Firebase init ──────────────────────────────────────
+firebase.initializeApp({
+  apiKey:            "AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME",
+  authDomain:        "investments-page.firebaseapp.com",
+  projectId:         "investments-page",
+  storageBucket:     "investments-page.firebasestorage.app",
+  messagingSenderId: "964948881361",
+  appId:             "1:964948881361:web:2801b8127489d953717af0"
+});
+
+var _auth     = firebase.auth();
+var _db       = firebase.firestore();
+var _provider = new firebase.auth.GoogleAuthProvider();
+_provider.setCustomParameters({ prompt: “select_account” });
+
+var _unsubSnap = null;
+var _syncing   = false;
+var _uid       = null;
+
+// ── Helpers ────────────────────────────────────────────
+function _ref(uid, col) {
+return _db.collection(“users”).doc(uid)
+.collection(“portfolio”).doc(col);
+}
+
+function _write(uid, col, data) {
+if (!uid) return;
+_ref(uid, col).set(
+{ data: data, uid: uid, ts: new Date().toISOString() },
+{ merge: true }
+)
+.then(function()  { _badge(“synced”); })
+.catch(function(e){ console.warn(“write:”, e.message); _badge(“error”); });
+}
+
+function _read(uid, col) {
+return _ref(uid, col).get().then(function(snap) {
+if (!snap.exists) return null;
+var d = snap.data();
+if (d.uid && d.uid !== uid) return null;
+return d.data || null;
+}).catch(function(e) { console.warn(“read:”, e.message); return null; });
+}
+
+function _badge(state) {
+var labels = { loading:“syncing…”, synced:“synced”, error:“error” };
+var colors = { loading:”#38d9a9”,   synced:“var(–green)”, error:“var(–red)” };
+var b = document.getElementById(“sync-badge”);
+var m = document.getElementById(“mob-sync-status”);
+var t = labels[state] || “offline”;
+var k = colors[state] || “var(–orange)”;
+if (b) { b.textContent = t; b.style.color = k; b.style.display = “flex”; }
+if (m) { m.textContent = t; m.style.color = k; }
+}
+
+function _gate(show) {
+var g = document.getElementById(“auth-gate”);
+if (g) g.style.display = show ? “flex” : “none”;
+}
+
+function _rerender() {
+[“renderAll”,“renderSukuk”,“renderFunds”,“renderStocks”,
+“renderLoans”,“renderDebts”].forEach(function(fn) {
+if (typeof window[fn] === “function”) window[fn]();
+});
+}
+
+function _updateUI(user) {
+function el(id)    { return document.getElementById(id); }
+function show(id,d){ var e=el(id); if(e) e.style.display=d; }
+function text(id,v){ var e=el(id); if(e) e.textContent=v; }
+function html(id,v){ var e=el(id); if(e) e.innerHTML=v; }
+
+if (user) {
+var name  = user.displayName || “User”;
+var first = name.split(” “)[0];
+var p     = user.photoURL;
+var img   = function(s) {
+return p
+? “<img src='"+p+"' style='width:"+s+"px;height:"+s+"px;border-radius:50%;object-fit:cover' referrerpolicy='no-referrer'/>”
+: name[0];
+};
+show(“auth-signin-btn”,“none”);
+var uc=el(“auth-user-card”); if(uc) uc.classList.add(“show”);
+text(“auth-user-name”,  name);
+text(“auth-user-email”, user.email||””);
+html(“auth-avatar-initials”, img(32));
+show(“mob-signin-btn”,“none”);
+show(“mob-user-card”,“flex”);
+text(“mob-user-name”,  first);
+text(“mob-menu-email”, user.email||””);
+html(“mob-avatar”, img(30));
+_gate(false);
+if (typeof showToast === “function”) showToast(“Welcome “ + first);
+} else {
+show(“auth-signin-btn”,“flex”);
+var uc2=el(“auth-user-card”); if(uc2) uc2.classList.remove(“show”);
+var bd=el(“sync-badge”); if(bd) bd.style.display=“none”;
+show(“mob-signin-btn”,“flex”);
+show(“mob-user-card”,“none”);
+}
+}
+
+function _loadData(uid) {
+_badge(“loading”);
+_gate(false);
+
+_read(uid, “investments”).then(function(inv) {
+if (inv && inv.length > 0) {
+window.__investments.length = 0;
+inv.forEach(function(r){ window.__investments.push(r); });
+} else {
+_write(uid, “investments”, Array.from(window.__investments));
+}
+return _read(uid, “loans”);
+}).then(function(loans) {
+if (loans) {
+window.loansData.length = 0;
+loans.forEach(function(r){ window.loansData.push(r); });
+}
+return _read(uid, “debts”);
+}).then(function(debts) {
+if (debts) {
+window.debtsData.length = 0;
+debts.forEach(function(r){ window.debtsData.push(r); });
+}
+_rerender();
+_badge(“synced”);
+
+```
+// Realtime listener
+if (_unsubSnap) _unsubSnap();
+_unsubSnap = _ref(uid,"investments").onSnapshot(function(snap) {
+  if (!snap.exists || _syncing) return;
+  var d = snap.data();
+  if (d.uid && d.uid !== uid) return;
+  if (!Array.isArray(d.data)) return;
+  window.__investments.length = 0;
+  d.data.forEach(function(r){ window.__investments.push(r); });
+  if (typeof renderAll    === "function") renderAll();
+  if (typeof renderSukuk  === "function") renderSukuk();
+  if (typeof renderFunds  === "function") renderFunds();
+  if (typeof renderStocks === "function") renderStocks();
+});
+```
+
+}).catch(function(e){ console.error(“loadData:”, e); });
+}
+
+function _clearData() {
+if (_unsubSnap) { _unsubSnap(); _unsubSnap = null; }
+_uid = null;
+window.__investments.length = 0;
+window.loansData.length     = 0;
+window.debtsData.length     = 0;
+_rerender();
+_gate(true);
+}
+
+// ── Expose save functions ──────────────────────────────
+window.fbSaveInvestments = function() {
+if (!_uid) return;
+_syncing = true;
+_write(_uid, “investments”, Array.from(window.__investments));
+setTimeout(function(){ _syncing = false; }, 2000);
+};
+window.fbSaveLoans = function() {
+if (_uid) _write(_uid, “loans”, Array.from(window.loansData));
+};
+window.fbSaveDebts = function() {
+if (_uid) _write(_uid, “debts”, Array.from(window.debtsData));
+};
+
+// ── Auth: use redirect on mobile, popup on desktop ────
+var _isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+window.googleSignIn = function() {
+if (_isMobile) {
+_auth.signInWithRedirect(_provider);
+} else {
+_auth.signInWithPopup(_provider).catch(function(e) {
+if (e.code !== “auth/popup-closed-by-user”
+&& e.code !== “auth/cancelled-popup-request”) {
+console.error(“popup error:”, e.code, e.message);
+// Fallback to redirect
+_auth.signInWithRedirect(_provider);
+}
+});
+}
+};
+
+window.googleSignOut = function() {
+_auth.signOut().then(function() {
+if (typeof showToast === “function”) showToast(“Signed out”);
+if (typeof closeMobUserMenu === “function”) closeMobUserMenu();
+});
+};
+
+// Handle redirect result first (for mobile)
+_auth.getRedirectResult().then(function(result) {
+// result.user is null if no redirect happened — that’s fine
+}).catch(function(e) {
+console.warn(“getRedirectResult:”, e.code, e.message);
+});
+
+// Auth state listener
+_auth.onAuthStateChanged(function(user) {
+window.__firebaseUser = user;
+_updateUI(user);
+if (user) {
+_uid = user.uid;
+_loadData(user.uid);
+} else {
+_clearData();
+}
+});
+
+window.IS_FIREBASE_CONFIGURED = true;
+</script>
+
 </body>
 </html>
