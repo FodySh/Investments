@@ -4,224 +4,233 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Wallet خزنتي </title>
+<title>محفظتي الاستثمارية</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <!-- Firebase SDK -->
 <script type="module">
-  import { initializeApp }
-    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged }
-    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-  import { getFirestore, doc, setDoc, getDoc, onSnapshot }
-    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
-apiKey:            “AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME”,
-authDomain:        “investments-page.firebaseapp.com”,
-projectId:         “investments-page”,
-storageBucket:     “investments-page.firebasestorage.app”,
+apiKey: “AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME”,
+authDomain: “investments-page.firebaseapp.com”,
+projectId: “investments-page”,
+storageBucket: “investments-page.firebasestorage.app”,
 messagingSenderId: “964948881361”,
-appId:             “1:964948881361:web:2801b8127489d953717af0”,
-measurementId:     “G-GCHGEV3FF2”
+appId: “1:964948881361:web:2801b8127489d953717af0”
 };
 
 let auth, db, provider;
 let _unsubSnapshot = null;
-let _syncing       = false;
-let _currentUid    = null;
+let _syncing = false;
+let _currentUid = null;
 
-// ── Set placeholders immediately so onclick handlers never get “undefined” ──
-window.googleSignIn = () => {
-if (typeof showToast === ‘function’) showToast(‘⏳ جاري التحميل… حاول مرة أخرى’);
+// Set placeholder immediately so onclick handlers never call undefined
+window.googleSignIn = function() {
+if (typeof showToast === “function”) showToast(“Loading…”);
 };
-window.googleSignOut = () => {};
+window.googleSignOut = function() {};
 
-const paths = uid => ({
-investments: [‘users’, uid, ‘portfolio’, ‘investments’],
-loans:       [‘users’, uid, ‘portfolio’, ‘loans’],
-debts:       [‘users’, uid, ‘portfolio’, ‘debts’],
-});
+function paths(uid) {
+return {
+investments: [“users”, uid, “portfolio”, “investments”],
+loans:       [“users”, uid, “portfolio”, “loans”],
+debts:       [“users”, uid, “portfolio”, “debts”]
+};
+}
 
 async function fbWrite(uid, col, data) {
 if (!db || !uid) return;
 try {
-await setDoc(doc(db, …paths(uid)[col]),
-{ data, uid, updatedAt: new Date().toISOString() }, { merge: true });
-showSyncBadge(‘synced’);
-} catch(e) { console.warn(‘fbWrite:’, e.message); showSyncBadge(‘error’); }
+var p = paths(uid)[col];
+await setDoc(doc(db, p[0], p[1], p[2], p[3]),
+{ data: data, uid: uid, updatedAt: new Date().toISOString() },
+{ merge: true });
+showSyncBadge(“synced”);
+} catch(e) {
+console.warn(“fbWrite:”, e.message);
+showSyncBadge(“error”);
+}
 }
 
 async function fbRead(uid, col) {
 if (!db || !uid) return null;
 try {
-const snap = await getDoc(doc(db, …paths(uid)[col]));
+var p = paths(uid)[col];
+var snap = await getDoc(doc(db, p[0], p[1], p[2], p[3]));
 if (!snap.exists()) return null;
-const d = snap.data();
-if (d.uid && d.uid !== uid) return null; // guard: never serve another user’s data
-return d.data ?? null;
-} catch(e) { console.warn(‘fbRead:’, e.message); return null; }
+var d = snap.data();
+if (d.uid && d.uid !== uid) return null;
+return d.data || null;
+} catch(e) {
+console.warn(“fbRead:”, e.message);
+return null;
+}
 }
 
 function attachRealtimeSync(uid) {
 if (_unsubSnapshot) _unsubSnapshot();
-_unsubSnapshot = onSnapshot(doc(db, …paths(uid).investments), snap => {
+var p = paths(uid).investments;
+_unsubSnapshot = onSnapshot(doc(db, p[0], p[1], p[2], p[3]), function(snap) {
 if (!snap.exists() || _syncing) return;
-const d = snap.data();
+var d = snap.data();
 if (d.uid && d.uid !== uid) return;
-const remote = d.data;
+var remote = d.data;
 if (!Array.isArray(remote)) return;
 window.__investments.length = 0;
-remote.forEach(r => window.__investments.push(r));
-[‘renderAll’,‘renderSukuk’,‘renderFunds’,‘renderStocks’]
-.forEach(fn => typeof window[fn] === ‘function’ && window[fn]());
-}, err => console.warn(‘Snapshot:’, err.message));
+remote.forEach(function(r) { window.__investments.push(r); });
+[“renderAll”,“renderSukuk”,“renderFunds”,“renderStocks”].forEach(function(fn) {
+if (typeof window[fn] === “function”) window[fn]();
+});
+}, function(err) { console.warn(“Snapshot:”, err.message); });
 }
 
 async function loadUserData(uid) {
-showSyncBadge(‘loading’);
+showSyncBadge(“loading”);
 showAuthGate(false);
 
-```
-const remoteInv = await fbRead(uid, 'investments');
+var remoteInv = await fbRead(uid, “investments”);
 if (remoteInv && Array.isArray(remoteInv) && remoteInv.length > 0) {
-  window.__investments.length = 0;
-  remoteInv.forEach(r => window.__investments.push(r));
+window.__investments.length = 0;
+remoteInv.forEach(function(r) { window.__investments.push(r); });
 } else {
-  // First login: save local seed data to this user's space
-  await fbWrite(uid, 'investments', [...window.__investments]);
+await fbWrite(uid, “investments”, Array.from(window.__investments));
 }
 
-const remoteLoans = await fbRead(uid, 'loans');
+var remoteLoans = await fbRead(uid, “loans”);
 if (remoteLoans && Array.isArray(remoteLoans)) {
-  window.loansData.length = 0;
-  remoteLoans.forEach(r => window.loansData.push(r));
+window.loansData.length = 0;
+remoteLoans.forEach(function(r) { window.loansData.push(r); });
 }
 
-const remoteDebts = await fbRead(uid, 'debts');
+var remoteDebts = await fbRead(uid, “debts”);
 if (remoteDebts && Array.isArray(remoteDebts)) {
-  window.debtsData.length = 0;
-  remoteDebts.forEach(r => window.debtsData.push(r));
+window.debtsData.length = 0;
+remoteDebts.forEach(function(r) { window.debtsData.push(r); });
 }
 
-['renderAll','renderSukuk','renderFunds','renderStocks','renderLoans','renderDebts']
-  .forEach(fn => typeof window[fn] === 'function' && window[fn]());
-showSyncBadge('synced');
+[“renderAll”,“renderSukuk”,“renderFunds”,“renderStocks”,“renderLoans”,“renderDebts”].forEach(function(fn) {
+if (typeof window[fn] === “function”) window[fn]();
+});
+showSyncBadge(“synced”);
 attachRealtimeSync(uid);
-```
-
 }
 
 function clearUserData() {
 if (_unsubSnapshot) { _unsubSnapshot(); _unsubSnapshot = null; }
 _currentUid = null;
 window.__investments.length = 0;
-window.loansData.length     = 0;
-window.debtsData.length     = 0;
-[‘renderAll’,‘renderSukuk’,‘renderFunds’,‘renderStocks’,‘renderLoans’,‘renderDebts’]
-.forEach(fn => typeof window[fn] === ‘function’ && window[fn]());
+window.loansData.length = 0;
+window.debtsData.length = 0;
+[“renderAll”,“renderSukuk”,“renderFunds”,“renderStocks”,“renderLoans”,“renderDebts”].forEach(function(fn) {
+if (typeof window[fn] === “function”) window[fn]();
+});
 showAuthGate(true);
 }
 
 function showAuthGate(show) {
-const gate = document.getElementById(‘auth-gate’);
-if (gate) gate.style.display = show ? ‘flex’ : ‘none’;
+var gate = document.getElementById(“auth-gate”);
+if (gate) gate.style.display = show ? “flex” : “none”;
 }
 
-// ── Exposed save functions ─────────────────────────────
-window.fbSaveInvestments = async () => {
+window.fbSaveInvestments = async function() {
 if (!_currentUid) return;
 _syncing = true;
-await fbWrite(_currentUid, ‘investments’, […window.__investments]);
+await fbWrite(_currentUid, “investments”, Array.from(window.__investments));
 _syncing = false;
 };
-window.fbSaveLoans = async () => {
-if (_currentUid) await fbWrite(_currentUid, ‘loans’, […window.loansData]);
-};
-window.fbSaveDebts = async () => {
-if (_currentUid) await fbWrite(_currentUid, ‘debts’, […window.debtsData]);
+
+window.fbSaveLoans = async function() {
+if (_currentUid) await fbWrite(_currentUid, “loans”, Array.from(window.loansData));
 };
 
-// ── Sync badge ─────────────────────────────────────────
-function showSyncBadge(state) {
-const map = {
-loading: { text:‘⟳ جاري المزامنة…’, c:’#38d9a9’ },
-synced:  { text:‘☁️ مزامن’,           c:‘var(–green)’ },
-offline: { text:‘📴 غير متصل’,         c:‘var(–orange)’ },
-error:   { text:‘⚠️ خطأ في المزامنة’,  c:‘var(–red)’ },
+window.fbSaveDebts = async function() {
+if (_currentUid) await fbWrite(_currentUid, “debts”, Array.from(window.debtsData));
 };
-const s = map[state] || map.offline;
-const badge = document.getElementById(‘sync-badge’);
-const mob   = document.getElementById(‘mob-sync-status’);
-if (badge) { badge.textContent = s.text; badge.style.color = s.c; badge.style.display = ‘flex’; }
+
+function showSyncBadge(state) {
+var map = {
+loading: { text: “… syncing”, c: “#38d9a9” },
+synced:  { text: “synced”, c: “var(–green)” },
+offline: { text: “offline”, c: “var(–orange)” },
+error:   { text: “error”, c: “var(–red)” }
+};
+var s = map[state] || map.offline;
+var badge = document.getElementById(“sync-badge”);
+var mob   = document.getElementById(“mob-sync-status”);
+if (badge) { badge.textContent = s.text; badge.style.color = s.c; badge.style.display = “flex”; }
 if (mob)   { mob.textContent   = s.text; mob.style.color   = s.c; }
 }
 
-// ── Auth UI ────────────────────────────────────────────
 function updateAuthUI(user) {
-const get = id => document.getElementById(id);
+function el(id) { return document.getElementById(id); }
+function show(id, d) { var e = el(id); if (e) e.style.display = d; }
+function txt(id, v)  { var e = el(id); if (e) e.textContent  = v; }
+function html(id, v) { var e = el(id); if (e) e.innerHTML    = v; }
+function cls(id, m, c) { var e = el(id); if (e) e.classList[m](c); }
+
 if (user) {
-const displayName = user.displayName || ‘مستخدم’;
-const firstLetter = displayName[0];
-const photo       = user.photoURL;
-const photoTag    = src => `<img src="${src}" style="width:32px;height:32px;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer"/>`;
-const photoTagSm  = src => `<img src="${src}" style="width:30px;height:30px;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer"/>`;
+var name   = user.displayName || “User”;
+var letter = name[0];
+var photo  = user.photoURL;
+var imgTag = function(src, sz) {
+return “<img src='" + src + "' style='width:" + sz + "px;height:" + sz + "px;border-radius:50%;object-fit:cover' referrerpolicy='no-referrer'/>”;
+};
 
 ```
-  const el = (id, v, isHTML) => { const e=get(id); if(e){ if(isHTML) e.innerHTML=v; else e.textContent=v; } };
-  const show = (id, disp) => { const e=get(id); if(e) e.style.display=disp; };
-  const cls  = (id, add, cls) => { const e=get(id); if(e) e.classList[add?'add':'remove'](cls); };
+show("auth-signin-btn", "none");
+cls("auth-user-card", "add", "show");
+txt("auth-user-name", name);
+txt("auth-user-email", user.email || "");
+photo ? html("auth-avatar-initials", imgTag(photo, 32)) : txt("auth-avatar-initials", letter);
 
-  show('auth-signin-btn', 'none');
-  cls('auth-user-card', true, 'show');
-  el('auth-user-name', displayName);
-  el('auth-user-email', user.email || '');
-  el('auth-avatar-initials', photo ? photoTag(photo) : firstLetter, !!photo);
-  show('mob-signin-btn', 'none');
-  show('mob-user-card', 'flex');
-  el('mob-user-name', displayName.split(' ')[0]);
-  el('mob-menu-email', user.email || '');
-  el('mob-avatar', photo ? photoTagSm(photo) : firstLetter, !!photo);
-  show('auth-gate', 'none'); // hide gate immediately on auth
+show("mob-signin-btn", "none");
+show("mob-user-card", "flex");
+txt("mob-user-name", name.split(" ")[0]);
+txt("mob-menu-email", user.email || "");
+photo ? html("mob-avatar", imgTag(photo, 30)) : txt("mob-avatar", letter);
 
-  if (typeof showToast === 'function')
-    showToast('✅ مرحباً ' + displayName.split(' ')[0]);
+show("auth-gate", "none");
+if (typeof showToast === "function") showToast("Welcome " + name.split(" ")[0]);
+```
+
 } else {
-  const show = (id, disp) => { const e=document.getElementById(id); if(e) e.style.display=disp; };
-  const cls  = (id, rm, cls) => { const e=document.getElementById(id); if(e) e.classList.remove(cls); };
-  show('auth-signin-btn', 'flex');
-  cls('auth-user-card', false, 'show');
-  const badge = get('sync-badge');
-  if (badge) badge.style.display = 'none';
-  show('mob-signin-btn', 'flex');
-  show('mob-user-card', 'none');
+show(“auth-signin-btn”, “flex”);
+cls(“auth-user-card”, “remove”, “show”);
+var badge = el(“sync-badge”);
+if (badge) badge.style.display = “none”;
+show(“mob-signin-btn”, “flex”);
+show(“mob-user-card”, “none”);
 }
-```
-
 }
 
-// ── Bootstrap ──────────────────────────────────────────
-const app  = initializeApp(firebaseConfig);
+// Initialize Firebase
+try {
+var app = initializeApp(firebaseConfig);
 auth     = getAuth(app);
 db       = getFirestore(app);
 provider = new GoogleAuthProvider();
-provider.setCustomParameters({ prompt: ‘select_account’, hl: ‘ar’ });
+provider.setCustomParameters({ prompt: “select_account”, hl: “ar” });
 
-// Now override the placeholder with the real implementation
-window.googleSignIn = async () => {
+// Override placeholder with real implementation
+window.googleSignIn = async function() {
 try {
 await signInWithPopup(auth, provider);
 } catch(e) {
-if (e.code !== ‘auth/popup-closed-by-user’ && e.code !== ‘auth/cancelled-popup-request’)
-if (typeof showToast === ‘function’) showToast(’❌ ’ + e.message);
+if (e.code !== “auth/popup-closed-by-user” && e.code !== “auth/cancelled-popup-request”) {
+if (typeof showToast === “function”) showToast(“Error: “ + e.message);
+console.error(“SignIn error:”, e);
+}
 }
 };
 
-window.googleSignOut = async () => {
+window.googleSignOut = async function() {
 await signOut(auth);
-if (typeof showToast === ‘function’) showToast(‘👋 تم تسجيل الخروج’);
+if (typeof showToast === “function”) showToast(“Signed out”);
 };
 
-onAuthStateChanged(auth, async user => {
+onAuthStateChanged(auth, async function(user) {
 window.__firebaseUser = user;
 updateAuthUI(user);
 if (user) {
@@ -232,8 +241,18 @@ clearUserData();
 }
 });
 
-window.__updateAuthUI         = updateAuthUI;
+window.__updateAuthUI = updateAuthUI;
 window.IS_FIREBASE_CONFIGURED = true;
+
+} catch(e) {
+console.error(“Firebase init error:”, e);
+window.googleSignIn = function() {
+if (typeof window.demoSignIn === “function”) window.demoSignIn();
+};
+window.googleSignOut = function() {
+if (typeof window.demoSignOut === “function”) window.demoSignOut();
+};
+}
 </script>
 
 <style>
