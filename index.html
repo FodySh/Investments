@@ -1393,6 +1393,15 @@
       <div class="nav-item nav-debts" onclick="showPage('debts',this)">
         <span class="nav-icon">💸</span> الديون الشخصية
       </div>
+      <div class="nav-item" onclick="showPage('calendar',this)" style="color:#a78bfa">
+        <span class="nav-icon">📅</span> تقويم الاستحقاق
+      </div>
+      <div class="nav-item" onclick="showPage('cashflow',this)" style="color:#34d399">
+        <span class="nav-icon">💧</span> التدفق النقدي
+      </div>
+      <div class="nav-item" onclick="showPage('insights',this)" style="color:#60a5fa">
+        <span class="nav-icon">📊</span> التحليل المتقدم
+      </div>
     </nav>
     <div class="sidebar-footer">
       <!-- Theme Toggle -->
@@ -3359,7 +3368,164 @@
     </div><!-- end page-debts -->
 
 </main>
-</div><!-- end .app -->
+
+    <!-- PAGE: CALENDAR - تقويم الاستحقاقات -->
+    <div id="page-calendar" class="page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">📅 تقويم الاستحقاقات</div>
+          <div class="page-sub" id="cal-sub">الفرص المستحقة خلال الأشهر القادمة</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="cal-months" onchange="renderCalendar()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--white);font-size:12px;font-family:'IBM Plex Sans Arabic',sans-serif;outline:none">
+            <option value="3">3 أشهر</option>
+            <option value="6" selected>6 أشهر</option>
+            <option value="12">12 شهر</option>
+            <option value="24">24 شهر</option>
+          </select>
+        </div>
+      </div>
+      <!-- Alert strip for imminent maturities -->
+      <div id="cal-alerts" style="display:none;margin-bottom:16px"></div>
+      <!-- Monthly timeline -->
+      <div id="cal-timeline" style="display:flex;flex-direction:column;gap:12px"></div>
+    </div>
+
+    <!-- PAGE: CASHFLOW - التدفق النقدي -->
+    <div id="page-cashflow" class="page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">💧 التدفق النقدي الشهري</div>
+          <div class="page-sub">التوزيعات والأرباح المتوقعة للأشهر القادمة</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <select id="cf-months" onchange="renderCashflow()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--white);font-size:12px;font-family:'IBM Plex Sans Arabic',sans-serif;outline:none">
+            <option value="6">6 أشهر</option>
+            <option value="12" selected>12 شهر</option>
+            <option value="24">24 شهر</option>
+          </select>
+        </div>
+      </div>
+      <!-- KPI strip -->
+      <div class="kpi-grid fade-up" id="cf-kpis" style="margin-bottom:20px"></div>
+      <!-- Bar chart -->
+      <div class="section-card fade-up" style="margin-bottom:16px">
+        <div class="section-head">
+          <span class="section-title">📊 الرسم البياني للتدفق</span>
+          <span class="section-count" id="cf-chart-label">—</span>
+        </div>
+        <div style="padding:20px;overflow-x:auto">
+          <div id="cf-chart" style="display:flex;align-items:flex-end;gap:8px;min-height:160px;min-width:400px"></div>
+          <div id="cf-chart-labels" style="display:flex;gap:8px;margin-top:6px;min-width:400px"></div>
+        </div>
+      </div>
+      <!-- Detail table -->
+      <div class="section-card fade-up">
+        <div class="section-head"><span class="section-title">📋 التفاصيل الشهرية</span></div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>الشهر</th><th>التوزيعات المتوقعة</th><th>استحقاقات رأس المال</th><th>إجمالي التدفق</th><th>الفرص</th></tr></thead>
+            <tbody id="cf-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: INSIGHTS - التحليل المتقدم -->
+    <div id="page-insights" class="page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">📊 التحليل المتقدم</div>
+          <div class="page-sub">نسبة شارب — بنشمارك — استيراد البيانات — تقارير PDF</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button onclick="document.getElementById('import-file').click()" style="background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.3);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:#a78bfa;cursor:pointer;font-family:'IBM Plex Sans Arabic',sans-serif;display:flex;align-items:center;gap:6px">
+            📥 استيراد Excel/CSV
+          </button>
+          <input type="file" id="import-file" accept=".xlsx,.xls,.csv" style="display:none" onchange="importPortfolioFile(event)">
+          <button onclick="exportPDF()" style="background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.3);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:#f87171;cursor:pointer;font-family:'IBM Plex Sans Arabic',sans-serif;display:flex;align-items:center;gap:6px">
+            📄 تصدير PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- Sharpe Ratio Card -->
+      <div class="two-col fade-up" style="margin-bottom:16px">
+        <div class="section-card">
+          <div class="section-head"><span class="section-title">⚡ نسبة شارب (Sharpe Ratio)</span></div>
+          <div class="section-body" id="sharpe-body">
+            <div style="text-align:center;padding:20px">
+              <div id="sharpe-value" style="font-size:48px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--gold)">—</div>
+              <div id="sharpe-label" style="font-size:13px;color:var(--muted);margin-top:8px">—</div>
+              <div style="margin-top:16px;padding:12px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:12px;color:var(--muted);text-align:right;line-height:1.7">
+                نسبة شارب = (عائد المحفظة - معدل الخطر الصفري) / الانحراف المعياري للعوائد<br>
+                <span style="color:var(--green)">فوق 1.0</span> ممتاز  •  <span style="color:var(--gold)">0.5-1.0</span> جيد  •  <span style="color:var(--red)">تحت 0.5</span> ضعيف
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px" id="sharpe-details"></div>
+          </div>
+        </div>
+
+        <!-- Benchmark Card -->
+        <div class="section-card">
+          <div class="section-head">
+            <span class="section-title">📈 مقارنة بالبنشمارك</span>
+            <button onclick="refreshBenchmark()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--muted);cursor:pointer;font-family:'IBM Plex Sans Arabic',sans-serif">تحديث</button>
+          </div>
+          <div class="section-body" id="benchmark-body">
+            <div style="display:flex;flex-direction:column;gap:10px" id="benchmark-bars"></div>
+            <div style="margin-top:12px;font-size:11px;color:var(--muted);text-align:center" id="benchmark-note">
+              يتم جلب بيانات SAIBOR ومؤشر تداول تلقائياً
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Import result preview -->
+      <div class="section-card fade-up" id="import-preview" style="display:none;margin-bottom:16px">
+        <div class="section-head">
+          <span class="section-title">📥 معاينة البيانات المستوردة</span>
+          <div style="display:flex;gap:8px">
+            <button onclick="confirmImport()" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:6px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:'IBM Plex Sans Arabic',sans-serif">
+              ✓ استيراد الكل
+            </button>
+            <button onclick="document.getElementById('import-preview').style.display='none'" style="background:none;border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:12px;color:var(--muted);cursor:pointer;font-family:'IBM Plex Sans Arabic',sans-serif">
+              إلغاء
+            </button>
+          </div>
+        </div>
+        <div class="table-wrap" style="max-height:300px">
+          <table class="data-table"><thead id="import-thead"></thead><tbody id="import-tbody"></tbody></table>
+        </div>
+        <div style="padding:12px 16px;font-size:12px;color:var(--muted)" id="import-stats"></div>
+      </div>
+
+      <!-- PDF preview info -->
+      <div class="section-card fade-up" id="pdf-preview-card">
+        <div class="section-head"><span class="section-title">📄 تقرير المحفظة PDF</span></div>
+        <div class="section-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);cursor:pointer">
+              <input type="checkbox" id="pdf-inc-investments" checked style="accent-color:var(--gold)"> الاستثمارات
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);cursor:pointer">
+              <input type="checkbox" id="pdf-inc-loans" checked style="accent-color:var(--gold)"> القروض
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);cursor:pointer">
+              <input type="checkbox" id="pdf-inc-debts" checked style="accent-color:var(--gold)"> الديون
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);cursor:pointer">
+              <input type="checkbox" id="pdf-inc-cashflow" checked style="accent-color:var(--gold)"> التدفق النقدي
+            </label>
+          </div>
+          <button onclick="exportPDF()" style="background:linear-gradient(135deg,#f87171,#ef4444);color:white;border:none;border-radius:10px;padding:12px 32px;font-size:14px;font-weight:700;cursor:pointer;font-family:'IBM Plex Sans Arabic',sans-serif;display:flex;align-items:center;gap:10px">
+            📄 إنشاء وتنزيل التقرير
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end .app -->
 
 <!-- MOBILE BOTTOM NAV -->
 <nav class="mobile-nav">
@@ -3454,6 +3620,16 @@
     transition:background .15s;text-align:right;
   " onmouseover="this.style.background='rgba(201,168,76,0.18)'" onmouseout="this.style.background='rgba(201,168,76,0.08)'">
     <span style="font-size:18px">➕</span> إضافة فرصة
+  </button>
+  <div style="height:1px;background:var(--border);margin:4px 12px"></div>
+  <button onclick="showPage('calendar',document.getElementById('mnav-more'),'📅 تقويم الاستحقاق');closeMobileMore()" style="width:100%;display:flex;align-items:center;gap:12px;background:none;border:none;padding:10px 14px;color:var(--white);font-family:'IBM Plex Sans Arabic',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;transition:background .15s;text-align:right" onmouseover="this.style.background='rgba(167,139,250,0.12)'" onmouseout="this.style.background='none'">
+    <span style="font-size:18px">📅</span> تقويم الاستحقاق
+  </button>
+  <button onclick="showPage('cashflow',document.getElementById('mnav-more'),'💧 التدفق النقدي');closeMobileMore()" style="width:100%;display:flex;align-items:center;gap:12px;background:none;border:none;padding:10px 14px;color:var(--white);font-family:'IBM Plex Sans Arabic',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;transition:background .15s;text-align:right" onmouseover="this.style.background='rgba(52,211,153,0.12)'" onmouseout="this.style.background='none'">
+    <span style="font-size:18px">💧</span> التدفق النقدي
+  </button>
+  <button onclick="showPage('insights',document.getElementById('mnav-more'),'📊 التحليل المتقدم');closeMobileMore()" style="width:100%;display:flex;align-items:center;gap:12px;background:none;border:none;padding:10px 14px;color:var(--white);font-family:'IBM Plex Sans Arabic',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;transition:background .15s;text-align:right" onmouseover="this.style.background='rgba(96,165,250,0.12)'" onmouseout="this.style.background='none'">
+    <span style="font-size:18px">📊</span> التحليل المتقدم
   </button>
 </div>
 <div id="mobile-more-overlay" onclick="closeMobileMore()" style="
@@ -3964,8 +4140,565 @@ function startStockPriceUpdater() {
 
 // Start after DOM ready
 document.addEventListener('DOMContentLoaded', function() {
-  setTimeout(startStockPriceUpdater, 1500); // slight delay to let page render first
+  setTimeout(startStockPriceUpdater, 1500);
+  setTimeout(renderCalendar, 800);
+  setTimeout(renderCashflow, 900);
+  setTimeout(function() { renderSharpe(); renderBenchmark(); }, 1000);
+  checkMaturityAlerts();
+  setInterval(checkMaturityAlerts, 60 * 60 * 1000); // re-check every hour
 });
+
+//  PAGE TITLES for new pages 
+PAGE_TITLES['calendar'] = '📅 تقويم الاستحقاقات';
+PAGE_TITLES['cashflow'] = '💧 التدفق النقدي';
+PAGE_TITLES['insights'] = '📊 التحليل المتقدم';
+
+//  showPage hooks for new pages 
+var _origShowPage = showPage;
+showPage = function(id, navEl, mobileTitle) {
+  _origShowPage(id, navEl, mobileTitle);
+  if (id === 'calendar') renderCalendar();
+  if (id === 'cashflow') renderCashflow();
+  if (id === 'insights') { renderSharpe(); renderBenchmark(); }
+};
+
+// 
+// 1. MATURITY CALENDAR
+// 
+function parseDate(str) {
+  if (!str || str === 'عند الحاجة') return null;
+  var parts = str.split('/');
+  if (parts.length === 3) return new Date(+parts[2], +parts[1]-1, +parts[0]);
+  parts = str.split('-');
+  if (parts.length === 3) return new Date(+parts[0], +parts[1]-1, +parts[2]);
+  return null;
+}
+
+function renderCalendar() {
+  var months = parseInt((document.getElementById('cal-months')||{value:'6'}).value || 6);
+  var now    = new Date(); now.setHours(0,0,0,0);
+  var end    = new Date(now); end.setMonth(end.getMonth() + months);
+  var inv    = window.__investments || [];
+
+  // Group by month
+  var byMonth = {};
+  inv.forEach(function(x) {
+    var d = parseDate(x.date_out);
+    if (!d || d < now || d > end) return;
+    var key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+    if (!byMonth[key]) byMonth[key] = [];
+    byMonth[key].push({inv:x, date:d});
+  });
+
+  var monthNames = ['يناير','فبراير','مارس','أبريل','مايو','يونيو',
+                    'يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  var keys = Object.keys(byMonth).sort();
+  var timeline = document.getElementById('cal-timeline');
+  var sub      = document.getElementById('cal-sub');
+  if (!timeline) return;
+
+  var totalExpected = 0;
+  keys.forEach(function(k) {
+    byMonth[k].forEach(function(e) { totalExpected += (e.inv.total || e.inv.amount || 0); });
+  });
+
+  if (sub) sub.textContent = keys.length + ' شهر بها استحقاقات — إجمالي متوقع: ' +
+    totalExpected.toLocaleString('en-US', {maximumFractionDigits:0}) + ' ر.س';
+
+  if (!keys.length) {
+    timeline.innerHTML = '<div style="text-align:center;padding:48px;color:var(--muted)">لا توجد استحقاقات خلال هذه الفترة</div>';
+    return;
+  }
+
+  timeline.innerHTML = keys.map(function(k) {
+    var parts  = k.split('-');
+    var mLabel = monthNames[+parts[1]-1] + ' ' + parts[0];
+    var items  = byMonth[k];
+    var mTotal = items.reduce(function(s,e){return s+(e.inv.total||e.inv.amount||0);},0);
+    var mRet   = items.reduce(function(s,e){return s+(e.inv.ret_val||0);},0);
+    var daysTo = Math.ceil((items[0].date - now) / 86400000);
+
+    var urgColor = daysTo <= 14 ? 'var(--red)' : daysTo <= 30 ? 'var(--orange)' : 'var(--gold)';
+
+    var rows = items.map(function(e) {
+      var d = e.inv;
+      var dDays = Math.ceil((e.date - now) / 86400000);
+      var riskC = d.risk==='منخفض'?'var(--green)':d.risk==='متوسط'?'var(--orange)':'var(--red)';
+      return '<tr>' +
+        '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis">' + d.name + '</td>' +
+        '<td style="color:var(--muted)">' + d.platform + '</td>' +
+        '<td class="mono">' + (d.amount||0).toLocaleString('en-US',{maximumFractionDigits:0}) + '</td>' +
+        '<td class="mono up">' + (d.ret_val>=0?'+':'') + (d.ret_val||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
+        '<td class="mono" style="color:var(--gold)">' + (d.total||0).toLocaleString('en-US',{maximumFractionDigits:0}) + '</td>' +
+        '<td><span style="font-size:11px;color:'+riskC+'">'+d.risk+'</span></td>' +
+        '<td><span style="font-size:11px;padding:2px 8px;border-radius:12px;background:rgba(201,168,76,0.12);color:var(--gold)">' + dDays + ' يوم</span></td>' +
+      '</tr>';
+    }).join('');
+
+    return '<div class="section-card">' +
+      '<div class="section-head" style="background:rgba(201,168,76,0.04)">' +
+        '<div style="display:flex;align-items:center;gap:12px">' +
+          '<span style="font-size:16px;font-weight:700;color:' + urgColor + '">' + mLabel + '</span>' +
+          '<span style="font-size:11px;color:var(--muted)">' + items.length + ' فرصة</span>' +
+        '</div>' +
+        '<div style="display:flex;gap:16px;font-family:monospace;font-size:12px">' +
+          '<span style="color:var(--green)">+' + mRet.toLocaleString('en-US',{maximumFractionDigits:0}) + '</span>' +
+          '<span style="color:var(--gold)">' + mTotal.toLocaleString('en-US',{maximumFractionDigits:0}) + ' ر.س</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="table-wrap">' +
+        '<table class="data-table">' +
+          '<thead><tr><th>الفرصة</th><th>المنصة</th><th>المبلغ</th><th>العائد</th><th>المجموع</th><th>المخاطرة</th><th>الأيام</th></tr></thead>' +
+          '<tbody>' + rows + '</tbody>' +
+        '</table>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// 
+// 2. MATURITY ALERTS (toast + badge)
+// 
+function checkMaturityAlerts() {
+  var inv  = window.__investments || [];
+  var now  = new Date(); now.setHours(0,0,0,0);
+  var warn = inv.filter(function(x) {
+    var d = parseDate(x.date_out);
+    if (!d) return false;
+    var days = Math.ceil((d - now) / 86400000);
+    return days >= 0 && days <= 30 && x.status === 'نشطة';
+  });
+
+  if (!warn.length) return;
+
+  var alertDiv = document.getElementById('cal-alerts');
+  if (alertDiv) {
+    alertDiv.style.display = 'block';
+    alertDiv.innerHTML = warn.map(function(x) {
+      var days = Math.ceil((parseDate(x.date_out) - now) / 86400000);
+      var col  = days <= 7 ? '#f87171' : days <= 14 ? 'var(--orange)' : 'var(--gold)';
+      return '<div style="display:flex;align-items:center;gap:12px;background:rgba(255,152,0,0.08);border:1px solid rgba(255,152,0,0.25);border-radius:10px;padding:10px 16px;margin-bottom:6px">' +
+        '<span style="font-size:18px">' + (days<=7?'🚨':'⚠️') + '</span>' +
+        '<div style="flex:1">' +
+          '<div style="font-size:13px;font-weight:600;color:var(--white)">' + x.name + '</div>' +
+          '<div style="font-size:11px;color:var(--muted)">' + x.platform + ' • المجموع المتوقع: ' + (x.total||0).toLocaleString('en-US',{maximumFractionDigits:0}) + ' ر.س</div>' +
+        '</div>' +
+        '<span style="font-size:13px;font-weight:700;color:'+col+'">' + days + ' يوم</span>' +
+      '</div>';
+    }).join('');
+  }
+
+  // Toast once per session
+  if (!window._alertsShown && typeof showToast === 'function') {
+    window._alertsShown = true;
+    showToast('⚠️ ' + warn.length + ' فرصة تستحق خلال 30 يوماً');
+  }
+}
+
+// 
+// 3. CASH FLOW
+// 
+function renderCashflow() {
+  var months = parseInt((document.getElementById('cf-months')||{value:'12'}).value || 12);
+  var inv    = window.__investments || [];
+  var now    = new Date(); now.setHours(0,0,0,0);
+  var monthNames = ['يناير','فبراير','مارس','أبريل','مايو','يونيو',
+                    'يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+
+  // Build monthly cash flows
+  var monthData = [];
+  for (var m = 0; m < months; m++) {
+    var dt = new Date(now.getFullYear(), now.getMonth() + m, 1);
+    var key = dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0');
+    monthData.push({ key:key, label:monthNames[dt.getMonth()]+' '+dt.getFullYear(),
+      shortLabel: monthNames[dt.getMonth()].slice(0,3), distributions:0, capital:0, items:[] });
+  }
+
+  inv.forEach(function(x) {
+    if (x.status !== 'نشطة') return;
+    var matDate  = parseDate(x.date_out);
+    var distFreq = x.dist || '';
+    var retVal   = Math.max(0, x.ret_val || 0);
+    var amt      = x.amount || 0;
+
+    // Capital return at maturity
+    if (matDate) {
+      var matKey = matDate.getFullYear() + '-' + String(matDate.getMonth()+1).padStart(2,'0');
+      var slot   = monthData.find(function(m){return m.key===matKey;});
+      if (slot) { slot.capital += (x.total || amt); slot.items.push(x.name); }
+    }
+
+    // Periodic distributions
+    var monthsPerDist = distFreq==='شهري'?1:distFreq==='ربع سنوي'?3:distFreq==='نصف سنوي'?6:distFreq==='سنوي'?12:0;
+    if (monthsPerDist > 0 && retVal > 0) {
+      var distAmt = retVal / (matDate ? Math.max(1, Math.ceil((matDate-now)/(86400000*30*monthsPerDist))) : 12/monthsPerDist);
+      for (var i = 0; i < months; i += monthsPerDist) {
+        if (i < monthData.length) monthData[i].distributions += distAmt;
+      }
+    }
+  });
+
+  // KPIs
+  var totalDist = monthData.reduce(function(s,m){return s+m.distributions;},0);
+  var totalCap  = monthData.reduce(function(s,m){return s+m.capital;},0);
+  var maxFlow   = Math.max.apply(null, monthData.map(function(m){return m.distributions+m.capital;})) || 1;
+
+  var kpiEl = document.getElementById('cf-kpis');
+  if (kpiEl) {
+    var fmt = function(n){return n.toLocaleString('en-US',{maximumFractionDigits:0});};
+    kpiEl.innerHTML =
+      '<div class="kpi-card" style="--accent:#34d399"><div class="kpi-icon">💧</div><div class="kpi-label">إجمالي التوزيعات المتوقعة</div><div class="kpi-value">'+fmt(totalDist)+'</div><div class="kpi-sub">ريال سعودي</div></div>' +
+      '<div class="kpi-card" style="--accent:#60a5fa"><div class="kpi-icon">🔄</div><div class="kpi-label">إجمالي رأس المال العائد</div><div class="kpi-value">'+fmt(totalCap)+'</div><div class="kpi-sub">ريال سعودي</div></div>' +
+      '<div class="kpi-card" style="--accent:#c9a84c"><div class="kpi-icon">💰</div><div class="kpi-label">الإجمالي الكلي</div><div class="kpi-value">'+fmt(totalDist+totalCap)+'</div><div class="kpi-sub">ريال سعودي</div></div>' +
+      '<div class="kpi-card" style="--accent:#a78bfa"><div class="kpi-icon">📅</div><div class="kpi-label">متوسط شهري</div><div class="kpi-value">'+fmt((totalDist+totalCap)/months)+'</div><div class="kpi-sub">ريال سعودي</div></div>';
+  }
+
+  // Bar chart
+  var chartEl  = document.getElementById('cf-chart');
+  var labelsEl = document.getElementById('cf-chart-labels');
+  var cfLabel  = document.getElementById('cf-chart-label');
+  if (cfLabel) cfLabel.textContent = months + ' شهراً قادماً';
+
+  if (chartEl) {
+    chartEl.innerHTML = monthData.map(function(m) {
+      var total = m.distributions + m.capital;
+      var hPct  = (total / maxFlow * 100).toFixed(1);
+      var dPct  = (m.distributions / maxFlow * 100).toFixed(1);
+      var cPct  = (m.capital / maxFlow * 100).toFixed(1);
+      return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:28px" title="'+m.label+': '+total.toLocaleString('en-US',{maximumFractionDigits:0})+' ر.س">' +
+        '<div style="font-size:9px;color:var(--muted);text-align:center">' + (total>0?total.toLocaleString('en-US',{maximumFractionDigits:0}):'') + '</div>' +
+        '<div style="width:100%;display:flex;flex-direction:column;justify-content:flex-end;height:120px">' +
+          '<div style="width:100%;height:'+cPct+'%;background:rgba(96,165,250,0.7);border-radius:3px 3px 0 0"></div>' +
+          '<div style="width:100%;height:'+dPct+'%;background:rgba(52,211,153,0.8);border-radius:' + (m.capital?'0':'3px 3px 0 0') + '"></div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+  if (labelsEl) {
+    labelsEl.innerHTML = monthData.map(function(m) {
+      return '<div style="flex:1;text-align:center;font-size:9px;color:var(--muted);min-width:28px;overflow:hidden">' + m.shortLabel + '</div>';
+    }).join('');
+  }
+
+  // Table
+  var tbody = document.getElementById('cf-tbody');
+  if (tbody) {
+    tbody.innerHTML = monthData.filter(function(m){return m.distributions+m.capital>0;}).map(function(m) {
+      var total = m.distributions + m.capital;
+      return '<tr>' +
+        '<td style="color:var(--muted)">' + m.label + '</td>' +
+        '<td class="mono ' + (m.distributions>0?'up':'') + '">' + (m.distributions>0?'+'+m.distributions.toLocaleString('en-US',{maximumFractionDigits:0}):'—') + '</td>' +
+        '<td class="mono ' + (m.capital>0?'up':'') + '">' + (m.capital>0?m.capital.toLocaleString('en-US',{maximumFractionDigits:0}):'—') + '</td>' +
+        '<td class="mono" style="color:var(--gold);font-weight:700">' + total.toLocaleString('en-US',{maximumFractionDigits:0}) + '</td>' +
+        '<td style="font-size:11px;color:var(--muted)">' + m.items.join('، ').slice(0,60) + (m.items.join('').length>60?'...':'') + '</td>' +
+      '</tr>';
+    }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">لا توجد تدفقات متوقعة في هذه الفترة</td></tr>';
+  }
+}
+
+// 
+// 4. SHARPE RATIO
+// 
+function renderSharpe() {
+  var inv = window.__investments || [];
+  if (!inv.length) return;
+
+  var riskFreeRate = 0.055; // SAIBOR ~5.5%
+  var returns = inv.filter(function(x){return x.ret_pct!=null && !isNaN(x.ret_pct) && x.ret_pct!==0;})
+                   .map(function(x){return x.ret_pct;});
+  if (!returns.length) return;
+
+  var avgReturn = returns.reduce(function(s,r){return s+r;},0) / returns.length;
+  var variance  = returns.reduce(function(s,r){return s+Math.pow(r-avgReturn,2);},0) / returns.length;
+  var stdDev    = Math.sqrt(variance);
+  var sharpe    = stdDev > 0 ? ((avgReturn - riskFreeRate) / stdDev).toFixed(2) : '—';
+  var sharpeNum = parseFloat(sharpe);
+
+  var valEl  = document.getElementById('sharpe-value');
+  var lblEl  = document.getElementById('sharpe-label');
+  var detEl  = document.getElementById('sharpe-details');
+
+  if (valEl) {
+    valEl.textContent = sharpe;
+    valEl.style.color = sharpeNum>=1?'var(--green)':sharpeNum>=0.5?'var(--gold)':'var(--red)';
+  }
+  if (lblEl) {
+    var desc = sharpeNum>=1?'ممتاز — المخاطرة تستحق العائد':sharpeNum>=0.5?'جيد — أداء مقبول':'ضعيف — المخاطرة أعلى من العائد';
+    lblEl.textContent = desc;
+    lblEl.style.color = sharpeNum>=1?'var(--green)':sharpeNum>=0.5?'var(--gold)':'var(--red)';
+  }
+
+  var totalAmt = inv.reduce(function(s,x){return s+(x.amount||0);},0);
+  var totalRet = inv.reduce(function(s,x){return s+(x.ret_val||0);},0);
+  var roi = totalAmt>0?(totalRet/totalAmt*100).toFixed(2):0;
+
+  if (detEl) {
+    detEl.innerHTML = [
+      {l:'متوسط العائد السنوي', v:(avgReturn*100).toFixed(2)+'%', c:'var(--gold)'},
+      {l:'معدل الخطر الصفري (SAIBOR)', v:(riskFreeRate*100).toFixed(1)+'%', c:'var(--muted)'},
+      {l:'الانحراف المعياري', v:(stdDev*100).toFixed(2)+'%', c:'var(--cyan)'},
+      {l:'ROI الإجمالي', v:roi+'%', c:'var(--green)'},
+    ].map(function(d){
+      return '<div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px 14px;text-align:center">' +
+        '<div style="font-size:16px;font-weight:700;color:'+d.c+';font-family:monospace">'+d.v+'</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:3px">'+d.l+'</div></div>';
+    }).join('');
+  }
+}
+
+// 
+// 5. BENCHMARK COMPARISON
+// 
+async function refreshBenchmark() {
+  renderBenchmark(true);
+}
+
+function renderBenchmark(live) {
+  var inv = window.__investments || [];
+  var totalAmt = inv.reduce(function(s,x){return s+(x.amount||0);},0);
+  var totalRet = inv.reduce(function(s,x){return s+(x.ret_val||0);},0);
+  var roi = totalAmt>0?(totalRet/totalAmt*100).toFixed(2):0;
+
+  // Benchmarks (static data updated periodically — real-time via Yahoo Finance)
+  var benchmarks = [
+    { label:'محفظتك', value:parseFloat(roi), color:'var(--gold)', icon:'💼' },
+    { label:'SAIBOR 3M', value:5.52, color:'var(--cyan)', icon:'🏦', note:'معدل الإقراض السعودي' },
+    { label:'مؤشر تداول (تاسي)', value:4.8, color:'#a78bfa', icon:'📈', note:'عائد سنوي تقريبي' },
+    { label:'التضخم السعودي', value:2.1, color:'var(--orange)', icon:'📊', note:'مارس 2026' },
+    { label:'وديعة بنكية', value:3.5, color:'var(--muted)', icon:'🏧', note:'متوسط البنوك السعودية' },
+  ];
+
+  var maxVal = Math.max.apply(null, benchmarks.map(function(b){return b.value;})) || 1;
+  var barsEl = document.getElementById('benchmark-bars');
+  if (!barsEl) return;
+
+  barsEl.innerHTML = benchmarks.map(function(b) {
+    var pct    = (b.value / maxVal * 100).toFixed(1);
+    var isYou  = b.label === 'محفظتك';
+    var diff   = isYou ? '' : (parseFloat(roi) > b.value ?
+      '<span style="font-size:11px;color:var(--green);margin-right:6px">+' + (parseFloat(roi)-b.value).toFixed(2) + '% أفضل</span>' :
+      '<span style="font-size:11px;color:var(--red);margin-right:6px">' + (parseFloat(roi)-b.value).toFixed(2) + '%</span>');
+
+    return '<div style="margin-bottom:8px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">' +
+        '<span style="font-size:13px;color:var(--white);font-weight:'+(isYou?'700':'400')+'">' + b.icon + ' ' + b.label + '</span>' +
+        '<div style="display:flex;align-items:center;gap:4px">' +
+          diff +
+          '<span style="font-size:14px;font-weight:700;font-family:monospace;color:'+b.color+'">' + b.value.toFixed(2) + '%</span>' +
+        '</div>' +
+      '</div>' +
+      '<div style="height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden">' +
+        '<div style="height:100%;width:'+pct+'%;background:'+b.color+';border-radius:4px;transition:width .8s ease"></div>' +
+      '</div>' +
+      (b.note ? '<div style="font-size:10px;color:var(--muted);margin-top:2px">'+b.note+'</div>' : '') +
+    '</div>';
+  }).join('');
+}
+
+// 
+// 6. IMPORT EXCEL / CSV
+// 
+var _importedRows = [];
+
+function importPortfolioFile(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  event.target.value = '';
+  var ext = file.name.split('.').pop().toLowerCase();
+
+  if (ext === 'csv') {
+    var reader = new FileReader();
+    reader.onload = function(e) { parseCSVImport(e.target.result); };
+    reader.readAsText(file, 'UTF-8');
+  } else {
+    // XLSX — use SheetJS from CDN
+    if (typeof XLSX === 'undefined') {
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+      s.onload = function() { readXLSX(file); };
+      document.head.appendChild(s);
+    } else {
+      readXLSX(file);
+    }
+  }
+}
+
+function readXLSX(file) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var wb    = XLSX.read(e.target.result, {type:'array'});
+      var ws    = wb.Sheets[wb.SheetNames[0]];
+      var data  = XLSX.utils.sheet_to_json(ws, {defval:''});
+      showImportPreview(data);
+    } catch(err) {
+      if (typeof showToast==='function') showToast('خطأ في قراءة الملف: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function parseCSVImport(text) {
+  var lines   = text.split('\n').filter(function(l){return l.trim();});
+  var headers = lines[0].split(',').map(function(h){return h.trim().replace(/"/g,'');});
+  var data    = lines.slice(1).map(function(l) {
+    var vals = l.split(',');
+    var obj  = {};
+    headers.forEach(function(h,i){ obj[h] = (vals[i]||'').trim().replace(/"/g,''); });
+    return obj;
+  });
+  showImportPreview(data);
+}
+
+function showImportPreview(data) {
+  if (!data.length) { if (typeof showToast==='function') showToast('الملف فارغ'); return; }
+  _importedRows = data;
+
+  var keys    = Object.keys(data[0]);
+  var preview = document.getElementById('import-preview');
+  var thead   = document.getElementById('import-thead');
+  var tbody   = document.getElementById('import-tbody');
+  var stats   = document.getElementById('import-stats');
+  if (!preview) return;
+
+  thead.innerHTML = '<tr>' + keys.map(function(k){return '<th>'+k+'</th>';}).join('') + '</tr>';
+  tbody.innerHTML = data.slice(0,10).map(function(row) {
+    return '<tr>' + keys.map(function(k){return '<td>'+row[k]+'</td>';}).join('') + '</tr>';
+  }).join('');
+  if (stats) stats.textContent = data.length + ' سجل — يعرض أول 10 فقط. اضغط "استيراد الكل" لإضافتها للمحفظة.';
+  preview.style.display = 'block';
+  preview.scrollIntoView({behavior:'smooth'});
+  if (typeof showToast==='function') showToast('تم قراءة ' + data.length + ' سجل — راجع المعاينة');
+}
+
+var _colMap = {
+  name:['name','اسم','الاسم','فرصة','opportunity'],
+  type:['type','نوع','النوع'],
+  platform:['platform','منصة','المنصة'],
+  amount:['amount','مبلغ','المبلغ','invested','investment'],
+  ret_pct:['ret_pct','عائد%','return%','roi'],
+  ret_val:['ret_val','عائد','return','profit'],
+  total:['total','مجموع','المجموع'],
+  status:['status','حالة','الحالة'],
+  risk:['risk','مخاطرة','المخاطرة'],
+};
+
+function mapRow(row) {
+  var keys = Object.keys(row).map(function(k){return k.toLowerCase();});
+  var out  = {name:'فرصة مستوردة',type:'أخرى',platform:'أخرى',amount:0,ret_pct:0,ret_val:0,total:0,status:'نشطة',risk:'متوسط'};
+  Object.keys(_colMap).forEach(function(field) {
+    _colMap[field].forEach(function(alias) {
+      var idx = keys.findIndex(function(k){return k.includes(alias);});
+      if (idx !== -1) {
+        var val = Object.values(row)[idx];
+        if (['amount','ret_pct','ret_val','total'].includes(field)) val = parseFloat(String(val).replace(/,/g,'')) || 0;
+        out[field] = val;
+      }
+    });
+  });
+  if (out.amount && !out.total) out.total = out.amount + out.ret_val;
+  return out;
+}
+
+function confirmImport() {
+  if (!_importedRows.length) return;
+  var mapped = _importedRows.map(mapRow);
+  mapped.forEach(function(row) { window.__investments.push(row); });
+  if (typeof triggerSync==='function') triggerSync('investments');
+  if (typeof renderAll==='function') renderAll();
+  if (typeof renderSukuk==='function') renderSukuk();
+  if (typeof renderFunds==='function') renderFunds();
+  document.getElementById('import-preview').style.display = 'none';
+  _importedRows = [];
+  if (typeof showToast==='function') showToast('تم استيراد ' + mapped.length + ' فرصة بنجاح');
+}
+
+// 
+// 7. PDF EXPORT
+// 
+function exportPDF() {
+  var inv      = window.__investments || [];
+  var loans    = window.loansData     || [];
+  var debts    = window.debtsData     || [];
+  var incInv   = (document.getElementById('pdf-inc-investments')||{checked:true}).checked;
+  var incLoans = (document.getElementById('pdf-inc-loans')||{checked:true}).checked;
+  var incDebts = (document.getElementById('pdf-inc-debts')||{checked:true}).checked;
+  var incCF    = (document.getElementById('pdf-inc-cashflow')||{checked:true}).checked;
+
+  var totalAmt = inv.reduce(function(s,x){return s+(x.amount||0);},0);
+  var totalRet = inv.reduce(function(s,x){return s+(x.ret_val||0);},0);
+  var roi      = totalAmt>0?(totalRet/totalAmt*100).toFixed(2):0;
+  var active   = inv.filter(function(x){return x.status==='نشطة';}).length;
+  var now      = new Date().toLocaleDateString('ar-SA');
+
+  var rows = incInv ? inv.map(function(x,i){
+    return '<tr style="border-bottom:1px solid #e5e7eb">' +
+      '<td style="padding:8px;font-size:12px">'+(i+1)+'</td>'+
+      '<td style="padding:8px;font-size:11px;max-width:200px">'+x.name+'</td>'+
+      '<td style="padding:8px;font-size:12px">'+x.type+'</td>'+
+      '<td style="padding:8px;font-size:12px">'+x.platform+'</td>'+
+      '<td style="padding:8px;font-size:12px;text-align:left;font-family:monospace">'+(x.amount||0).toLocaleString('en-US',{maximumFractionDigits:0})+'</td>'+
+      '<td style="padding:8px;font-size:12px;text-align:left;color:'+(x.ret_val>=0?'green':'red')+'">'+((x.ret_pct||0)*100).toFixed(1)+'%</td>'+
+      '<td style="padding:8px;font-size:12px;text-align:left;font-family:monospace">'+(x.total||0).toLocaleString('en-US',{maximumFractionDigits:0})+'</td>'+
+      '<td style="padding:8px;font-size:12px">'+x.status+'</td>'+
+    '</tr>';
+  }).join('') : '';
+
+  var html = '<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">'+
+    '<title>تقرير المحفظة الاستثمارية</title>'+
+    '<style>body{font-family:Arial,sans-serif;color:#111;margin:40px;direction:rtl} '+
+    'table{width:100%;border-collapse:collapse;margin-top:16px} '+
+    'th{background:#071510;color:white;padding:10px 8px;font-size:12px;text-align:right} '+
+    '.kpi{display:inline-block;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 20px;margin:6px;min-width:140px;text-align:center} '+
+    '.kpi-v{font-size:22px;font-weight:700;font-family:monospace} '+
+    '.kpi-l{font-size:11px;color:#6b7280;margin-top:4px} '+
+    'h2{color:#071510;border-bottom:2px solid #c9a84c;padding-bottom:8px;margin-top:28px} '+
+    '@media print{.no-print{display:none}}'+
+    '</style></head><body>'+
+
+    '<div style="text-align:center;margin-bottom:32px;padding-bottom:20px;border-bottom:2px solid #c9a84c">'+
+    '<h1 style="color:#071510;margin:0">محفظتي المالية</h1>'+
+    '<div style="color:#6b7280;margin-top:8px">تقرير شامل — '+now+'</div></div>'+
+
+    '<div style="margin-bottom:24px">'+
+    '<div class="kpi"><div class="kpi-v" style="color:#c9a84c">'+totalAmt.toLocaleString('en-US',{maximumFractionDigits:0})+'</div><div class="kpi-l">إجمالي مستثمر (ر.س)</div></div>'+
+    '<div class="kpi"><div class="kpi-v" style="color:green">'+totalRet.toLocaleString('en-US',{maximumFractionDigits:0})+'</div><div class="kpi-l">إجمالي العوائد (ر.س)</div></div>'+
+    '<div class="kpi"><div class="kpi-v" style="color:#2563eb">'+roi+'%</div><div class="kpi-l">ROI الإجمالي</div></div>'+
+    '<div class="kpi"><div class="kpi-v">'+inv.length+'</div><div class="kpi-l">عدد الفرص</div></div>'+
+    '<div class="kpi"><div class="kpi-v" style="color:green">'+active+'</div><div class="kpi-l">نشطة</div></div>'+
+    '</div>';
+
+  if (incInv && rows) {
+    html += '<h2>الاستثمارات</h2><table><thead><tr><th>#</th><th>الاسم</th><th>النوع</th><th>المنصة</th><th>المبلغ</th><th>العائد%</th><th>المجموع</th><th>الحالة</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  }
+
+  if (incLoans && loans.length) {
+    html += '<h2>القروض البنكية</h2><table><thead><tr><th>القرض</th><th>البنك</th><th>الأصل</th><th>المتبقي</th><th>القسط</th></tr></thead><tbody>'+
+      loans.map(function(l){return '<tr><td style="padding:8px">'+l.name+'</td><td style="padding:8px">'+l.bank+'</td><td style="padding:8px;font-family:monospace">'+( l.principal||0).toLocaleString('en-US',{maximumFractionDigits:0})+'</td><td style="padding:8px;font-family:monospace;color:red">'+(l.remaining||0).toLocaleString('en-US',{maximumFractionDigits:0})+'</td><td style="padding:8px;font-family:monospace">'+(l.installment||0).toLocaleString('en-US',{maximumFractionDigits:0})+'</td></tr>';}).join('')+'</tbody></table>';
+  }
+
+  if (incDebts && debts.length) {
+    html += '<h2>الديون الشخصية</h2><table><thead><tr><th>الشخص</th><th>النوع</th><th>المبلغ</th><th>المتبقي</th></tr></thead><tbody>'+
+      debts.map(function(d){return '<tr><td style="padding:8px">'+d.person+'</td><td style="padding:8px">'+(d.direction==='owe'?'عليّ':'لي')+'</td><td style="padding:8px;font-family:monospace">'+(d.amount||0).toLocaleString('en-US',{maximumFractionDigits:0})+'</td><td style="padding:8px;font-family:monospace">'+(d.remaining||0).toLocaleString('en-US',{maximumFractionDigits:0})+'</td></tr>';}).join('')+'</tbody></table>';
+  }
+
+  html += '<div style="margin-top:40px;padding-top:16px;border-top:1px solid #e5e7eb;text-align:center;color:#9ca3af;font-size:11px">محفظتي المالية — تم إنشاء هذا التقرير تلقائياً في '+now+'</div></body></html>';
+
+  var blob = new Blob([html], {type:'text/html;charset=utf-8'});
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href   = url;
+  a.download = 'portfolio-report-' + new Date().toISOString().split('T')[0] + '.html';
+  a.click();
+  URL.revokeObjectURL(url);
+
+  // Also open print dialog for PDF
+  var win = window.open(url, '_blank');
+  if (win) setTimeout(function(){try{win.print();}catch(e){}}, 800);
+
+  if (typeof showToast==='function') showToast('تم إنشاء التقرير — اختر "طباعة كـ PDF"');
+}
+
 
 function renderStocks() {
   const stockData = investments.filter(x => x.type === 'سهم');
