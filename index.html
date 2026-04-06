@@ -58,6 +58,8 @@
     --theme-icon: '🌙';
   }
   * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-padding-top: 64px; }
+  @media (max-width: 768px) { html { scroll-padding-top: 0; } }
 
   body {
     font-family: 'IBM Plex Sans Arabic', sans-serif;
@@ -4176,9 +4178,14 @@ PAGE_TITLES['insights'] = '📊 التحليل المتقدم';
 var _origShowPage = showPage;
 showPage = function(id, navEl, mobileTitle) {
   _origShowPage(id, navEl, mobileTitle);
-  if (id === 'calendar') renderCalendar();
-  if (id === 'cashflow') renderCashflow();
+  if (id === 'calendar') { renderCalendar(); }
+  if (id === 'cashflow') { renderCashflow(); }
   if (id === 'insights') { renderSharpe(); renderBenchmark(); }
+  // Ensure scroll is at top after render
+  setTimeout(function() {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+  }, 50);
 };
 
 // 
@@ -5412,7 +5419,11 @@ function showPage(id, navEl, mobileTitle){
   const titleEl = document.getElementById('mob-page-title');
   if (titleEl) titleEl.textContent = mobileTitle || PAGE_TITLES[id] || '';
 
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Scroll to top — account for fixed topbar on desktop
+  var topbarH = window.innerWidth > 768 ? 64 : 0;
+  window.scrollTo({ top: topbarH > 0 ? 0 : 0, behavior: 'smooth' });
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
   if (id === 'db') dbRender();
   if (id === 'stocks') renderStocks();
   if (id === 'loans') renderLoans();
@@ -6432,6 +6443,113 @@ function calcDebt() {
   }
 }
 
+// WHATSAPP REMINDER
+function sendWhatsApp(idx) {
+  var d = debtsData[idx];
+  if (!d || !d.contact) return;
+  var isOwe  = d.direction === 'owe';
+  var amt    = (d.remaining || d.amount || 0).toLocaleString('en-US', {maximumFractionDigits:0});
+  var due    = d.due_date ? ' (الموعد: ' + d.due_date + ')' : '';
+  var reason = d.reason ? ' - ' + d.reason : '';
+  var msg = isOwe
+    ? ('السلام عليكم ' + d.person + ',\nاردت ان اذكرك بان علي مبلغ ' + amt + ' ريال' + reason + due + '.\nسأحرص على السداد في اقرب وقت. شكرا.')
+    : ('السلام عليكم ' + d.person + ',\nاردت ان اذكرك بلطف بمبلغ ' + amt + ' ريال' + reason + due + '.\nشكرا جزيلا.');
+  var phone = d.contact.replace(/[\s\-\+]/g, '');
+  if (phone.startsWith('05')) phone = '966' + phone.slice(1);
+  else if (phone.startsWith('5')) phone = '966' + phone;
+  window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// PROMISSORY NOTE (sand li-amr)
+function generatePromissoryNote(idx) {
+  var d = debtsData[idx];
+  if (!d) return;
+  var today     = new Date();
+  var gregorian = today.toLocaleDateString('ar-SA', {year:'numeric', month:'long', day:'numeric'});
+  var hijri     = toHijriDate(today);
+  var isOwe     = d.direction === 'owe';
+  var creditor  = isOwe ? d.person : ((window.__firebaseUser && window.__firebaseUser.displayName) || 'الدائن');
+  var debtor    = isOwe ? ((window.__firebaseUser && window.__firebaseUser.displayName) || 'المدين') : d.person;
+  var amt       = (d.amount || 0).toLocaleString('en-US', {maximumFractionDigits:0});
+  var amtWords  = numToArabicWords(d.amount || 0);
+  var dueDate   = d.due_date ? new Date(d.due_date).toLocaleDateString('ar-SA', {year:'numeric', month:'long', day:'numeric'}) : '_______________';
+  var reason    = d.reason || '_______________';
+
+  var css = '<style>*{box-sizing:border-box;margin:0;padding:0}'
+  + 'body{font-family:Georgia,serif;background:#fff;color:#000;direction:rtl}'
+  + '.page{width:210mm;min-height:150mm;margin:10mm auto;padding:12mm 14mm;border:2.5pt double #000;position:relative}'
+  + '.hdr{text-align:center;border-bottom:1.5pt solid #000;padding-bottom:8px;margin-bottom:12px}'
+  + '.hdr h1{font-size:24pt;font-weight:700;letter-spacing:2px}'
+  + '.hdr p{font-size:10pt;color:#555;margin-top:3px}'
+  + '.meta{display:flex;justify-content:space-between;margin-bottom:14px;font-size:10pt}'
+  + '.bx{border:1pt solid #000;padding:4px 10px;border-radius:3px}'
+  + '.body{font-size:13pt;line-height:2.4;text-align:justify}'
+  + '.fl{border-bottom:1pt dotted #000;display:inline-block;min-width:110px;text-align:center;font-weight:700}'
+  + '.ab{border:2pt solid #000;padding:6px 14px;display:inline-block;border-radius:4px;font-size:15pt;font-weight:700;margin:0 4px}'
+  + '.sigs{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:18px;padding-top:12px;border-top:1pt dashed #000}'
+  + '.sig{text-align:center}'
+  + '.sln{border-bottom:1pt solid #000;width:80%;margin:28px auto 6px}'
+  + '.wm{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-35deg);font-size:48pt;color:rgba(0,0,0,0.04);font-weight:700;pointer-events:none}'
+  + '.legal{font-size:9pt;color:#555;margin-top:10px;text-align:center;line-height:1.7;border-top:1pt solid #ccc;padding-top:8px}'
+  + '.tb{background:#1a2e24;color:white;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;font-family:sans-serif;font-size:13px}'
+  + '.bp{background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:8px 20px;font-size:13px;font-weight:700;cursor:pointer}'
+  + '.bc{background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer}'
+  + '@media print{.tb{display:none!important}}</style>';
+
+  var body = '<div class="tb"><span>سند لامر</span>'
+  + '<div style="display:flex;gap:10px"><button class="bp" onclick="window.print()">طباعة / PDF</button>'
+  + '<button class="bc" onclick="window.close()">اغلاق</button></div></div>'
+  + '<div class="page"><div class="wm">سند لامر</div>'
+  + '<div class="hdr"><h1>سَنَدٌ لِامْر</h1><p>وفقاً لنظام الاوراق التجارية السعودي - المرسوم الملكي م/37</p></div>'
+  + '<div class="meta"><span class="bx">التاريخ الهجري: <b>' + hijri + '</b></span>'
+  + '<span class="bx">التاريخ الميلادي: <b>' + gregorian + '</b></span>'
+  + '<span class="bx">رقم السند: <b>__________</b></span></div>'
+  + '<div class="body"><p>انا الموقع ادناه، <span class="fl">' + debtor + '</span>، اتعهد بموجب هذا السند بصرف لامر <span class="fl">' + creditor + '</span> مبلغاً وقدره:</p>'
+  + '<p style="text-align:center;margin:10px 0"><span class="ab">' + amt + ' ريال سعودي</span><br><span style="font-size:11pt">(' + amtWords + ' ريالاً سعودياً لا غير)</span></p>'
+  + '<p>وذلك بسبب: <span class="fl">' + reason + '</span></p>'
+  + '<p>ويستحق السداد في تاريخ: <span class="fl">' + dueDate + '</span></p>'
+  + '<p>في مدينة: <span class="fl">_______________</span> &nbsp; رقم الهوية: <span class="fl">_______________</span></p></div>'
+  + '<div class="sigs"><div class="sig"><div style="font-size:11pt;font-weight:700;margin-bottom:6px">المدين (محرر السند)</div>'
+  + '<div class="sln"></div><div style="font-size:11pt;font-weight:700">' + debtor + '</div><div style="font-size:9.5pt;color:#666">التوقيع والبصمة</div></div>'
+  + '<div class="sig"><div style="font-size:11pt;font-weight:700;margin-bottom:6px">الدائن (المستفيد)</div>'
+  + '<div class="sln"></div><div style="font-size:11pt;font-weight:700">' + creditor + '</div><div style="font-size:9.5pt;color:#666">التوقيع</div></div></div>'
+  + '<div class="legal">هذا السند ورقة تجارية وفقاً لنظام الاوراق التجارية الصادر بالمرسوم الملكي رقم م/37 وتاريخ 11/10/1383هـ.<br>يعد سنداً تنفيذياً وفقاً للمادة 29 من نظام التنفيذ السعودي.</div>'
+  + '</div>';
+
+  var html = '<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>سند لامر</title>' + css + '</head><body>' + body + '</body></html>';
+  var win = window.open('', '_blank', 'width=920,height=720');
+  if (win) { win.document.write(html); win.document.close(); }
+  else if (typeof showToast === 'function') showToast('يرجى السماح بفتح النوافذ المنبثقة');
+}
+
+function toHijriDate(date) {
+  var jd = Math.floor((14+153*(date.getMonth()>1?date.getMonth()-1:date.getMonth()+11)+2)/5)
+         + date.getDate()+365*date.getFullYear()+Math.floor(date.getFullYear()/4)
+         - Math.floor(date.getFullYear()/100)+Math.floor(date.getFullYear()/400)-32045;
+  var l=jd-1948440+10632, n=Math.floor((l-1)/10631);
+  l=l-10631*n+354;
+  var j=Math.floor((10985-l)/5316)*Math.floor((50*l)/17719)+Math.floor(l/5670)*Math.floor((43*l)/15238);
+  l=l-Math.floor((30-j)/15)*Math.floor((17719*j)/50)-Math.floor(j/16)*Math.floor((15238*j)/43)+29;
+  var hY=30*n+j-30, hM=Math.floor((24*l)/709), hD=l-Math.floor((709*hM)/24);
+  var mn=['محرم','صفر','ربيع الاول','ربيع الآخر','جمادى الاولى','جمادى الآخرة','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'];
+  return hD+' '+(mn[hM-1]||'')+' '+hY+'هـ';
+}
+
+function numToArabicWords(n) {
+  n=Math.floor(n); if(!n) return 'صفر';
+  var o=['','واحد','اثنان','ثلاثة','اربعة','خمسة','ستة','سبعة','ثمانية','تسعة','عشرة','احد عشر','اثنا عشر','ثلاثة عشر','اربعة عشر','خمسة عشر','ستة عشر','سبعة عشر','ثمانية عشر','تسعة عشر'];
+  var t=['','','عشرون','ثلاثون','اربعون','خمسون','ستون','سبعون','ثمانون','تسعون'];
+  var h=['','مئة','مئتان','ثلاثمئة','اربعمئة','خمسمئة','ستمئة','سبعمئة','ثمانمئة','تسعمئة'];
+  function b(x){return x<20?o[x]:(x%10>0?o[x%10]+' و'+t[Math.floor(x/10)]:t[Math.floor(x/10)]);}
+  var r='';
+  if(n>=1000000){r+=b(Math.floor(n/1000000))+' مليون ';n%=1000000;}
+  if(n>=1000){r+=b(Math.floor(n/1000))+' الف ';n%=1000;}
+  if(n>=100){r+=h[Math.floor(n/100)]+' ';n%=100;}
+  if(n>0){r+=b(n);}
+  return r.trim();
+}
+
+
 function saveDebt() {
   const person = document.getElementById('dt-person').value.trim();
   const amount = parseFloat(document.getElementById('dt-amount').value) || 0;
@@ -6541,10 +6659,12 @@ function renderDebts() {
         </div>
         <div style="font-size:9px;color:var(--muted);margin-top:2px">${pct.toFixed(0)}% سُدِّد</div>
         ` : ''}
-        <div style="display:flex;gap:6px;margin-top:8px">
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
           <button class="loan-action-btn" onclick="showDebtForm(${d._idx})">✏️ تعديل</button>
           <button class="loan-action-btn" style="color:var(--red);border-color:rgba(255,77,77,0.2)" onclick="deleteDebt(${d._idx})">🗑</button>
           ${d.contact ? `<button class="loan-action-btn" onclick="window.open('tel:${d.contact}')" style="color:var(--cyan)">📞</button>` : ''}
+          ${d.contact ? `<button class="loan-action-btn" onclick="sendWhatsApp(${d._idx})" style="color:#25d366;border-color:rgba(37,211,102,0.3)">📲 واتساب</button>` : ''}
+          <button class="loan-action-btn" onclick="generatePromissoryNote(${d._idx})" style="color:#a78bfa;border-color:rgba(167,139,250,0.3)">📜 سند</button>
         </div>
       </div>
       <div>
