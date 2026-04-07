@@ -6011,7 +6011,7 @@ function showLoanForm(idx = null) {
   const title = document.getElementById('loan-form-title');
   wrap.style.display = 'block';
   title.textContent = idx !== null ? '✏️ تعديل القرض' : '🏦 إضافة قرض جديد';
-  setTimeout(function(){ wrap.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
+  setTimeout(function(){ wrap.scrollIntoView({ behavior: 'smooth'}); }, 80);
   if (idx !== null) {
     const l = loansData[idx];
     document.getElementById('ln-name').value           = l.name || '';
@@ -6037,7 +6037,7 @@ function showLoanForm(idx = null) {
      'ln-paid-amount','ln-start','ln-end','ln-installments-total','ln-installments-paid','ln-next-date','ln-notes']
       .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   }
-  wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  wrap.scrollIntoView({ behavior: 'smooth' });
 }
 
 function hideLoanForm() {
