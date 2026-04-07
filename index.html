@@ -1382,7 +1382,7 @@
 <div class="bg-mesh"></div>
 <div class="bg-grid"></div>
 
-<div class="app" id="main-app" style="display:none">
+<div class="app">
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="logo">
@@ -3542,7 +3542,7 @@
   </div><!-- end .app -->
 
 <!-- MOBILE BOTTOM NAV -->
-<nav class="mobile-nav" id="mobile-nav-bar" style="display:none !important">
+<nav class="mobile-nav">
   <div class="mobile-nav-inner">
     <div class="mnav-item active" id="mnav-dashboard" onclick="showPage('dashboard', this, '📊 لوحة التحكم')">
       <div class="mnav-icon-wrap"><span class="mnav-icon">📊</span></div>
@@ -3654,7 +3654,7 @@
 
 <script>
 //  DATA 
-let investments = [
+const investments = [
   {name:"60 سهم في شركة المراعي",type:"سهم",platform:"دراية",amount:3608.22,ret_pct:-0.2299,ret_val:-828.58,total:2775.53,date_out:null,duration:null,dist:"سنوية",risk:"متوسط",status:"نشطة",ticker:"2280",shares:60},
   {name:"205 صندوق الراجحي للنمو",type:"صندوق",platform:"دراية",amount:5000,ret_pct:0.0887,ret_val:433.31,total:5318.31,date_out:"عند الحاجة",duration:null,dist:"لا يوجد",risk:"متوسط",status:"نشطة"},
   {name:"74 صندوق الراجحي للأسهم",type:"صندوق",platform:"دراية",amount:5700,ret_pct:0.1455,ret_val:810.58,total:6381.58,date_out:"عند الحاجة",duration:null,dist:"لا يوجد",risk:"عالي",status:"نشطة"},
@@ -3880,7 +3880,7 @@ async function runAIAnalysis() {
 
     var summary = 'المحفظة: ' + totalAmt.toLocaleString('en-US') + ' ر.س | عوائد: ' + totalRet.toLocaleString('en-US') + ' ر.س | ROI: '+roi+'% | الفرص: '+inv.length+' (نشطة:'+active+' مستلمة:'+done+') | صكوك:'+Math.round(sukukAmt/1000)+'k صناديق:'+Math.round(fundsAmt/1000)+'k اسهم:'+Math.round(stksAmt/1000)+'k | منصات: '+platStr+' | افضل: '+topGain+' | اسوا: '+topLoss+' | ديون:'+((window.debtsData||[]).length)+' قروض:'+((window.loansData||[]).length);
 
-    var PROXY_URL = 'https://claude-proxy.shaheenhouse1.workers.dev';
+    var PROXY_URL = 'https://claude-proxy.fahad-shaheen.workers.dev';
 
     var payload = {
       model: 'claude-sonnet-4-20250514',
@@ -6904,8 +6904,6 @@ function _rerender() {
    "renderLoans","renderDebts"].forEach(function(fn) {
     if (typeof window[fn] === "function") window[fn]();
   });
-  if (typeof initDashboardYears === "function") initDashboardYears();
-  if (typeof renderDashboard    === "function") renderDashboard();
 }
 
 function _updateUI(user) {
@@ -6947,22 +6945,13 @@ function _updateUI(user) {
 function _loadData(uid) {
   _badge("loading");
   _gate(false);
-  var appEl = document.getElementById('main-app');
-  if (appEl) appEl.style.display = 'block';
-  var navEl = document.getElementById('mobile-nav-bar');
-  if (navEl) navEl.style.removeProperty('display');
-
-  // مسح البيانات الافتراضية اولاً — كل مستخدم له بياناته الخاصة فقط
-  window.__investments.length = 0;
-  investments.length = 0;
 
   _read(uid, "investments").then(function(inv) {
     if (inv && inv.length > 0) {
-      // تحميل بيانات المستخدم من Firebase
-      inv.forEach(function(r){ window.__investments.push(r); investments.push(r); });
+      window.__investments.length = 0;
+      inv.forEach(function(r){ window.__investments.push(r); });
     } else {
-      // مستخدم جديد — قاعدة بيانات فارغة
-      _write(uid, "investments", []);
+      _write(uid, "investments", Array.from(window.__investments));
     }
     return _read(uid, "loans");
   }).then(function(loans) {
@@ -6989,13 +6978,11 @@ function _loadData(uid) {
       if (d.uid && d.uid !== uid) return;
       if (!Array.isArray(d.data)) return;
       window.__investments.length = 0;
-      investments.length          = 0;
-      d.data.forEach(function(r){ window.__investments.push(r); investments.push(r); });
+      d.data.forEach(function(r){ window.__investments.push(r); });
       if (typeof renderAll    === "function") renderAll();
       if (typeof renderSukuk  === "function") renderSukuk();
       if (typeof renderFunds  === "function") renderFunds();
       if (typeof renderStocks === "function") renderStocks();
-      if (typeof renderDashboard === "function") { initDashboardYears(); renderDashboard(); }
     });
   }).catch(function(e){ console.error("loadData:", e); });
 }
@@ -7003,16 +6990,10 @@ function _loadData(uid) {
 function _clearData() {
   if (_unsubSnap) { _unsubSnap(); _unsubSnap = null; }
   _uid = null;
-  // تفريغ جميع البيانات عند تسجيل الخروج
   window.__investments.length = 0;
-  investments.length          = 0;
   window.loansData.length     = 0;
   window.debtsData.length     = 0;
   _rerender();
-  var appEl2 = document.getElementById('main-app');
-  if (appEl2) appEl2.style.display = 'none';
-  var navEl2 = document.getElementById('mobile-nav-bar');
-  if (navEl2) navEl2.style.setProperty('display','none','important');
   _gate(true);
 }
 
@@ -7020,11 +7001,7 @@ function _clearData() {
 window.fbSaveInvestments = function() {
   if (!_uid) return;
   _syncing = true;
-  // مزامنة investments المحلية مع window.__investments
-  var data = Array.from(window.__investments);
-  investments.length = 0;
-  data.forEach(function(r){ investments.push(r); });
-  _write(_uid, "investments", data);
+  _write(_uid, "investments", Array.from(window.__investments));
   setTimeout(function(){ _syncing = false; }, 2000);
 };
 window.fbSaveLoans = function() {
