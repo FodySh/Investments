@@ -3910,7 +3910,7 @@ async function runAIAnalysis() {
 
     var summary = 'المحفظة: ' + totalAmt.toLocaleString('en-US') + ' ر.س | عوائد: ' + totalRet.toLocaleString('en-US') + ' ر.س | ROI: '+roi+'% | الفرص: '+inv.length+' (نشطة:'+active+' مستلمة:'+done+') | صكوك:'+Math.round(sukukAmt/1000)+'k صناديق:'+Math.round(fundsAmt/1000)+'k اسهم:'+Math.round(stksAmt/1000)+'k | منصات: '+platStr+' | افضل: '+topGain+' | اسوا: '+topLoss+' | ديون:'+((window.debtsData||[]).length)+' قروض:'+((window.loansData||[]).length);
 
-    var PROXY_URL = 'https://claude-proxy.shaheenhouse1.workers.dev'; // Cloudflare Worker — Claude API key is safe here
+    var PROXY_URL = 'https://claude-proxy.fahad-shaheen.workers.dev'; // Cloudflare Worker — Claude API key is safe here
 
     var payload = {
       model: 'claude-sonnet-4-20250514',
@@ -6011,6 +6011,7 @@ function showLoanForm(idx = null) {
   const title = document.getElementById('loan-form-title');
   wrap.style.display = 'block';
   title.textContent = idx !== null ? '✏️ تعديل القرض' : '🏦 إضافة قرض جديد';
+  setTimeout(function(){ wrap.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
   if (idx !== null) {
     const l = loansData[idx];
     document.getElementById('ln-name').value           = l.name || '';
@@ -6428,6 +6429,7 @@ function showDebtForm(idx = null) {
   editingDebtIdx = idx;
   const wrap = document.getElementById('debt-form-wrap');
   wrap.style.display = 'block';
+  setTimeout(function(){ wrap.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
   const today = new Date().toISOString().split('T')[0];
   if (idx !== null) {
     const d = debtsData[idx];
