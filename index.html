@@ -1368,14 +1368,8 @@
       <div class="nav-item nav-debts" onclick="showPage('debts',this)">
         <span class="nav-icon">💸</span> الديون الشخصية
       </div>
-      <div class="nav-item" onclick="showPage('calendar',this)" style="color:#a78bfa">
-        <span class="nav-icon">📅</span> تقويم الاستحقاق
-      </div>
-      <div class="nav-item" onclick="showPage('cashflow',this)" style="color:#34d399">
-        <span class="nav-icon">💧</span> التدفق النقدي
-      </div>
-      <div class="nav-item" onclick="showPage('insights',this)" style="color:#60a5fa">
-        <span class="nav-icon">📊</span> التحليل المتقدم
+      <div class="nav-item" onclick="showPage('reports',this)" style="color:#60a5fa">
+        <span class="nav-icon">📊</span> التقارير والتحليل
       </div>
     </nav>
     <div class="sidebar-footer">
@@ -3344,163 +3338,248 @@
 </main>
 
     <!-- PAGE: CALENDAR - تقويم الاستحقاقات -->
-    <div id="page-calendar" class="page">
-      <div class="page-header">
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- PAGE: REPORTS - لوحة التقارير والتحليل          -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div id="page-reports" class="page">
+      <div class="page-header fade-up">
         <div>
-          <div class="page-title">📅 تقويم الاستحقاقات</div>
-          <div class="page-sub" id="cal-sub">الفرص المستحقة خلال الأشهر القادمة</div>
+          <div class="page-title">📊 التقارير والتحليل</div>
+          <div class="page-sub">تقويم الاستحقاقات — التدفق النقدي — التحليل المتقدم</div>
         </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <select id="cal-months" onchange="renderCalendar()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--white);font-size:12px;font-family:'IBM Plex Sans Arabic',sans-serif;outline:none">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button onclick="document.getElementById('import-file').click()" style="background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.3);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:#a78bfa;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px">📥 استيراد</button>
+          <input type="file" id="import-file" accept=".xlsx,.xls,.csv" style="display:none" onchange="importPortfolioFile(event)">
+          <button onclick="exportPDF()" style="background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.3);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:#f87171;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px">📄 PDF</button>
+        </div>
+      </div>
+
+      <!-- تبويبات داخل الصفحة -->
+      <div style="display:flex;gap:0;margin-bottom:24px;border-bottom:1px solid var(--border)">
+        <button id="rtab-calendar" onclick="switchReportsTab('calendar')" style="padding:11px 20px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:all .2s">📅 الاستحقاقات</button>
+        <button id="rtab-cashflow" onclick="switchReportsTab('cashflow')" style="padding:11px 20px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s">💧 التدفق النقدي</button>
+        <button id="rtab-insights" onclick="switchReportsTab('insights')" style="padding:11px 20px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s">🔬 التحليل المتقدم</button>
+        <button id="rtab-dividends" onclick="switchReportsTab('dividends')" style="padding:11px 20px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s">💰 توزيعات الأسهم</button>
+      </div>
+
+      <!-- ── تبويب: الاستحقاقات ── -->
+      <div id="rtab-panel-calendar">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+          <div>
+            <div style="font-size:16px;font-weight:700">📅 تقويم الاستحقاقات</div>
+            <div style="font-size:12px;color:var(--muted)" id="cal-sub">الفرص المستحقة خلال الأشهر القادمة</div>
+          </div>
+          <select id="cal-months" onchange="renderCalendar()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--white);font-size:12px;font-family:inherit;outline:none">
             <option value="3">3 أشهر</option>
             <option value="6" selected>6 أشهر</option>
             <option value="12">12 شهر</option>
             <option value="24">24 شهر</option>
           </select>
         </div>
+        <div id="cal-alerts" style="display:none;margin-bottom:16px"></div>
+        <div id="cal-timeline" style="display:flex;flex-direction:column;gap:12px"></div>
       </div>
-      <!-- Alert strip for imminent maturities -->
-      <div id="cal-alerts" style="display:none;margin-bottom:16px"></div>
-      <!-- Monthly timeline -->
-      <div id="cal-timeline" style="display:flex;flex-direction:column;gap:12px"></div>
-    </div>
 
-    <!-- PAGE: CASHFLOW - التدفق النقدي -->
-    <div id="page-cashflow" class="page">
-      <div class="page-header">
-        <div>
-          <div class="page-title">💧 التدفق النقدي الشهري</div>
-          <div class="page-sub">التوزيعات والأرباح المتوقعة للأشهر القادمة</div>
-        </div>
-        <div style="display:flex;gap:8px">
-          <select id="cf-months" onchange="renderCashflow()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--white);font-size:12px;font-family:'IBM Plex Sans Arabic',sans-serif;outline:none">
+      <!-- ── تبويب: التدفق النقدي ── -->
+      <div id="rtab-panel-cashflow" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+          <div>
+            <div style="font-size:16px;font-weight:700">💧 التدفق النقدي الشهري</div>
+            <div style="font-size:12px;color:var(--muted)">التوزيعات والأرباح المتوقعة</div>
+          </div>
+          <select id="cf-months" onchange="renderCashflow()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--white);font-size:12px;font-family:inherit;outline:none">
             <option value="6">6 أشهر</option>
             <option value="12" selected>12 شهر</option>
             <option value="24">24 شهر</option>
           </select>
         </div>
-      </div>
-      <!-- KPI strip -->
-      <div class="kpi-grid fade-up" id="cf-kpis" style="margin-bottom:14px"></div>
-      <!-- Bar chart -->
-      <div class="section-card fade-up" style="margin-bottom:16px">
-        <div class="section-head">
-          <span class="section-title">📊 الرسم البياني للتدفق</span>
-          <span class="section-count" id="cf-chart-label">—</span>
+        <div class="kpi-grid fade-up" id="cf-kpis" style="margin-bottom:14px"></div>
+        <div class="section-card fade-up" style="margin-bottom:16px">
+          <div class="section-head">
+            <span class="section-title">📊 الرسم البياني للتدفق</span>
+            <span class="section-count" id="cf-chart-label">—</span>
+          </div>
+          <div style="padding:20px;overflow-x:auto">
+            <div id="cf-chart" style="display:flex;align-items:flex-end;gap:8px;min-height:160px;min-width:400px"></div>
+            <div id="cf-chart-labels" style="display:flex;gap:8px;margin-top:6px;min-width:400px"></div>
+          </div>
         </div>
-        <div style="padding:20px;overflow-x:auto">
-          <div id="cf-chart" style="display:flex;align-items:flex-end;gap:8px;min-height:160px;min-width:400px"></div>
-          <div id="cf-chart-labels" style="display:flex;gap:8px;margin-top:6px;min-width:400px"></div>
-        </div>
-      </div>
-      <!-- Detail table -->
-      <div class="section-card fade-up">
-        <div class="section-head"><span class="section-title">📋 التفاصيل الشهرية</span></div>
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead><tr><th>الشهر</th><th>التوزيعات المتوقعة</th><th>استحقاقات رأس المال</th><th>إجمالي التدفق</th><th>الفرص</th></tr></thead>
-            <tbody id="cf-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- PAGE: INSIGHTS - التحليل المتقدم -->
-    <div id="page-insights" class="page">
-      <div class="page-header">
-        <div>
-          <div class="page-title">📊 التحليل المتقدم</div>
-          <div class="page-sub">نسبة شارب — بنشمارك — استيراد البيانات — تقارير PDF</div>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button onclick="document.getElementById('import-file').click()" style="background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.3);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:#a78bfa;cursor:pointer;font-family:'IBM Plex Sans Arabic',sans-serif;display:flex;align-items:center;gap:6px">
-            📥 استيراد Excel/CSV
-          </button>
-          <input type="file" id="import-file" accept=".xlsx,.xls,.csv" style="display:none" onchange="importPortfolioFile(event)">
-          <button onclick="exportPDF()" style="background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.3);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:#f87171;cursor:pointer;font-family:'IBM Plex Sans Arabic',sans-serif;display:flex;align-items:center;gap:6px">
-            📄 تصدير PDF
-          </button>
+        <div class="section-card fade-up">
+          <div class="section-head"><span class="section-title">📋 التفاصيل الشهرية</span></div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>الشهر</th><th>التوزيعات المتوقعة</th><th>استحقاقات رأس المال</th><th>إجمالي التدفق</th><th>الفرص</th></tr></thead>
+              <tbody id="cf-tbody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- Sharpe Ratio Card -->
-      <div class="two-col fade-up" style="margin-bottom:12px">
-        <div class="section-card">
-          <div class="section-head"><span class="section-title">⚡ نسبة شارب (Sharpe Ratio)</span></div>
-          <div class="section-body" id="sharpe-body">
-            <div style="text-align:center;padding:20px">
-              <div id="sharpe-value" style="font-size:48px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--gold)">—</div>
-              <div id="sharpe-label" style="font-size:13px;color:var(--muted);margin-top:8px">—</div>
-              <div style="margin-top:16px;padding:12px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:12px;color:var(--muted);text-align:right;line-height:1.7">
-                نسبة شارب = (عائد المحفظة - معدل الخطر الصفري) / الانحراف المعياري للعوائد<br>
-                <span style="color:var(--green)">فوق 1.0</span> ممتاز  •  <span style="color:var(--gold)">0.5-1.0</span> جيد  •  <span style="color:var(--red)">تحت 0.5</span> ضعيف
+      <!-- ── تبويب: التحليل المتقدم ── -->
+      <div id="rtab-panel-insights" style="display:none">
+        <div style="font-size:16px;font-weight:700;margin-bottom:16px">🔬 التحليل المتقدم</div>
+        <div class="two-col fade-up" style="margin-bottom:12px">
+          <div class="section-card">
+            <div class="section-head"><span class="section-title">⚡ نسبة شارب (Sharpe Ratio)</span></div>
+            <div class="section-body" id="sharpe-body">
+              <div style="text-align:center;padding:20px">
+                <div id="sharpe-value" style="font-size:48px;font-weight:800;font-family:monospace;color:var(--gold)">—</div>
+                <div id="sharpe-label" style="font-size:13px;color:var(--muted);margin-top:8px">—</div>
+                <div style="margin-top:16px;padding:12px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:12px;color:var(--muted);text-align:right;line-height:1.7">
+                  نسبة شارب = (عائد المحفظة - معدل الخطر الصفري) / الانحراف المعياري للعوائد<br>
+                  <span style="color:var(--green)">فوق 1.0</span> ممتاز  •  <span style="color:var(--gold)">0.5-1.0</span> جيد  •  <span style="color:var(--red)">تحت 0.5</span> ضعيف
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px" id="sharpe-details"></div>
+            </div>
+          </div>
+          <div class="section-card">
+            <div class="section-head">
+              <span class="section-title">📈 مقارنة بالبنشمارك</span>
+              <button onclick="refreshBenchmark()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--muted);cursor:pointer;font-family:inherit">تحديث</button>
+            </div>
+            <div class="section-body" id="benchmark-body">
+              <div style="display:flex;flex-direction:column;gap:10px" id="benchmark-bars"></div>
+              <div style="margin-top:12px;font-size:11px;color:var(--muted);text-align:center" id="benchmark-note">يتم جلب بيانات SAIBOR ومؤشر تداول تلقائياً</div>
+            </div>
+          </div>
+        </div>
+        <div class="section-card fade-up" id="import-preview" style="display:none;margin-bottom:16px">
+          <div class="section-head">
+            <span class="section-title">📥 معاينة البيانات المستوردة</span>
+            <div style="display:flex;gap:8px">
+              <button onclick="confirmImport()" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:6px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">✓ استيراد الكل</button>
+              <button onclick="document.getElementById('import-preview').style.display='none'" style="background:none;border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:12px;color:var(--muted);cursor:pointer;font-family:inherit">إلغاء</button>
+            </div>
+          </div>
+          <div class="table-wrap" style="max-height:300px">
+            <table class="data-table"><thead id="import-thead"></thead><tbody id="import-tbody"></tbody></table>
+          </div>
+          <div style="padding:12px 16px;font-size:12px;color:var(--muted)" id="import-stats"></div>
+        </div>
+        <div class="section-card fade-up" id="pdf-preview-card">
+          <div class="section-head"><span class="section-title">📄 تقرير المحفظة PDF</span></div>
+          <div class="section-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);cursor:pointer"><input type="checkbox" id="pdf-inc-investments" checked style="accent-color:var(--gold)"> الاستثمارات</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);cursor:pointer"><input type="checkbox" id="pdf-inc-loans" checked style="accent-color:var(--gold)"> القروض</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);cursor:pointer"><input type="checkbox" id="pdf-inc-debts" checked style="accent-color:var(--gold)"> الديون</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);cursor:pointer"><input type="checkbox" id="pdf-inc-cashflow" checked style="accent-color:var(--gold)"> التدفق النقدي</label>
+            </div>
+            <button onclick="exportPDF()" style="background:linear-gradient(135deg,#f87171,#ef4444);color:white;border:none;border-radius:10px;padding:12px 32px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:10px">📄 إنشاء وتنزيل التقرير</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── تبويب: توزيعات الأسهم ── -->
+      <div id="rtab-panel-dividends" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+          <div>
+            <div style="font-size:16px;font-weight:700">💰 توزيعات الأسهم السعودية</div>
+            <div style="font-size:12px;color:var(--muted)">توزيعات الأسهم المحتفظ بها — تاريخية وقادمة</div>
+          </div>
+          <button onclick="showAddDividendForm()" style="background:linear-gradient(135deg,#00e676,#00b248);color:#0a1628;border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px">➕ إضافة توزيعة</button>
+        </div>
+
+        <!-- KPIs التوزيعات -->
+        <div class="kpi-grid" id="div-kpis" style="margin-bottom:20px"></div>
+
+        <!-- فورم إضافة توزيعة (مخفي) -->
+        <div id="div-add-form" style="display:none;margin-bottom:20px">
+          <div class="section-card" style="border-color:rgba(0,230,118,0.25)">
+            <div class="section-head" style="background:rgba(0,230,118,0.06)">
+              <span class="section-title" style="color:var(--green)">➕ تسجيل توزيعة</span>
+              <button onclick="document.getElementById('div-add-form').style.display='none'" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer">×</button>
+            </div>
+            <div class="section-body">
+              <div class="form-grid">
+                <div class="field-group">
+                  <label class="field-label">السهم <span class="req">*</span></label>
+                  <select class="f-select" id="div-ticker-sel" onchange="onDivTickerChange()">
+                    <option value="">— اختر السهم —</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">نوع التوزيعة</label>
+                  <select class="f-select" id="div-type">
+                    <option value="cash">نقدية</option>
+                    <option value="stock">أسهم مجانية</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">قيمة التوزيعة للسهم (ر.س) <span class="req">*</span></label>
+                  <input class="f-input" id="div-per-share" type="number" step="0.001" min="0" placeholder="مثال: 0.75" oninput="calcDividend()" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">تاريخ الإعلان</label>
+                  <input class="f-input" id="div-announce-date" type="date" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">تاريخ الاستحقاق (Ex-Dividend)</label>
+                  <input class="f-input" id="div-ex-date" type="date" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">تاريخ الدفع</label>
+                  <input class="f-input" id="div-pay-date" type="date" />
+                </div>
+              </div>
+              <!-- حساب لحظي -->
+              <div id="div-calc-box" style="display:none;background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.2);border-radius:12px;padding:16px;margin:12px 0">
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center">
+                  <div>
+                    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">عدد أسهمك</div>
+                    <div id="div-c-shares" style="font-size:18px;font-weight:800;font-family:monospace;color:var(--cyan)">—</div>
+                  </div>
+                  <div>
+                    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي التوزيعة</div>
+                    <div id="div-c-total" style="font-size:18px;font-weight:800;font-family:monospace;color:var(--green)">—</div>
+                  </div>
+                  <div>
+                    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">عائد التوزيعة %</div>
+                    <div id="div-c-yield" style="font-size:18px;font-weight:800;font-family:monospace;color:var(--gold)">—</div>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:4px">
+                <button onclick="saveDividend()" style="background:linear-gradient(135deg,#00e676,#00b248);color:#0a1628;border:none;border-radius:10px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">💾 حفظ التوزيعة</button>
+                <button onclick="fetchDividendsForStock()" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;color:var(--cyan);cursor:pointer;font-family:inherit">🔄 جلب من Yahoo Finance</button>
               </div>
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px" id="sharpe-details"></div>
           </div>
         </div>
 
-        <!-- Benchmark Card -->
+        <!-- قاعدة بيانات التوزيعات المعروفة -->
+        <div id="div-known-alert" style="display:none;background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.2);border-radius:12px;padding:14px 18px;margin-bottom:16px;font-size:13px;color:var(--green)"></div>
+
+        <!-- جدول التوزيعات -->
         <div class="section-card">
           <div class="section-head">
-            <span class="section-title">📈 مقارنة بالبنشمارك</span>
-            <button onclick="refreshBenchmark()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--muted);cursor:pointer;font-family:'IBM Plex Sans Arabic',sans-serif">تحديث</button>
+            <span class="section-title">📋 سجل التوزيعات</span>
+            <span class="section-count" id="div-count-badge">0 توزيعة</span>
           </div>
-          <div class="section-body" id="benchmark-body">
-            <div style="display:flex;flex-direction:column;gap:10px" id="benchmark-bars"></div>
-            <div style="margin-top:12px;font-size:11px;color:var(--muted);text-align:center" id="benchmark-note">
-              يتم جلب بيانات SAIBOR ومؤشر تداول تلقائياً
-            </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>السهم</th><th>الرمز</th><th>النوع</th>
+                  <th>قيمة السهم</th><th>أسهمك</th><th>إجمالي المستلم</th>
+                  <th>العائد %</th><th>تاريخ Ex-Div</th><th>تاريخ الدفع</th><th>الحالة</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="div-tbody"></tbody>
+            </table>
           </div>
+        </div>
+
+        <!-- ملخص سنوي -->
+        <div class="section-card" style="margin-top:16px">
+          <div class="section-head"><span class="section-title">📈 ملخص الدخل من التوزيعات</span></div>
+          <div class="section-body" id="div-summary"></div>
         </div>
       </div>
 
-      <!-- Import result preview -->
-      <div class="section-card fade-up" id="import-preview" style="display:none;margin-bottom:16px">
-        <div class="section-head">
-          <span class="section-title">📥 معاينة البيانات المستوردة</span>
-          <div style="display:flex;gap:8px">
-            <button onclick="confirmImport()" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:6px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:'IBM Plex Sans Arabic',sans-serif">
-              ✓ استيراد الكل
-            </button>
-            <button onclick="document.getElementById('import-preview').style.display='none'" style="background:none;border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:12px;color:var(--muted);cursor:pointer;font-family:'IBM Plex Sans Arabic',sans-serif">
-              إلغاء
-            </button>
-          </div>
-        </div>
-        <div class="table-wrap" style="max-height:300px">
-          <table class="data-table"><thead id="import-thead"></thead><tbody id="import-tbody"></tbody></table>
-        </div>
-        <div style="padding:12px 16px;font-size:12px;color:var(--muted)" id="import-stats"></div>
-      </div>
-
-      <!-- PDF preview info -->
-      <div class="section-card fade-up" id="pdf-preview-card">
-        <div class="section-head"><span class="section-title">📄 تقرير المحفظة PDF</span></div>
-        <div class="section-body">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);cursor:pointer">
-              <input type="checkbox" id="pdf-inc-investments" checked style="accent-color:var(--gold)"> الاستثمارات
-            </label>
-            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);cursor:pointer">
-              <input type="checkbox" id="pdf-inc-loans" checked style="accent-color:var(--gold)"> القروض
-            </label>
-            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);cursor:pointer">
-              <input type="checkbox" id="pdf-inc-debts" checked style="accent-color:var(--gold)"> الديون
-            </label>
-            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);cursor:pointer">
-              <input type="checkbox" id="pdf-inc-cashflow" checked style="accent-color:var(--gold)"> التدفق النقدي
-            </label>
-          </div>
-          <button onclick="exportPDF()" style="background:linear-gradient(135deg,#f87171,#ef4444);color:white;border:none;border-radius:10px;padding:12px 32px;font-size:14px;font-weight:700;cursor:pointer;font-family:'IBM Plex Sans Arabic',sans-serif;display:flex;align-items:center;gap:10px">
-            📄 إنشاء وتنزيل التقرير
-          </button>
-        </div>
-      </div>
     </div>
 
-  
-    <!-- ═══════════════════════════════════════════════ -->
     <!-- PAGE: ADD STOCK — شاشة إضافة سهم متخصصة       -->
     <!-- ═══════════════════════════════════════════════ -->
     <div id="page-add-stock" class="page">
@@ -4226,15 +4305,11 @@
     <span style="font-size:18px">➕</span> إضافة فرصة
   </button>
   <div style="height:1px;background:var(--border);margin:4px 12px"></div>
-  <button onclick="showPage('calendar',document.getElementById('mnav-more'),'📅 تقويم الاستحقاق');closeMobileMore()" style="width:100%;display:flex;align-items:center;gap:12px;background:none;border:none;padding:10px 14px;color:var(--white);font-family:'IBM Plex Sans Arabic',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;transition:background .15s;text-align:right" onmouseover="this.style.background='rgba(167,139,250,0.12)'" onmouseout="this.style.background='none'">
+  <button onclick="showPage('reports',document.getElementById('mnav-more'),'📊 التقارير والتحليل');closeMobileMore()" style="width:100%;display:flex;align-items:center;gap:12px;background:none;border:none;padding:10px 14px;color:var(--white);font-family:'IBM Plex Sans Arabic',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;transition:background .15s;text-align:right" onmouseover="this.style.background='rgba(167,139,250,0.12)'" onmouseout="this.style.background='none'">
     <span style="font-size:18px">📅</span> تقويم الاستحقاق
   </button>
-  <button onclick="showPage('cashflow',document.getElementById('mnav-more'),'💧 التدفق النقدي');closeMobileMore()" style="width:100%;display:flex;align-items:center;gap:12px;background:none;border:none;padding:10px 14px;color:var(--white);font-family:'IBM Plex Sans Arabic',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;transition:background .15s;text-align:right" onmouseover="this.style.background='rgba(52,211,153,0.12)'" onmouseout="this.style.background='none'">
-    <span style="font-size:18px">💧</span> التدفق النقدي
-  </button>
-  <button onclick="showPage('insights',document.getElementById('mnav-more'),'📊 التحليل المتقدم');closeMobileMore()" style="width:100%;display:flex;align-items:center;gap:12px;background:none;border:none;padding:10px 14px;color:var(--white);font-family:'IBM Plex Sans Arabic',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;transition:background .15s;text-align:right" onmouseover="this.style.background='rgba(96,165,250,0.12)'" onmouseout="this.style.background='none'">
-    <span style="font-size:18px">📊</span> التحليل المتقدم
-  </button>
+
+
 </div>
 <div id="mobile-more-overlay" onclick="closeMobileMore()" style="
   display:none;position:fixed;inset:0;z-index:299;
@@ -4707,81 +4782,103 @@ const STOCK_PRICES = {
 };
 
 // Fetch live prices from Yahoo Finance (free, no API key needed)
-async function fetchLiveStockPrices() {
-  // Always include static tickers + any new SA stocks added by user
-  const inv = window.__investments || investments;
-  inv.filter(x=>x.type==='سهم' && x.market !== 'us' && x.ticker).forEach(x=>{
-    if (!STOCK_PRICES[x.ticker]) STOCK_PRICES[x.ticker]={price:null,chg:null,color:''};
-  });
-  const tickers = Object.keys(STOCK_PRICES);
-  const symbols = tickers.map(t => t + '.SR').join(',');
-  const url = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + symbols
-            + '&fields=regularMarketPrice,regularMarketChangePercent';
+// ─── SAUDI STOCK PRICES VIA CLOUDFLARE WORKER ─────────────────────────────
+// Uses the same Worker already deployed for Claude AI analysis
+// Worker fetches Yahoo Finance on the server-side (no CORS issues)
+var _stockFetchInProgress = false;
 
-  // Show loading state
-  const icon = document.getElementById('stocks-refresh-icon');
-  const btn  = document.getElementById('stocks-refresh-btn');
+async function fetchLiveStockPrices() {
+  if (_stockFetchInProgress) return;
+  _stockFetchInProgress = true;
+
+  // Collect all SA stock tickers from investments
+  var inv = window.__investments || investments;
+  inv.filter(function(x){ return x.type==='سهم' && x.market !== 'us' && x.ticker; })
+    .forEach(function(x){
+      if (!STOCK_PRICES[x.ticker]) STOCK_PRICES[x.ticker] = {price:null, chg:null, color:''};
+    });
+
+  var tickers = Object.keys(STOCK_PRICES);
+  if (!tickers.length) { _stockFetchInProgress = false; return; }
+
+  var icon = document.getElementById('stocks-refresh-icon');
+  var btn  = document.getElementById('stocks-refresh-btn');
   if (icon) icon.style.animation = 'spin 1s linear infinite';
   if (btn)  btn.style.opacity = '0.6';
 
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
-    const quotes = json?.quoteResponse?.result || [];
+  var updated = 0;
 
-    quotes.forEach(function(q) {
-      const ticker = q.symbol.replace('.SR', '');
-      if (!STOCK_PRICES[ticker]) return;
-      const price  = q.regularMarketPrice;
-      const chgPct = (q.regularMarketChangePercent || 0) / 100;
-      STOCK_PRICES[ticker] = {
-        price: price,
-        chg:   chgPct,
-        color: chgPct >= 0 ? 'up' : 'dn'
-      };
+  // Try each ticker via Worker proxy (avoids CORS)
+  var PROXY = 'https://claude-proxy.fahad-shaheen.workers.dev';
+  var symbols = tickers.map(function(t){ return t + '.SR'; }).join(',');
+
+  try {
+    var payload = {
+      _stockRequest: true,
+      symbols: symbols
+    };
+    var res = await fetch(PROXY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
     });
 
-    renderStocks();
-    const now = new Date().toLocaleTimeString('ar-SA', {hour:'2-digit', minute:'2-digit'});
-    if (btn) btn.title = 'آخر تحديث: ' + now;
-    console.log('Stock prices updated:', now);
-
+    if (res.ok) {
+      var data = await res.json();
+      // Worker returns { quotes: [{symbol, price, changePercent}] }
+      if (data.quotes && Array.isArray(data.quotes)) {
+        data.quotes.forEach(function(q) {
+          var ticker = (q.symbol || '').replace('.SR','');
+          if (!STOCK_PRICES[ticker]) return;
+          STOCK_PRICES[ticker] = {
+            price: q.price,
+            chg:   (q.changePercent || 0) / 100,
+            color: (q.changePercent || 0) >= 0 ? 'up' : 'dn'
+          };
+          updated++;
+        });
+      }
+    }
   } catch(e) {
-    console.warn('Stock price fetch failed:', e.message);
-    fetchLiveStockPricesFallback(tickers);
-  } finally {
-    if (icon) icon.style.animation = '';
-    if (btn)  btn.style.opacity = '1';
+    console.warn('Worker stock fetch failed:', e.message);
   }
-}
 
-// Fallback: use allorigins CORS proxy
-async function fetchLiveStockPricesFallback(tickers) {
-  for (const ticker of tickers) {
+  // If Worker didn't return stock data, fall back to Yahoo Finance directly
+  // (works in some browsers/regions without CORS issues)
+  if (updated === 0) {
     try {
-      const apiUrl = 'https://query2.finance.yahoo.com/v8/finance/chart/' + ticker + '.SR?interval=1d&range=1d';
-      const proxy  = 'https://api.allorigins.win/get?url=' + encodeURIComponent(apiUrl);
-      const res    = await fetch(proxy);
-      const json   = await res.json();
-      const data   = JSON.parse(json.contents);
-      const meta   = data?.chart?.result?.[0]?.meta;
-      if (!meta) continue;
-
-      const price      = meta.regularMarketPrice;
-      const prevClose  = meta.previousClose || meta.chartPreviousClose;
-      const chgPct     = prevClose ? (price - prevClose) / prevClose : 0;
-
-      STOCK_PRICES[ticker] = {
-        price: price,
-        chg:   chgPct,
-        color: chgPct >= 0 ? 'up' : 'dn'
-      };
-    } catch(e) {
-      console.warn('Fallback failed for', ticker, e.message);
+      var url = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols='
+              + symbols + '&fields=regularMarketPrice,regularMarketChangePercent';
+      var res2 = await fetch(url);
+      if (res2.ok) {
+        var json2 = await res2.json();
+        var quotes = (json2.quoteResponse || {}).result || [];
+        quotes.forEach(function(q) {
+          var ticker = q.symbol.replace('.SR','');
+          if (!STOCK_PRICES[ticker]) return;
+          STOCK_PRICES[ticker] = {
+            price: q.regularMarketPrice,
+            chg:   (q.regularMarketChangePercent || 0) / 100,
+            color: (q.regularMarketChangePercent || 0) >= 0 ? 'up' : 'dn'
+          };
+          updated++;
+        });
+      }
+    } catch(e2) {
+      console.warn('Yahoo direct failed:', e2.message);
     }
   }
+
   renderStocks();
+  var now = new Date().toLocaleTimeString('ar-SA', {hour:'2-digit', minute:'2-digit'});
+  if (btn) {
+    btn.title = updated > 0
+      ? 'آخر تحديث: ' + now + ' (' + updated + ' سهم)'
+      : 'تعذّر جلب الأسعار - يُعرض آخر سعر محفوظ';
+    btn.style.opacity = '1';
+  }
+  if (icon) icon.style.animation = '';
+  _stockFetchInProgress = false;
 }
 
 // Auto-refresh prices every 5 minutes while page is open
@@ -4801,17 +4898,15 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 //  PAGE TITLES for new pages 
-PAGE_TITLES['calendar'] = '📅 تقويم الاستحقاقات';
-PAGE_TITLES['cashflow'] = '💧 التدفق النقدي';
-PAGE_TITLES['insights'] = '📊 التحليل المتقدم';
+PAGE_TITLES['reports']  = '📊 التقارير والتحليل';
+
+
 
 //  showPage hooks for new pages 
 var _origShowPage = showPage;
 showPage = function(id, navEl, mobileTitle, noScroll) {
   _origShowPage(id, navEl, mobileTitle, noScroll);
-  if (id === 'calendar') { renderCalendar(); }
-  if (id === 'cashflow') { renderCashflow(); }
-  if (id === 'insights') { renderSharpe(); renderBenchmark(); }
+  if (id === 'reports')  { renderCalendar(); renderCashflow(); renderSharpe(); renderBenchmark(); renderDividendsTab(); }
   // Only scroll to top if NOT called from a form button
   if (!noScroll) {
     setTimeout(function() {
@@ -6602,9 +6697,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // if (remote) { investments.length=0; remote.forEach(r=>investments.push(r)); renderAll(); }
 */
 // 
-let loansData = JSON.parse(localStorage.getItem('loansData') || '[]');
+var loansData = JSON.parse(localStorage.getItem('loansData') || '[]');
 window.loansData = loansData;
-let editingLoanIdx = null;
+var editingLoanIdx = null;
 
 // ══════════════════════════════════════════════
 // ADD STOCK PAGE
@@ -7313,6 +7408,381 @@ function renderUsStocksTable() {
   }
 }
 
+// ══════════════════════════════════════════════
+// REPORTS PAGE — TAB SWITCHING
+// ══════════════════════════════════════════════
+var _currentReportsTab = 'calendar';
+
+function switchReportsTab(tab) {
+  _currentReportsTab = tab;
+  var tabs = ['calendar','cashflow','insights','dividends'];
+  tabs.forEach(function(t) {
+    var panel = document.getElementById('rtab-panel-' + t);
+    var btn   = document.getElementById('rtab-' + t);
+    if (panel) panel.style.display = t === tab ? 'block' : 'none';
+    if (btn) {
+      btn.style.borderBottomColor = t === tab ? 'var(--gold)' : 'transparent';
+      btn.style.color = t === tab ? 'var(--gold)' : 'var(--muted)';
+    }
+  });
+  if (tab === 'calendar')  renderCalendar();
+  if (tab === 'cashflow')  renderCashflow();
+  if (tab === 'insights')  { renderSharpe(); renderBenchmark(); }
+  if (tab === 'dividends') renderDividendsTab();
+}
+
+// ══════════════════════════════════════════════
+// DIVIDENDS SYSTEM
+// ══════════════════════════════════════════════
+
+// قاعدة بيانات التوزيعات التاريخية للأسهم السعودية الشائعة
+var KNOWN_DIVIDENDS = {
+  '2222': { name:'أرامكو', history:[
+    { year:2024, per_share:0.35, ex_date:'2024-12-05', pay_date:'2025-01-05', type:'cash', q:'Q4' },
+    { year:2024, per_share:0.35, ex_date:'2024-09-04', pay_date:'2024-10-05', type:'cash', q:'Q3' },
+    { year:2024, per_share:0.35, ex_date:'2024-06-05', pay_date:'2024-07-07', type:'cash', q:'Q2' },
+    { year:2024, per_share:0.35, ex_date:'2024-03-06', pay_date:'2024-04-07', type:'cash', q:'Q1' },
+    { year:2023, per_share:0.35, ex_date:'2023-12-06', pay_date:'2024-01-07', type:'cash', q:'Q4' }
+  ]},
+  '2280': { name:'المراعي', history:[
+    { year:2024, per_share:0.375, ex_date:'2024-04-10', pay_date:'2024-05-05', type:'cash', q:'نصف سنوي' },
+    { year:2023, per_share:0.375, ex_date:'2023-10-11', pay_date:'2023-11-05', type:'cash', q:'نصف سنوي' }
+  ]},
+  '1120': { name:'مصرف الراجحي', history:[
+    { year:2024, per_share:1.00, ex_date:'2024-10-09', pay_date:'2024-11-04', type:'cash', q:'نصف سنوي' },
+    { year:2024, per_share:1.00, ex_date:'2024-04-10', pay_date:'2024-05-06', type:'cash', q:'نصف سنوي' }
+  ]},
+  '1180': { name:'البنك الأهلي السعودي', history:[
+    { year:2024, per_share:0.80, ex_date:'2024-09-11', pay_date:'2024-10-07', type:'cash', q:'نصف سنوي' }
+  ]},
+  '5110': { name:'السعودية للكهرباء', history:[
+    { year:2024, per_share:0.50, ex_date:'2024-06-12', pay_date:'2024-07-08', type:'cash', q:'سنوي' }
+  ]},
+  '1211': { name:'معادن', history:[
+    { year:2024, per_share:0.30, ex_date:'2024-03-27', pay_date:'2024-04-22', type:'cash', q:'سنوي' }
+  ]}
+};
+
+// تحميل التوزيعات المحفوظة
+var dividendsData = JSON.parse(localStorage.getItem('dividendsData') || '[]');
+
+function saveDividendsToStorage() {
+  localStorage.setItem('dividendsData', JSON.stringify(dividendsData));
+  if (typeof triggerSync === 'function') triggerSync('dividends');
+}
+
+// ── رندر تبويب التوزيعات ──────────────────────────────────────────────────────
+function renderDividendsTab() {
+  var inv = window.__investments || investments;
+  var saStocks = inv.filter(function(x){ return x.type==='سهم' && x.status==='نشطة' && x.market !== 'us'; });
+
+  // تحديث KPIs
+  var totalReceived = dividendsData.filter(function(d){ return d.status==='مستلمة'; })
+    .reduce(function(s,d){ return s+(d.total_amount||0); }, 0);
+  var totalPending  = dividendsData.filter(function(d){ return d.status!=='مستلمة'; })
+    .reduce(function(s,d){ return s+(d.total_amount||0); }, 0);
+  var annualYield   = saStocks.reduce(function(s,x){
+    var known = KNOWN_DIVIDENDS[x.ticker];
+    if (!known) return s;
+    var lastYear = new Date().getFullYear() - 1;
+    var annual = known.history.filter(function(h){ return h.year >= lastYear; })
+      .reduce(function(t,h){ return t+(h.per_share * (x.shares||0)); }, 0);
+    return s + annual;
+  }, 0);
+
+  var kpiEl = document.getElementById('div-kpis');
+  if (kpiEl) {
+    var fmt = function(n){ return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+    kpiEl.innerHTML =
+      '<div class="kpi-card" style="--accent:var(--green)"><div class="kpi-icon">✅</div><div class="kpi-label">توزيعات مستلمة</div><div class="kpi-value">'+fmt(totalReceived)+'</div><div class="kpi-sub">ر.س</div></div>' +
+      '<div class="kpi-card" style="--accent:var(--gold)"><div class="kpi-icon">⏳</div><div class="kpi-label">توزيعات قادمة</div><div class="kpi-value">'+fmt(totalPending)+'</div><div class="kpi-sub">ر.س</div></div>' +
+      '<div class="kpi-card" style="--accent:var(--cyan)"><div class="kpi-icon">📊</div><div class="kpi-label">عائد سنوي تقديري</div><div class="kpi-value">'+fmt(annualYield)+'</div><div class="kpi-sub">ر.س (بناءً على التاريخي)</div></div>' +
+      '<div class="kpi-card" style="--accent:#a78bfa"><div class="kpi-icon">🏷️</div><div class="kpi-label">أسهم نشطة بتوزيعات</div><div class="kpi-value">'+saStocks.filter(function(x){return KNOWN_DIVIDENDS[x.ticker];}).length+'</div><div class="kpi-sub">من '+saStocks.length+' سهم</div></div>';
+  }
+
+  // تنبيه التوزيعات المعروفة للأسهم النشطة
+  var knownAlert = document.getElementById('div-known-alert');
+  if (knownAlert) {
+    var knownStocks = saStocks.filter(function(x){ return KNOWN_DIVIDENDS[x.ticker]; });
+    if (knownStocks.length > 0) {
+      knownAlert.style.display = 'block';
+      knownAlert.innerHTML = '💡 <strong>توزيعات معروفة لـ ' + knownStocks.length + ' سهم في محفظتك:</strong> ' +
+        knownStocks.map(function(x){ return KNOWN_DIVIDENDS[x.ticker].name + ' (' + x.ticker + ')'; }).join(' • ') +
+        ' — <a href="#" onclick="autoImportKnownDividends();return false;" style="color:var(--gold);text-decoration:underline">استيراد تلقائي ←</a>';
+    } else {
+      knownAlert.style.display = 'none';
+    }
+  }
+
+  // جدول التوزيعات
+  var tbody = document.getElementById('div-tbody');
+  var countBadge = document.getElementById('div-count-badge');
+  if (countBadge) countBadge.textContent = dividendsData.length + ' توزيعة';
+
+  if (tbody) {
+    if (!dividendsData.length) {
+      tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:32px;color:var(--muted)">لا توجد توزيعات مسجلة — أضف توزيعة أو اضغط "استيراد تلقائي" أعلاه</td></tr>';
+    } else {
+      tbody.innerHTML = dividendsData.map(function(d, i) {
+        var statusColor = d.status==='مستلمة' ? 'var(--green)' : d.status==='قادمة' ? 'var(--gold)' : 'var(--orange)';
+        var statusBg    = d.status==='مستلمة' ? 'rgba(0,230,118,0.1)' : d.status==='قادمة' ? 'rgba(201,168,76,0.1)' : 'rgba(255,152,0,0.1)';
+        return '<tr>' +
+          '<td>' + (d.stock_name||d.ticker) + '</td>' +
+          '<td><span style="font-family:monospace;background:rgba(201,168,76,0.12);color:var(--gold);padding:2px 8px;border-radius:5px;font-size:11px">' + d.ticker + '</span></td>' +
+          '<td>' + (d.type==='cash'?'نقدية 💵':'أسهم مجانية 📈') + '</td>' +
+          '<td class="mono" style="color:var(--gold)">' + (d.per_share||0).toFixed(3) + ' ر.س</td>' +
+          '<td class="mono" style="color:var(--cyan)">' + (d.shares||0).toLocaleString('en-US') + '</td>' +
+          '<td class="mono" style="color:var(--green);font-weight:700">' + (d.total_amount||0).toLocaleString('en-US',{minimumFractionDigits:2}) + ' ر.س</td>' +
+          '<td class="mono" style="color:var(--cyan)">' + (d.yield_pct||0).toFixed(2) + '%</td>' +
+          '<td style="color:var(--muted);font-size:11px">' + (d.ex_date||'—') + '</td>' +
+          '<td style="color:var(--muted);font-size:11px">' + (d.pay_date||'—') + '</td>' +
+          '<td><span style="font-size:11px;padding:3px 8px;border-radius:8px;background:'+statusBg+';color:'+statusColor+'">'+d.status+'</span></td>' +
+          '<td><button class="loan-action-btn" onclick="markDivReceived('+i+')" style="color:var(--green);display:'+(d.status==='مستلمة'?'none':'inline')+'">✅</button> ' +
+               '<button class="loan-action-btn" style="color:var(--red)" onclick="deleteDividend('+i+')">🗑</button></td>' +
+          '</tr>';
+      }).join('');
+    }
+  }
+
+  // ملخص سنوي
+  renderDividendsSummary(saStocks);
+}
+
+function renderDividendsSummary(saStocks) {
+  var summaryEl = document.getElementById('div-summary');
+  if (!summaryEl) return;
+
+  // اجمع حسب السنة
+  var byYear = {};
+  dividendsData.forEach(function(d) {
+    var yr = d.ex_date ? d.ex_date.split('-')[0] : new Date().getFullYear().toString();
+    if (!byYear[yr]) byYear[yr] = { total:0, count:0, received:0 };
+    byYear[yr].total  += (d.total_amount||0);
+    byYear[yr].count  += 1;
+    if (d.status==='مستلمة') byYear[yr].received += (d.total_amount||0);
+  });
+
+  var years = Object.keys(byYear).sort().reverse();
+  if (!years.length) {
+    summaryEl.innerHTML = '<div style="color:var(--muted);text-align:center;padding:16px">لا توجد بيانات كافية للملخص السنوي</div>';
+    return;
+  }
+
+  var fmt = function(n){ return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+  summaryEl.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px">' +
+    years.map(function(yr) {
+      var d = byYear[yr];
+      var pct = d.total > 0 ? (d.received/d.total*100) : 0;
+      return '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">' +
+        '<span style="font-size:13px;font-weight:700;color:var(--white);min-width:50px">' + yr + '</span>' +
+        '<span class="mono" style="color:var(--gold);min-width:120px">' + fmt(d.total) + ' ر.س</span>' +
+        '<div style="flex:1;height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;min-width:100px">' +
+          '<div style="height:100%;width:'+pct.toFixed(0)+'%;background:linear-gradient(90deg,var(--green),#00b248);border-radius:4px"></div>' +
+        '</div>' +
+        '<span style="font-size:11px;color:var(--muted)">' + d.count + ' توزيعة</span>' +
+        '</div>';
+    }).join('') + '</div>';
+}
+
+// ── إضافة توزيعة ─────────────────────────────────────────────────────────────
+function showAddDividendForm() {
+  var form = document.getElementById('div-add-form');
+  if (!form) return;
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  if (form.style.display === 'none') return;
+
+  // ملء قائمة الأسهم النشطة
+  var inv = window.__investments || investments;
+  var saStocks = inv.filter(function(x){ return x.type==='سهم' && x.status==='نشطة' && x.market !== 'us'; });
+  var sel = document.getElementById('div-ticker-sel');
+  if (sel) {
+    sel.innerHTML = '<option value="">— اختر السهم —</option>' +
+      saStocks.map(function(x){
+        return '<option value="'+x.ticker+'" data-shares="'+x.shares+'" data-amount="'+x.amount+'" data-name="'+x.name.replace(/^\d+ سهم في /,'')+'">'+x.ticker+' - '+x.name.replace(/^\d+ سهم في /,'')+'</option>';
+      }).join('');
+  }
+  // تاريخ اليوم
+  var today = new Date().toISOString().split('T')[0];
+  var exDate = document.getElementById('div-ex-date');
+  var payDate = document.getElementById('div-pay-date');
+  var annDate = document.getElementById('div-announce-date');
+  if (annDate) annDate.value = today;
+  form.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function onDivTickerChange() {
+  var perShare = document.getElementById('div-per-share');
+  if (perShare) perShare.value = '';
+  calcDividend();
+  // تعبئة تلقائية من قاعدة البيانات المعروفة
+  var sel = document.getElementById('div-ticker-sel');
+  if (!sel || !sel.value) return;
+  var known = KNOWN_DIVIDENDS[sel.value];
+  if (known && known.history.length) {
+    var latest = known.history[0];
+    if (perShare) perShare.value = latest.per_share;
+    var exDate = document.getElementById('div-ex-date');
+    var payDate = document.getElementById('div-pay-date');
+    if (exDate && !exDate.value) exDate.value = latest.ex_date;
+    if (payDate && !payDate.value) payDate.value = latest.pay_date;
+    calcDividend();
+    showToast('💡 تم تعبئة آخر توزيعة معروفة لـ ' + sel.value);
+  }
+}
+
+function calcDividend() {
+  var sel = document.getElementById('div-ticker-sel');
+  var perShare = parseFloat(document.getElementById('div-per-share')?.value) || 0;
+  if (!sel || !sel.value || !perShare) {
+    document.getElementById('div-calc-box').style.display = 'none';
+    return;
+  }
+  var opt = sel.options[sel.selectedIndex];
+  var shares = parseInt(opt?.dataset?.shares) || 0;
+  var amount = parseFloat(opt?.dataset?.amount) || 0;
+  var total  = perShare * shares;
+  var yieldPct = amount > 0 ? (total/amount*100) : 0;
+  var fmt = function(n){ return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+  var set = function(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; };
+  set('div-c-shares', shares.toLocaleString('en-US') + ' سهم');
+  set('div-c-total',  fmt(total) + ' ر.س');
+  set('div-c-yield',  yieldPct.toFixed(2) + '%');
+  document.getElementById('div-calc-box').style.display = 'block';
+}
+
+function saveDividend() {
+  var sel = document.getElementById('div-ticker-sel');
+  var perShare = parseFloat(document.getElementById('div-per-share')?.value) || 0;
+  if (!sel || !sel.value) { showToast('❌ اختر السهم'); return; }
+  if (!perShare)           { showToast('❌ أدخل قيمة التوزيعة للسهم'); return; }
+  var opt    = sel.options[sel.selectedIndex];
+  var shares = parseInt(opt?.dataset?.shares) || 0;
+  var amount = parseFloat(opt?.dataset?.amount) || 0;
+  var total  = perShare * shares;
+  var exDate = document.getElementById('div-ex-date')?.value || '';
+  var now    = new Date();
+  var exD    = exDate ? new Date(exDate) : null;
+  var status = exD && exD <= now ? 'مستلمة' : 'قادمة';
+  var record = {
+    ticker:       sel.value,
+    stock_name:   opt?.dataset?.name || sel.value,
+    type:         document.getElementById('div-type')?.value || 'cash',
+    per_share:    perShare,
+    shares:       shares,
+    total_amount: total,
+    yield_pct:    amount > 0 ? total/amount*100 : 0,
+    announce_date:document.getElementById('div-announce-date')?.value || '',
+    ex_date:      exDate,
+    pay_date:     document.getElementById('div-pay-date')?.value || '',
+    status:       status,
+    created_at:   new Date().toISOString()
+  };
+  dividendsData.unshift(record);
+  saveDividendsToStorage();
+  document.getElementById('div-add-form').style.display = 'none';
+  renderDividendsTab();
+  showToast('✅ تم حفظ توزيعة ' + sel.value + ': ' + total.toLocaleString('en-US',{maximumFractionDigits:2}) + ' ر.س');
+}
+
+function markDivReceived(idx) {
+  dividendsData[idx].status = 'مستلمة';
+  saveDividendsToStorage();
+  renderDividendsTab();
+  showToast('✅ تم تأكيد استلام التوزيعة');
+}
+
+function deleteDividend(idx) {
+  if (!confirm('حذف هذه التوزيعة؟')) return;
+  dividendsData.splice(idx, 1);
+  saveDividendsToStorage();
+  renderDividendsTab();
+  showToast('تم الحذف');
+}
+
+// ── استيراد تلقائي للتوزيعات المعروفة ────────────────────────────────────────
+function autoImportKnownDividends() {
+  var inv = window.__investments || investments;
+  var saStocks = inv.filter(function(x){ return x.type==='سهم' && x.status==='نشطة' && x.market !== 'us'; });
+  var count = 0;
+  saStocks.forEach(function(stock) {
+    var known = KNOWN_DIVIDENDS[stock.ticker];
+    if (!known) return;
+    known.history.forEach(function(h) {
+      // تحقق أنها غير موجودة مسبقاً
+      var exists = dividendsData.some(function(d){
+        return d.ticker === stock.ticker && d.ex_date === h.ex_date;
+      });
+      if (exists) return;
+      var total = h.per_share * (stock.shares || 0);
+      var now = new Date(); var exD = new Date(h.ex_date);
+      dividendsData.push({
+        ticker: stock.ticker, stock_name: known.name, type: h.type,
+        per_share: h.per_share, shares: stock.shares||0, total_amount: total,
+        yield_pct: stock.amount>0 ? total/stock.amount*100 : 0,
+        announce_date:'', ex_date: h.ex_date, pay_date: h.pay_date,
+        status: exD <= now ? 'مستلمة' : 'قادمة',
+        created_at: new Date().toISOString(), source:'auto'
+      });
+      count++;
+    });
+  });
+  if (count > 0) {
+    saveDividendsToStorage();
+    renderDividendsTab();
+    showToast('✅ تم استيراد ' + count + ' توزيعة تاريخية');
+  } else {
+    showToast('ℹ️ لا توجد توزيعات جديدة للاستيراد');
+  }
+}
+
+// ── جلب توزيعات من Yahoo Finance ─────────────────────────────────────────────
+async function fetchDividendsForStock() {
+  var sel = document.getElementById('div-ticker-sel');
+  if (!sel || !sel.value) { showToast('❌ اختر السهم أولاً'); return; }
+  var ticker = sel.value + '.SR';
+  showToast('⏳ جاري الجلب من Yahoo Finance...');
+  try {
+    var url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + ticker + '?interval=1mo&range=2y&events=dividends';
+    var res = await fetch(url, { mode:'cors' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var json = await res.json();
+    var events = json?.chart?.result?.[0]?.events?.dividends;
+    if (!events || !Object.keys(events).length) {
+      showToast('ℹ️ لا توجد بيانات توزيعات من Yahoo لهذا السهم');
+      return;
+    }
+    var inv = window.__investments || investments;
+    var stock = inv.find(function(x){ return x.ticker === sel.value && x.type === 'سهم'; });
+    var shares = stock ? (stock.shares||0) : 0;
+    var amount = stock ? (stock.amount||0) : 0;
+    var count = 0;
+    Object.values(events).forEach(function(e) {
+      var exDate = new Date(e.date * 1000).toISOString().split('T')[0];
+      var exists = dividendsData.some(function(d){ return d.ticker===sel.value && d.ex_date===exDate; });
+      if (exists) return;
+      var total = e.amount * shares;
+      dividendsData.push({
+        ticker: sel.value, stock_name: sel.options[sel.selectedIndex]?.dataset?.name || sel.value,
+        type: 'cash', per_share: e.amount, shares: shares, total_amount: total,
+        yield_pct: amount>0?total/amount*100:0, announce_date:'', ex_date: exDate, pay_date:'',
+        status: new Date(exDate) <= new Date() ? 'مستلمة' : 'قادمة',
+        created_at: new Date().toISOString(), source:'yahoo'
+      });
+      count++;
+    });
+    if (count > 0) {
+      saveDividendsToStorage();
+      renderDividendsTab();
+      showToast('✅ تم استيراد ' + count + ' توزيعة من Yahoo Finance');
+      document.getElementById('div-add-form').style.display = 'none';
+    } else {
+      showToast('ℹ️ التوزيعات موجودة مسبقاً');
+    }
+  } catch(e) {
+    showToast('❌ فشل الجلب: ' + e.message + ' — أدخل يدوياً');
+  }
+}
+
 function saveLoansToStorage() { localStorage.setItem('loansData', JSON.stringify(loansData)); triggerSync('loans'); }
 
 function showLoanForm(idx) {
@@ -7734,9 +8204,9 @@ function renderLoans() {
 // 
 // DEBTS PAGE
 // 
-let debtsData = JSON.parse(localStorage.getItem('debtsData') || '[]');
+var debtsData = JSON.parse(localStorage.getItem('debtsData') || '[]');
 window.debtsData = debtsData;
-let editingDebtIdx = null;
+var editingDebtIdx = null;
 let currentDebtFilter = 'all';
 
 function saveDebtsToStorage() { localStorage.setItem('debtsData', JSON.stringify(debtsData)); triggerSync('debts'); }
