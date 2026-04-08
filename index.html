@@ -1347,10 +1347,7 @@
         <span class="nav-icon">📈</span> الأسهم
       </div>
       <div class="nav-item" onclick="showPage('sukuk',this)">
-        <span class="nav-icon">🏛</span> الصكوك
-      </div>
-      <div class="nav-item" onclick="showPage('funds',this)">
-        <span class="nav-icon">💼</span> الصناديق
+        <span class="nav-icon">🏦</span> الفرص
       </div>
       <div class="nav-item" onclick="showPage('all',this)">
         <span class="nav-icon">📋</span> جميع الفرص
@@ -1781,87 +1778,78 @@
     <!-- ═══════════════════════════════════════════════ -->
     <!-- PAGE: SUKUK -->
     <!-- ═══════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- PAGE: OPPORTUNITIES — الفرص (صكوك + صناديق)   -->
+    <!-- ═══════════════════════════════════════════════ -->
     <div id="page-sukuk" class="page">
-      <div class="page-header">
+      <div class="page-header fade-up">
         <div>
-          <div class="page-title">الصكوك</div>
-          <div class="page-sub" id="sukuk-sub">إجمالي الصكوك</div>
+          <div class="page-title">🏦 الفرص الاستثمارية</div>
+          <div class="page-sub" id="opps-sub">الصكوك والصناديق</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <div class="date-badge" id="opps-total-badge">—</div>
+          <button onclick="showPage('add',document.querySelector('.nav-add')||document.getElementById('mnav-add'),'➕ إضافة فرصة')" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:6px">➕ إضافة فرصة</button>
+        </div>
+      </div>
+
+      <!-- تبويبات -->
+      <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border)">
+        <button id="opps-tab-sukuk" onclick="switchOppsTab('sukuk')" style="padding:11px 22px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:all .2s">📜 الصكوك</button>
+        <button id="opps-tab-funds" onclick="switchOppsTab('funds')" style="padding:11px 22px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s">💼 الصناديق</button>
+      </div>
+
+      <!-- تبويب: الصكوك -->
+      <div id="opps-panel-sukuk">
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
           <div class="date-badge" style="color:#00e676;border-color:rgba(0,230,118,0.3)" id="sukuk-active-badge">نشطة: —</div>
           <div class="date-badge" style="color:#00d4ff;border-color:rgba(0,212,255,0.3)" id="sukuk-done-badge">مستلمة: —</div>
-          <button onclick="showPage('add',document.querySelector('.nav-add')||document.getElementById('mnav-add'),'➕ إضافة فرصة')" style="
-            background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;
-            border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;
-            font-family:'IBM Plex Sans Arabic',sans-serif;cursor:pointer;
-            display:flex;align-items:center;gap:6px;transition:all .2s;
-          ">➕ إضافة</button>
+          <div class="date-badge" id="sukuk-sub">—</div>
+        </div>
+        <div class="section-card">
+          <div class="section-head">
+            <span class="section-title">📜 سجل الصكوك والمرابحات</span>
+            <span class="section-count" id="sukuk-count-badge">—</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr>
+                <th>اسم الصك</th><th>المنصة</th><th>المبلغ</th>
+                <th>العائد %</th><th>العائد ر.س</th>
+                <th>تاريخ الخروج</th><th>المخاطرة</th><th>الحالة</th><th></th>
+              </tr></thead>
+              <tbody id="sukuk-tbody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
-      <div class="section-card">
-        <div class="section-head">
-          <span class="section-title">📜 سجل الصكوك</span>
-          <span class="section-count">38 صك</span>
-        </div>
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>اسم الصك</th>
-                <th>المنصة</th>
-                <th>المبلغ</th>
-                <th>العائد %</th>
-                <th>العائد ر.س</th>
-                <th>تاريخ الخروج</th>
-                <th>المخاطرة</th>
-                <th>الحالة</th>
-              </tr>
-            </thead>
-            <tbody id="sukuk-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
 
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- PAGE: FUNDS -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <div id="page-funds" class="page">
-      <div class="page-header">
-        <div>
-          <div class="page-title">الصناديق</div>
-          <div class="page-sub" id="funds-sub">إجمالي الصناديق</div>
+      <!-- تبويب: الصناديق -->
+      <div id="opps-panel-funds" style="display:none">
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+          <div class="date-badge" id="funds-sub">—</div>
+          <div class="date-badge" id="funds-count-badge" style="color:#a78bfa;border-color:rgba(167,139,250,0.3)">— صندوق</div>
         </div>
-        <button onclick="showPage('add',document.querySelector('.nav-add')||document.getElementById('mnav-add'),'➕ إضافة فرصة')" style="
-          background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;
-          border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;
-          font-family:'IBM Plex Sans Arabic',sans-serif;cursor:pointer;
-          display:flex;align-items:center;gap:6px;transition:all .2s;
-        ">➕ إضافة</button>
-      </div>
-      <div class="section-card">
-        <div class="section-head">
-          <span class="section-title">💼 سجل الصناديق</span>
-          <span class="section-count">6 صناديق</span>
-        </div>
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>اسم الصندوق</th>
-                <th>المنصة</th>
-                <th>المبلغ</th>
-                <th>العائد %</th>
-                <th>العائد ر.س</th>
-                <th>المجموع المتوقع</th>
-                <th>المخاطرة</th>
-                <th>الحالة</th>
-              </tr>
-            </thead>
-            <tbody id="funds-tbody"></tbody>
-          </table>
+        <div class="section-card">
+          <div class="section-head">
+            <span class="section-title">💼 سجل الصناديق الاستثمارية</span>
+            <span class="section-count" id="funds-count-badge2">—</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr>
+                <th>اسم الصندوق</th><th>المنصة</th><th>المبلغ</th>
+                <th>العائد %</th><th>العائد ر.س</th>
+                <th>المجموع المتوقع</th><th>المخاطرة</th><th>الحالة</th><th></th>
+              </tr></thead>
+              <tbody id="funds-tbody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
+
+      <!-- keep page-funds as hidden alias -->
+      <div id="page-funds-anchor"></div>
     </div>
 
     <!-- ═══════════════════════════════════════════════ -->
@@ -4267,7 +4255,7 @@
   " onmouseover="this.style.background='rgba(76,175,130,0.1)'" onmouseout="this.style.background='none'">
     <span style="font-size:18px">📈</span> الأسهم
   </button>
-  <button onclick="showPage('sukuk', document.getElementById('mnav-more'), '🏛 الصكوك'); closeMobileMore()" style="
+  <button onclick="showPage('sukuk', document.getElementById('mnav-more'), '🏦 الفرص'); closeMobileMore()" style="
     width:100%;display:flex;align-items:center;gap:12px;
     background:none;border:none;padding:10px 14px;
     color:var(--white);font-family:'IBM Plex Sans Arabic',sans-serif;
@@ -4275,15 +4263,6 @@
     transition:background .15s;text-align:right;
   " onmouseover="this.style.background='rgba(201,168,76,0.1)'" onmouseout="this.style.background='none'">
     <span style="font-size:18px">🏛</span> الصكوك
-  </button>
-  <button onclick="showPage('funds', document.getElementById('mnav-more'), '💼 الصناديق'); closeMobileMore()" style="
-    width:100%;display:flex;align-items:center;gap:12px;
-    background:none;border:none;padding:10px 14px;
-    color:var(--white);font-family:'IBM Plex Sans Arabic',sans-serif;
-    font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;
-    transition:background .15s;text-align:right;
-  " onmouseover="this.style.background='rgba(0,212,255,0.1)'" onmouseout="this.style.background='none'">
-    <span style="font-size:18px">💼</span> الصناديق
   </button>
   <div style="height:1px;background:var(--border);margin:4px 12px"></div>
   <button onclick="showPage('db', document.getElementById('mnav-more'), '🗄️ قاعدة البيانات'); closeMobileMore()" style="
@@ -6031,23 +6010,57 @@ function deleteEntry(idx) {
 
 
 // Live prices map (ticker  {price, change_pct})
+// ══════════════════════════════════════════════
+// OPPORTUNITIES PAGE — TABS (Sukuk + Funds)
+// ══════════════════════════════════════════════
+var _currentOppsTab = 'sukuk';
+
+function switchOppsTab(tab) {
+  _currentOppsTab = tab;
+  var panels = ['sukuk','funds'];
+  panels.forEach(function(t) {
+    var panel = document.getElementById('opps-panel-' + t);
+    var btn   = document.getElementById('opps-tab-' + t);
+    if (panel) panel.style.display = t === tab ? 'block' : 'none';
+    if (btn) {
+      btn.style.borderBottomColor = t === tab ? 'var(--gold)' : 'transparent';
+      btn.style.color = t === tab ? 'var(--gold)' : 'var(--muted)';
+    }
+  });
+  if (tab === 'sukuk') renderSukuk();
+  if (tab === 'funds') renderFunds();
+}
+
+
 function renderSukuk() {
   const _inv = window.__investments || investments;
   const sukukData = _inv.filter(x => x.type === 'صك' || x.type === 'مرابحة');
+  const fundsData = _inv.filter(x => x.type === 'صندوق');
   const totalAmt  = sukukData.reduce((s,x)=>s+(x.amount||0),0);
+  const fundsAmt  = fundsData.reduce((s,x)=>s+(x.amount||0),0);
   const active    = sukukData.filter(x=>x.status==='نشطة').length;
   const done      = sukukData.filter(x=>x.status==='مستلمة').length;
-  // Update dynamic header elements
-  const subEl = document.getElementById('sukuk-sub');
-  if (subEl) subEl.textContent = 'إجمالي ' + fmtNum(totalAmt) + ' ر.س — ' + sukukData.length + ' صك';
-  const actEl = document.getElementById('sukuk-active-badge');
-  if (actEl) actEl.textContent = 'نشطة: ' + active;
+
+  // Update badges
+  const subEl  = document.getElementById('sukuk-sub');
+  if (subEl)  subEl.textContent  = fmtNum(totalAmt) + ' ر.س — ' + sukukData.length + ' صك';
+  const actEl  = document.getElementById('sukuk-active-badge');
+  if (actEl)  actEl.textContent  = 'نشطة: ' + active;
   const doneEl = document.getElementById('sukuk-done-badge');
   if (doneEl) doneEl.textContent = 'مستلمة: ' + done;
+  const cntEl  = document.getElementById('sukuk-count-badge');
+  if (cntEl)  cntEl.textContent  = sukukData.length + ' صك';
+  const oppsSub = document.getElementById('opps-sub');
+  if (oppsSub) oppsSub.textContent = fmtNum(totalAmt + fundsAmt) + ' ر.س إجمالي';
+  const oppsBadge = document.getElementById('opps-total-badge');
+  if (oppsBadge) oppsBadge.textContent = (sukukData.length + fundsData.length) + ' فرصة';
 
-  document.getElementById('sukuk-tbody').innerHTML = sukukData.map((d, i) => `
-    <tr>
-      <td>${d.name}</td>
+  const tbody = document.getElementById('sukuk-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = sukukData.map((d, i) => {
+    const realIdx = _inv.indexOf(d);
+    return `<tr>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.name}</td>
       <td style="color:#8899bb">${d.platform}</td>
       <td class="mono">${fmtNum(d.amount)}</td>
       <td>${fmtPct(d.ret_pct)}</td>
@@ -6055,20 +6068,30 @@ function renderSukuk() {
       <td style="color:#8899bb;font-size:11px">${d.date_out || '—'}</td>
       <td>${riskPill(d.risk)}</td>
       <td>${statusPill(d.status)}</td>
-    </tr>`).join('');
+      <td><button class="loan-action-btn" onclick="openEditOpp(${realIdx})">✏️</button></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--muted)">لا توجد صكوك</td></tr>';
 }
 
 function renderFunds() {
   const _inv = window.__investments || investments;
   const fundsData = _inv.filter(x => x.type === 'صندوق');
   const totalAmt  = fundsData.reduce((s,x)=>s+(x.amount||0),0);
-  // Update dynamic header
-  const subEl = document.getElementById('funds-sub');
-  if (subEl) subEl.textContent = 'إجمالي ' + fmtNum(totalAmt) + ' ر.س — ' + fundsData.length + ' صناديق';
+  const active    = fundsData.filter(x=>x.status==='نشطة').length;
 
-  document.getElementById('funds-tbody').innerHTML = fundsData.map((d, i) => `
-    <tr>
-      <td>${d.name}</td>
+  const subEl  = document.getElementById('funds-sub');
+  if (subEl)  subEl.textContent  = fmtNum(totalAmt) + ' ر.س — ' + fundsData.length + ' صندوق';
+  const cntEl  = document.getElementById('funds-count-badge');
+  if (cntEl)  cntEl.textContent  = fundsData.length + ' صندوق';
+  const cnt2El = document.getElementById('funds-count-badge2');
+  if (cnt2El) cnt2El.textContent = fundsData.length + ' صندوق';
+
+  const tbody = document.getElementById('funds-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = fundsData.map((d, i) => {
+    const realIdx = _inv.indexOf(d);
+    return `<tr>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.name}</td>
       <td style="color:#8899bb">${d.platform}</td>
       <td class="mono">${fmtNum(d.amount)}</td>
       <td>${fmtPct(d.ret_pct)}</td>
@@ -6076,7 +6099,9 @@ function renderFunds() {
       <td class="mono" style="color:#c9a84c">${fmtNum(d.total, 2)}</td>
       <td>${riskPill(d.risk)}</td>
       <td>${statusPill(d.status)}</td>
-    </tr>`).join('');
+      <td><button class="loan-action-btn" onclick="openEditOpp(${realIdx})">✏️</button></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--muted)">لا توجد صناديق</td></tr>';
 }
 
 function resetForm() {
@@ -6123,6 +6148,8 @@ const PAGE_TITLES = {
   'add-loan':  '🏦 إضافة قرض',
   'add-debt':  '💸 إضافة دين',
   'reports':   '📊 التقارير والتحليل',
+  'sukuk':     '🏦 الفرص الاستثمارية',
+  'funds':     '🏦 الفرص الاستثمارية',
   dashboard: '📊 لوحة التحكم',
   stocks:    '📈 الأسهم',
   sukuk:     '🏛 الصكوك',
@@ -6133,7 +6160,9 @@ const PAGE_TITLES = {
 };
 
 function showPage(id, navEl, mobileTitle, noScroll){
-  window.__currentPage = id;
+  // funds is now part of sukuk page
+  if (id === 'funds') { id = 'sukuk'; window.__currentPage = 'sukuk'; }
+  else { window.__currentPage = id; }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
 
@@ -6164,6 +6193,8 @@ function showPage(id, navEl, mobileTitle, noScroll){
   }
   if (id === 'db') dbRender();
   if (id === 'stocks') { renderStocks(); renderUsStocksTable(); }
+  if (id === 'sukuk')  { renderSukuk(); renderFunds(); }
+  if (id === 'funds')  { renderSukuk(); renderFunds(); setTimeout(function(){ switchOppsTab('funds'); }, 50); }
   if (id === 'add-stock') { resetAddStock(); calcAddStock(); }
   if (id === 'add-loan')  { calcAddLoan(); }
   if (id === 'add-debt')  { updateDebtDirectionLabel(); calcAddDebt(); }
