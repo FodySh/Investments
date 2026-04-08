@@ -6721,6 +6721,8 @@ document.addEventListener('DOMContentLoaded', () => {
 var loansData = JSON.parse(localStorage.getItem('loansData') || '[]');
 window.loansData = loansData;
 var editingLoanIdx = null;
+var debtsData = JSON.parse(localStorage.getItem('debtsData') || '[]');
+window.debtsData = debtsData;
 
 // ══════════════════════════════════════════════
 // ADD STOCK PAGE
@@ -8242,8 +8244,6 @@ function renderLoans() {
 // 
 // DEBTS PAGE
 // 
-var debtsData = JSON.parse(localStorage.getItem('debtsData') || '[]');
-window.debtsData = debtsData;
 var editingDebtIdx = null;
 let currentDebtFilter = 'all';
 
