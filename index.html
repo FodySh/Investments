@@ -337,7 +337,9 @@
   /* New feature pages: tighter top spacing */
   #page-calendar.active,
   #page-cashflow.active,
-  #page-insights.active {
+  #page-insights.active,
+  #page-reports.active,
+  #page-analyst.active {
     padding-top: 0;
   }
 
@@ -409,7 +411,12 @@
     /* Full-width main */
     .main {
       margin-right: 0 !important;
-      padding: 0 14px 90px !important;
+      padding: 0 12px 90px !important;
+    }
+    /* Remove extra top spacing on reports page specifically */
+    #page-reports.active .page-header,
+    #page-reports.active > div:first-child {
+      margin-top: 0 !important;
     }
 
     /* Page header stack */
@@ -1352,9 +1359,7 @@
       <div class="nav-item" onclick="showPage('all',this)">
         <span class="nav-icon">📋</span> جميع الفرص
       </div>
-      <div class="nav-item" onclick="showPage('analyst',this)">
-        <span class="nav-icon">🔍</span> رأي المحلل
-      </div>
+
 
       <div class="nav-item nav-db" onclick="showPage('db',this)">
         <span class="nav-icon">🗄️</span> قاعدة البيانات
@@ -1365,7 +1370,7 @@
       <div class="nav-item nav-debts" onclick="showPage('debts',this)">
         <span class="nav-icon">💸</span> الديون الشخصية
       </div>
-      <div class="nav-item" onclick="showPage('reports',this)" style="color:#60a5fa">
+      <div class="nav-item" onclick="showPage('reports',this)">
         <span class="nav-icon">📊</span> التقارير والتحليل
       </div>
     </nav>
@@ -1994,7 +1999,7 @@
     <!-- ═══════════════════════════════════════════════ -->
     <!-- PAGE: ANALYST -->
     <!-- ═══════════════════════════════════════════════ -->
-    <div id="page-analyst" class="page">
+    <div id="page-analyst" class="page" style="display:none!important">
       <div class="page-header">
         <div>
           <div class="page-title">رأي المحلل المالي</div>
@@ -3330,25 +3335,27 @@
     <!-- PAGE: REPORTS - لوحة التقارير والتحليل          -->
     <!-- ═══════════════════════════════════════════════ -->
     <div id="page-reports" class="page">
-      <div class="page-header fade-up">
+      <!-- compact header + tabs merged -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0;flex-wrap:wrap;gap:8px;padding-bottom:8px">
         <div>
-          <div class="page-title">📊 التقارير والتحليل</div>
-          <div class="page-sub">تقويم الاستحقاقات — التدفق النقدي — التحليل المتقدم</div>
+          <div style="font-size:18px;font-weight:800;color:var(--white)">📊 التقارير والتحليل</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button onclick="document.getElementById('import-file').click()" style="background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.3);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:#a78bfa;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px">📥 استيراد</button>
+          <button onclick="document.getElementById('import-file').click()" style="background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.3);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:600;color:#a78bfa;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px">📥 استيراد</button>
           <input type="file" id="import-file" accept=".xlsx,.xls,.csv" style="display:none" onchange="importPortfolioFile(event)">
-          <button onclick="exportPDF()" style="background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.3);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:#f87171;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px">📄 PDF</button>
+          <button onclick="exportPDF()" style="background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.3);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:600;color:#f87171;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px">📄 PDF</button>
         </div>
       </div>
 
-      <!-- تبويبات داخل الصفحة -->
-      <div style="display:flex;gap:0;margin-bottom:24px;border-bottom:1px solid var(--border)">
-        <button id="rtab-calendar" onclick="switchReportsTab('calendar')" style="padding:11px 20px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:all .2s">📅 الاستحقاقات</button>
-        <button id="rtab-cashflow" onclick="switchReportsTab('cashflow')" style="padding:11px 20px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s">💧 التدفق النقدي</button>
-        <button id="rtab-insights" onclick="switchReportsTab('insights')" style="padding:11px 20px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s">🔬 التحليل المتقدم</button>
-        <button id="rtab-dividends" onclick="switchReportsTab('dividends')" style="padding:11px 20px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s">💰 توزيعات الأسهم</button>
+      <!-- تبويبات داخل الصفحة — الترتيب الجديد -->
+      <div style="display:flex;gap:0;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;flex-shrink:0">
+        <button id="rtab-calendar"  onclick="switchReportsTab('calendar')"  style="padding:11px 18px;font-size:12px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0">📅 الاستحقاقات</button>
+        <button id="rtab-cashflow"  onclick="switchReportsTab('cashflow')"  style="padding:11px 18px;font-size:12px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0">💧 التدفق المالي</button>
+        <button id="rtab-dividends" onclick="switchReportsTab('dividends')" style="padding:11px 18px;font-size:12px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0">💰 التوزيعات</button>
+        <button id="rtab-analyst"   onclick="switchReportsTab('analyst')"   style="padding:11px 18px;font-size:12px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0">🤖 رأي المحلل</button>
+        <button id="rtab-insights"  onclick="switchReportsTab('insights')"  style="padding:11px 18px;font-size:12px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0">🔬 التحليل المتقدم</button>
       </div>
+      <div style="margin-bottom:20px"></div>
 
       <!-- ── تبويب: الاستحقاقات ── -->
       <div id="rtab-panel-calendar">
@@ -3401,6 +3408,107 @@
             </table>
           </div>
         </div>
+      </div>
+
+      <!-- ── تبويب: رأي المحلل ── -->
+      <div id="rtab-panel-analyst" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+          <div>
+            <div style="font-size:16px;font-weight:700">🤖 رأي المحلل المالي</div>
+            <div style="font-size:12px;color:var(--muted)" id="analyst-last-update">اضغط "تحليل الآن" للحصول على رأي محدّث</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+            <button id="analyst-run-btn" onclick="runAIAnalysisOnce()" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:12px;padding:12px 24px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all .2s;box-shadow:0 4px 16px rgba(201,168,76,0.3)" onmouseover="if(!this.disabled)this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+              <span id="analyst-btn-icon">🤖</span>
+              <span id="analyst-btn-label">تحليل الآن</span>
+            </button>
+            <div style="font-size:10px;color:rgba(255,152,0,0.8);display:flex;align-items:center;gap:4px">
+              <span>💳</span><span>كل تحليل يستهلك رصيداً — مرة واحدة لكل جلسة</span>
+            </div>
+          </div>
+        </div>
+        <!-- Auto-refresh disabled notice -->
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px 18px;opacity:0.5;pointer-events:none">
+          <div style="flex:1"><div style="font-size:13px;color:var(--muted)">التحديث التلقائي كل 30 دقيقة</div><div style="font-size:11px;color:rgba(255,152,0,0.8);margin-top:3px">⚠️ معطّل — يستهلك رصيداً من Claude API</div></div>
+          <div style="width:44px;height:24px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);position:relative"><div style="position:absolute;top:3px;right:3px;width:16px;height:16px;border-radius:50%;background:rgba(136,153,187,0.4)"></div></div>
+          <span style="font-size:11px;color:var(--muted)">معطّل</span>
+        </div>
+
+      <!-- Auto-refresh toggle — DISABLED -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;
+                  background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);
+                  border-radius:12px;padding:12px 18px;opacity:0.5;pointer-events:none;">
+        <div style="flex:1">
+          <div style="font-size:13px;color:var(--muted)">التحديث التلقائي كل 30 دقيقة</div>
+          <div style="font-size:11px;color:rgba(255,152,0,0.8);margin-top:3px">
+            ⚠️ معطّل — يستهلك رصيداً من Claude API عند كل تشغيل
+          </div>
+        </div>
+        <div style="width:44px;height:24px;border-radius:12px;
+          background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+          position:relative;">
+          <div style="position:absolute;top:3px;right:3px;width:16px;height:16px;
+            border-radius:50%;background:rgba(136,153,187,0.4);"></div>
+        </div>
+        <span style="font-size:11px;color:var(--muted);min-width:36px">معطّل</span>
+      </div>
+
+      <!-- Loading skeleton -->
+      <div id="analyst-loading" style="display:none;text-align:center;padding:60px 20px">
+        <div style="font-size:40px;margin-bottom:16px;animation:pulse 1.5s infinite">🤖</div>
+        <div style="font-size:16px;font-weight:600;color:var(--white);margin-bottom:8px">جاري تحليل محفظتك...</div>
+        <div style="font-size:13px;color:var(--muted)" id="analyst-loading-msg">يقرأ Claude بيانات محفظتك</div>
+        <div style="margin-top:20px;background:rgba(255,255,255,0.06);border-radius:8px;height:6px;overflow:hidden">
+          <div id="analyst-progress" style="height:100%;background:linear-gradient(90deg,var(--gold),var(--cyan));
+               border-radius:8px;width:0%;transition:width .5s ease"></div>
+        </div>
+      </div>
+
+      <!-- AI Score card (dynamic) -->
+      <div id="analyst-score-card" class="section-card fade-up" style="margin-bottom:20px;display:none">
+        <div class="section-body" style="display:flex;align-items:center;gap:32px;padding:28px;flex-wrap:wrap">
+          <div style="text-align:center;flex-shrink:0">
+            <svg width="120" height="120" viewBox="0 0 120 120" id="analyst-score-svg">
+              <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="14"/>
+              <circle cx="60" cy="60" r="50" fill="none" stroke="#c9a84c" stroke-width="14"
+                stroke-dasharray="0 314" stroke-dashoffset="78" transform="rotate(-90 60 60)"
+                stroke-linecap="round" id="analyst-score-circle"/>
+              <text x="60" y="55" text-anchor="middle" fill="#f0f4ff" font-size="28" font-weight="700"
+                font-family="'JetBrains Mono',monospace" id="analyst-score-num">—</text>
+              <text x="60" y="72" text-anchor="middle" fill="#8899bb" font-size="10">/ 100</text>
+            </svg>
+            <div id="analyst-score-label" style="font-size:13px;color:#c9a84c;font-weight:700;margin-top:8px">—</div>
+          </div>
+          <div style="flex:1;min-width:220px">
+            <div style="font-size:18px;font-weight:700;margin-bottom:10px">ملخص التقييم الاستثماري</div>
+            <div id="analyst-summary-text" style="font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:16px">—</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap" id="analyst-kpis"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Analysis boxes (dynamic) -->
+      <div id="analyst-boxes" class="analyst-grid fade-up delay-1"></div>
+
+      <!-- Static fallback (shown before first AI run) -->
+      <div id="analyst-static" class="analyst-grid fade-up delay-1">
+        <div class="analyst-box info">
+          <div class="analyst-head" style="color:#00d4ff">💼 هيكل المحفظة</div>
+          <div class="analyst-text">اضغط "تحليل الآن" ليقرأ Claude بياناتك الفعلية ويحلّل هيكل محفظتك تلقائياً.</div>
+        </div>
+        <div class="analyst-box good">
+          <div class="analyst-head" style="color:#00e676">📊 نقاط القوة</div>
+          <div class="analyst-text">سيُحدّد Claude نقاط القوة بناءً على أداء استثماراتك الفعلية.</div>
+        </div>
+        <div class="analyst-box warn">
+          <div class="analyst-head" style="color:#ff4444">⚠️ نقاط التحذير</div>
+          <div class="analyst-text">سيُحدّد Claude المخاطر والخسائر الموجودة في محفظتك الحالية.</div>
+        </div>
+        <div class="analyst-box tip">
+          <div class="analyst-head" style="color:#c9a84c">🎯 التوصيات</div>
+          <div class="analyst-text">سيقدّم Claude توصيات استراتيجية مخصّصة لوضع محفظتك.</div>
+        </div>
+      </div>
       </div>
 
       <!-- ── تبويب: التحليل المتقدم ── -->
@@ -4198,7 +4306,7 @@
       <div class="mnav-icon-wrap"><span class="mnav-icon">📊</span></div>
       <span class="mnav-label">الرئيسية</span>
     </div>
-    <div class="mnav-item" id="mnav-analyst" onclick="showPage('analyst', this, '🔍 رأي المحلل')">
+    <div class="mnav-item" id="mnav-analyst" onclick="showPage('reports', this, '📊 التقارير والتحليل'); setTimeout(function(){switchReportsTab('analyst');},100)">
       <div class="mnav-icon-wrap"><span class="mnav-icon">🔍</span></div>
       <span class="mnav-label">المحلل</span>
     </div>
@@ -4881,6 +4989,7 @@ var _origShowPage = showPage;
 showPage = function(id, navEl, mobileTitle, noScroll) {
   _origShowPage(id, navEl, mobileTitle, noScroll);
   if (id === 'reports')  { renderCalendar(); renderCashflow(); renderSharpe(); renderBenchmark(); renderDividendsTab(); }
+  if (id === 'analyst')  { id = 'reports'; window.__currentPage = 'reports'; setTimeout(function(){ switchReportsTab('analyst'); }, 80); }
   // Only scroll to top if NOT called from a form button
   if (!noScroll) {
     setTimeout(function() {
@@ -7479,7 +7588,7 @@ var _currentReportsTab = 'calendar';
 
 function switchReportsTab(tab) {
   _currentReportsTab = tab;
-  var tabs = ['calendar','cashflow','insights','dividends'];
+  var tabs = ['calendar','cashflow','dividends','analyst','insights'];
   tabs.forEach(function(t) {
     var panel = document.getElementById('rtab-panel-' + t);
     var btn   = document.getElementById('rtab-' + t);
@@ -7491,8 +7600,9 @@ function switchReportsTab(tab) {
   });
   if (tab === 'calendar')  renderCalendar();
   if (tab === 'cashflow')  renderCashflow();
-  if (tab === 'insights')  { renderSharpe(); renderBenchmark(); }
   if (tab === 'dividends') renderDividendsTab();
+  if (tab === 'analyst')   { /* AI analysis runs on button click */ }
+  if (tab === 'insights')  { renderSharpe(); renderBenchmark(); }
 }
 
 // ══════════════════════════════════════════════
