@@ -4571,7 +4571,7 @@ async function runAIAnalysis() {
 
     var summary = 'المحفظة: ' + totalAmt.toLocaleString('en-US') + ' ر.س | عوائد: ' + totalRet.toLocaleString('en-US') + ' ر.س | ROI: '+roi+'% | الفرص: '+inv.length+' (نشطة:'+active+' مستلمة:'+done+') | صكوك:'+Math.round(sukukAmt/1000)+'k صناديق:'+Math.round(fundsAmt/1000)+'k اسهم:'+Math.round(stksAmt/1000)+'k | منصات: '+platStr+' | افضل: '+topGain+' | اسوا: '+topLoss+' | ديون:'+((window.debtsData||[]).length)+' قروض:'+((window.loansData||[]).length);
 
-    var PROXY_URL = 'https://claude-proxy.shaheenhouse1.workers.dev'; // Cloudflare Worker — Claude API key is safe here
+    var PROXY_URL = 'https://claude-proxy.fahad-shaheen.workers.dev'; // Cloudflare Worker — Claude API key is safe here
 
     var payload = {
       model: 'claude-sonnet-4-20250514',
@@ -6102,11 +6102,18 @@ function resetForm() {
   if (stockBox) stockBox.style.display = 'none';
 }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
+var _toastTimer = null;
+function showToast(msg, duration) {
+  var t = document.getElementById('toast');
+  if (!t) return;
+  // Error messages stay 10s, normal 3.5s
+  var ms = duration || (msg.includes('❌') || msg.includes('فشل') || msg.includes('Load failed') ? 10000 : 3500);
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3500);
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function(){ t.classList.remove('show'); }, ms);
+  // Click to dismiss
+  t.onclick = function(){ t.classList.remove('show'); clearTimeout(_toastTimer); };
 }
 
 // Initialize date-in to today
@@ -6162,8 +6169,8 @@ function showPage(id, navEl, mobileTitle, noScroll){
   if (id === 'db') dbRender();
   if (id === 'stocks') { renderStocks(); renderUsStocksTable(); }
   if (id === 'add-stock') { resetAddStock(); calcAddStock(); }
-  if (id === 'add-loan')  { if(!_editingLoanPageIdx) resetAddLoan(); calcAddLoan(); }
-  if (id === 'add-debt')  { if(!_editingDebtPageIdx) resetAddDebt(); updateDebtDirectionLabel(); calcAddDebt(); }
+  if (id === 'add-loan')  { calcAddLoan(); }
+  if (id === 'add-debt')  { updateDebtDirectionLabel(); calcAddDebt(); }
   if (id === 'loans') renderLoans();
   if (id === 'debts') renderDebts();
   if (id === 'dashboard') { initDashboardYears(); renderDashboard(); }
@@ -6277,9 +6284,9 @@ function dbDeleteSelected() {
 }
 
 function dbRender() {
-  const search = (document.getElementById('db-search-input')?.value || '').toLowerCase();
-  const typeFilter = document.getElementById('db-filter-type')?.value || '';
-  const statusFilter = document.getElementById('db-filter-status')?.value || '';
+  const search = ((document.getElementById('db-search-input')||{}).value || '').toLowerCase();
+  const typeFilter = (document.getElementById('db-filter-type')||{}).value || '';
+  const statusFilter = (document.getElementById('db-filter-status')||{}).value || '';
   const cols = dbGetVisibleCols();
 
   // Filter
@@ -6721,14 +6728,14 @@ var editingLoanIdx = null;
 var _editingStockIdx = null;
 
 function calcAddStock() {
-  var shares    = parseFloat(document.getElementById('as-shares')?.value) || 0;
-  var buyPrice  = parseFloat(document.getElementById('as-buy-price')?.value) || 0;
-  var fees      = parseFloat(document.getElementById('as-fees')?.value) || 0;
-  var currPrice = parseFloat(document.getElementById('as-curr-price')?.value) || 0;
-  var target    = parseFloat(document.getElementById('as-target')?.value) || 0;
-  var stopLoss  = parseFloat(document.getElementById('as-stop-loss')?.value) || 0;
-  var divYield  = parseFloat(document.getElementById('as-div-yield')?.value) || 0;
-  var ticker    = (document.getElementById('as-ticker')?.value || '').trim();
+  var shares    = parseFloat((document.getElementById('as-shares')||{}).value) || 0;
+  var buyPrice  = parseFloat((document.getElementById('as-buy-price')||{}).value) || 0;
+  var fees      = parseFloat((document.getElementById('as-fees')||{}).value) || 0;
+  var currPrice = parseFloat((document.getElementById('as-curr-price')||{}).value) || 0;
+  var target    = parseFloat((document.getElementById('as-target')||{}).value) || 0;
+  var stopLoss  = parseFloat((document.getElementById('as-stop-loss')||{}).value) || 0;
+  var divYield  = parseFloat((document.getElementById('as-div-yield')||{}).value) || 0;
+  var ticker    = ((document.getElementById('as-ticker')||{}).value || '').trim();
 
   var cost      = shares * buyPrice + fees;
   var mktVal    = currPrice > 0 ? shares * currPrice : 0;
@@ -6804,19 +6811,22 @@ function calcAddStock() {
 }
 
 function saveAddStock() {
-  var ticker    = (document.getElementById('as-ticker')?.value || '').trim().toUpperCase();
-  var name      = (document.getElementById('as-name')?.value || '').trim() || ticker;
-  var shares    = parseFloat(document.getElementById('as-shares')?.value) || 0;
-  var buyPrice  = parseFloat(document.getElementById('as-buy-price')?.value) || 0;
-  var platform  = document.getElementById('as-platform')?.value || '';
+  function gv(id) { var e = document.getElementById(id); return e ? e.value : ''; }
+  function gf(id) { return parseFloat(gv(id)) || 0; }
+
+  var ticker    = gv('as-ticker').trim().toUpperCase();
+  var name      = gv('as-name').trim() || ticker;
+  var shares    = gf('as-shares');
+  var buyPrice  = gf('as-buy-price');
+  var platform  = gv('as-platform');
 
   if (!ticker)    { showToast('❌ أدخل رمز السهم'); return; }
   if (!shares)    { showToast('❌ أدخل عدد الأسهم'); return; }
   if (!buyPrice)  { showToast('❌ أدخل سعر الشراء'); return; }
   if (!platform)  { showToast('❌ اختر المنصة'); return; }
 
-  var fees      = parseFloat(document.getElementById('as-fees')?.value) || 0;
-  var currPrice = parseFloat(document.getElementById('as-curr-price')?.value) || 0;
+  var fees      = gf('as-fees');
+  var currPrice = gf('as-curr-price');
   var cost      = shares * buyPrice + fees;
   var mktVal    = currPrice > 0 ? shares * currPrice : 0;
   var pnl       = mktVal > 0 ? mktVal - cost : 0;
@@ -6831,18 +6841,18 @@ function saveAddStock() {
     ret_pct:  mktVal > 0 && cost > 0 ? pnl / cost : 0,
     ret_val:  pnl,
     total:    mktVal > 0 ? mktVal : cost,
-    status:   document.getElementById('as-status')?.value || 'نشطة',
-    risk:     document.getElementById('as-risk')?.value || 'متوسط',
-    date_in:  document.getElementById('as-buy-date')?.value || new Date().toISOString().split('T')[0],
+    status:   (document.getElementById('as-status')||{}).value || 'نشطة',
+    risk:     (document.getElementById('as-risk')||{}).value || 'متوسط',
+    date_in:  (document.getElementById('as-buy-date')||{}).value || new Date().toISOString().split('T')[0],
     date_out: null,
-    sector:   document.getElementById('as-sector')?.value || '',
-    horizon:  document.getElementById('as-horizon')?.value || '',
-    reason:   document.getElementById('as-reason')?.value || '',
-    stop_loss: parseFloat(document.getElementById('as-stop-loss')?.value) || 0,
-    target:   parseFloat(document.getElementById('as-target')?.value) || 0,
-    pe:       parseFloat(document.getElementById('as-pe')?.value) || 0,
-    div_yield:parseFloat(document.getElementById('as-div-yield')?.value) || 0,
-    notes:    document.getElementById('as-notes')?.value || '',
+    sector:   (document.getElementById('as-sector')||{}).value || '',
+    horizon:  (document.getElementById('as-horizon')||{}).value || '',
+    reason:   (document.getElementById('as-reason')||{}).value || '',
+    stop_loss: parseFloat((document.getElementById('as-stop-loss')||{}).value) || 0,
+    target:   parseFloat((document.getElementById('as-target')||{}).value) || 0,
+    pe:       parseFloat((document.getElementById('as-pe')||{}).value) || 0,
+    div_yield:parseFloat((document.getElementById('as-div-yield')||{}).value) || 0,
+    notes:    (document.getElementById('as-notes')||{}).value || '',
     buy_price_per_share: buyPrice,
     added_at: new Date().toISOString(),
     market: _currentStockMarket
@@ -6919,11 +6929,11 @@ function editStockFromCard(invIdx) {
 var _editingLoanPageIdx = null;
 
 function calcAddLoan() {
-  var principal = parseFloat(document.getElementById('al-principal')?.value) || 0;
-  var rate      = parseFloat(document.getElementById('al-rate')?.value) || 0;
-  var years     = parseFloat(document.getElementById('al-years')?.value) || 0;
-  var paid      = parseFloat(document.getElementById('al-paid')?.value) || 0;
-  var startVal  = document.getElementById('al-start')?.value || '';
+  var principal = parseFloat((document.getElementById('al-principal')||{}).value) || 0;
+  var rate      = parseFloat((document.getElementById('al-rate')||{}).value) || 0;
+  var years     = parseFloat((document.getElementById('al-years')||{}).value) || 0;
+  var paid      = parseFloat((document.getElementById('al-paid')||{}).value) || 0;
+  var startVal  = (document.getElementById('al-start')||{}).value || '';
 
   var fmt = function(n) { return n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); };
   var set = function(id, v) { var e=document.getElementById(id); if(e) e.textContent=v; };
@@ -6977,17 +6987,20 @@ function calcAddLoan() {
 }
 
 function saveAddLoan() {
-  var name      = (document.getElementById('al-name')?.value || '').trim();
-  var bank      = document.getElementById('al-bank')?.value || '';
-  var principal = parseFloat(document.getElementById('al-principal')?.value) || 0;
+  function gv(id) { var e = document.getElementById(id); return e ? e.value : ''; }
+  function gf(id) { return parseFloat(gv(id)) || 0; }
+
+  var name      = gv('al-name').trim();
+  var bank      = gv('al-bank');
+  var principal = gf('al-principal');
 
   if (!name)      { showToast('❌ أدخل مسمى القرض'); return; }
   if (!bank)      { showToast('❌ اختر البنك'); return; }
   if (!principal) { showToast('❌ أدخل مبلغ القرض'); return; }
 
-  var rate    = parseFloat(document.getElementById('al-rate')?.value) || 0;
-  var years   = parseFloat(document.getElementById('al-years')?.value) || 0;
-  var paid    = parseFloat(document.getElementById('al-paid')?.value) || 0;
+  var rate    = gf('al-rate');
+  var years   = gf('al-years');
+  var paid    = gf('al-paid');
   var months  = Math.round(years * 12);
   var r       = rate > 0 ? (rate/100)/12 : 0;
   var pmt     = (r > 0 && months > 0) ? principal*(r*Math.pow(1+r,months))/(Math.pow(1+r,months)-1) : (months > 0 ? principal/months : 0);
@@ -6996,8 +7009,8 @@ function saveAddLoan() {
   var loan = {
     name:        name,
     bank:        bank,
-    type:        document.getElementById('al-type')?.value || 'شخصي',
-    status:      document.getElementById('al-status')?.value || 'نشط',
+    type:        (document.getElementById('al-type')||{}).value || 'شخصي',
+    status:      (document.getElementById('al-status')||{}).value || 'نشط',
     principal:   principal,
     rate:        rate,
     years:       years,
@@ -7007,9 +7020,9 @@ function saveAddLoan() {
     inst_paid:   paid > 0 && pmt > 0 ? Math.round(paid/pmt) : 0,
     paid_amount: paid,
     remaining:   Math.max(0, principal - paid),
-    start_date:  document.getElementById('al-start')?.value || '',
-    next_date:   document.getElementById('al-next-date')?.value || '',
-    notes:       document.getElementById('al-notes')?.value || '',
+    start_date:  (document.getElementById('al-start')||{}).value || '',
+    next_date:   (document.getElementById('al-next-date')||{}).value || '',
+    notes:       (document.getElementById('al-notes')||{}).value || '',
     collateral:  'بدون ضمان',
     created_at:  new Date().toISOString()
   };
@@ -7064,7 +7077,7 @@ function openLoanEditPage(idx) {
 var _editingDebtPageIdx = null;
 
 function updateDebtDirectionLabel() {
-  var dir = document.getElementById('ad-direction')?.value;
+  var dir = (document.getElementById('ad-direction')||{}).value;
   var lbl = document.getElementById('ad-label-total');
   var titleEl = document.getElementById('add-debt-title');
   var amtTitle = document.getElementById('ad-amount-title');
@@ -7081,8 +7094,8 @@ function updateDebtDirectionLabel() {
 }
 
 function calcAddDebt() {
-  var amount    = parseFloat(document.getElementById('ad-amount')?.value) || 0;
-  var remaining = parseFloat(document.getElementById('ad-remaining')?.value);
+  var amount    = parseFloat((document.getElementById('ad-amount')||{}).value) || 0;
+  var remaining = parseFloat((document.getElementById('ad-remaining')||{}).value);
   if (isNaN(remaining)) remaining = amount;
 
   var fmt = function(n) { return n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); };
@@ -7098,7 +7111,7 @@ function calcAddDebt() {
   if (pctEl) pctEl.textContent = pct.toFixed(0)+'%';
 
   // Due date warning
-  var dueVal = document.getElementById('ad-due')?.value;
+  var dueVal = (document.getElementById('ad-due')||{}).value;
   var warning = document.getElementById('ad-due-warning');
   if (dueVal && warning) {
     var daysLeft = Math.ceil((new Date(dueVal)-new Date())/86400000);
@@ -7115,29 +7128,32 @@ function calcAddDebt() {
 }
 
 function saveAddDebt() {
-  var person = (document.getElementById('ad-person')?.value || '').trim();
-  var amount = parseFloat(document.getElementById('ad-amount')?.value) || 0;
+  function gv(id) { var e = document.getElementById(id); return e ? e.value : ''; }
+  function gf(id) { return parseFloat(gv(id)) || 0; }
+
+  var person = gv('ad-person').trim();
+  var amount = gf('ad-amount');
 
   if (!person) { showToast('❌ أدخل اسم الشخص'); return; }
   if (!amount) { showToast('❌ أدخل المبلغ'); return; }
 
-  var remaining = parseFloat(document.getElementById('ad-remaining')?.value);
+  var remaining = parseFloat(gv('ad-remaining'));
   if (isNaN(remaining)) remaining = amount;
 
   var debt = {
     person:    person,
-    direction: document.getElementById('ad-direction')?.value || 'owe',
+    direction: gv('ad-direction') || 'owe',
     amount:    amount,
     remaining: remaining,
-    reason:    document.getElementById('ad-reason')?.value || '',
-    relation:  document.getElementById('ad-relation')?.value || 'صديق',
-    contact:   document.getElementById('ad-contact')?.value || '',
-    method:    document.getElementById('ad-method')?.value || 'تحويل بنكي',
-    date:      document.getElementById('ad-date')?.value || new Date().toISOString().split('T')[0],
-    due_date:  document.getElementById('ad-due')?.value || '',
-    status:    document.getElementById('ad-status')?.value || 'قائم',
-    written:   document.getElementById('ad-written')?.value || 'لا',
-    notes:     document.getElementById('ad-notes')?.value || '',
+    reason:    gv('ad-reason'),
+    relation:  gv('ad-relation') || 'صديق',
+    contact:   gv('ad-contact'),
+    method:    gv('ad-method') || 'تحويل بنكي',
+    date:      gv('ad-date') || new Date().toISOString().split('T')[0],
+    due_date:  gv('ad-due'),
+    status:    (document.getElementById('ad-status')||{}).value || 'قائم',
+    written:   (document.getElementById('ad-written')||{}).value || 'لا',
+    notes:     (document.getElementById('ad-notes')||{}).value || '',
     created_at: new Date().toISOString()
   };
 
@@ -7654,7 +7670,7 @@ function onDivTickerChange() {
 
 function calcDividend() {
   var sel = document.getElementById('div-ticker-sel');
-  var perShare = parseFloat(document.getElementById('div-per-share')?.value) || 0;
+  var perShare = parseFloat((document.getElementById('div-per-share')||{}).value) || 0;
   if (!sel || !sel.value || !perShare) {
     document.getElementById('div-calc-box').style.display = 'none';
     return;
@@ -7674,28 +7690,28 @@ function calcDividend() {
 
 function saveDividend() {
   var sel = document.getElementById('div-ticker-sel');
-  var perShare = parseFloat(document.getElementById('div-per-share')?.value) || 0;
+  var perShare = parseFloat((document.getElementById('div-per-share')||{}).value) || 0;
   if (!sel || !sel.value) { showToast('❌ اختر السهم'); return; }
   if (!perShare)           { showToast('❌ أدخل قيمة التوزيعة للسهم'); return; }
   var opt    = sel.options[sel.selectedIndex];
   var shares = parseInt(opt?.dataset?.shares) || 0;
   var amount = parseFloat(opt?.dataset?.amount) || 0;
   var total  = perShare * shares;
-  var exDate = document.getElementById('div-ex-date')?.value || '';
+  var exDate = (document.getElementById('div-ex-date')||{}).value || '';
   var now    = new Date();
   var exD    = exDate ? new Date(exDate) : null;
   var status = exD && exD <= now ? 'مستلمة' : 'قادمة';
   var record = {
     ticker:       sel.value,
     stock_name:   opt?.dataset?.name || sel.value,
-    type:         document.getElementById('div-type')?.value || 'cash',
+    type:         (document.getElementById('div-type')||{}).value || 'cash',
     per_share:    perShare,
     shares:       shares,
     total_amount: total,
     yield_pct:    amount > 0 ? total/amount*100 : 0,
-    announce_date:document.getElementById('div-announce-date')?.value || '',
+    announce_date:(document.getElementById('div-announce-date')||{}).value || '',
     ex_date:      exDate,
-    pay_date:     document.getElementById('div-pay-date')?.value || '',
+    pay_date:     (document.getElementById('div-pay-date')||{}).value || '',
     status:       status,
     created_at:   new Date().toISOString()
   };
@@ -7982,7 +7998,7 @@ function calcLoan() {
 
 let _amortYearFilter = 'all';
 function renderAmortTable() {
-  const filter = document.getElementById('amort-year-filter')?.value || 'all';
+  const filter = (document.getElementById('amort-year-filter')||{}).value || 'all';
   const instPaid = parseInt(document.getElementById('ln-installments-paid').value) || 0;
   const tbody = document.getElementById('amort-tbody');
   const tfoot = document.getElementById('amort-tfoot');
@@ -8276,7 +8292,7 @@ function hideDebtForm() {
 }
 
 function updateDebtLabel() {
-  const dir = document.getElementById('dt-direction')?.value;
+  const dir = (document.getElementById('dt-direction')||{}).value;
 }
 
 function calcDebt() {
