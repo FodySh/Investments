@@ -409,7 +409,7 @@
     /* Full-width main */
     .main {
       margin-right: 0 !important;
-      padding: 8px 14px 90px !important;
+      padding: 0 14px 90px !important;
     }
 
     /* Page header stack */
@@ -599,7 +599,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    margin: -16px -14px 12px;
+    margin: 0 -14px 12px;
   }
   .mobile-topbar-title {
     font-size: 15px;
@@ -1318,65 +1318,15 @@
 </head>
 <body>
 <!-- AUTH GATE — shown to unauthenticated users -->
-<div id="auth-gate" style="
-  position:fixed;inset:0;z-index:1000;
-  background:linear-gradient(160deg,#071510 0%,#0c1f18 60%,#071510 100%);
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  padding:32px;text-align:center;
-  font-family:'IBM Plex Sans Arabic',sans-serif;
-">
-  <!-- Logo -->
-  <div style="margin-bottom:40px">
-    <div style="font-size:48px;margin-bottom:16px">💰</div>
-    <div style="font-size:11px;letter-spacing:4px;color:var(--gold);font-weight:700;text-transform:uppercase;margin-bottom:8px">PORTFOLIO</div>
-    <div style="font-size:26px;font-weight:800;color:var(--white);line-height:1.2">محفظتي المالية</div>
-    <div style="font-size:13px;color:var(--muted);margin-top:10px;line-height:1.7">
-      تتبع استثماراتك وقروضك وديونك<br>في مكان واحد — آمن وخاص
-    </div>
+<div id="auth-gate" style="position:fixed;top:0;left:0;right:0;z-index:1001;background:linear-gradient(90deg,#0c1f18,#071510);border-bottom:1px solid rgba(201,168,76,0.3);display:flex;align-items:center;justify-content:space-between;padding:10px 20px;font-family:'IBM Plex Sans Arabic',sans-serif;gap:12px;flex-wrap:wrap;">
+  <div style="display:flex;align-items:center;gap:10px">
+    <span style="font-size:18px">🔒</span>
+    <span style="font-size:13px;color:var(--muted)">سجّل دخولك لحفظ بياناتك ومزامنتها — البيانات الحالية للعرض فقط</span>
   </div>
-
-  <!-- Features list -->
-  <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:40px;width:100%;max-width:300px;text-align:right">
-    <div style="display:flex;align-items:center;gap:10px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.15);border-radius:10px;padding:10px 14px">
-      <span style="font-size:18px">🔒</span>
-      <span style="font-size:13px;color:var(--white)">بياناتك خاصة — لا يراها أحد غيرك</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.15);border-radius:10px;padding:10px 14px">
-      <span style="font-size:18px">☁️</span>
-      <span style="font-size:13px;color:var(--white)">مزامنة تلقائية على جميع أجهزتك</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.15);border-radius:10px;padding:10px 14px">
-      <span style="font-size:18px">📊</span>
-      <span style="font-size:13px;color:var(--white)">تحليل شامل للمحفظة في لحظة</span>
-    </div>
-  </div>
-
-  <!-- Google sign-in button -->
-  <button id="gate-signin-btn" onclick="googleSignIn()" style="
-    display:flex;align-items:center;justify-content:center;gap:12px;
-    background:white;color:#1a2e24;
-    border:none;border-radius:14px;
-    padding:16px 32px;font-size:15px;font-weight:700;
-    font-family:'IBM Plex Sans Arabic',sans-serif;
-    cursor:pointer;width:100%;max-width:300px;
-    box-shadow:0 8px 32px rgba(0,0,0,0.3);
-    transition:all .2s;
-  " onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 40px rgba(0,0,0,0.4)'"
-     onmouseout="this.style.transform='';this.style.boxShadow='0 8px 32px rgba(0,0,0,0.3)'">
-    <svg width="20" height="20" viewBox="0 0 24 24">
-      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
-      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-    </svg>
+  <button id="gate-signin-btn" onclick="googleSignIn()" style="display:flex;align-items:center;gap:8px;background:white;color:#1a2e24;border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:700;font-family:'IBM Plex Sans Arabic',sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+    <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
     تسجيل الدخول بـ Google
   </button>
-
-  <div style="font-size:11px;color:var(--muted);margin-top:20px;line-height:1.6">
-    بتسجيل الدخول توافق على استخدام بياناتك<br>
-    بشكل آمن ومحمي عبر Google Firebase
-  </div>
 </div>
 
 <div class="bg-mesh"></div>
@@ -1773,59 +1723,65 @@
     <div id="page-stocks" class="page">
       <div class="page-header fade-up">
         <div>
-          <div class="page-title">الأسهم</div>
-          <div class="page-sub">أسعار محدّثة من السوق السعودي</div>
+          <div class="page-title">📈 الأسهم</div>
+          <div class="page-sub" id="stocks-page-sub">أسعار محدّثة من السوق السعودي والأمريكي</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <div class="date-badge" id="stocks-total-badge">جاري الحساب...</div>
-          <button onclick="fetchLiveStockPrices()" id="stocks-refresh-btn" style="
-        background:rgba(56,217,169,0.1);border:1px solid rgba(56,217,169,0.3);
-        border-radius:8px;padding:8px 14px;font-size:11px;font-weight:600;
-        color:#38d9a9;cursor:pointer;font-family:'IBM Plex Sans Arabic',sans-serif;
-        transition:all .2s;display:flex;align-items:center;gap:6px;
-      " onmouseover="this.style.background='rgba(56,217,169,0.2)'"
-         onmouseout="this.style.background='rgba(56,217,169,0.1)'">
-        <span id="stocks-refresh-icon">⟳</span> تحديث الأسعار
-      </button>
-          <button onclick="showPage('add',document.querySelector('.nav-add')||document.getElementById('mnav-add'),'➕ إضافة فرصة')" style="
-            background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;
-            border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;
-            font-family:'IBM Plex Sans Arabic',sans-serif;cursor:pointer;
-            display:flex;align-items:center;gap:6px;transition:all .2s;
-          ">➕ إضافة</button>
+          <button onclick="refreshAllStockPrices()" id="stocks-refresh-btn" style="background:rgba(56,217,169,0.1);border:1px solid rgba(56,217,169,0.3);border-radius:8px;padding:8px 14px;font-size:11px;font-weight:600;color:#38d9a9;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;gap:6px">
+            <span id="stocks-refresh-icon">⟳</span> تحديث
+          </button>
+          <button onclick="showPage('add-stock',null,'📈 إضافة سهم')" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:6px">➕ إضافة سهم</button>
         </div>
       </div>
 
-      <!-- Stocks table -->
-      <div class="section-card fade-up delay-1">
-        <div class="section-head">
-          <span class="section-title">📈 سجل الأسهم</span>
-          <span class="section-count" id="stocks-count-badge">—</span>
-        </div>
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>الاسم</th>
-                <th>رمز السهم</th>
-                <th>عدد الأسهم</th>
-                <th>المبلغ المستثمر</th>
-                <th>السعر الحالي</th>
-                <th>التغيّر</th>
-                <th>ق. السوقية</th>
-                <th>ر/خ غير محققة</th>
-                <th>المنصة</th>
-                <th>المخاطرة</th>
-                <th>الحالة</th>
-              </tr>
-            </thead>
-            <tbody id="stocks-tbody"></tbody>
-          </table>
-        </div>
+      <!-- تبويبات السوق -->
+      <div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0">
+        <button id="tab-sa" onclick="switchStocksTab('sa')" style="padding:10px 20px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer">🇸🇦 السوق السعودي</button>
+        <button id="tab-us" onclick="switchStocksTab('us')" style="padding:10px 20px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer">🇺🇸 السوق الأمريكي</button>
       </div>
 
-      <!-- Cards grid -->
-      <div class="stocks-grid fade-up delay-2" id="stocks-cards-grid" style="margin-top:20px"></div>
+      <!-- السوق السعودي -->
+      <div id="stocks-tab-sa">
+        <div class="section-card fade-up delay-1">
+          <div class="section-head">
+            <span class="section-title">🇸🇦 الأسهم السعودية</span>
+            <span class="section-count" id="stocks-count-badge">—</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr>
+                <th>الاسم</th><th>الرمز</th><th>الأسهم</th><th>التكلفة</th>
+                <th>السعر الحالي</th><th>التغيّر</th><th>ق.السوقية</th>
+                <th>ر/خ</th><th>المنصة</th><th>المخاطرة</th><th>الحالة</th><th></th>
+              </tr></thead>
+              <tbody id="stocks-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="stocks-grid fade-up delay-2" id="stocks-cards-grid" style="margin-top:20px"></div>
+      </div>
+
+      <!-- السوق الأمريكي -->
+      <div id="stocks-tab-us" style="display:none">
+        <div class="section-card fade-up delay-1">
+          <div class="section-head">
+            <span class="section-title">🇺🇸 الأسهم الأمريكية</span>
+            <span class="section-count" id="us-stocks-count-badge">—</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr>
+                <th>الاسم</th><th>الرمز</th><th>الأسهم</th><th>التكلفة ($)</th>
+                <th>السعر الحالي ($)</th><th>التغيّر</th><th>ق.السوقية ($)</th>
+                <th>ر/خ ($)</th><th>المنصة</th><th></th>
+              </tr></thead>
+              <tbody id="us-stocks-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="stocks-grid fade-up delay-2" id="us-stocks-cards-grid" style="margin-top:20px"></div>
+      </div>
     </div>
 
     <!-- ═══════════════════════════════════════════════ -->
@@ -2907,7 +2863,7 @@
           <div class="page-title">🏦 القروض البنكية</div>
           <div class="page-sub">إدارة القروض والالتزامات البنكية بشكل شامل</div>
         </div>
-        <button class="btn-submit" onclick="showLoanForm()" style="font-size:13px;padding:10px 22px">
+        <button class="btn-submit" onclick="showPage('add-loan',null,'🏦 إضافة قرض',true)" style="font-size:13px;padding:10px 22px">
           ➕ إضافة قرض
         </button>
       </div>
@@ -3195,7 +3151,7 @@
           <div class="page-title">💸 الديون الشخصية</div>
           <div class="page-sub">تتبع الديون بينك وبين الآخرين — مالك وما عليك</div>
         </div>
-        <button class="btn-submit" onclick="showDebtForm()" style="font-size:13px;padding:10px 22px">
+        <button class="btn-submit" onclick="showPage('add-debt',null,'💸 إضافة دين',true)" style="font-size:13px;padding:10px 22px">
           ➕ إضافة دين
         </button>
       </div>
@@ -3543,7 +3499,630 @@
       </div>
     </div>
 
-  </div><!-- end .app -->
+  
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- PAGE: ADD STOCK — شاشة إضافة سهم متخصصة       -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div id="page-add-stock" class="page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">📈 إضافة / تعديل سهم</div>
+          <div class="page-sub">أدخل بيانات السهم — تُحسب القيم السوقية تلقائياً</div>
+        </div>
+        <button onclick="showPage('stocks',document.querySelector('.sidebar .nav-item[onclick*=stocks]'),'📈 الأسهم')" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:9px 18px;color:var(--muted);font-size:13px;cursor:pointer;font-family:inherit">← رجوع للأسهم</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" class="add-stock-grid">
+
+        <!-- ── الجانب الأيمن: نموذج الإدخال ── -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+
+          <!-- بيانات الشركة -->
+          <div class="section-card">
+            <div class="section-head">
+              <span class="section-title">🏢 بيانات الشركة</span>
+              <div style="display:flex;gap:8px">
+                <button onclick="setStockMarket('sa')" id="mkt-btn-sa" style="padding:4px 12px;font-size:11px;font-weight:700;font-family:inherit;border-radius:8px;cursor:pointer;border:1px solid var(--gold);background:rgba(201,168,76,0.15);color:var(--gold)">🇸🇦 سعودي</button>
+                <button onclick="setStockMarket('us')" id="mkt-btn-us" style="padding:4px 12px;font-size:11px;font-weight:700;font-family:inherit;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted)">🇺🇸 أمريكي</button>
+              </div>
+            </div>
+            <div class="section-body" style="display:flex;flex-direction:column;gap:14px">
+              <div class="form-grid">
+                <div class="field-group">
+                  <label class="field-label">رمز السهم <span class="req">*</span></label>
+                  <div style="position:relative">
+                    <input class="f-input" id="as-ticker" type="text" placeholder="مثال: 2222 أو AAPL" maxlength="10" oninput="onTickerInput()" style="font-family:monospace;font-size:16px;font-weight:800;color:var(--gold);letter-spacing:2px;padding-left:36px" />
+                    <span id="as-ticker-status" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px"></span>
+                  </div>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">اسم الشركة</label>
+                  <div style="position:relative">
+                    <input class="f-input" id="as-name" type="text" placeholder="يُجلب تلقائياً بعد إدخال الرمز" oninput="calcAddStock()" style="padding-left:32px" />
+                    <span id="as-name-fetching" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;display:none">⏳</span>
+                  </div>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">القطاع</label>
+                  <select class="f-select" id="as-sector">
+                    <option value="">— اختر —</option>
+                    <option>الطاقة</option>
+                    <option>المواد الأساسية</option>
+                    <option>الصناعة</option>
+                    <option>التجزئة والخدمات</option>
+                    <option>الرعاية الصحية</option>
+                    <option>البنوك والتمويل</option>
+                    <option>الاتصالات وتقنية المعلومات</option>
+                    <option>المرافق العامة</option>
+                    <option>إدارة وتطوير العقارات</option>
+                    <option>السلع الاستهلاكية</option>
+                    <option>النقل والتوزيع</option>
+                    <option>التأمين</option>
+                    <option>الاستثمار متعدد القطاعات</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">المنصة / الوسيط <span class="req">*</span></label>
+                  <select class="f-select" id="as-platform">
+                    <option value="">— اختر —</option>
+                    <optgroup label="🇸🇦 سعودية" id="as-platform-sa-group">
+                      <option>دراية</option>
+                      <option>منصة الأهلي</option>
+                      <option>رياض المالية</option>
+                      <option>الراجحي المالية</option>
+                      <option>بنك البلاد</option>
+                      <option>إتقان</option>
+                      <option>ميزانية</option>
+                    </optgroup>
+                    <optgroup label="🇺🇸 أمريكية" id="as-platform-us-group">
+                      <option>Interactive Brokers</option>
+                      <option>Alpaca</option>
+                      <option>Robinhood</option>
+                      <option>TD Ameritrade</option>
+                      <option>Charles Schwab</option>
+                      <option>دراية (أمريكي)</option>
+                    </optgroup>
+                    <option value="أخرى">أخرى</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">الحالة</label>
+                  <select class="f-select" id="as-status">
+                    <option value="نشطة">نشطة ✅</option>
+                    <option value="مستلمة">مُبيعة / مستلمة</option>
+                    <option value="مؤجلة">مؤجلة</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- بيانات الصفقة -->
+          <div class="section-card">
+            <div class="section-head"><span class="section-title">💰 بيانات الشراء</span></div>
+            <div class="section-body" style="display:flex;flex-direction:column;gap:14px">
+              <div class="form-grid">
+                <div class="field-group">
+                  <label class="field-label">عدد الأسهم <span class="req">*</span></label>
+                  <input class="f-input" id="as-shares" type="number" step="1" min="1" placeholder="0" oninput="calcAddStock()" style="font-size:15px;font-weight:700" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">سعر الشراء للسهم (ر.س) <span class="req">*</span></label>
+                  <input class="f-input" id="as-buy-price" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAddStock()" style="color:var(--gold)" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">تاريخ الشراء</label>
+                  <input class="f-input" id="as-buy-date" type="date" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">الرسوم والعمولات (ر.س)</label>
+                  <input class="f-input" id="as-fees" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAddStock()" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- السعر الحالي والتقييم -->
+          <div class="section-card">
+            <div class="section-head"><span class="section-title">📊 السعر الحالي والتقييم</span></div>
+            <div class="section-body" style="display:flex;flex-direction:column;gap:14px">
+              <div class="form-grid">
+                <div class="field-group">
+                  <label class="field-label">السعر الحالي للسهم (ر.س)</label>
+                  <input class="f-input" id="as-curr-price" type="number" step="0.01" placeholder="اتركه فارغاً للتحديث التلقائي" oninput="calcAddStock()" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">سعر الهدف (ر.س)</label>
+                  <input class="f-input" id="as-target" type="number" step="0.01" placeholder="سعرك المستهدف للبيع" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">نسبة P/E</label>
+                  <input class="f-input" id="as-pe" type="number" step="0.01" placeholder="مثال: 18.5" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">عائد التوزيعات السنوي %</label>
+                  <input class="f-input" id="as-div-yield" type="number" step="0.01" placeholder="مثال: 3.5" oninput="calcAddStock()" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- استراتيجية الاستثمار -->
+          <div class="section-card">
+            <div class="section-head"><span class="section-title">🎯 الاستراتيجية</span></div>
+            <div class="section-body" style="display:flex;flex-direction:column;gap:14px">
+              <div class="form-grid">
+                <div class="field-group">
+                  <label class="field-label">أفق الاستثمار</label>
+                  <select class="f-select" id="as-horizon">
+                    <option value="">— اختر —</option>
+                    <option value="مضاربة">مضاربة (أقل من شهر)</option>
+                    <option value="قصير">قصير الأجل (1-6 أشهر)</option>
+                    <option value="متوسط">متوسط الأجل (6-24 شهر)</option>
+                    <option value="طويل">طويل الأجل (+2 سنوات)</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">مستوى المخاطرة</label>
+                  <select class="f-select" id="as-risk">
+                    <option value="منخفض">منخفض 🟢</option>
+                    <option value="متوسط" selected>متوسط 🟡</option>
+                    <option value="عالي">عالي 🔴</option>
+                    <option value="عالي جداً">عالي جداً ⚫</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">سبب الشراء</label>
+                  <select class="f-select" id="as-reason">
+                    <option value="">— اختر —</option>
+                    <option>توزيعات نقدية</option>
+                    <option>نمو رأس المال</option>
+                    <option>مضاربة</option>
+                    <option>تحوط</option>
+                    <option>قيمة مخفّضة (Value)</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">وقف الخسارة (ر.س)</label>
+                  <input class="f-input" id="as-stop-loss" type="number" step="0.01" placeholder="سعر وقف الخسارة" />
+                </div>
+              </div>
+              <div class="field-group">
+                <label class="field-label">ملاحظات</label>
+                <textarea class="f-input" id="as-notes" rows="2" placeholder="أسباب الشراء، توقعات، مصادر التحليل..." style="resize:none"></textarea>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── الجانب الأيسر: لوحة الحسابات اللحظية ── -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+
+          <!-- بطاقة الملخص الرئيسية -->
+          <div id="as-summary-card" class="section-card" style="position:sticky;top:72px;border:1px solid rgba(201,168,76,0.3)">
+            <div class="section-head" style="background:rgba(201,168,76,0.06)">
+              <span class="section-title" style="color:var(--gold)">📊 ملخص الصفقة</span>
+              <span id="as-ticker-badge" style="font-family:monospace;font-size:13px;font-weight:800;background:rgba(201,168,76,0.15);color:var(--gold);padding:3px 10px;border-radius:6px">—</span>
+            </div>
+            <div class="section-body">
+
+              <!-- KPIs -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+                <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;text-align:center">
+                  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي التكلفة</div>
+                  <div id="as-c-cost" style="font-size:18px;font-weight:800;font-family:monospace;color:var(--white)">—</div>
+                  <div style="font-size:10px;color:var(--muted);margin-top:2px">ر.س (شامل الرسوم)</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;text-align:center">
+                  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">القيمة السوقية</div>
+                  <div id="as-c-mkt" style="font-size:18px;font-weight:800;font-family:monospace;color:var(--cyan)">—</div>
+                  <div style="font-size:10px;color:var(--muted);margin-top:2px">ر.س حالياً</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;text-align:center">
+                  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">ر/خ غير محققة</div>
+                  <div id="as-c-pnl" style="font-size:18px;font-weight:800;font-family:monospace">—</div>
+                  <div id="as-c-pnl-pct" style="font-size:11px;color:var(--muted);margin-top:2px">—</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;text-align:center">
+                  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">سعر التعادل</div>
+                  <div id="as-c-breakeven" style="font-size:18px;font-weight:800;font-family:monospace;color:var(--gold)">—</div>
+                  <div style="font-size:10px;color:var(--muted);margin-top:2px">ر.س/سهم</div>
+                </div>
+              </div>
+
+              <!-- تفاصيل -->
+              <div style="display:flex;flex-direction:column;gap:8px;font-size:12px">
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+                  <span style="color:var(--muted)">عدد الأسهم</span>
+                  <span id="as-d-shares" style="font-family:monospace;font-weight:600">—</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+                  <span style="color:var(--muted)">متوسط سعر الشراء</span>
+                  <span id="as-d-avg" style="font-family:monospace;font-weight:600;color:var(--gold)">—</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+                  <span style="color:var(--muted)">الرسوم المدفوعة</span>
+                  <span id="as-d-fees" style="font-family:monospace;font-weight:600;color:var(--red)">—</span>
+                </div>
+                <div id="as-div-row" style="display:none;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+                  <span style="color:var(--muted)">التوزيعات السنوية المتوقعة</span>
+                  <span id="as-c-div" style="font-family:monospace;font-weight:600;color:var(--green)">—</span>
+                </div>
+                <div id="as-target-row" style="display:none;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+                  <span style="color:var(--muted)">العائد عند الهدف</span>
+                  <span id="as-c-target-pnl" style="font-family:monospace;font-weight:600;color:var(--green)">—</span>
+                </div>
+                <div id="as-stop-row" style="display:none;justify-content:space-between;padding:8px 0">
+                  <span style="color:var(--muted)">الخسارة عند وقف الخسارة</span>
+                  <span id="as-c-stop-pnl" style="font-family:monospace;font-weight:600;color:var(--red)">—</span>
+                </div>
+              </div>
+
+              <!-- Progress toward target -->
+              <div id="as-target-progress" style="display:none;margin-top:14px">
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px">
+                  <span>التقدم نحو الهدف</span>
+                  <span id="as-target-pct">0%</span>
+                </div>
+                <div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden">
+                  <div id="as-target-bar" style="height:100%;background:linear-gradient(90deg,var(--gold),#e8c97a);border-radius:3px;width:0%;transition:width .5s"></div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- زر الحفظ -->
+          <button onclick="saveAddStock()" style="
+            background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;
+            border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:700;
+            cursor:pointer;width:100%;font-family:inherit;
+            box-shadow:0 4px 20px rgba(201,168,76,0.3);transition:all .2s;
+          " onmouseover="this.style.transform='translateY(-2px)'"
+             onmouseout="this.style.transform=''">
+            💾 حفظ السهم
+          </button>
+
+          <button onclick="resetAddStock()" style="
+            background:rgba(255,255,255,0.05);border:1px solid var(--border);
+            border-radius:14px;padding:12px;font-size:13px;color:var(--muted);
+            cursor:pointer;width:100%;font-family:inherit;
+          ">🔄 مسح الحقول</button>
+
+        </div>
+      </div>
+
+      <!-- Mobile: single column -->
+      <style>
+        @media(max-width:768px){
+          .add-stock-grid { grid-template-columns:1fr !important; }
+          #as-summary-card { position:static !important; }
+        }
+      </style>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- PAGE: ADD LOAN — شاشة إضافة قرض         -->
+    <!-- ═══════════════════════════════════════ -->
+    <div id="page-add-loan" class="page">
+      <div class="page-header">
+        <div>
+          <div class="page-title" id="add-loan-title">🏦 إضافة قرض بنكي</div>
+          <div class="page-sub">أدخل بيانات القرض — تُحسب الأقساط تلقائياً</div>
+        </div>
+        <button onclick="showPage('loans',document.querySelector('.nav-loans')||document.getElementById('mnav-loans'),'🏦 القروض البنكية')" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:9px 18px;color:var(--muted);font-size:13px;cursor:pointer;font-family:inherit">← رجوع</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" class="add-form-grid">
+
+        <!-- يمين: حقول الإدخال -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+
+          <div class="section-card">
+            <div class="section-head"><span class="section-title">🏦 بيانات القرض</span></div>
+            <div class="section-body">
+              <div class="form-grid">
+                <div class="field-group" style="grid-column:span 2">
+                  <label class="field-label">مسمى القرض <span class="req">*</span></label>
+                  <input class="f-input" id="al-name" type="text" placeholder="مثال: قرض سيارة، قرض شخصي..." />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">البنك / الجهة الممولة <span class="req">*</span></label>
+                  <select class="f-select" id="al-bank">
+                    <option value="">— اختر —</option>
+                    <option>البنك الأهلي السعودي</option>
+                    <option>بنك الراجحي</option>
+                    <option>بنك الرياض</option>
+                    <option>البنك السعودي الفرنسي</option>
+                    <option>بنك البلاد</option>
+                    <option>بنك الجزيرة</option>
+                    <option>البنك السعودي للاستثمار</option>
+                    <option>بنك الإمارات دبي الوطني</option>
+                    <option>أخرى</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">نوع القرض</label>
+                  <select class="f-select" id="al-type">
+                    <option value="شخصي">شخصي</option>
+                    <option value="عقاري">عقاري</option>
+                    <option value="سيارة">سيارة</option>
+                    <option value="تجاري">تجاري</option>
+                    <option value="تعليمي">تعليمي</option>
+                    <option value="أخرى">أخرى</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">حالة القرض</label>
+                  <select class="f-select" id="al-status">
+                    <option value="نشط">نشط ✅</option>
+                    <option value="مسدد">مسدد</option>
+                    <option value="متأخر">متأخر ⚠️</option>
+                    <option value="مجمّد">مجمّد</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-card">
+            <div class="section-head"><span class="section-title">💰 التفاصيل المالية</span></div>
+            <div class="section-body">
+              <div class="form-grid">
+                <div class="field-group">
+                  <label class="field-label">مبلغ القرض (ر.س) <span class="req">*</span></label>
+                  <input class="f-input" id="al-principal" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAddLoan()" style="font-size:15px;font-weight:700;color:var(--gold)" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">نسبة الفائدة السنوية %</label>
+                  <input class="f-input" id="al-rate" type="number" step="0.01" min="0" placeholder="مثال: 4.5" oninput="calcAddLoan()" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">مدة القرض (سنوات)</label>
+                  <input class="f-input" id="al-years" type="number" step="0.5" min="0" placeholder="مثال: 5" oninput="calcAddLoan()" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">المبلغ المسدد (ر.س)</label>
+                  <input class="f-input" id="al-paid" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAddLoan()" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">تاريخ البداية</label>
+                  <input class="f-input" id="al-start" type="date" oninput="calcAddLoan()" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">تاريخ موعد القسط القادم</label>
+                  <input class="f-input" id="al-next-date" type="date" />
+                </div>
+              </div>
+              <div class="field-group" style="margin-top:8px">
+                <label class="field-label">ملاحظات</label>
+                <textarea class="f-input" id="al-notes" rows="2" placeholder="رقم العقد، ضمانات، شروط خاصة..." style="resize:none"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- يسار: ملخص حسابي -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="section-card" style="position:sticky;top:72px;border:1px solid rgba(201,168,76,0.3)">
+            <div class="section-head" style="background:rgba(201,168,76,0.06)">
+              <span class="section-title" style="color:var(--gold)">📊 ملخص القرض</span>
+            </div>
+            <div class="section-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+                <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;text-align:center">
+                  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">القسط الشهري</div>
+                  <div id="al-c-pmt" style="font-size:20px;font-weight:800;font-family:monospace;color:var(--gold)">—</div>
+                  <div style="font-size:10px;color:var(--muted);margin-top:2px">ر.س / شهر</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;text-align:center">
+                  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي الفوائد</div>
+                  <div id="al-c-interest" style="font-size:20px;font-weight:800;font-family:monospace;color:var(--red)">—</div>
+                  <div style="font-size:10px;color:var(--muted);margin-top:2px">ر.س</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;text-align:center">
+                  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي المبلغ</div>
+                  <div id="al-c-total" style="font-size:20px;font-weight:800;font-family:monospace;color:var(--white)">—</div>
+                  <div style="font-size:10px;color:var(--muted);margin-top:2px">ر.س</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;text-align:center">
+                  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">المتبقي</div>
+                  <div id="al-c-remaining" style="font-size:20px;font-weight:800;font-family:monospace;color:var(--red)">—</div>
+                  <div style="font-size:10px;color:var(--muted);margin-top:2px">ر.س</div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;font-size:12px">
+                <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+                  <span style="color:var(--muted)">عدد الأقساط</span>
+                  <span id="al-d-months" style="font-family:monospace;font-weight:600">—</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+                  <span style="color:var(--muted)">تكلفة الفائدة %</span>
+                  <span id="al-d-cost-pct" style="font-family:monospace;font-weight:600;color:var(--red)">—</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:7px 0">
+                  <span style="color:var(--muted)">تاريخ الانتهاء المتوقع</span>
+                  <span id="al-d-end-date" style="font-family:monospace;font-weight:600">—</span>
+                </div>
+              </div>
+              <div style="margin-top:14px">
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px">
+                  <span>نسبة السداد</span>
+                  <span id="al-progress-pct">0%</span>
+                </div>
+                <div style="height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden">
+                  <div id="al-progress-bar" style="height:100%;background:linear-gradient(90deg,var(--gold),#e8c97a);border-radius:4px;width:0%;transition:width .5s"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="saveAddLoan()" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:700;cursor:pointer;width:100%;font-family:inherit;box-shadow:0 4px 20px rgba(201,168,76,0.3);transition:all .2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">💾 حفظ القرض</button>
+          <button onclick="resetAddLoan()" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:14px;padding:12px;font-size:13px;color:var(--muted);cursor:pointer;width:100%;font-family:inherit">🔄 مسح</button>
+        </div>
+      </div>
+
+      <style>@media(max-width:768px){.add-form-grid{grid-template-columns:1fr !important}#add-loan-summary{position:static !important}}</style>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- PAGE: ADD DEBT — شاشة إضافة دين         -->
+    <!-- ═══════════════════════════════════════ -->
+    <div id="page-add-debt" class="page">
+      <div class="page-header">
+        <div>
+          <div class="page-title" id="add-debt-title">💸 إضافة دين / مديونية</div>
+          <div class="page-sub">سجّل الديون بينك وبين الآخرين</div>
+        </div>
+        <button onclick="showPage('debts',document.querySelector('.nav-debts')||document.getElementById('mnav-debts'),'💸 الديون الشخصية')" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:9px 18px;color:var(--muted);font-size:13px;cursor:pointer;font-family:inherit">← رجوع</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" class="add-form-grid">
+        <!-- يمين: حقول الإدخال -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+
+          <div class="section-card">
+            <div class="section-head"><span class="section-title">👤 بيانات الشخص</span></div>
+            <div class="section-body">
+              <div class="form-grid">
+                <div class="field-group" style="grid-column:span 2">
+                  <label class="field-label">اسم الشخص <span class="req">*</span></label>
+                  <input class="f-input" id="ad-person" type="text" placeholder="اسم الشخص المعني بالدين" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">الاتجاه <span class="req">*</span></label>
+                  <select class="f-select" id="ad-direction" onchange="updateDebtDirectionLabel()">
+                    <option value="owe">👆 عليّ (أنا المدين)</option>
+                    <option value="owed">👇 له عندي (هو المدين)</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">طبيعة العلاقة</label>
+                  <select class="f-select" id="ad-relation">
+                    <option>صديق</option>
+                    <option>أخ / أخت</option>
+                    <option>والد / والدة</option>
+                    <option>زميل عمل</option>
+                    <option>شريك تجاري</option>
+                    <option>آخر</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">رقم التواصل (واتساب)</label>
+                  <input class="f-input" id="ad-contact" type="tel" placeholder="05xxxxxxxx" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-card">
+            <div class="section-head"><span class="section-title" id="ad-amount-title">💰 تفاصيل المبلغ</span></div>
+            <div class="section-body">
+              <div class="form-grid">
+                <div class="field-group">
+                  <label class="field-label">المبلغ الأصلي (ر.س) <span class="req">*</span></label>
+                  <input class="f-input" id="ad-amount" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAddDebt()" style="font-size:15px;font-weight:700;color:var(--gold)" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">المبلغ المتبقي (ر.س)</label>
+                  <input class="f-input" id="ad-remaining" type="number" step="0.01" min="0" placeholder="مساوٍ للأصلي إذا لم يُسدَّد شيء" oninput="calcAddDebt()" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">سبب الدين</label>
+                  <input class="f-input" id="ad-reason" type="text" placeholder="مثال: إقراض نقدي، شراء بضاعة..." />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">طريقة السداد</label>
+                  <select class="f-select" id="ad-method">
+                    <option value="تحويل بنكي">تحويل بنكي</option>
+                    <option value="نقداً">نقداً</option>
+                    <option value="شيك">شيك</option>
+                    <option value="تقسيط">تقسيط</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">تاريخ الدين</label>
+                  <input class="f-input" id="ad-date" type="date" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">تاريخ الاستحقاق</label>
+                  <input class="f-input" id="ad-due" type="date" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-card">
+            <div class="section-head"><span class="section-title">📋 الحالة والتوثيق</span></div>
+            <div class="section-body">
+              <div class="form-grid">
+                <div class="field-group">
+                  <label class="field-label">حالة الدين</label>
+                  <select class="f-select" id="ad-status">
+                    <option value="قائم">قائم</option>
+                    <option value="جزئي">مسدد جزئياً</option>
+                    <option value="مسوَّى">مسوَّى ✅</option>
+                    <option value="متنازع عنه">متنازع عنه</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">موثق سنداً</label>
+                  <select class="f-select" id="ad-written">
+                    <option value="لا">لا</option>
+                    <option value="نعم">نعم — سند موقّع</option>
+                    <option value="شهود">شهود فقط</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-group" style="margin-top:12px">
+                <label class="field-label">ملاحظات</label>
+                <textarea class="f-input" id="ad-notes" rows="2" placeholder="تفاصيل إضافية، اتفاقيات..." style="resize:none"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- يسار: ملخص -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="section-card" style="position:sticky;top:72px;border:1px solid rgba(201,168,76,0.3)">
+            <div class="section-head" style="background:rgba(201,168,76,0.06)">
+              <span class="section-title" style="color:var(--gold)">📊 ملخص الدين</span>
+            </div>
+            <div class="section-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+                <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;text-align:center">
+                  <div style="font-size:10px;color:var(--muted);margin-bottom:4px" id="ad-label-total">المبلغ عليك</div>
+                  <div id="ad-c-amount" style="font-size:20px;font-weight:800;font-family:monospace;color:var(--red)">—</div>
+                  <div style="font-size:10px;color:var(--muted)">ر.س</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;text-align:center">
+                  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">المتبقي</div>
+                  <div id="ad-c-remaining" style="font-size:20px;font-weight:800;font-family:monospace;color:var(--red)">—</div>
+                  <div style="font-size:10px;color:var(--muted)">ر.س</div>
+                </div>
+              </div>
+              <div style="margin-top:6px">
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px">
+                  <span>نسبة السداد</span>
+                  <span id="ad-progress-pct">0%</span>
+                </div>
+                <div style="height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden">
+                  <div id="ad-progress-bar" style="height:100%;background:linear-gradient(90deg,#f87171,#fbbf24);border-radius:4px;width:0%;transition:width .5s"></div>
+                </div>
+              </div>
+              <div id="ad-due-warning" style="display:none;margin-top:14px;padding:10px 14px;background:rgba(255,152,0,0.1);border:1px solid rgba(255,152,0,0.25);border-radius:10px;font-size:12px;color:var(--orange)"></div>
+            </div>
+          </div>
+
+          <button onclick="saveAddDebt()" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:700;cursor:pointer;width:100%;font-family:inherit;box-shadow:0 4px 20px rgba(201,168,76,0.3);transition:all .2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">💾 حفظ الدين</button>
+          <button onclick="resetAddDebt()" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:14px;padding:12px;font-size:13px;color:var(--muted);cursor:pointer;width:100%;font-family:inherit">🔄 مسح</button>
+        </div>
+      </div>
+    </div>
+
+</div><!-- end .app -->
 
 <!-- MOBILE BOTTOM NAV -->
 <nav class="mobile-nav">
@@ -3593,6 +4172,13 @@
   animation:fadeUp .2s ease;
 ">
   <div style="font-size:10px;color:var(--muted);padding:6px 12px 4px;letter-spacing:.5px;text-transform:uppercase">المزيد من الصفحات</div>
+  <button onclick="showPage('add-stock', null, '📈 إضافة سهم'); closeMobileMore()" style="
+    width:100%;text-align:right;padding:14px 16px;background:rgba(201,168,76,0.08);
+    border:1px solid rgba(201,168,76,0.2);border-radius:10px;color:var(--gold);
+    font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:6px;
+    display:flex;align-items:center;gap:10px;">
+    <span style="font-size:18px">📈</span> إضافة سهم جديد
+  </button>
   <button onclick="showPage('stocks', document.getElementById('mnav-more'), '📈 الأسهم'); closeMobileMore()" style="
     width:100%;display:flex;align-items:center;gap:12px;
     background:none;border:none;padding:10px 14px;
@@ -3910,7 +4496,7 @@ async function runAIAnalysis() {
 
     var summary = 'المحفظة: ' + totalAmt.toLocaleString('en-US') + ' ر.س | عوائد: ' + totalRet.toLocaleString('en-US') + ' ر.س | ROI: '+roi+'% | الفرص: '+inv.length+' (نشطة:'+active+' مستلمة:'+done+') | صكوك:'+Math.round(sukukAmt/1000)+'k صناديق:'+Math.round(fundsAmt/1000)+'k اسهم:'+Math.round(stksAmt/1000)+'k | منصات: '+platStr+' | افضل: '+topGain+' | اسوا: '+topLoss+' | ديون:'+((window.debtsData||[]).length)+' قروض:'+((window.loansData||[]).length);
 
-    var PROXY_URL = 'https://claude-proxy.fahad-shaheen.workers.dev'; // Cloudflare Worker — Claude API key is safe here
+    var PROXY_URL = 'https://claude-proxy.shaheenhouse1.workers.dev'; // Cloudflare Worker — Claude API key is safe here
 
     var payload = {
       model: 'claude-sonnet-4-20250514',
@@ -4070,7 +4656,7 @@ let currentFilter = 'all';
 let currentSearch = '';
 
 function renderAll(){
-  let data = investments;
+  let data = window.__investments || investments;
   if(currentFilter !== 'all'){
     if(['نشطة','مستلمة'].includes(currentFilter)){
       data = data.filter(x=>(x.status||'').includes(currentFilter));
@@ -4122,6 +4708,11 @@ const STOCK_PRICES = {
 
 // Fetch live prices from Yahoo Finance (free, no API key needed)
 async function fetchLiveStockPrices() {
+  // Always include static tickers + any new SA stocks added by user
+  const inv = window.__investments || investments;
+  inv.filter(x=>x.type==='سهم' && x.market !== 'us' && x.ticker).forEach(x=>{
+    if (!STOCK_PRICES[x.ticker]) STOCK_PRICES[x.ticker]={price:null,chg:null,color:''};
+  });
   const tickers = Object.keys(STOCK_PRICES);
   const symbols = tickers.map(t => t + '.SR').join(',');
   const url = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + symbols
@@ -4216,16 +4807,18 @@ PAGE_TITLES['insights'] = '📊 التحليل المتقدم';
 
 //  showPage hooks for new pages 
 var _origShowPage = showPage;
-showPage = function(id, navEl, mobileTitle) {
-  _origShowPage(id, navEl, mobileTitle);
+showPage = function(id, navEl, mobileTitle, noScroll) {
+  _origShowPage(id, navEl, mobileTitle, noScroll);
   if (id === 'calendar') { renderCalendar(); }
   if (id === 'cashflow') { renderCashflow(); }
   if (id === 'insights') { renderSharpe(); renderBenchmark(); }
-  // Ensure scroll is at top after render
-  setTimeout(function() {
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-  }, 50);
+  // Only scroll to top if NOT called from a form button
+  if (!noScroll) {
+    setTimeout(function() {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+    }, 50);
+  }
 };
 
 // 
@@ -4767,7 +5360,8 @@ function exportPDF() {
 
 
 function renderStocks() {
-  const stockData = investments.filter(x => x.type === 'سهم');
+  const inv = window.__investments || investments;
+  const stockData = inv.filter(x => x.type === 'سهم' && x.market !== 'us');
 
   // Update header badges
   const totalInvested = stockData.reduce((s, r) => s + (r.amount || 0), 0);
@@ -5348,7 +5942,8 @@ function deleteEntry(idx) {
 
 // Live prices map (ticker  {price, change_pct})
 function renderSukuk() {
-  const sukukData = investments.filter(x => x.type === 'صك' || x.type === 'مرابحة');
+  const _inv = window.__investments || investments;
+  const sukukData = _inv.filter(x => x.type === 'صك' || x.type === 'مرابحة');
   const totalAmt  = sukukData.reduce((s,x)=>s+(x.amount||0),0);
   const active    = sukukData.filter(x=>x.status==='نشطة').length;
   const done      = sukukData.filter(x=>x.status==='مستلمة').length;
@@ -5374,7 +5969,8 @@ function renderSukuk() {
 }
 
 function renderFunds() {
-  const fundsData = investments.filter(x => x.type === 'صندوق');
+  const _inv = window.__investments || investments;
+  const fundsData = _inv.filter(x => x.type === 'صندوق');
   const totalAmt  = fundsData.reduce((s,x)=>s+(x.amount||0),0);
   // Update dynamic header
   const subEl = document.getElementById('funds-sub');
@@ -5426,6 +6022,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 //  PAGE NAVIGATION 
 const PAGE_TITLES = {
+  'add-stock': '📈 إضافة سهم',
+  'add-loan': '🏦 إضافة قرض',
+  'add-debt': '💸 إضافة دين',
   dashboard: '📊 لوحة التحكم',
   stocks:    '📈 الأسهم',
   sukuk:     '🏛 الصكوك',
@@ -5435,7 +6034,7 @@ const PAGE_TITLES = {
   add:       '➕ إضافة فرصة',
 };
 
-function showPage(id, navEl, mobileTitle){
+function showPage(id, navEl, mobileTitle, noScroll){
   window.__currentPage = id;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
@@ -5460,12 +6059,16 @@ function showPage(id, navEl, mobileTitle){
   if (titleEl) titleEl.textContent = mobileTitle || PAGE_TITLES[id] || '';
 
   // Scroll to top — account for fixed topbar on desktop
-  var topbarH = window.innerWidth > 768 ? 64 : 0;
-  window.scrollTo({ top: topbarH > 0 ? 0 : 0, behavior: 'smooth' });
-  document.documentElement.scrollTop = 0;
-  document.body.scrollTop = 0;
+  if (!noScroll) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }
   if (id === 'db') dbRender();
-  if (id === 'stocks') renderStocks();
+  if (id === 'stocks') { renderStocks(); renderUsStocksTable(); }
+  if (id === 'add-stock') { resetAddStock(); calcAddStock(); }
+  if (id === 'add-loan')  { if(!_editingLoanPageIdx) resetAddLoan(); calcAddLoan(); }
+  if (id === 'add-debt')  { if(!_editingDebtPageIdx) resetAddDebt(); updateDebtDirectionLabel(); calcAddDebt(); }
   if (id === 'loans') renderLoans();
   if (id === 'debts') renderDebts();
   if (id === 'dashboard') { initDashboardYears(); renderDashboard(); }
@@ -6003,15 +6606,729 @@ let loansData = JSON.parse(localStorage.getItem('loansData') || '[]');
 window.loansData = loansData;
 let editingLoanIdx = null;
 
+// ══════════════════════════════════════════════
+// ADD STOCK PAGE
+// ══════════════════════════════════════════════
+var _editingStockIdx = null;
+
+function calcAddStock() {
+  var shares    = parseFloat(document.getElementById('as-shares')?.value) || 0;
+  var buyPrice  = parseFloat(document.getElementById('as-buy-price')?.value) || 0;
+  var fees      = parseFloat(document.getElementById('as-fees')?.value) || 0;
+  var currPrice = parseFloat(document.getElementById('as-curr-price')?.value) || 0;
+  var target    = parseFloat(document.getElementById('as-target')?.value) || 0;
+  var stopLoss  = parseFloat(document.getElementById('as-stop-loss')?.value) || 0;
+  var divYield  = parseFloat(document.getElementById('as-div-yield')?.value) || 0;
+  var ticker    = (document.getElementById('as-ticker')?.value || '').trim();
+
+  var cost      = shares * buyPrice + fees;
+  var mktVal    = currPrice > 0 ? shares * currPrice : 0;
+  var pnl       = mktVal > 0 ? mktVal - cost : 0;
+  var pnlPct    = cost > 0 && mktVal > 0 ? (pnl / cost * 100) : 0;
+  var breakeven = shares > 0 ? (cost / shares) : 0;
+  var annualDiv = cost > 0 && divYield > 0 ? (cost * divYield / 100) : 0;
+
+  var fmt = function(n) { return n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); };
+  var set = function(id, v) { var e = document.getElementById(id); if(e) e.textContent = v; };
+
+  // Update ticker badge
+  var badge = document.getElementById('as-ticker-badge');
+  if (badge) badge.textContent = ticker || '—';
+
+  // Cost
+  set('as-c-cost', cost > 0 ? fmt(cost) + ' ر.س' : '—');
+  // Market value
+  set('as-c-mkt', mktVal > 0 ? fmt(mktVal) + ' ر.س' : '—');
+  // PnL
+  var pnlEl = document.getElementById('as-c-pnl');
+  var pnlPctEl = document.getElementById('as-c-pnl-pct');
+  if (pnlEl) {
+    if (mktVal > 0) {
+      pnlEl.textContent = (pnl >= 0 ? '+' : '') + fmt(pnl) + ' ر.س';
+      pnlEl.style.color = pnl >= 0 ? 'var(--green)' : 'var(--red)';
+    } else { pnlEl.textContent = '—'; pnlEl.style.color = 'var(--muted)'; }
+  }
+  if (pnlPctEl) {
+    pnlPctEl.textContent = mktVal > 0 ? (pnlPct >= 0 ? '▲ +' : '▼ ') + Math.abs(pnlPct).toFixed(2) + '%' : '—';
+    pnlPctEl.style.color = pnl >= 0 ? 'var(--green)' : 'var(--red)';
+  }
+  // Breakeven
+  set('as-c-breakeven', breakeven > 0 ? fmt(breakeven) : '—');
+  // Details
+  set('as-d-shares', shares > 0 ? shares.toLocaleString('en-US') + ' سهم' : '—');
+  set('as-d-avg', breakeven > 0 ? fmt(breakeven) + ' ر.س' : '—');
+  set('as-d-fees', fees > 0 ? fmt(fees) + ' ر.س' : '—');
+
+  // Dividend
+  var divRow = document.getElementById('as-div-row');
+  if (divRow) divRow.style.display = annualDiv > 0 ? 'flex' : 'none';
+  set('as-c-div', annualDiv > 0 ? fmt(annualDiv) + ' ر.س' : '—');
+
+  // Target
+  var targetRow = document.getElementById('as-target-row');
+  if (targetRow) targetRow.style.display = target > 0 && shares > 0 ? 'flex' : 'none';
+  if (target > 0 && shares > 0) {
+    var targetPnl = (target * shares) - cost;
+    set('as-c-target-pnl', (targetPnl >= 0 ? '+' : '') + fmt(targetPnl) + ' ر.س (' + (targetPnl/cost*100).toFixed(1) + '%)');
+  }
+
+  // Stop loss
+  var stopRow = document.getElementById('as-stop-row');
+  if (stopRow) stopRow.style.display = stopLoss > 0 && shares > 0 ? 'flex' : 'none';
+  if (stopLoss > 0 && shares > 0) {
+    var stopPnl = (stopLoss * shares) - cost;
+    set('as-c-stop-pnl', fmt(stopPnl) + ' ر.س (' + (stopPnl/cost*100).toFixed(1) + '%)');
+  }
+
+  // Target progress bar
+  var progWrap = document.getElementById('as-target-progress');
+  if (progWrap) {
+    if (target > 0 && currPrice > 0 && buyPrice > 0) {
+      progWrap.style.display = 'block';
+      var pct = Math.min(100, Math.max(0, ((currPrice - buyPrice) / (target - buyPrice)) * 100));
+      var bar = document.getElementById('as-target-bar');
+      var pctEl = document.getElementById('as-target-pct');
+      if (bar) bar.style.width = pct.toFixed(0) + '%';
+      if (pctEl) pctEl.textContent = pct.toFixed(0) + '%';
+    } else { progWrap.style.display = 'none'; }
+  }
+}
+
+function saveAddStock() {
+  var ticker    = (document.getElementById('as-ticker')?.value || '').trim().toUpperCase();
+  var name      = (document.getElementById('as-name')?.value || '').trim() || ticker;
+  var shares    = parseFloat(document.getElementById('as-shares')?.value) || 0;
+  var buyPrice  = parseFloat(document.getElementById('as-buy-price')?.value) || 0;
+  var platform  = document.getElementById('as-platform')?.value || '';
+
+  if (!ticker)    { showToast('❌ أدخل رمز السهم'); return; }
+  if (!shares)    { showToast('❌ أدخل عدد الأسهم'); return; }
+  if (!buyPrice)  { showToast('❌ أدخل سعر الشراء'); return; }
+  if (!platform)  { showToast('❌ اختر المنصة'); return; }
+
+  var fees      = parseFloat(document.getElementById('as-fees')?.value) || 0;
+  var currPrice = parseFloat(document.getElementById('as-curr-price')?.value) || 0;
+  var cost      = shares * buyPrice + fees;
+  var mktVal    = currPrice > 0 ? shares * currPrice : 0;
+  var pnl       = mktVal > 0 ? mktVal - cost : 0;
+
+  var newStock = {
+    name:     shares + ' سهم في ' + name,
+    type:     'سهم',
+    platform: platform,
+    ticker:   ticker,
+    shares:   shares,
+    amount:   cost,
+    ret_pct:  mktVal > 0 && cost > 0 ? pnl / cost : 0,
+    ret_val:  pnl,
+    total:    mktVal > 0 ? mktVal : cost,
+    status:   document.getElementById('as-status')?.value || 'نشطة',
+    risk:     document.getElementById('as-risk')?.value || 'متوسط',
+    date_in:  document.getElementById('as-buy-date')?.value || new Date().toISOString().split('T')[0],
+    date_out: null,
+    sector:   document.getElementById('as-sector')?.value || '',
+    horizon:  document.getElementById('as-horizon')?.value || '',
+    reason:   document.getElementById('as-reason')?.value || '',
+    stop_loss: parseFloat(document.getElementById('as-stop-loss')?.value) || 0,
+    target:   parseFloat(document.getElementById('as-target')?.value) || 0,
+    pe:       parseFloat(document.getElementById('as-pe')?.value) || 0,
+    div_yield:parseFloat(document.getElementById('as-div-yield')?.value) || 0,
+    notes:    document.getElementById('as-notes')?.value || '',
+    buy_price_per_share: buyPrice,
+    added_at: new Date().toISOString(),
+    market: _currentStockMarket
+  };
+
+  if (_editingStockIdx !== null) {
+    (window.__investments || investments)[_editingStockIdx] = newStock;
+    showToast('✅ تم تحديث السهم: ' + name);
+  } else {
+    (window.__investments || investments).push(newStock);
+    showToast('✅ تم حفظ السهم: ' + name);
+  }
+
+  triggerSync('investments');
+  renderStocks();
+  renderAll();
+  resetAddStock();
+
+  // Navigate back to stocks
+  showPage('stocks', document.querySelector('.sidebar .nav-item[onclick*=stocks]'), '📈 الأسهم');
+}
+
+function resetAddStock() {
+  _editingStockIdx = null;
+  ['as-name','as-ticker','as-shares','as-buy-price','as-fees','as-curr-price',
+   'as-target','as-stop-loss','as-pe','as-div-yield','as-notes'].forEach(function(id) {
+    var e = document.getElementById(id); if (e) e.value = '';
+  });
+  ['as-sector','as-platform','as-status','as-risk','as-horizon','as-reason'].forEach(function(id) {
+    var e = document.getElementById(id); if (e) e.selectedIndex = 0;
+  });
+  calcAddStock();
+}
+
+function editStockFromCard(invIdx) {
+  var stock = (window.__investments || investments)[invIdx];
+  if (!stock) return;
+  _editingStockIdx = invIdx;
+  showPage('add-stock', null, '📈 تعديل سهم', true);
+
+  setTimeout(function() {
+    // Populate from the name (remove "X سهم في " prefix)
+    var nameClean = stock.name.replace(/^\d+ سهم في /, '');
+    var set = function(id, v) { var e = document.getElementById(id); if(e) e.value = v || ''; };
+    set('as-name',      nameClean);
+    set('as-ticker',    stock.ticker || '');
+    set('as-shares',    stock.shares || '');
+    set('as-buy-price', stock.buy_price_per_share || (stock.shares ? (stock.amount / stock.shares).toFixed(2) : ''));
+    set('as-fees',      '');
+    set('as-curr-price', '');
+    set('as-target',    stock.target || '');
+    set('as-stop-loss', stock.stop_loss || '');
+    set('as-pe',        stock.pe || '');
+    set('as-div-yield', stock.div_yield || '');
+    set('as-notes',     stock.notes || '');
+    var setsel = function(id, v) { var e = document.getElementById(id); if(e && v) e.value = v; };
+    setsel('as-platform', stock.platform);
+    setsel('as-status',   stock.status);
+    setsel('as-risk',     stock.risk);
+    setsel('as-sector',   stock.sector);
+    setsel('as-horizon',  stock.horizon);
+    setsel('as-reason',   stock.reason);
+    calcAddStock();
+  }, 100);
+}
+
+
+// ══════════════════════════════════════════════
+// ADD LOAN PAGE
+// ══════════════════════════════════════════════
+var _editingLoanPageIdx = null;
+
+function calcAddLoan() {
+  var principal = parseFloat(document.getElementById('al-principal')?.value) || 0;
+  var rate      = parseFloat(document.getElementById('al-rate')?.value) || 0;
+  var years     = parseFloat(document.getElementById('al-years')?.value) || 0;
+  var paid      = parseFloat(document.getElementById('al-paid')?.value) || 0;
+  var startVal  = document.getElementById('al-start')?.value || '';
+
+  var fmt = function(n) { return n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); };
+  var set = function(id, v) { var e=document.getElementById(id); if(e) e.textContent=v; };
+
+  if (principal <= 0) {
+    set('al-c-pmt','—'); set('al-c-interest','—'); set('al-c-total','—');
+    set('al-c-remaining','—'); set('al-d-months','—'); set('al-d-cost-pct','—');
+    set('al-d-end-date','—');
+    var bar=document.getElementById('al-progress-bar'); if(bar) bar.style.width='0%';
+    document.getElementById('al-progress-pct').textContent='0%';
+    return;
+  }
+
+  var pmt=0, totalAmt=principal, totalInt=0, months=0;
+  if (rate > 0 && years > 0) {
+    months = Math.round(years * 12);
+    var r = (rate/100)/12;
+    pmt = principal * (r * Math.pow(1+r,months)) / (Math.pow(1+r,months)-1);
+    totalAmt = pmt * months;
+    totalInt = totalAmt - principal;
+  } else if (years > 0) {
+    months = Math.round(years * 12);
+    pmt = principal / months;
+    totalAmt = principal;
+    totalInt = 0;
+  }
+
+  var remaining = Math.max(0, principal - paid);
+  var pct = principal > 0 ? Math.min(100,(paid/principal)*100) : 0;
+
+  set('al-c-pmt', pmt > 0 ? fmt(pmt) : '—');
+  set('al-c-interest', totalInt > 0 ? fmt(totalInt) : '—');
+  set('al-c-total', totalAmt > 0 ? fmt(totalAmt) : '—');
+  set('al-c-remaining', fmt(remaining));
+  set('al-d-months', months > 0 ? months + ' قسط' : '—');
+  set('al-d-cost-pct', totalInt > 0 && principal > 0 ? (totalInt/principal*100).toFixed(1)+'%' : '—');
+
+  if (startVal && months > 0) {
+    var endDate = new Date(startVal);
+    endDate.setMonth(endDate.getMonth() + months);
+    set('al-d-end-date', endDate.toLocaleDateString('ar-SA-u-nu-latn',{year:'numeric',month:'long'}));
+    // update end date field if visible
+    var endFld = document.getElementById('al-end');
+    if (endFld) endFld.value = endDate.toISOString().split('T')[0];
+  } else { set('al-d-end-date','—'); }
+
+  var bar = document.getElementById('al-progress-bar');
+  var pctEl = document.getElementById('al-progress-pct');
+  if (bar) bar.style.width = pct.toFixed(0) + '%';
+  if (pctEl) pctEl.textContent = pct.toFixed(0) + '%';
+}
+
+function saveAddLoan() {
+  var name      = (document.getElementById('al-name')?.value || '').trim();
+  var bank      = document.getElementById('al-bank')?.value || '';
+  var principal = parseFloat(document.getElementById('al-principal')?.value) || 0;
+
+  if (!name)      { showToast('❌ أدخل مسمى القرض'); return; }
+  if (!bank)      { showToast('❌ اختر البنك'); return; }
+  if (!principal) { showToast('❌ أدخل مبلغ القرض'); return; }
+
+  var rate    = parseFloat(document.getElementById('al-rate')?.value) || 0;
+  var years   = parseFloat(document.getElementById('al-years')?.value) || 0;
+  var paid    = parseFloat(document.getElementById('al-paid')?.value) || 0;
+  var months  = Math.round(years * 12);
+  var r       = rate > 0 ? (rate/100)/12 : 0;
+  var pmt     = (r > 0 && months > 0) ? principal*(r*Math.pow(1+r,months))/(Math.pow(1+r,months)-1) : (months > 0 ? principal/months : 0);
+  var totalAmt = pmt > 0 ? pmt * months : principal;
+
+  var loan = {
+    name:        name,
+    bank:        bank,
+    type:        document.getElementById('al-type')?.value || 'شخصي',
+    status:      document.getElementById('al-status')?.value || 'نشط',
+    principal:   principal,
+    rate:        rate,
+    years:       years,
+    total_amount: totalAmt,
+    installment: pmt,
+    inst_total:  months,
+    inst_paid:   paid > 0 && pmt > 0 ? Math.round(paid/pmt) : 0,
+    paid_amount: paid,
+    remaining:   Math.max(0, principal - paid),
+    start_date:  document.getElementById('al-start')?.value || '',
+    next_date:   document.getElementById('al-next-date')?.value || '',
+    notes:       document.getElementById('al-notes')?.value || '',
+    collateral:  'بدون ضمان',
+    created_at:  new Date().toISOString()
+  };
+
+  if (_editingLoanPageIdx !== null) {
+    loansData[_editingLoanPageIdx] = loan;
+    showToast('✅ تم تحديث القرض: ' + name);
+  } else {
+    loansData.push(loan);
+    showToast('✅ تم حفظ القرض: ' + name);
+  }
+
+  window.loansData = loansData;
+  saveLoansToStorage();
+  renderLoans();
+  resetAddLoan();
+  showPage('loans', document.querySelector('.nav-loans')||document.getElementById('mnav-loans'), '🏦 القروض البنكية');
+}
+
+function resetAddLoan() {
+  _editingLoanPageIdx = null;
+  ['al-name','al-principal','al-rate','al-years','al-paid','al-start','al-next-date','al-notes'].forEach(function(id){
+    var e=document.getElementById(id); if(e) e.value='';
+  });
+  document.getElementById('al-bank').selectedIndex=0;
+  calcAddLoan();
+}
+
+function openLoanEditPage(idx) {
+  _editingLoanPageIdx = idx;
+  var l = loansData[idx];
+  if (!l) return;
+  showPage('add-loan', null, '🏦 تعديل قرض', true);
+  setTimeout(function(){
+    var set=function(id,v){var e=document.getElementById(id);if(e)e.value=v||'';};
+    set('al-name', l.name); set('al-principal', l.principal); set('al-rate', l.rate);
+    set('al-years', l.years); set('al-paid', l.paid_amount); set('al-start', l.start_date);
+    set('al-next-date', l.next_date); set('al-notes', l.notes);
+    var setsel=function(id,v){var e=document.getElementById(id);if(e&&v)e.value=v;};
+    setsel('al-bank', l.bank); setsel('al-type', l.type); setsel('al-status', l.status);
+    var titleEl=document.getElementById('add-loan-title');
+    if(titleEl) titleEl.textContent='🏦 تعديل القرض: '+l.name;
+    calcAddLoan();
+  }, 100);
+}
+
+// ══════════════════════════════════════════════
+// ADD DEBT PAGE
+// ══════════════════════════════════════════════
+var _editingDebtPageIdx = null;
+
+function updateDebtDirectionLabel() {
+  var dir = document.getElementById('ad-direction')?.value;
+  var lbl = document.getElementById('ad-label-total');
+  var titleEl = document.getElementById('add-debt-title');
+  var amtTitle = document.getElementById('ad-amount-title');
+  var isOwe = dir === 'owe';
+  if (lbl) lbl.textContent = isOwe ? 'المبلغ عليك' : 'المبلغ لك';
+  if (titleEl) titleEl.textContent = isOwe ? '💸 إضافة دين (عليّ)' : '💰 إضافة دين (له عندي)';
+  if (amtTitle) amtTitle.textContent = isOwe ? '💰 المبلغ المطلوب منك' : '💰 المبلغ المطلوب منه';
+  var barEl = document.getElementById('ad-progress-bar');
+  if (barEl) barEl.style.background = isOwe ? 'linear-gradient(90deg,#f87171,#fbbf24)' : 'linear-gradient(90deg,#4caf82,#38d9a9)';
+  var amtEl = document.getElementById('ad-c-amount');
+  var remEl = document.getElementById('ad-c-remaining');
+  if (amtEl) amtEl.style.color = isOwe ? 'var(--red)' : 'var(--green)';
+  if (remEl) remEl.style.color = isOwe ? 'var(--red)' : 'var(--green)';
+}
+
+function calcAddDebt() {
+  var amount    = parseFloat(document.getElementById('ad-amount')?.value) || 0;
+  var remaining = parseFloat(document.getElementById('ad-remaining')?.value);
+  if (isNaN(remaining)) remaining = amount;
+
+  var fmt = function(n) { return n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); };
+  var set = function(id, v) { var e=document.getElementById(id); if(e) e.textContent=v; };
+
+  set('ad-c-amount',    amount > 0 ? fmt(amount) : '—');
+  set('ad-c-remaining', amount > 0 ? fmt(remaining) : '—');
+
+  var pct = amount > 0 ? Math.min(100, ((amount-remaining)/amount)*100) : 0;
+  var bar = document.getElementById('ad-progress-bar');
+  var pctEl = document.getElementById('ad-progress-pct');
+  if (bar) bar.style.width = pct.toFixed(0)+'%';
+  if (pctEl) pctEl.textContent = pct.toFixed(0)+'%';
+
+  // Due date warning
+  var dueVal = document.getElementById('ad-due')?.value;
+  var warning = document.getElementById('ad-due-warning');
+  if (dueVal && warning) {
+    var daysLeft = Math.ceil((new Date(dueVal)-new Date())/86400000);
+    if (daysLeft < 0) {
+      warning.style.display='block';
+      warning.textContent='⚠️ تجاوز تاريخ الاستحقاق بـ '+Math.abs(daysLeft)+' يوم';
+      warning.style.color='var(--red)';
+    } else if (daysLeft <= 14) {
+      warning.style.display='block';
+      warning.textContent='⏰ يستحق بعد '+daysLeft+' يوم';
+      warning.style.color='var(--orange)';
+    } else { warning.style.display='none'; }
+  } else if (warning) { warning.style.display='none'; }
+}
+
+function saveAddDebt() {
+  var person = (document.getElementById('ad-person')?.value || '').trim();
+  var amount = parseFloat(document.getElementById('ad-amount')?.value) || 0;
+
+  if (!person) { showToast('❌ أدخل اسم الشخص'); return; }
+  if (!amount) { showToast('❌ أدخل المبلغ'); return; }
+
+  var remaining = parseFloat(document.getElementById('ad-remaining')?.value);
+  if (isNaN(remaining)) remaining = amount;
+
+  var debt = {
+    person:    person,
+    direction: document.getElementById('ad-direction')?.value || 'owe',
+    amount:    amount,
+    remaining: remaining,
+    reason:    document.getElementById('ad-reason')?.value || '',
+    relation:  document.getElementById('ad-relation')?.value || 'صديق',
+    contact:   document.getElementById('ad-contact')?.value || '',
+    method:    document.getElementById('ad-method')?.value || 'تحويل بنكي',
+    date:      document.getElementById('ad-date')?.value || new Date().toISOString().split('T')[0],
+    due_date:  document.getElementById('ad-due')?.value || '',
+    status:    document.getElementById('ad-status')?.value || 'قائم',
+    written:   document.getElementById('ad-written')?.value || 'لا',
+    notes:     document.getElementById('ad-notes')?.value || '',
+    created_at: new Date().toISOString()
+  };
+
+  if (_editingDebtPageIdx !== null) {
+    debtsData[_editingDebtPageIdx] = debt;
+    showToast('✅ تم تحديث الدين: ' + person);
+  } else {
+    debtsData.push(debt);
+    showToast('✅ تم حفظ الدين: ' + person);
+  }
+
+  window.debtsData = debtsData;
+  saveDebtsToStorage();
+  renderDebts();
+  resetAddDebt();
+  showPage('debts', document.querySelector('.nav-debts')||document.getElementById('mnav-debts'), '💸 الديون الشخصية');
+}
+
+function resetAddDebt() {
+  _editingDebtPageIdx = null;
+  ['ad-person','ad-amount','ad-remaining','ad-reason','ad-contact','ad-due','ad-notes'].forEach(function(id){
+    var e=document.getElementById(id); if(e) e.value='';
+  });
+  var today=new Date().toISOString().split('T')[0];
+  var dateEl=document.getElementById('ad-date'); if(dateEl) dateEl.value=today;
+  ['ad-direction','ad-relation','ad-method','ad-status','ad-written'].forEach(function(id){
+    var e=document.getElementById(id); if(e) e.selectedIndex=0;
+  });
+  updateDebtDirectionLabel();
+  calcAddDebt();
+}
+
+function openDebtEditPage(idx) {
+  _editingDebtPageIdx = idx;
+  var d = debtsData[idx];
+  if (!d) return;
+  showPage('add-debt', null, '💸 تعديل دين', true);
+  setTimeout(function(){
+    var set=function(id,v){var e=document.getElementById(id);if(e)e.value=v||'';};
+    set('ad-person',d.person); set('ad-amount',d.amount); set('ad-remaining',d.remaining||d.amount);
+    set('ad-reason',d.reason); set('ad-contact',d.contact); set('ad-date',d.date);
+    set('ad-due',d.due_date); set('ad-notes',d.notes);
+    var setsel=function(id,v){var e=document.getElementById(id);if(e&&v)e.value=v;};
+    setsel('ad-direction',d.direction); setsel('ad-relation',d.relation);
+    setsel('ad-method',d.method); setsel('ad-status',d.status); setsel('ad-written',d.written);
+    updateDebtDirectionLabel(); calcAddDebt();
+  }, 100);
+}
+
+
+// ══════════════════════════════════════════════
+// STOCKS — MARKET TABS & US PRICES
+// ══════════════════════════════════════════════
+var _currentStocksTab = 'sa';
+var _currentStockMarket = 'sa'; // for add form
+var _tickerFetchTimer = null;
+
+// ── تبديل تبويب الأسهم SA/US ─────────────────────────────────────────────────
+function switchStocksTab(tab) {
+  _currentStocksTab = tab;
+  var sa = document.getElementById('stocks-tab-sa');
+  var us = document.getElementById('stocks-tab-us');
+  var btnSa = document.getElementById('tab-sa');
+  var btnUs = document.getElementById('tab-us');
+  if (tab === 'sa') {
+    if (sa) sa.style.display = 'block';
+    if (us) us.style.display = 'none';
+    if (btnSa) { btnSa.style.borderBottomColor = 'var(--gold)'; btnSa.style.color = 'var(--gold)'; }
+    if (btnUs) { btnUs.style.borderBottomColor = 'transparent'; btnUs.style.color = 'var(--muted)'; }
+  } else {
+    if (sa) sa.style.display = 'none';
+    if (us) us.style.display = 'block';
+    if (btnUs) { btnUs.style.borderBottomColor = 'var(--gold)'; btnUs.style.color = 'var(--gold)'; }
+    if (btnSa) { btnSa.style.borderBottomColor = 'transparent'; btnSa.style.color = 'var(--muted)'; }
+    renderUsStocksTable();
+    fetchUsStockPrices();
+  }
+}
+
+// ── تبديل سوق في فورم الإضافة ─────────────────────────────────────────────────
+function setStockMarket(mkt) {
+  _currentStockMarket = mkt;
+  var btnSa = document.getElementById('mkt-btn-sa');
+  var btnUs = document.getElementById('mkt-btn-us');
+  var tickerEl = document.getElementById('as-ticker');
+
+  if (mkt === 'sa') {
+    if (btnSa) { btnSa.style.borderColor='var(--gold)'; btnSa.style.background='rgba(201,168,76,0.15)'; btnSa.style.color='var(--gold)'; }
+    if (btnUs) { btnUs.style.borderColor='var(--border)'; btnUs.style.background='transparent'; btnUs.style.color='var(--muted)'; }
+    if (tickerEl) { tickerEl.maxLength=6; tickerEl.placeholder='مثال: 2222'; tickerEl.style.direction='ltr'; }
+  } else {
+    if (btnUs) { btnUs.style.borderColor='var(--gold)'; btnUs.style.background='rgba(201,168,76,0.15)'; btnUs.style.color='var(--gold)'; }
+    if (btnSa) { btnSa.style.borderColor='var(--border)'; btnSa.style.background='transparent'; btnSa.style.color='var(--muted)'; }
+    if (tickerEl) { tickerEl.maxLength=10; tickerEl.placeholder='مثال: AAPL, NVDA'; tickerEl.style.direction='ltr'; }
+  }
+  // clear previous fetch
+  var nameEl = document.getElementById('as-name');
+  if (nameEl) nameEl.value = '';
+  var statusEl = document.getElementById('as-ticker-status');
+  if (statusEl) statusEl.textContent = '';
+}
+
+// ── جلب اسم الشركة تلقائياً عند إدخال الرمز ──────────────────────────────────
+function onTickerInput() {
+  var tickerEl = document.getElementById('as-ticker');
+  if (!tickerEl) return;
+  var raw = tickerEl.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  tickerEl.value = raw;
+  calcAddStock();
+
+  // Debounce: wait 700ms after user stops typing
+  clearTimeout(_tickerFetchTimer);
+  if (raw.length < 2) return;
+  _tickerFetchTimer = setTimeout(function() { fetchCompanyName(raw); }, 700);
+}
+
+async function fetchCompanyName(ticker) {
+  var nameEl    = document.getElementById('as-name');
+  var statusEl  = document.getElementById('as-ticker-status');
+  var fetchingEl = document.getElementById('as-name-fetching');
+
+  if (!nameEl) return;
+  if (statusEl)  statusEl.textContent = '⏳';
+  if (fetchingEl) fetchingEl.style.display = 'block';
+
+  try {
+    var symbol = _currentStockMarket === 'sa' ? ticker + '.SR' : ticker;
+    var url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + symbol + '?interval=1d&range=1d';
+    var res = await fetch(url, {mode:'cors'});
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var json = await res.json();
+    var meta = json?.chart?.result?.[0]?.meta;
+    if (!meta) throw new Error('No data');
+
+    var longName = meta.longName || meta.shortName || ticker;
+    nameEl.value = longName;
+
+    // Also fill current price if empty
+    var currPriceEl = document.getElementById('as-curr-price');
+    if (currPriceEl && !currPriceEl.value && meta.regularMarketPrice) {
+      currPriceEl.value = meta.regularMarketPrice.toFixed(2);
+    }
+
+    if (statusEl)  statusEl.textContent = '✅';
+    if (fetchingEl) fetchingEl.style.display = 'none';
+    calcAddStock();
+    showToast('✅ ' + longName);
+
+  } catch(e) {
+    // Fallback: known SA tickers dictionary
+    var saNames = {
+      '2222':'أرامكو السعودية','2280':'المراعي','2222':'أرامكو','4017':'فقيه للرعاية',
+      '5110':'السعودية للكهرباء','2084':'دار الأركان','4163':'سلامة','1834':'الراجحي للتأمين',
+      '2284':'ACWA Power','4143':'عناية','1211':'معادن','1120':'الراجحي','1180':'الأهلي',
+      '1150':'رياض','1140':'الجزيرة','4260':'أكواباور','4240':'تمكين','4200':'البلاد'
+    };
+    if (saNames[ticker]) {
+      nameEl.value = saNames[ticker];
+      if (statusEl)  statusEl.textContent = '✅';
+    } else {
+      if (statusEl)  statusEl.textContent = '❓';
+      nameEl.placeholder = 'أدخل الاسم يدوياً';
+    }
+    if (fetchingEl) fetchingEl.style.display = 'none';
+  }
+}
+
+// ── تحديث الأسعار لكلا السوقين ────────────────────────────────────────────────
+function refreshAllStockPrices() {
+  fetchLiveStockPrices();
+  if (_currentStocksTab === 'us') fetchUsStockPrices();
+}
+
+// ── أسعار الأسهم الأمريكية via Yahoo Finance ──────────────────────────────────
+var US_STOCK_PRICES = {};
+
+async function fetchUsStockPrices() {
+  var inv = window.__investments || investments;
+  var usStocks = inv.filter(function(x){ return x.type === 'سهم' && x.market === 'us' && x.ticker; });
+  if (!usStocks.length) return;
+
+  var icon = document.getElementById('stocks-refresh-icon');
+  if (icon) { icon.style.animation = 'spin 1s linear infinite'; }
+
+  var symbols = usStocks.map(function(s){ return s.ticker; }).join(',');
+  var url = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + symbols + '&fields=regularMarketPrice,regularMarketChangePercent,longName,shortName';
+
+  try {
+    var res = await fetch(url, {mode:'cors'});
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var json = await res.json();
+    var results = json?.quoteResponse?.result || [];
+    results.forEach(function(q) {
+      US_STOCK_PRICES[q.symbol] = {
+        price: q.regularMarketPrice,
+        chg:   (q.regularMarketChangePercent || 0) / 100,
+        color: (q.regularMarketChangePercent || 0) >= 0 ? 'up' : 'dn',
+        name:  q.longName || q.shortName || q.symbol
+      };
+    });
+    renderUsStocksTable();
+  } catch(e) {
+    // Fallback: fetch one by one
+    for (var i = 0; i < usStocks.length; i++) {
+      var s = usStocks[i];
+      try {
+        var r2 = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/' + s.ticker + '?interval=1d&range=1d');
+        var j2 = await r2.json();
+        var meta = j2?.chart?.result?.[0]?.meta;
+        if (meta) {
+          US_STOCK_PRICES[s.ticker] = {
+            price: meta.regularMarketPrice,
+            chg:   meta.previousClose ? (meta.regularMarketPrice - meta.previousClose) / meta.previousClose : 0,
+            color: meta.regularMarketPrice >= (meta.previousClose || meta.regularMarketPrice) ? 'up' : 'dn',
+            name:  meta.longName || s.ticker
+          };
+        }
+      } catch(e2) { console.warn('US price fetch failed:', s.ticker); }
+    }
+    renderUsStocksTable();
+  }
+
+  if (icon) icon.style.animation = '';
+}
+
+// ── رندر جدول الأسهم الأمريكية ────────────────────────────────────────────────
+function renderUsStocksTable() {
+  var inv = window.__investments || investments;
+  var usStocks = inv.filter(function(x){ return x.type === 'سهم' && x.market === 'us'; });
+
+  var countBadge = document.getElementById('us-stocks-count-badge');
+  if (countBadge) countBadge.textContent = usStocks.length + ' سهم';
+
+  var tbody = document.getElementById('us-stocks-tbody');
+  if (tbody) {
+    tbody.innerHTML = usStocks.map(function(d, i) {
+      var p = d.ticker ? US_STOCK_PRICES[d.ticker] : null;
+      var currPrice = p ? p.price : null;
+      var mktVal    = (currPrice && d.shares) ? currPrice * d.shares : null;
+      var pnl       = (mktVal && d.amount) ? mktVal - d.amount : null;
+      var chgPct    = p ? p.chg : null;
+      var realIdx   = inv.indexOf(d);
+
+      var priceCell = currPrice ? '<span class="mono '+(p.color||'')+'">' + currPrice.toFixed(2) + '</span>' : '<span style="color:var(--muted)">—</span>';
+      var chgCell   = chgPct != null ? '<span class="'+(chgPct>=0?'up':'dn')+'">'+(chgPct>=0?'▲':'▼')+' '+(Math.abs(chgPct)*100).toFixed(1)+'%</span>' : '—';
+      var mktCell   = mktVal ? '<span class="mono">' + mktVal.toLocaleString('en-US',{minimumFractionDigits:2}) + '</span>' : '—';
+      var pnlCell   = pnl != null ? '<span class="mono '+(pnl>=0?'up':'dn')+'">'+(pnl>=0?'+':'')+pnl.toLocaleString('en-US',{minimumFractionDigits:2})+'</span>' : '—';
+
+      return '<tr>' +
+        '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (d.name||'').replace(/^\d+ سهم في /,'') + '</td>' +
+        '<td><span style="font-family:monospace;background:rgba(96,165,250,0.12);color:#60a5fa;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700">' + (d.ticker||'—') + '</span></td>' +
+        '<td class="mono">' + (d.shares||'—') + '</td>' +
+        '<td class="mono">$' + (d.amount||0).toLocaleString('en-US',{minimumFractionDigits:2}) + '</td>' +
+        '<td>' + priceCell + '</td>' +
+        '<td>' + chgCell + '</td>' +
+        '<td>' + mktCell + '</td>' +
+        '<td>' + pnlCell + '</td>' +
+        '<td style="color:var(--muted);font-size:11px">' + (d.platform||'—') + '</td>' +
+        '<td><button class="loan-action-btn" onclick="editStockFromCard(' + realIdx + ')">✏️</button></td>' +
+        '</tr>';
+    }).join('') || '<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--muted)">لا توجد أسهم أمريكية — أضف سهماً باختيار 🇺🇸 أمريكي</td></tr>';
+  }
+
+  // Cards grid for US
+  var grid = document.getElementById('us-stocks-cards-grid');
+  if (grid) {
+    grid.innerHTML = usStocks.map(function(d) {
+      var p = d.ticker ? US_STOCK_PRICES[d.ticker] : null;
+      var currPrice = p ? p.price : null;
+      var mktVal    = (currPrice && d.shares) ? currPrice * d.shares : null;
+      var pnl       = (mktVal && d.amount) ? mktVal - d.amount : null;
+      var pnlPct    = (pnl != null && d.amount) ? (pnl/d.amount*100) : null;
+      var borderColor = !p ? 'rgba(136,153,187,0.2)' : p.color==='up' ? 'rgba(0,230,118,0.3)' : 'rgba(255,68,68,0.3)';
+
+      return '<div class="stock-card" style="border-color:'+borderColor+'">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+          '<span style="font-family:monospace;font-size:15px;font-weight:800;background:rgba(96,165,250,0.15);color:#60a5fa;padding:4px 10px;border-radius:7px">' + (d.ticker||'—') + '</span>' +
+          '<span style="font-size:11px;color:#60a5fa;background:rgba(96,165,250,0.1);padding:3px 9px;border-radius:6px">🇺🇸 ' + (d.shares||'—') + ' سهم</span>' +
+        '</div>' +
+        '<div class="stock-name">' + (d.name||'').replace(/^\d+ سهم في /,'') + '</div>' +
+        '<div class="stock-price '+(p?p.color:'')+'">' + (currPrice ? '$'+currPrice.toFixed(2) : '—') + '</div>' +
+        '<div class="stock-change '+(p?p.color:'')+'">' + (p ? (p.chg>=0?'▲':'▼')+' '+(Math.abs(p.chg)*100).toFixed(1)+'%' : '—') + '</div>' +
+        '<div class="stock-ipo">مستثمر: <span style="color:var(--white);font-weight:600">$' + (d.amount||0).toLocaleString('en-US',{minimumFractionDigits:2}) + '</span></div>' +
+        (pnl != null ? '<div style="margin-top:10px;padding:8px 10px;background:'+(pnl>=0?'rgba(0,230,118,0.1)':'rgba(255,68,68,0.1)')+';border-radius:8px;font-size:11px;color:'+(pnl>=0?'var(--green)':'var(--red)')+'">'+( pnl>=0?'ربح':'خسارة')+' غير محققة: '+(pnl>=0?'+':'')+pnlPct.toFixed(1)+'% ($'+Math.abs(pnl).toLocaleString('en-US',{minimumFractionDigits:2})+')</div>' : '<div style="margin-top:10px;padding:8px 10px;background:rgba(136,153,187,0.08);border-radius:8px;font-size:11px;color:var(--muted)">السعر غير متوفر</div>') +
+        '</div>';
+    }).join('');
+  }
+}
+
 function saveLoansToStorage() { localStorage.setItem('loansData', JSON.stringify(loansData)); triggerSync('loans'); }
 
-function showLoanForm(idx = null) {
+function showLoanForm(idx) {
+  if (idx === undefined) idx = null;
   editingLoanIdx = idx;
-  const wrap = document.getElementById('loan-form-wrap');
-  const title = document.getElementById('loan-form-title');
+  // Navigate to loans page first if needed
+  if (window.__currentPage !== 'loans') {
+    var navEl = document.querySelector('.nav-loans') || document.getElementById('mnav-loans');
+    showPage('loans', navEl, '🏦 القروض البنكية', true);
+  }
+  var wrap = document.getElementById('loan-form-wrap');
+  var title = document.getElementById('loan-form-title');
+  if (!wrap) { console.error('loan-form-wrap not found'); return; }
   wrap.style.display = 'block';
-  title.textContent = idx !== null ? '✏️ تعديل القرض' : '🏦 إضافة قرض جديد';
-  setTimeout(function(){ wrap.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
+  if (title) title.textContent = idx !== null ? '✏️ تعديل القرض' : '🏦 إضافة قرض جديد';
+  setTimeout(function(){ wrap.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300);
   if (idx !== null) {
     const l = loansData[idx];
     document.getElementById('ln-name').value           = l.name || '';
@@ -6401,7 +7718,7 @@ function renderLoans() {
         </div>
         <div style="font-size:10px;color:var(--muted);margin-top:4px">${pct.toFixed(0)}% مسدَّد</div>
         <div class="loan-card-actions">
-          <button class="loan-action-btn" onclick="showLoanForm(${i})">✏️ تعديل</button>
+          <button class="loan-action-btn" onclick="openLoanEditPage(${i})">✏️ تعديل</button>
           <button class="loan-action-btn" style="color:var(--red);border-color:rgba(255,77,77,0.2)" onclick="deleteLoan(${i})">🗑 حذف</button>
         </div>
       </div>
@@ -6424,11 +7741,18 @@ let currentDebtFilter = 'all';
 
 function saveDebtsToStorage() { localStorage.setItem('debtsData', JSON.stringify(debtsData)); triggerSync('debts'); }
 
-function showDebtForm(idx = null) {
+function showDebtForm(idx) {
+  if (idx === undefined) idx = null;
   editingDebtIdx = idx;
-  const wrap = document.getElementById('debt-form-wrap');
+  // Navigate to debts page first if needed
+  if (window.__currentPage !== 'debts') {
+    var navEl = document.querySelector('.nav-debts') || document.getElementById('mnav-debts');
+    showPage('debts', navEl, '💸 الديون الشخصية', true);
+  }
+  var wrap = document.getElementById('debt-form-wrap');
+  if (!wrap) { console.error('debt-form-wrap not found'); return; }
   wrap.style.display = 'block';
-  setTimeout(function(){ wrap.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
+  setTimeout(function(){ wrap.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300);
   const today = new Date().toISOString().split('T')[0];
   if (idx !== null) {
     const d = debtsData[idx];
@@ -6700,7 +8024,7 @@ function renderDebts() {
         <div style="font-size:9px;color:var(--muted);margin-top:2px">${pct.toFixed(0)}% سُدِّد</div>
         ` : ''}
         <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-          <button class="loan-action-btn" onclick="showDebtForm(${d._idx})">✏️ تعديل</button>
+          <button class="loan-action-btn" onclick="openDebtEditPage(${d._idx})">✏️ تعديل</button>
           <button class="loan-action-btn" style="color:var(--red);border-color:rgba(255,77,77,0.2)" onclick="deleteDebt(${d._idx})">🗑</button>
           ${d.contact ? `<button class="loan-action-btn" onclick="window.open('tel:${d.contact}')" style="color:var(--cyan)">📞</button>` : ''}
           ${d.contact ? `<button class="loan-action-btn" onclick="sendWhatsApp(${d._idx})" style="color:#25d366;border-color:rgba(37,211,102,0.3)">📲 واتساب</button>` : ''}
@@ -6855,11 +8179,13 @@ function closeMobileMore() {
   <button onclick="dbCloseUndo()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px">×</button>
 </div>
 <!-- Firebase Compat SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" onerror="window._firebaseFailed=true"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" onerror="window._firebaseFailed=true"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js" onerror="window._firebaseFailed=true"></script>
 <script>
-//  Firebase init 
+// Firebase init — wrapped in try/catch so app works even if CDN fails
+try {
+if (typeof firebase === 'undefined') throw new Error('Firebase not loaded');
 firebase.initializeApp({
   apiKey:            "AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME",
   authDomain:        "investments-page.firebaseapp.com",
@@ -6937,6 +8263,18 @@ function _badge(state) {
 function _gate(show) {
   var g = document.getElementById("auth-gate");
   if (g) g.style.display = show ? "flex" : "none";
+  // Adjust top offset of sidebar/main for banner
+  var sidebar = document.querySelector(".sidebar");
+  var main    = document.querySelector(".main");
+  var banner  = document.getElementById("auth-gate");
+  if (show && banner) {
+    var h = banner.offsetHeight || 48;
+    if (sidebar) sidebar.style.top = h + "px";
+    if (main)    main.style.paddingTop = (h + 8) + "px";
+  } else {
+    if (sidebar) sidebar.style.top = "0";
+    if (main)    main.style.paddingTop = "";
+  }
 }
 
 function _rerender() {
@@ -7087,13 +8425,22 @@ _auth.onAuthStateChanged(function(user) {
   _updateUI(user);
   if (user) {
     _uid = user.uid;
+    _gate(false);  // Hide login banner
     _loadData(user.uid);
   } else {
-    _clearData();
+    _gate(true);   // Show login banner — but keep default data visible
+    // Don't call _clearData() — let user see demo data without login
   }
 });
 
 window.IS_FIREBASE_CONFIGURED = true;
+} catch(e) {
+  console.warn('Firebase init failed:', e.message);
+  window._firebaseFailed = true;
+  // Show login banner but app still works with local data
+  var g = document.getElementById('auth-gate');
+  if (g) g.style.display = 'flex';
+}
 </script>
 </body>
 </html>
