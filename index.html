@@ -4897,11 +4897,6 @@ document.addEventListener('DOMContentLoaded', function() {
   setInterval(checkMaturityAlerts, 60 * 60 * 1000); // re-check every hour
 });
 
-//  PAGE TITLES for new pages 
-PAGE_TITLES['reports']  = '📊 التقارير والتحليل';
-
-
-
 //  showPage hooks for new pages 
 var _origShowPage = showPage;
 showPage = function(id, navEl, mobileTitle, noScroll) {
@@ -6125,8 +6120,9 @@ document.addEventListener('DOMContentLoaded', () => {
 //  PAGE NAVIGATION 
 const PAGE_TITLES = {
   'add-stock': '📈 إضافة سهم',
-  'add-loan': '🏦 إضافة قرض',
-  'add-debt': '💸 إضافة دين',
+  'add-loan':  '🏦 إضافة قرض',
+  'add-debt':  '💸 إضافة دين',
+  'reports':   '📊 التقارير والتحليل',
   dashboard: '📊 لوحة التحكم',
   stocks:    '📈 الأسهم',
   sukuk:     '🏛 الصكوك',
@@ -6860,11 +6856,12 @@ function saveAddStock() {
     market: _currentStockMarket
   };
 
+  if (!Array.isArray(window.__investments)) window.__investments = investments;
   if (_editingStockIdx !== null) {
-    (window.__investments || investments)[_editingStockIdx] = newStock;
+    window.__investments[_editingStockIdx] = newStock;
     showToast('✅ تم تحديث السهم: ' + name);
   } else {
-    (window.__investments || investments).push(newStock);
+    window.__investments.push(newStock);
     showToast('✅ تم حفظ السهم: ' + name);
   }
 
@@ -7029,17 +7026,16 @@ function saveAddLoan() {
     created_at:  new Date().toISOString()
   };
 
-  // دائماً استخدم window.loansData (المحدَّث من Firebase)
-  var ld = window.loansData || loansData;
+  // Ensure loansData is always a valid array
+  if (!Array.isArray(window.loansData)) window.loansData = [];
   if (_editingLoanPageIdx !== null) {
-    ld[_editingLoanPageIdx] = loan;
+    window.loansData[_editingLoanPageIdx] = loan;
     showToast('✅ تم تحديث القرض: ' + name);
   } else {
-    ld.push(loan);
+    window.loansData.push(loan);
     showToast('✅ تم حفظ القرض: ' + name);
   }
-  window.loansData = ld;
-  loansData = ld;
+  loansData = window.loansData;
   saveLoansToStorage();
   renderLoans();
   resetAddLoan();
@@ -7159,16 +7155,15 @@ function saveAddDebt() {
     created_at: new Date().toISOString()
   };
 
-  var dd = window.debtsData || debtsData;
+  if (!Array.isArray(window.debtsData)) window.debtsData = [];
   if (_editingDebtPageIdx !== null) {
-    dd[_editingDebtPageIdx] = debt;
+    window.debtsData[_editingDebtPageIdx] = debt;
     showToast('✅ تم تحديث الدين: ' + person);
   } else {
-    dd.push(debt);
+    window.debtsData.push(debt);
     showToast('✅ تم حفظ الدين: ' + person);
   }
-  window.debtsData = dd;
-  debtsData = dd;
+  debtsData = window.debtsData;
   saveDebtsToStorage();
   renderDebts();
   resetAddDebt();
@@ -7823,7 +7818,13 @@ async function fetchDividendsForStock() {
   }
 }
 
-function saveLoansToStorage() { localStorage.setItem('loansData', JSON.stringify(loansData)); triggerSync('loans'); }
+function saveLoansToStorage() {
+  var data = window.loansData || loansData || [];
+  localStorage.setItem('loansData', JSON.stringify(data));
+  window.loansData = data;
+  loansData = data;
+  if (typeof triggerSync === 'function') triggerSync('loans');
+}
 
 function showLoanForm(idx) {
   if (idx === undefined) idx = null;
@@ -8247,7 +8248,13 @@ function renderLoans() {
 var editingDebtIdx = null;
 let currentDebtFilter = 'all';
 
-function saveDebtsToStorage() { localStorage.setItem('debtsData', JSON.stringify(debtsData)); triggerSync('debts'); }
+function saveDebtsToStorage() {
+  var data = window.debtsData || debtsData || [];
+  localStorage.setItem('debtsData', JSON.stringify(data));
+  window.debtsData = data;
+  debtsData = data;
+  if (typeof triggerSync === 'function') triggerSync('debts');
+}
 
 function showDebtForm(idx) {
   if (idx === undefined) idx = null;
