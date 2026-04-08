@@ -6283,7 +6283,8 @@ function dbRender() {
   const cols = dbGetVisibleCols();
 
   // Filter
-  const filtered = investments.map((row, i) => ({ row, i })).filter(({ row }) => {
+  const _inv = window.__investments || investments;
+  const filtered = _inv.map((row, i) => ({ row, i })).filter(({ row }) => {
     if (search && !JSON.stringify(row).toLowerCase().includes(search)) return false;
     if (typeFilter && !(row.type||'').includes(typeFilter)) return false;
     if (statusFilter && !(row.status||'').includes(statusFilter)) return false;
@@ -6381,27 +6382,28 @@ function dbCellChange(el, idx, key) {
 function dbCellBlur(el, idx, key) {
   const col = DB_COLS.find(c => c.key === key);
   const raw = el.textContent.trim().replace(/,/g,'').replace('%','');
+  const _inv = window.__investments || investments;
 
   // Save to data
   if (col.type === 'number') {
-    investments[idx][key] = parseFloat(raw) || 0;
-    el.dataset.raw = investments[idx][key];
+    _inv[idx][key] = parseFloat(raw) || 0;
+    el.dataset.raw = _inv[idx][key];
     // Reformat display
-    el.textContent = Number(investments[idx][key]).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-    el.className = 'db-cell db-cell-num ' + (investments[idx][key] > 0 ? 'db-cell-pos' : investments[idx][key] < 0 ? 'db-cell-neg' : '');
+    el.textContent = Number(_inv[idx][key]).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    el.className = 'db-cell db-cell-num ' + (_inv[idx][key] > 0 ? 'db-cell-pos' : _inv[idx][key] < 0 ? 'db-cell-neg' : '');
   } else if (col.type === 'pct') {
     const v = parseFloat(raw) || 0;
-    investments[idx][key] = v / 100; // store as decimal
-    el.dataset.raw = investments[idx][key];
+    _inv[idx][key] = v / 100; // store as decimal
+    el.dataset.raw = _inv[idx][key];
     el.textContent = (v).toFixed(2) + '%';
-    el.className = 'db-cell db-cell-pct ' + (investments[idx][key] > 0 ? 'db-cell-pos' : investments[idx][key] < 0 ? 'db-cell-neg' : '');
+    el.className = 'db-cell db-cell-pct ' + (_inv[idx][key] > 0 ? 'db-cell-pos' : _inv[idx][key] < 0 ? 'db-cell-neg' : '');
   } else {
-    investments[idx][key] = raw === '' ? null : raw;
+    _inv[idx][key] = raw === '' ? null : raw;
   }
 
   // Auto-recalc total
   if (['amount','ret_pct','ret_val'].includes(key)) {
-    const row = investments[idx];
+    const row = _inv[idx];
     if (key === 'ret_pct' && row.amount) {
       row.ret_val = parseFloat((row.amount * row.ret_pct).toFixed(2));
     }
@@ -6424,22 +6426,27 @@ function dbCellSelectChange(el, idx, key) {
 }
 
 function dbUpdateStats() {
-  document.getElementById('db-count').textContent = investments.length;
-  document.getElementById('db-modified-count').textContent = dbModified.size;
-  const total = investments.reduce((s, r) => s + (r.amount || 0), 0);
-  const returns = investments.reduce((s, r) => s + (r.ret_val || 0), 0);
+  const _inv = window.__investments || investments;
+  var dbCountEl = document.getElementById('db-count');
+  var dbModEl   = document.getElementById('db-modified-count');
+  if (dbCountEl) dbCountEl.textContent = _inv.length;
+  if (dbModEl)   dbModEl.textContent   = dbModified.size;
+  const total   = _inv.reduce((s, r) => s + (r.amount || 0), 0);
+  const returns = _inv.reduce((s, r) => s + (r.ret_val || 0), 0);
   document.getElementById('db-total-amount').textContent = total.toLocaleString('en-US', {maximumFractionDigits:0});
   document.getElementById('db-total-returns').textContent = returns.toLocaleString('en-US', {maximumFractionDigits:0});
 }
 
 function dbAddRow() {
+  const _inv = window.__investments || investments;
   const newRow = {
     name:'فرصة جديدة', type:'صك', platform:'ترميز',
     amount:0, ret_pct:0, ret_val:0, total:0,
     date_out:null, duration:null, dist:'لا يوجد',
     risk:'منخفض', status:'نشطة', _new:true
   };
-  investments.push(newRow);
+  _inv.push(newRow);
+  if (window.__investments !== _inv) window.__investments = _inv;
   dbRender();
   // Scroll to bottom
   const wrap = document.getElementById('db-table-wrap');
@@ -6448,8 +6455,9 @@ function dbAddRow() {
 }
 
 function dbDuplicateRow(idx) {
-  const copy = { ...investments[idx], _new:true, name: investments[idx].name + ' (نسخة)' };
-  investments.splice(idx + 1, 0, copy);
+  const _inv = window.__investments || investments;
+  const copy = { ..._inv[idx], _new:true, name: _inv[idx].name + ' (نسخة)' };
+  _inv.splice(idx + 1, 0, copy);
   dbRender();
   showToast('⧉ تم تكرار الصف');
 }
@@ -6461,7 +6469,8 @@ function dbConfirmDelete(idx) {
   document.getElementById('db-delete-modal').classList.add('open');
   document.getElementById('db-confirm-delete').onclick = () => {
     dbUndoStack.push({ action:'delete', idx, row: {...investments[idx]} });
-    investments.splice(idx, 1);
+    const _dinv = window.__investments || investments;
+    _dinv.splice(idx, 1);
     dbModified.delete(idx);
     document.getElementById('db-delete-modal').classList.remove('open');
     dbRender();
@@ -6511,7 +6520,12 @@ function dbUndo() {
 }
 
 function dbSaveAll() {
-  // Refresh all tables
+  // Sync window.__investments ↔ investments
+  if (window.__investments && window.__investments !== investments) {
+    investments.length = 0;
+    window.__investments.forEach(function(r){ investments.push(r); });
+  }
+  triggerSync('investments');
   renderAll(); renderStocks(); renderSukuk(); renderFunds();
   const count = dbModified.size;
   dbModified.clear();
@@ -6844,11 +6858,14 @@ function saveAddStock() {
 
   triggerSync('investments');
   renderStocks();
+  renderUsStocksTable();
   renderAll();
+  var mkt = _currentStockMarket;
   resetAddStock();
 
-  // Navigate back to stocks
+  // Navigate back to stocks, show correct tab
   showPage('stocks', document.querySelector('.sidebar .nav-item[onclick*=stocks]'), '📈 الأسهم');
+  if (mkt === 'us') setTimeout(function(){ switchStocksTab('us'); }, 100);
 }
 
 function resetAddStock() {
@@ -6997,15 +7014,17 @@ function saveAddLoan() {
     created_at:  new Date().toISOString()
   };
 
+  // دائماً استخدم window.loansData (المحدَّث من Firebase)
+  var ld = window.loansData || loansData;
   if (_editingLoanPageIdx !== null) {
-    loansData[_editingLoanPageIdx] = loan;
+    ld[_editingLoanPageIdx] = loan;
     showToast('✅ تم تحديث القرض: ' + name);
   } else {
-    loansData.push(loan);
+    ld.push(loan);
     showToast('✅ تم حفظ القرض: ' + name);
   }
-
-  window.loansData = loansData;
+  window.loansData = ld;
+  loansData = ld;
   saveLoansToStorage();
   renderLoans();
   resetAddLoan();
@@ -7122,15 +7141,16 @@ function saveAddDebt() {
     created_at: new Date().toISOString()
   };
 
+  var dd = window.debtsData || debtsData;
   if (_editingDebtPageIdx !== null) {
-    debtsData[_editingDebtPageIdx] = debt;
+    dd[_editingDebtPageIdx] = debt;
     showToast('✅ تم تحديث الدين: ' + person);
   } else {
-    debtsData.push(debt);
+    dd.push(debt);
     showToast('✅ تم حفظ الدين: ' + person);
   }
-
-  window.debtsData = debtsData;
+  window.debtsData = dd;
+  debtsData = dd;
   saveDebtsToStorage();
   renderDebts();
   resetAddDebt();
@@ -7468,7 +7488,9 @@ var dividendsData = JSON.parse(localStorage.getItem('dividendsData') || '[]');
 
 function saveDividendsToStorage() {
   localStorage.setItem('dividendsData', JSON.stringify(dividendsData));
-  if (typeof triggerSync === 'function') triggerSync('dividends');
+  window.dividendsData = dividendsData;
+  // Firebase sync
+  if (typeof window.fbSaveDividends === 'function') window.fbSaveDividends();
 }
 
 // ── رندر تبويب التوزيعات ──────────────────────────────────────────────────────
@@ -8749,9 +8771,14 @@ function _gate(show) {
 
 function _rerender() {
   ["renderAll","renderSukuk","renderFunds","renderStocks",
-   "renderLoans","renderDebts"].forEach(function(fn) {
+   "renderLoans","renderDebts","renderUsStocksTable"].forEach(function(fn) {
     if (typeof window[fn] === "function") window[fn]();
   });
+  // Refresh active reports tab
+  if (typeof renderDividendsTab === 'function' && window.__currentPage === 'reports') {
+    renderDividendsTab();
+  }
+  dbRender();
 }
 
 function _updateUI(user) {
@@ -8813,6 +8840,13 @@ function _loadData(uid) {
       window.debtsData.length = 0;
       debts.forEach(function(r){ window.debtsData.push(r); });
     }
+    return _read(uid, "dividends");
+  }).then(function(divs) {
+    if (divs && divs.length) {
+      dividendsData.length = 0;
+      divs.forEach(function(r){ dividendsData.push(r); });
+      window.dividendsData = dividendsData;
+    }
     _rerender();
     initDashboardYears();
     renderDashboard();
@@ -8862,6 +8896,10 @@ window.fbSaveLoans = function() {
 window.fbSaveDebts = function() {
   if (!_uid) return;
   _write(_uid, "debts", Array.from(window.debtsData));
+};
+window.fbSaveDividends = function() {
+  if (!_uid) return;
+  _write(_uid, "dividends", Array.from(window.dividendsData || dividendsData));
 };
 
 //  Auth: popup on all platforms (redirect breaks on GitHub Pages / iOS Safari)
