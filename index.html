@@ -4570,33 +4570,42 @@
 <!-- MOBILE BOTTOM NAV -->
 <nav class="mobile-nav">
   <div class="mobile-nav-inner">
-    <div class="mnav-item active" id="mnav-dashboard" onclick="showPage('dashboard', this, '📊 لوحة التحكم')">
-      <div class="mnav-icon-wrap"><span class="mnav-icon">📊</span></div>
+
+    <div class="mnav-item active" id="mnav-dashboard" onclick="showPage('dashboard',this,'📊 لوحة التحكم')">
+      <div class="mnav-icon-wrap"><span class="mnav-icon">🏠</span></div>
       <span class="mnav-label">الرئيسية</span>
     </div>
-    <div class="mnav-item" id="mnav-all" onclick="showPage('all', this, '📋 جميع الفرص')">
-      <div class="mnav-icon-wrap"><span class="mnav-icon">📋</span></div>
-      <span class="mnav-label">الفرص</span>
-    </div>
-    <div class="mnav-item" id="mnav-analyst" onclick="showPage('reports', this, '📊 التقارير والتحليل'); setTimeout(function(){switchReportsTab('analyst');},100)">
-      <div class="mnav-icon-wrap"><span class="mnav-icon">🔍</span></div>
-      <span class="mnav-label">المحلل</span>
+
+    <div class="mnav-item" id="mnav-stocks" onclick="showPage('stocks',this,'📈 الأسهم')">
+      <div class="mnav-icon-wrap"><span class="mnav-icon">📈</span></div>
+      <span class="mnav-label">الأسهم</span>
     </div>
 
+    <div class="mnav-item" id="mnav-sukuk" onclick="showPage('sukuk',this,'🏦 الفرص')">
+      <div class="mnav-icon-wrap"><span class="mnav-icon">🏦</span></div>
       <span class="mnav-label">الفرص</span>
     </div>
-    <div class="mnav-item" id="mnav-loans" onclick="showPage('loans', this, '🏦 القروض البنكية')">
-      <div class="mnav-icon-wrap"><span class="mnav-icon">🏦</span></div>
+
+    <div class="mnav-item" id="mnav-loans" onclick="showPage('loans',this,'🏦 القروض البنكية')">
+      <div class="mnav-icon-wrap"><span class="mnav-icon">💰</span></div>
       <span class="mnav-label">القروض</span>
     </div>
-    <div class="mnav-item" id="mnav-debts" onclick="showPage('debts', this, '💸 ديون وجمعيات')">
+
+    <div class="mnav-item" id="mnav-debts" onclick="showPage('debts',this,'💸 ديون وجمعيات')">
       <div class="mnav-icon-wrap"><span class="mnav-icon">💸</span></div>
       <span class="mnav-label">الديون</span>
     </div>
+
+    <div class="mnav-item" id="mnav-reports" onclick="showPage('reports',this,'📊 التقارير والتحليل')">
+      <div class="mnav-icon-wrap"><span class="mnav-icon">📊</span></div>
+      <span class="mnav-label">التقارير</span>
+    </div>
+
     <div class="mnav-item" id="mnav-more" onclick="toggleMobileMore()">
       <div class="mnav-icon-wrap"><span class="mnav-icon">⋯</span></div>
       <span class="mnav-label">المزيد</span>
     </div>
+
   </div>
 </nav>
 
@@ -4610,65 +4619,39 @@
   background:var(--sidebar-bg);
   border:1px solid var(--border);
   border-radius:16px;
-  padding:8px;
+  padding:10px;
   z-index:300;
   box-shadow:0 -8px 40px rgba(0,0,0,0.4);
   backdrop-filter:blur(20px);
-  min-width:220px;
+  min-width:230px;
   animation:fadeUp .2s ease;
 ">
-  <div style="font-size:10px;color:var(--muted);padding:6px 12px 4px;letter-spacing:.5px;text-transform:uppercase">المزيد من الصفحات</div>
-  <button onclick="showPage('add-stock', null, '📈 إضافة سهم'); closeMobileMore()" style="
-    width:100%;text-align:right;padding:14px 16px;background:rgba(201,168,76,0.08);
-    border:1px solid rgba(201,168,76,0.2);border-radius:10px;color:var(--gold);
-    font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:6px;
-    display:flex;align-items:center;gap:10px;">
-    <span style="font-size:18px">📈</span> إضافة سهم جديد
+  <div style="font-size:10px;color:var(--muted);padding:6px 12px 8px;letter-spacing:.5px;text-transform:uppercase">صفحات إضافية</div>
+
+  <!-- جميع الفرص -->
+  <button onclick="showPage('all',document.getElementById('mnav-more'),'📋 جميع الفرص');closeMobileMore()" style="width:100%;display:flex;align-items:center;gap:12px;background:none;border:none;padding:10px 14px;color:var(--white);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;transition:background .15s;text-align:right" onmouseover="this.style.background='rgba(56,217,169,0.1)'" onmouseout="this.style.background='none'">
+    <span style="font-size:18px">📋</span> جميع الفرص
   </button>
-  <button onclick="showPage('stocks', document.getElementById('mnav-more'), '📈 الأسهم'); closeMobileMore()" style="
-    width:100%;display:flex;align-items:center;gap:12px;
-    background:none;border:none;padding:10px 14px;
-    color:var(--white);font-family:'IBM Plex Sans Arabic',sans-serif;
-    font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;
-    transition:background .15s;text-align:right;
-  " onmouseover="this.style.background='rgba(76,175,130,0.1)'" onmouseout="this.style.background='none'">
-    <span style="font-size:18px">📈</span> الأسهم
-  </button>
-  <button onclick="showPage('sukuk', document.getElementById('mnav-more'), '🏦 الفرص'); closeMobileMore()" style="
-    width:100%;display:flex;align-items:center;gap:12px;
-    background:none;border:none;padding:10px 14px;
-    color:var(--white);font-family:'IBM Plex Sans Arabic',sans-serif;
-    font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;
-    transition:background .15s;text-align:right;
-  " onmouseover="this.style.background='rgba(201,168,76,0.1)'" onmouseout="this.style.background='none'">
-    <span style="font-size:18px">🏛</span> الصكوك
-  </button>
-  <div style="height:1px;background:var(--border);margin:4px 12px"></div>
-  <button onclick="showPage('db', document.getElementById('mnav-more'), '🗄️ قاعدة البيانات'); closeMobileMore()" style="
-    width:100%;display:flex;align-items:center;gap:12px;
-    background:none;border:none;padding:10px 14px;
-    color:var(--white);font-family:'IBM Plex Sans Arabic',sans-serif;
-    font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;
-    transition:background .15s;text-align:right;
-  " onmouseover="this.style.background='rgba(125,211,252,0.1)'" onmouseout="this.style.background='none'">
+
+  <!-- قاعدة البيانات -->
+  <button onclick="showPage('db',document.getElementById('mnav-more'),'🗄️ قاعدة البيانات');closeMobileMore()" style="width:100%;display:flex;align-items:center;gap:12px;background:none;border:none;padding:10px 14px;color:var(--white);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;transition:background .15s;text-align:right" onmouseover="this.style.background='rgba(125,211,252,0.1)'" onmouseout="this.style.background='none'">
     <span style="font-size:18px">🗄️</span> قاعدة البيانات
   </button>
-  <button onclick="showPage('add', document.getElementById('mnav-more'), '➕ إضافة فرصة'); closeMobileMore()" style="
-    width:100%;display:flex;align-items:center;gap:12px;
-    background:rgba(201,168,76,0.08);border:none;padding:10px 14px;
-    color:var(--gold);font-family:'IBM Plex Sans Arabic',sans-serif;
-    font-size:13px;font-weight:700;cursor:pointer;border-radius:10px;
-    transition:background .15s;text-align:right;
-  " onmouseover="this.style.background='rgba(201,168,76,0.18)'" onmouseout="this.style.background='rgba(201,168,76,0.08)'">
+
+  <div style="height:1px;background:var(--border);margin:6px 12px"></div>
+
+  <!-- إضافة فرصة -->
+  <button onclick="showPage('add',document.getElementById('mnav-more'),'➕ إضافة فرصة');closeMobileMore()" style="width:100%;display:flex;align-items:center;gap:12px;background:rgba(201,168,76,0.08);border:none;padding:10px 14px;color:var(--gold);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;border-radius:10px;transition:background .15s;text-align:right" onmouseover="this.style.background='rgba(201,168,76,0.18)'" onmouseout="this.style.background='rgba(201,168,76,0.08)'">
     <span style="font-size:18px">➕</span> إضافة فرصة
   </button>
-  <div style="height:1px;background:var(--border);margin:4px 12px"></div>
-  <button onclick="showPage('reports',document.getElementById('mnav-more'),'📊 التقارير والتحليل');closeMobileMore()" style="width:100%;display:flex;align-items:center;gap:12px;background:none;border:none;padding:10px 14px;color:var(--white);font-family:'IBM Plex Sans Arabic',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;transition:background .15s;text-align:right" onmouseover="this.style.background='rgba(167,139,250,0.12)'" onmouseout="this.style.background='none'">
-    <span style="font-size:18px">📅</span> تقويم الاستحقاق
+
+  <!-- إضافة سهم -->
+  <button onclick="showPage('add-stock',null,'📈 إضافة سهم');closeMobileMore()" style="width:100%;display:flex;align-items:center;gap:12px;background:rgba(201,168,76,0.05);border:none;padding:10px 14px;color:var(--gold);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;transition:background .15s;text-align:right" onmouseover="this.style.background='rgba(201,168,76,0.12)'" onmouseout="this.style.background='rgba(201,168,76,0.05)'">
+    <span style="font-size:18px">📈</span> إضافة سهم جديد
   </button>
 
-
 </div>
+
 <div id="mobile-more-overlay" onclick="closeMobileMore()" style="
   display:none;position:fixed;inset:0;z-index:299;
 "></div>
@@ -6528,11 +6511,28 @@ function showPage(id, navEl, mobileTitle, noScroll){
     .find(n => n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+id+"'"));
   if (sidebarMatch) sidebarMatch.classList.add('active');
 
-  // Mobile bottom nav  if analyst or db, highlight the "more" button
+  // Mobile bottom nav — highlight correct button
   document.querySelectorAll('.mnav-item').forEach(n=>n.classList.remove('active'));
-  if (['db','stocks','sukuk','funds','add'].includes(id)) {
-    document.getElementById('mnav-more')?.classList.add('active');
-  } else {
+  var mnavMap = {
+    'dashboard':  'mnav-dashboard',
+    'stocks':     'mnav-stocks',
+    'sukuk':      'mnav-sukuk',
+    'funds':      'mnav-sukuk',
+    'loans':      'mnav-loans',
+    'add-loan':   'mnav-loans',
+    'debts':      'mnav-debts',
+    'add-debt':   'mnav-debts',
+    'reports':    'mnav-reports',
+    'all':        'mnav-more',
+    'db':         'mnav-more',
+    'add':        'mnav-more',
+    'add-stock':  'mnav-more',
+    'analyst':    'mnav-reports'
+  };
+  var mnavTarget = mnavMap[id] || 'mnav-more';
+  if (document.getElementById(mnavTarget)) {
+    document.getElementById(mnavTarget).classList.add('active');
+  } else {} else {
     const mobMatch = document.getElementById('mnav-'+id);
     if (mobMatch) mobMatch.classList.add('active');
   }
@@ -8688,7 +8688,7 @@ function renderJamaa() {
         '</div>' +
       '</div>' +
       '<div style="display:flex;gap:8px">' +
-        (j.contact ? '<a href="https://wa.me/966'+j.contact.replace(/^0/,'')+'" target="_blank" style="background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.25);border-radius:8px;padding:6px 12px;font-size:11px;color:#25d366;text-decoration:none">💬 واتساب</a>' : '') +
+        (j.contact ? '<button class="loan-action-btn" onclick="sendJamaaWhatsApp('+i+')" style="color:#25d366;border-color:rgba(37,211,102,0.3)">📲 واتساب</button>' : '') +
         '<button class="loan-action-btn" onclick="editJamaa('+i+')" style="margin-right:auto">✏️ تعديل</button>' +
         '<button class="loan-action-btn" style="color:var(--red)" onclick="deleteJamaa('+i+')">🗑</button>' +
       '</div>' +
@@ -8720,84 +8720,6 @@ function deleteJamaa(idx) {
 }
 
 
-// ══════════════════════════════════════════════════════
-// سند أمر للقروض البنكية
-// ══════════════════════════════════════════════════════
-function generateLoanSanad(idx) {
-  var l = (window.loansData || loansData)[idx];
-  if (!l) return;
-  var today    = new Date();
-  var gregorian = today.toLocaleDateString('ar-SA', {year:'numeric', month:'long', day:'numeric'});
-  var hijri     = toHijriDate(today);
-  var userName  = (window.__firebaseUser && window.__firebaseUser.displayName) || '_______________';
-  var amt       = (l.principal || 0).toLocaleString('en-US', {maximumFractionDigits:0});
-  var amtWords  = numToArabicWords(l.principal || 0);
-  var bankName  = l.bank || '_______________';
-  var loanType  = l.type || 'شخصي';
-  var rate      = l.rate ? l.rate + '%' : '___';
-  var months    = l.inst_total || '___';
-  var pmt       = (l.installment || 0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-  var endDate   = l.end_date ? new Date(l.end_date).toLocaleDateString('ar-SA', {year:'numeric', month:'long', day:'numeric'}) : '_______________';
-
-  var css = '<style>*{box-sizing:border-box;margin:0;padding:0}'
-  + 'body{font-family:Georgia,serif;background:#fff;color:#000;direction:rtl}'
-  + '.page{width:210mm;min-height:200mm;margin:10mm auto;padding:14mm 16mm;border:2.5pt double #000;position:relative}'
-  + '.hdr{text-align:center;border-bottom:2pt solid #000;padding-bottom:10px;margin-bottom:14px}'
-  + '.hdr h1{font-size:22pt;font-weight:700;letter-spacing:2px}.hdr p{font-size:10pt;color:#555;margin-top:3px}'
-  + '.meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;font-size:10pt}'
-  + '.bx{border:1pt solid #000;padding:5px 10px;border-radius:3px;text-align:center}'
-  + '.body{font-size:12.5pt;line-height:2.2;text-align:justify}'
-  + '.fl{border-bottom:1pt dotted #000;display:inline-block;min-width:120px;text-align:center;font-weight:700}'
-  + '.ab{border:2pt solid #000;padding:6px 14px;display:inline-block;border-radius:4px;font-size:15pt;font-weight:700;margin:0 4px}'
-  + '.tbl{width:100%;border-collapse:collapse;margin:12px 0;font-size:11pt}'
-  + '.tbl th,.tbl td{border:1pt solid #000;padding:6px 10px;text-align:center}'
-  + '.tbl th{background:#f0f0f0;font-weight:700}'
-  + '.sigs{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;padding-top:12px;border-top:1pt dashed #000}'
-  + '.sig{text-align:center}.sln{border-bottom:1pt solid #000;width:80%;margin:30px auto 6px}'
-  + '.wm{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-35deg);font-size:48pt;color:rgba(0,0,0,0.04);font-weight:700;pointer-events:none}'
-  + '.legal{font-size:9pt;color:#555;margin-top:12px;text-align:center;line-height:1.7;border-top:1pt solid #ccc;padding-top:8px}'
-  + '.tb{background:#1a2e24;color:white;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;font-family:sans-serif;font-size:13px}'
-  + '.bp{background:#c9a84c;color:#0a1628;border:none;border-radius:6px;padding:8px 20px;font-size:13px;font-weight:700;cursor:pointer}'
-  + '.bc{background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer}'
-  + '@media print{.tb{display:none!important}}</style>';
-
-  var body = '<div class="tb"><span>سند أمر — قرض بنكي</span>'
-  + '<div style="display:flex;gap:10px"><button class="bp" onclick="window.print()">طباعة / PDF</button>'
-  + '<button class="bc" onclick="window.close()">إغلاق</button></div></div>'
-  + '<div class="page"><div class="wm">سند أمر</div>'
-  + '<div class="hdr"><h1>سَنَدٌ لِامْر — قَرْضٌ بَنْكِي</h1><p>وفقاً لنظام الأوراق التجارية السعودي - المرسوم الملكي م/37</p></div>'
-  + '<div class="meta">'
-  + '<div class="bx">التاريخ الهجري<br><b>' + hijri + '</b></div>'
-  + '<div class="bx">التاريخ الميلادي<br><b>' + gregorian + '</b></div>'
-  + '<div class="bx">رقم السند<br><b>__________</b></div>'
-  + '</div>'
-  + '<div class="body">'
-  + '<p>أنا الموقع أدناه <span class="fl">' + userName + '</span> أُقرّ وأتعهد بموجب هذا السند بالسداد لأمر:</p>'
-  + '<p style="text-align:center;font-size:14pt;font-weight:700;margin:6px 0">' + bankName + '</p>'
-  + '<p>مبلغ القرض:</p>'
-  + '<p style="text-align:center;margin:8px 0"><span class="ab">' + amt + ' ريال سعودي</span><br><span style="font-size:11pt">(' + amtWords + ' ريالاً سعودياً لا غير)</span></p>'
-  + '<table class="tbl"><tr><th>نوع القرض</th><th>نسبة الفائدة السنوية</th><th>عدد الأقساط</th><th>القسط الشهري</th><th>تاريخ انتهاء القرض</th></tr>'
-  + '<tr><td>' + loanType + '</td><td>' + rate + '</td><td>' + months + ' قسط</td><td>' + pmt + ' ر.س</td><td>' + endDate + '</td></tr></table>'
-  + '<p>وأتعهد بسداد الأقساط الشهرية في مواعيدها المحددة، وفي حال التأخر يحق للبنك المطالبة بكامل المبلغ المتبقي.</p>'
-  + '<p>مكان إصدار السند: <span class="fl">_______________</span> &nbsp; رقم الهوية: <span class="fl">_______________</span></p>'
-  + '</div>'
-  + '<div class="sigs">'
-  + '<div class="sig"><div style="font-size:11pt;font-weight:700;margin-bottom:6px">المقترض</div><div class="sln"></div><div style="font-size:11pt;font-weight:700">' + userName + '</div><div style="font-size:9.5pt;color:#666">التوقيع والبصمة</div></div>'
-  + '<div class="sig"><div style="font-size:11pt;font-weight:700;margin-bottom:6px">ممثل البنك / الجهة الممولة</div><div class="sln"></div><div style="font-size:11pt;font-weight:700">' + bankName + '</div><div style="font-size:9.5pt;color:#666">التوقيع والختم الرسمي</div></div>'
-  + '</div>'
-  + '<div class="legal">هذا السند ورقة تجارية وفقاً لنظام الأوراق التجارية السعودي الصادر بالمرسوم الملكي رقم م/37.<br>'
-  + 'يُعدّ سنداً تنفيذياً وفقاً للمادة 29 من نظام التنفيذ السعودي. حُرِّر بإرادة حرة دون إكراه.</div>'
-  + '</div>';
-
-  var html = '<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>سند أمر - قرض بنكي</title>' + css + '</head><body>' + body + '</body></html>';
-  var win = window.open('', '_blank', 'width=950,height=780');
-  if (win) { win.document.write(html); win.document.close(); }
-  else showToast('يرجى السماح بفتح النوافذ المنبثقة في المتصفح');
-}
-
-// ══════════════════════════════════════════════════════
-// واتساب للقروض
-// ══════════════════════════════════════════════════════
 // ══════════════════════════════════════════════════════
 // إضافة دين لتقويم Google Calendar
 // ══════════════════════════════════════════════════════
@@ -9029,6 +8951,33 @@ function deleteCapitalSrc(i) {
 document.addEventListener('DOMContentLoaded', function() {
   setTimeout(populateCapitalSrcSelect, 500);
 });
+
+
+// ══════════════════════════════════════════════
+// واتساب الجمعيات
+// ══════════════════════════════════════════════
+function sendJamaaWhatsApp(idx) {
+  var j = (window.jamaaData || jamaaData)[idx];
+  if (!j) return;
+  var nl = String.fromCharCode(10);
+  var fmt = function(n){ return n.toLocaleString('en-US',{maximumFractionDigits:0}); };
+  var msg = [
+    '🤝 *جمعية: ' + j.name + '*',
+    '',
+    '• القسط الشهري: *' + fmt(j.monthly) + ' ر.س*',
+    '• عدد الأعضاء: ' + j.members + ' عضو',
+    '• إجمالي الوعاء: ' + fmt(j.total_pot) + ' ر.س',
+    (j.turn ? '• دورك: الشهر ' + j.turn : ''),
+    (j.turn_date ? '• تاريخ دورك: ' + j.turn_date : ''),
+    '',
+    '— محفظتي المالية 📊'
+  ].filter(function(x){ return x !== undefined; }).join(nl);
+  var phone = j.contact ? '966' + j.contact.replace(/^0/, '') : '';
+  var url = phone
+    ? 'https://wa.me/' + phone + '?text=' + encodeURIComponent(msg)
+    : 'https://wa.me/?text=' + encodeURIComponent(msg);
+  window.open(url, '_blank');
+}
 
 
 function saveLoansToStorage() {
@@ -9444,7 +9393,6 @@ function renderLoans() {
         <div class="loan-card-actions">
           <button class="loan-action-btn" onclick="openLoanEditPage(${i})">✏️ تعديل</button>
           <button class="loan-action-btn" style="color:var(--red);border-color:rgba(255,77,77,0.2)" onclick="deleteLoan(${i})">🗑 حذف</button>
-          <button class="loan-action-btn" onclick="generateLoanSanad(${i})" style="color:#a78bfa;border-color:rgba(167,139,250,0.3)">📜 سند أمر</button>
         </div>
       </div>
       <div class="loan-card-amounts">
