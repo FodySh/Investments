@@ -1395,12 +1395,17 @@
         </button>
         <div class="auth-user-card" id="auth-user-card" style="flex-direction:row;gap:8px;align-items:center">
           <div class="auth-avatar-placeholder" id="auth-avatar-initials" style="width:28px;height:28px;font-size:12px;cursor:pointer" onclick="toggleDesktopUserMenu()">؟</div>
-          <div style="cursor:pointer" onclick="toggleDesktopUserMenu()">
-            <div class="auth-user-name" id="auth-user-name" style="font-size:12px">—</div>
+          <div style="cursor:pointer;flex:1;min-width:0" onclick="toggleDesktopUserMenu()">
+            <div class="auth-user-name" id="auth-user-name" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</div>
           </div>
+          <!-- زر الإعدادات -->
+          <button onclick="openSettingsModal()" title="الإعدادات" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:7px;padding:4px 7px;cursor:pointer;font-size:13px;color:var(--gold);flex-shrink:0;line-height:1">⚙️</button>
           <!-- Desktop user dropdown -->
-          <div id="desktop-user-menu" style="display:none;position:fixed;top:60px;left:8px;background:var(--sidebar-bg);border:1px solid var(--border);border-radius:12px;padding:8px;z-index:500;box-shadow:0 8px 32px rgba(0,0,0,0.4);backdrop-filter:blur(20px);min-width:180px">
+          <div id="desktop-user-menu" style="display:none;position:fixed;top:60px;left:8px;background:var(--sidebar-bg);border:1px solid var(--border);border-radius:12px;padding:8px;z-index:500;box-shadow:0 8px 32px rgba(0,0,0,0.4);backdrop-filter:blur(20px);min-width:200px">
             <div id="desktop-menu-email" style="padding:8px 12px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border);margin-bottom:4px"></div>
+            <button onclick="openSettingsModal();toggleDesktopUserMenu()" style="width:100%;display:flex;align-items:center;gap:10px;background:rgba(201,168,76,0.08);border:none;padding:9px 12px;color:var(--gold);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;border-radius:8px;text-align:right;margin-bottom:4px">
+              ⚙️ الإعدادات
+            </button>
             <button onclick="googleSignOut();toggleDesktopUserMenu()" style="width:100%;display:flex;align-items:center;gap:10px;background:rgba(255,77,77,0.08);border:none;padding:9px 12px;color:var(--red);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;border-radius:8px;text-align:right">
               🚪 تسجيل الخروج
             </button>
@@ -4549,20 +4554,60 @@
     </div>
 
 
-    <!-- CAPITAL SOURCE SETTINGS MODAL -->
-    <div id="capital-src-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;align-items:center;justify-content:center">
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:min(90vw,460px);max-height:80vh;overflow-y:auto">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-          <div style="font-size:16px;font-weight:700">⚙️ مصادر رأس المال</div>
-          <button onclick="closeCapitalSrcSettings()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1">×</button>
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- SETTINGS MODAL                                   -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div id="settings-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:2000;align-items:flex-start;justify-content:center;padding-top:60px;overflow-y:auto">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:min(94vw,560px);margin:0 auto 40px">
+
+        <!-- Header -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+          <div style="font-size:18px;font-weight:800">⚙️ الإعدادات</div>
+          <button onclick="closeSettingsModal()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1">×</button>
         </div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:14px">أضف وعدّل مصادر رأس المال الخاصة بك</div>
-        <div id="capital-src-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
-        <div style="display:flex;gap:8px">
-          <input type="text" id="capital-src-new-input" class="f-input" placeholder="مثال: مكافأة نهاية الخدمة" style="flex:1;padding:9px 12px;font-size:13px" onkeydown="if(event.key==='Enter')addCapitalSrc()" />
-          <button onclick="addCapitalSrc()" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">+ إضافة</button>
+
+        <!-- ── القسم 1: معلومات الحساب ── -->
+        <div style="margin-bottom:24px">
+          <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">👤 معلومات الحساب</div>
+          <div class="field-group">
+            <label class="field-label">الاسم في التقارير والسندات</label>
+            <input class="f-input" id="settings-display-name" type="text" placeholder="اسمك الكامل كما يظهر في السندات" />
+          </div>
         </div>
-        <button onclick="closeCapitalSrcSettings()" style="width:100%;margin-top:16px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:10px;font-size:13px;color:var(--muted);cursor:pointer;font-family:inherit">إغلاق</button>
+
+        <div style="height:1px;background:var(--border);margin-bottom:24px"></div>
+
+        <!-- ── القسم 2: مصادر رأس المال ── -->
+        <div style="margin-bottom:24px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px">💰 مصادر رأس المال</div>
+            <button onclick="addSettingsItem('capital')" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);border-radius:8px;padding:4px 12px;font-size:11px;color:var(--gold);cursor:pointer;font-family:inherit">+ إضافة</button>
+          </div>
+          <div id="settings-capital-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px"></div>
+          <div style="display:flex;gap:8px">
+            <input class="f-input" id="settings-capital-input" type="text" placeholder="مثال: مكافأة نهاية الخدمة" style="flex:1;padding:8px 12px;font-size:12px" onkeydown="if(event.key==='Enter')addSettingsItem('capital')" />
+          </div>
+        </div>
+
+        <div style="height:1px;background:var(--border);margin-bottom:24px"></div>
+
+        <!-- ── القسم 3: المنصات ── -->
+        <div style="margin-bottom:24px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px">🏦 المنصات والوسطاء</div>
+            <button onclick="addSettingsItem('platforms')" style="background:rgba(56,217,169,0.1);border:1px solid rgba(56,217,169,0.25);border-radius:8px;padding:4px 12px;font-size:11px;color:var(--green);cursor:pointer;font-family:inherit">+ إضافة</button>
+          </div>
+          <div id="settings-platforms-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px"></div>
+          <div style="display:flex;gap:8px">
+            <input class="f-input" id="settings-platforms-input" type="text" placeholder="مثال: منصة جديدة" style="flex:1;padding:8px 12px;font-size:12px" onkeydown="if(event.key==='Enter')addSettingsItem('platforms')" />
+          </div>
+        </div>
+
+        <!-- Save button -->
+        <button onclick="saveSettings()" style="width:100%;background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px">
+          💾 حفظ الإعدادات
+        </button>
+
       </div>
     </div>
 </div><!-- end .app -->
@@ -6553,7 +6598,7 @@ function showPage(id, navEl, mobileTitle, noScroll){
   if (id === 'funds')  { renderSukuk(); renderFunds(); setTimeout(function(){ switchOppsTab('funds'); }, 50); }
   if (id === 'add-stock') { resetAddStock(); calcAddStock(); }
   if (id === 'add-loan')  { calcAddLoan(); }
-  if (id === 'add')       { setTimeout(populateCapitalSrcSelect, 100); }
+  if (id === 'add')       { setTimeout(function(){ populateCapitalSrcSelect(); populatePlatformSelects(); }, 100); }
   if (id === 'add-debt')  { updateDebtDirectionLabel(); calcAddDebt(); }
   if (id === 'loans') renderLoans();
   if (id === 'debts') renderDebts();
@@ -8978,6 +9023,168 @@ function sendJamaaWhatsApp(idx) {
     : 'https://wa.me/?text=' + encodeURIComponent(msg);
   window.open(url, '_blank');
 }
+
+
+// ══════════════════════════════════════════════════════
+// SETTINGS SYSTEM — مصادر رأس المال + المنصات + الاسم
+// ══════════════════════════════════════════════════════
+
+var _defaultCapitalSources  = ['مستحقات','Cash Flow','رصيد الإجازة','تحويشة','أرباح سابقة','ايجار عقار','مدخرات','مكافأة','قرض','أخرى'];
+var _defaultPlatforms       = ['ترميز','منافع','دراية','ابيان','عوائد','منصة الأهلي','رياض المالية','الراجحي المالية','بنك البلاد','إتقان','أخرى'];
+
+function _getSettings() {
+  try { return JSON.parse(localStorage.getItem('appSettings') || '{}'); } catch(e) { return {}; }
+}
+function _saveSettings(s) { localStorage.setItem('appSettings', JSON.stringify(s)); }
+
+function getCapitalSources() {
+  var s = _getSettings();
+  return (s.capitalSources && s.capitalSources.length) ? s.capitalSources : _defaultCapitalSources.slice();
+}
+function getPlatforms() {
+  var s = _getSettings();
+  return (s.platforms && s.platforms.length) ? s.platforms : _defaultPlatforms.slice();
+}
+function getDisplayName() {
+  var s = _getSettings();
+  return s.displayName || (window.__firebaseUser && window.__firebaseUser.displayName) || '';
+}
+
+// ── تعبئة القوائم المنسدلة ───────────────────────────────────────────────────
+function populateCapitalSrcSelect() {
+  var sel = document.getElementById('f-capital-src');
+  if (!sel) return;
+  var current = sel.value;
+  var sources = getCapitalSources();
+  sel.innerHTML = '<option value="">— اختر المصدر —</option>'
+    + sources.map(function(s) {
+        return '<option value="' + s + '"' + (s === current ? ' selected' : '') + '>' + s + '</option>';
+      }).join('');
+}
+
+function populatePlatformSelects() {
+  var platforms = getPlatforms();
+  var opts = '<option value="">— اختر المنصة —</option>'
+    + platforms.map(function(p){ return '<option>' + p + '</option>'; }).join('');
+
+  // كل select الخاصة بالمنصة في التطبيق
+  ['f-platform', 'al-bank', 'as-platform'].forEach(function(id) {
+    var sel = document.getElementById(id);
+    if (!sel) return;
+    var cur = sel.value;
+    // f-platform لها optgroups — نبقيها كما هي
+    if (id === 'f-platform') return;
+    if (id === 'al-bank') return; // للقروض لها قائمة خاصة
+    // as-platform: نحدّث optgroups
+    if (id === 'as-platform') {
+      var saOpts = platforms.filter(function(p){ return !['Interactive Brokers','Alpaca','Robinhood','TD Ameritrade','Charles Schwab'].includes(p); })
+        .map(function(p){ return '<option>' + p + '</option>'; }).join('');
+      var existingSa = sel.querySelector('#as-platform-sa-group');
+      if (existingSa) existingSa.innerHTML = saOpts;
+      return;
+    }
+  });
+}
+
+// ── فتح/إغلاق الـ Modal ──────────────────────────────────────────────────────
+function openSettingsModal() {
+  var modal = document.getElementById('settings-modal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+
+  var s = _getSettings();
+
+  // تعبئة الاسم
+  var nameInp = document.getElementById('settings-display-name');
+  if (nameInp) nameInp.value = s.displayName || (window.__firebaseUser && window.__firebaseUser.displayName) || '';
+
+  // تعبئة مصادر رأس المال
+  renderSettingsList('capital', getCapitalSources());
+
+  // تعبئة المنصات
+  renderSettingsList('platforms', getPlatforms());
+}
+
+function closeSettingsModal() {
+  var modal = document.getElementById('settings-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+// ── عرض القائمة في الـ Modal ─────────────────────────────────────────────────
+function renderSettingsList(key, items) {
+  var listEl = document.getElementById('settings-' + key + '-list');
+  if (!listEl) return;
+  if (!items.length) {
+    listEl.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:6px 0">لا توجد عناصر</div>';
+    return;
+  }
+  listEl.innerHTML = items.map(function(item, i) {
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(255,255,255,0.04);border-radius:9px;border:1px solid var(--border)">'
+      + '<span style="flex:1;font-size:12px">' + item + '</span>'
+      + '<button onclick="removeSettingsItem('' + key + '',' + i + ')" style="background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.2);border-radius:6px;padding:2px 8px;cursor:pointer;color:var(--red);font-size:11px;flex-shrink:0">حذف</button>'
+      + '</div>';
+  }).join('');
+}
+
+function addSettingsItem(key) {
+  var inp = document.getElementById('settings-' + key + '-input');
+  if (!inp) return;
+  var val = inp.value.trim();
+  if (!val) { showToast('❌ أدخل اسماً'); return; }
+  var s = _getSettings();
+  var list = key === 'capital' ? getCapitalSources() : getPlatforms();
+  if (list.includes(val)) { showToast('العنصر موجود مسبقاً'); return; }
+  list.push(val);
+  if (key === 'capital') s.capitalSources = list;
+  else s.platforms = list;
+  _saveSettings(s);
+  inp.value = '';
+  renderSettingsList(key, list);
+  showToast('✅ تمت إضافة: ' + val);
+}
+
+function removeSettingsItem(key, idx) {
+  var s = _getSettings();
+  var list = key === 'capital' ? getCapitalSources() : getPlatforms();
+  list.splice(idx, 1);
+  if (key === 'capital') s.capitalSources = list;
+  else s.platforms = list;
+  _saveSettings(s);
+  renderSettingsList(key, list);
+}
+
+function saveSettings() {
+  var s = _getSettings();
+  var nameInp = document.getElementById('settings-display-name');
+  if (nameInp && nameInp.value.trim()) {
+    s.displayName = nameInp.value.trim();
+  }
+  // capital و platforms محفوظة تلقائياً عند الإضافة/الحذف
+  _saveSettings(s);
+
+  // تحديث القوائم في التطبيق
+  populateCapitalSrcSelect();
+  populatePlatformSelects();
+
+  closeSettingsModal();
+  showToast('✅ تم حفظ الإعدادات');
+}
+
+// ── تعبئة تلقائية عند فتح صفحة الإضافة ─────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    populateCapitalSrcSelect();
+    populatePlatformSelects();
+  }, 600);
+});
+
+// ── إغلاق بالضغط خارج الـ modal ────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  var modal = document.getElementById('settings-modal');
+  if (modal && modal.style.display === 'flex' && e.target === modal) {
+    closeSettingsModal();
+  }
+});
 
 
 function saveLoansToStorage() {
