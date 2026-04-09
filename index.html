@@ -5232,7 +5232,7 @@ async function fetchLiveStockPrices() {
     };
     var res = await fetch(PROXY, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Request-Type': 'stocks' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
 
@@ -7933,7 +7933,7 @@ async function fetchUsStockPrices() {
   try {
     var res = await fetch(PROXY, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Request-Type': 'stocks' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ _stockRequest: true, symbols: symbols, market: 'us' })
     });
     if (res.ok) {
