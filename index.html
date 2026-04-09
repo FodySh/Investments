@@ -3489,7 +3489,7 @@
               <div class="form-grid">
                 <div class="field-group" style="grid-column:span 2">
                   <label class="field-label">اسم الجمعية <span class="req">*</span></label>
-                  <input class="f-input" id="j-name" type="text" placeholder="مثال: جمعية الأصدقاء 2025" />
+                  <input class="f-input" id="j-name" type="text" placeholder="مثال: جمعية الأصدقاء 2026" />
                 </div>
                 <div class="field-group">
                   <label class="field-label">القسط الشهري (ر.س) <span class="req">*</span></label>
@@ -3934,7 +3934,7 @@
         <button onclick="showPage('stocks',document.querySelector('.sidebar .nav-item[onclick*=stocks]'),'📈 الأسهم')" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:9px 18px;color:var(--muted);font-size:13px;cursor:pointer;font-family:inherit">← رجوع للأسهم</button>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" class="add-stock-grid">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px" class="add-stock-grid">
 
         <!-- ── الجانب الأيمن: نموذج الإدخال ── -->
         <div style="display:flex;flex-direction:column;gap:16px">
@@ -4908,7 +4908,7 @@ async function runAIAnalysis() {
 
     var summary = 'المحفظة: ' + totalAmt.toLocaleString('en-US') + ' ر.س | عوائد: ' + totalRet.toLocaleString('en-US') + ' ر.س | ROI: '+roi+'% | الفرص: '+inv.length+' (نشطة:'+active+' مستلمة:'+done+') | صكوك:'+Math.round(sukukAmt/1000)+'k صناديق:'+Math.round(fundsAmt/1000)+'k اسهم:'+Math.round(stksAmt/1000)+'k | منصات: '+platStr+' | افضل: '+topGain+' | اسوا: '+topLoss+' | ديون:'+((window.debtsData||[]).length)+' قروض:'+((window.loansData||[]).length);
 
-    var PROXY_URL = 'https://claude-proxy.fahad-shaheen.workers.dev'; // Cloudflare Worker — Claude API key is safe here
+    var PROXY_URL = 'https://claude-proxy.shaheenhouse1.workers.dev'; // Cloudflare Worker — Claude API key is safe here
 
     var payload = {
       model: 'claude-sonnet-4-20250514',
