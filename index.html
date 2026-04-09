@@ -9146,7 +9146,7 @@ function renderSettingsList(key, items) {
   listEl.innerHTML = items.map(function(item, i) {
     return '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(255,255,255,0.04);border-radius:9px;border:1px solid var(--border)">'
       + '<span style="flex:1;font-size:12px">' + item + '</span>'
-      + '<button onclick="removeSettingsItem('' + key + '',' + i + ')" style="background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.2);border-radius:6px;padding:2px 8px;cursor:pointer;color:var(--red);font-size:11px;flex-shrink:0">حذف</button>'
+      + '<button onclick="removeSettingsItem(\\'' + key + \\'',' + i + ')" style="background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.2);border-radius:6px;padding:2px 8px;cursor:pointer;color:var(--red);font-size:11px;flex-shrink:0">حذف</button>'
       + '</div>';
   }).join('');
 }
