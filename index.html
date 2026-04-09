@@ -1445,16 +1445,20 @@
           تسجيل الدخول
         </button>
         <!-- Logged-in avatar (hidden by default) -->
-        <div id="mob-user-card" style="display:none;align-items:center;gap:6px;cursor:pointer" onclick="toggleMobUserMenu()">
-          <div id="mob-avatar" style="
-            width:30px;height:30px;border-radius:50%;
-            background:linear-gradient(135deg,var(--gold),var(--gold2));
-            display:flex;align-items:center;justify-content:center;
-            font-size:13px;font-weight:700;color:var(--navy);
-            border:2px solid var(--gold);overflow:hidden;flex-shrink:0;
-          ">؟</div>
-          <span id="mob-user-name" style="font-size:11px;font-weight:600;color:var(--white);max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
-          <span style="font-size:9px;color:var(--muted)">▾</span>
+        <div id="mob-user-card" style="display:none;align-items:center;gap:6px">
+          <div style="display:flex;align-items:center;gap:5px;cursor:pointer" onclick="toggleMobUserMenu()">
+            <div id="mob-avatar" style="
+              width:30px;height:30px;border-radius:50%;
+              background:linear-gradient(135deg,var(--gold),var(--gold2));
+              display:flex;align-items:center;justify-content:center;
+              font-size:13px;font-weight:700;color:var(--navy);
+              border:2px solid var(--gold);overflow:hidden;flex-shrink:0;
+            ">؟</div>
+            <span id="mob-user-name" style="font-size:11px;font-weight:600;color:var(--white);max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+            <span style="font-size:9px;color:var(--muted)">▾</span>
+          </div>
+          <!-- زر الإعدادات -->
+          <button onclick="openSettingsModal()" title="الإعدادات" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:7px;padding:5px 7px;cursor:pointer;font-size:14px;color:var(--gold);line-height:1;flex-shrink:0">⚙️</button>
         </div>
       </div>
     </div>
@@ -1470,6 +1474,16 @@
     ">
       <div id="mob-menu-email" style="padding:8px 12px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border);margin-bottom:4px"></div>
       <div id="mob-sync-status" style="padding:6px 12px;font-size:11px;color:var(--green)">☁️ مزامن</div>
+      <button onclick="openSettingsModal();closeMobUserMenu()" style="
+        width:100%;display:flex;align-items:center;gap:10px;
+        background:rgba(201,168,76,0.08);border:none;
+        padding:9px 12px;color:var(--gold);
+        font-family:'IBM Plex Sans Arabic',sans-serif;
+        font-size:12px;font-weight:600;cursor:pointer;
+        border-radius:8px;margin-bottom:4px;text-align:right;
+      ">
+        <span>⚙️</span> الإعدادات
+      </button>
       <button onclick="googleSignOut();closeMobUserMenu()" style="
         width:100%;display:flex;align-items:center;gap:10px;
         background:rgba(255,77,77,0.08);border:none;
