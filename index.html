@@ -1730,8 +1730,13 @@
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <div class="date-badge" id="stocks-total-badge">جاري الحساب...</div>
-          <button onclick="refreshAllStockPrices()" id="stocks-refresh-btn" style="background:rgba(56,217,169,0.1);border:1px solid rgba(56,217,169,0.3);border-radius:8px;padding:8px 14px;font-size:11px;font-weight:600;color:#38d9a9;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;gap:6px">
-            <span id="stocks-refresh-icon">⟳</span> تحديث
+          <!-- زر تحديث السعودي -->
+          <button onclick="fetchLiveStockPrices()" id="sa-refresh-btn" style="background:rgba(56,217,169,0.1);border:1px solid rgba(56,217,169,0.3);border-radius:8px;padding:7px 12px;font-size:11px;font-weight:600;color:#38d9a9;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;gap:5px" title="تحديث أسعار السوق السعودي">
+            <span id="sa-refresh-icon">⟳</span> 🇸🇦
+          </button>
+          <!-- زر تحديث الأمريكي -->
+          <button onclick="fetchUsStockPrices()" id="us-refresh-btn" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.3);border-radius:8px;padding:7px 12px;font-size:11px;font-weight:600;color:#60a5fa;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;gap:5px" title="تحديث أسعار السوق الأمريكي">
+            <span id="us-refresh-icon">⟳</span> 🇺🇸
           </button>
           <button onclick="showPage('add-stock',null,'📈 إضافة سهم')" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:6px">➕ إضافة سهم</button>
         </div>
@@ -1745,6 +1750,10 @@
 
       <!-- السوق السعودي -->
       <div id="stocks-tab-sa">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:11px;color:var(--muted)">
+          <span>🇸🇦 السوق السعودي</span>
+          <span id="sa-last-update" style="color:var(--muted)">لم يُحدَّث بعد</span>
+        </div>
         <div class="section-card fade-up delay-1">
           <div class="section-head">
             <span class="section-title">🇸🇦 الأسهم السعودية</span>
@@ -1766,6 +1775,10 @@
 
       <!-- السوق الأمريكي -->
       <div id="stocks-tab-us" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:11px;color:var(--muted)">
+          <span>🇺🇸 السوق الأمريكي</span>
+          <span id="us-last-update" style="color:var(--muted)">لم يُحدَّث بعد</span>
+        </div>
         <div class="section-card fade-up delay-1">
           <div class="section-head">
             <span class="section-title">🇺🇸 الأسهم الأمريكية</span>
@@ -5187,8 +5200,8 @@ async function fetchLiveStockPrices() {
   var tickers = Object.keys(STOCK_PRICES);
   if (!tickers.length) { _stockFetchInProgress = false; return; }
 
-  var icon = document.getElementById('stocks-refresh-icon');
-  var btn  = document.getElementById('stocks-refresh-btn');
+  var icon = document.getElementById('sa-refresh-icon');
+  var btn  = document.getElementById('sa-refresh-btn');
   if (icon) icon.style.animation = 'spin 1s linear infinite';
   if (btn)  btn.style.opacity = '0.6';
 
@@ -5205,7 +5218,7 @@ async function fetchLiveStockPrices() {
     };
     var res = await fetch(PROXY, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-Request-Type': 'stocks' },
       body: JSON.stringify(payload)
     });
 
@@ -5261,13 +5274,19 @@ async function fetchLiveStockPrices() {
   }
 
   renderStocks();
-  var now = new Date().toLocaleTimeString('ar-SA', {hour:'2-digit', minute:'2-digit'});
-  if (btn) {
-    btn.title = updated > 0
-      ? 'آخر تحديث: ' + now + ' (' + updated + ' سهم)'
-      : 'تعذّر جلب الأسعار - يُعرض آخر سعر محفوظ';
-    btn.style.opacity = '1';
+
+  // تحديث timestamp
+  var now = new Date();
+  var timeStr = now.toLocaleTimeString('ar-SA-u-nu-latn', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  var dateStr = now.toLocaleDateString('ar-SA-u-nu-latn', {day:'numeric', month:'short'});
+  var lastUpEl = document.getElementById('sa-last-update');
+  if (lastUpEl) {
+    lastUpEl.textContent = updated > 0
+      ? '✅ آخر تحديث: ' + dateStr + ' — ' + timeStr + ' (' + updated + ' سهم)'
+      : '⚠️ تعذّر الجلب — آخر تحديث: ' + dateStr + ' ' + timeStr;
+    lastUpEl.style.color = updated > 0 ? 'var(--green)' : 'var(--orange)';
   }
+  if (btn) btn.style.opacity = '1';
   if (icon) icon.style.animation = '';
   _stockFetchInProgress = false;
 }
@@ -7878,7 +7897,7 @@ async function fetchCompanyName(ticker) {
 // ── تحديث الأسعار لكلا السوقين ────────────────────────────────────────────────
 function refreshAllStockPrices() {
   fetchLiveStockPrices();
-  if (_currentStocksTab === 'us') fetchUsStockPrices();
+  fetchUsStockPrices();
 }
 
 // ── أسعار الأسهم الأمريكية via Yahoo Finance ──────────────────────────────────
@@ -7900,7 +7919,7 @@ async function fetchUsStockPrices() {
   try {
     var res = await fetch(PROXY, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-Request-Type': 'stocks' },
       body: JSON.stringify({ _stockRequest: true, symbols: symbols, market: 'us' })
     });
     if (res.ok) {
