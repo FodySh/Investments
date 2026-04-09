@@ -1771,7 +1771,11 @@
         <div class="section-card fade-up delay-1">
           <div class="section-head">
             <span class="section-title">🇸🇦 الأسهم السعودية</span>
-            <span class="section-count" id="stocks-count-badge">—</span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="section-count" id="stocks-count-badge">—</span>
+              <button onclick="exportStocksCSV('sa')" title="تصدير CSV" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--green);cursor:pointer;font-family:inherit;white-space:nowrap">⬇️ CSV</button>
+              <label title="استيراد CSV" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--cyan);cursor:pointer;white-space:nowrap">⬆️ CSV<input type="file" accept=".csv" style="display:none" onchange="importStocksCSV(event,'sa')"></label>
+            </div>
           </div>
           <div class="table-wrap">
             <table class="data-table">
@@ -1796,7 +1800,11 @@
         <div class="section-card fade-up delay-1">
           <div class="section-head">
             <span class="section-title">🇺🇸 الأسهم الأمريكية</span>
-            <span class="section-count" id="us-stocks-count-badge">—</span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="section-count" id="us-stocks-count-badge">—</span>
+              <button onclick="exportStocksCSV('us')" title="تصدير CSV" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--green);cursor:pointer;font-family:inherit;white-space:nowrap">⬇️ CSV</button>
+              <label title="استيراد CSV" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--cyan);cursor:pointer;white-space:nowrap">⬆️ CSV<input type="file" accept=".csv" style="display:none" onchange="importStocksCSV(event,'us')"></label>
+            </div>
           </div>
           <div class="table-wrap">
             <table class="data-table">
@@ -1864,7 +1872,11 @@
         <div class="section-card">
           <div class="section-head">
             <span class="section-title">📜 سجل الصكوك والمرابحات</span>
-            <span class="section-count" id="sukuk-count-badge">—</span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="section-count" id="sukuk-count-badge">—</span>
+              <button onclick="exportOppsCSV('sukuk')" title="تصدير CSV" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--green);cursor:pointer;font-family:inherit;white-space:nowrap">⬇️ CSV</button>
+              <label title="استيراد CSV" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--cyan);cursor:pointer;white-space:nowrap">⬆️ CSV<input type="file" accept=".csv" style="display:none" onchange="importOppsCSV(event,'sukuk')"></label>
+            </div>
           </div>
           <div class="table-wrap">
             <table class="data-table">
@@ -1888,7 +1900,11 @@
         <div class="section-card">
           <div class="section-head">
             <span class="section-title">💼 سجل الصناديق الاستثمارية</span>
-            <span class="section-count" id="funds-count-badge2">—</span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="section-count" id="funds-count-badge2">—</span>
+              <button onclick="exportOppsCSV('funds')" title="تصدير CSV" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--green);cursor:pointer;font-family:inherit;white-space:nowrap">⬇️ CSV</button>
+              <label title="استيراد CSV" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--cyan);cursor:pointer;white-space:nowrap">⬆️ CSV<input type="file" accept=".csv" style="display:none" onchange="importOppsCSV(event,'funds')"></label>
+            </div>
           </div>
           <div class="table-wrap">
             <table class="data-table">
@@ -7798,54 +7814,70 @@ function onTickerInput() {
 }
 
 async function fetchCompanyName(ticker) {
-  var nameEl    = document.getElementById('as-name');
-  var statusEl  = document.getElementById('as-ticker-status');
+  var nameEl     = document.getElementById('as-name');
+  var statusEl   = document.getElementById('as-ticker-status');
   var fetchingEl = document.getElementById('as-name-fetching');
-
   if (!nameEl) return;
-  if (statusEl)  statusEl.textContent = '⏳';
+  if (statusEl)   statusEl.textContent = '⏳';
   if (fetchingEl) fetchingEl.style.display = 'block';
 
+  var symbol = _currentStockMarket === 'sa' ? ticker + '.SR' : ticker;
+  var PROXY  = 'https://claude-proxy.shaheenhouse1.workers.dev';
+
+  // قاموس الأسهم السعودية الشائعة (fallback سريع)
+  var saNames = {
+    '2222':'أرامكو السعودية','2280':'المراعي','4017':'فقيه للرعاية الصحية',
+    '5110':'السعودية للكهرباء','2084':'دار الأركان','4163':'سلامة',
+    '1834':'الراجحي للتأمين','2284':'ACWA Power','4143':'عناية',
+    '1211':'معادن','1120':'مصرف الراجحي','1180':'البنك الأهلي السعودي',
+    '1150':'بنك الرياض','1140':'بنك الجزيرة','4260':'أكواباور',
+    '2381':'بان للصناعات','4200':'بنك البلاد','1010':'الراجحي المالية',
+    '2010':'سابك','4030':'سلامة للتأمين','2350':'الشركة الخليجية للصناعات',
+    '4240':'تمكين','7010':'الاتصالات السعودية','7020':'اتحاد الاتصالات',
+    '2330':'أدوية التميمي','4110':'سلامة','4031':'التعاونية للتأمين'
+  };
+
+  var found = false;
+
+  // 1) جرب عبر الـ Worker أولاً
   try {
-    var symbol = _currentStockMarket === 'sa' ? ticker + '.SR' : ticker;
-    var url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + symbol + '?interval=1d&range=1d';
-    var res = await fetch(url, {mode:'cors'});
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    var json = await res.json();
-    var meta = json?.chart?.result?.[0]?.meta;
-    if (!meta) throw new Error('No data');
-
-    var longName = meta.longName || meta.shortName || ticker;
-    nameEl.value = longName;
-
-    // Also fill current price if empty
-    var currPriceEl = document.getElementById('as-curr-price');
-    if (currPriceEl && !currPriceEl.value && meta.regularMarketPrice) {
-      currPriceEl.value = meta.regularMarketPrice.toFixed(2);
+    var res = await fetch(PROXY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ _stockRequest: true, symbols: symbol })
+    });
+    if (res.ok) {
+      var data = await res.json();
+      var q = (data.quotes || [])[0];
+      if (q && q.name && q.name !== symbol) {
+        nameEl.value = q.name;
+        if (q.price) {
+          var priceEl = document.getElementById('as-curr-price');
+          if (priceEl && !priceEl.value) priceEl.value = parseFloat(q.price).toFixed(2);
+        }
+        found = true;
+      }
     }
+  } catch(e) { /* Worker unavailable */ }
 
-    if (statusEl)  statusEl.textContent = '✅';
-    if (fetchingEl) fetchingEl.style.display = 'none';
-    calcAddStock();
-    showToast('✅ ' + longName);
-
-  } catch(e) {
-    // Fallback: known SA tickers dictionary
-    var saNames = {
-      '2222':'أرامكو السعودية','2280':'المراعي','2222':'أرامكو','4017':'فقيه للرعاية',
-      '5110':'السعودية للكهرباء','2084':'دار الأركان','4163':'سلامة','1834':'الراجحي للتأمين',
-      '2284':'ACWA Power','4143':'عناية','1211':'معادن','1120':'الراجحي','1180':'الأهلي',
-      '1150':'رياض','1140':'الجزيرة','4260':'أكواباور','4240':'تمكين','4200':'البلاد'
-    };
-    if (saNames[ticker]) {
-      nameEl.value = saNames[ticker];
-      if (statusEl)  statusEl.textContent = '✅';
-    } else {
-      if (statusEl)  statusEl.textContent = '❓';
-      nameEl.placeholder = 'أدخل الاسم يدوياً';
-    }
-    if (fetchingEl) fetchingEl.style.display = 'none';
+  // 2) Fallback: قاموس الأسهم السعودية
+  if (!found && _currentStockMarket === 'sa' && saNames[ticker]) {
+    nameEl.value = saNames[ticker];
+    found = true;
   }
+
+  // 3) إذا لم يُجلب شيء
+  if (!found) {
+    if (statusEl) statusEl.textContent = '❓';
+    nameEl.placeholder = 'أدخل الاسم يدوياً';
+    if (fetchingEl) fetchingEl.style.display = 'none';
+    return;
+  }
+
+  if (statusEl)   statusEl.textContent = '✅';
+  if (fetchingEl) fetchingEl.style.display = 'none';
+  calcAddStock();
+  showToast('✅ ' + nameEl.value);
 }
 
 // ── تحديث الأسعار لكلا السوقين ────────────────────────────────────────────────
@@ -9205,6 +9237,222 @@ document.addEventListener('click', function(e) {
     closeSettingsModal();
   }
 });
+
+
+// ══════════════════════════════════════════════════════
+// CSV EXPORT / IMPORT — الأسهم والصكوك والصناديق
+// ══════════════════════════════════════════════════════
+
+function _downloadCSV(filename, rows) {
+  var bom  = '﻿'; // BOM for Excel Arabic support
+  var csv  = bom + rows.map(function(row) {
+    return row.map(function(cell) {
+      var s = String(cell == null ? '' : cell);
+      // Escape cells with commas, quotes, or newlines
+      if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+        s = '"' + s.replace(/"/g, '""') + '"';
+      }
+      return s;
+    }).join(',');
+  }).join('\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+}
+
+// ── تصدير الأسهم ────────────────────────────────────────────────────────────
+function exportStocksCSV(market) {
+  var inv = window.__investments || investments;
+  var data = inv.filter(function(x) {
+    return x.type === 'سهم' && (market === 'us' ? x.market === 'us' : x.market !== 'us');
+  });
+  if (!data.length) { showToast('لا توجد أسهم للتصدير'); return; }
+
+  var headers = ['الاسم','الرمز','عدد الأسهم','التكلفة (ر.س)','متوسط سعر الشراء',
+                 'المنصة','المخاطرة','الحالة','تاريخ الشراء','تاريخ الخروج','السوق'];
+  var rows = [headers].concat(data.map(function(d) {
+    var avgPrice = d.shares && d.amount ? (d.amount / d.shares).toFixed(2) : '';
+    return [
+      d.name, d.ticker || '', d.shares || '', d.amount || '', avgPrice,
+      d.platform || '', d.risk || '', d.status || '',
+      d.date_in || '', d.date_out || '',
+      market === 'us' ? 'أمريكي' : 'سعودي'
+    ];
+  }));
+  var fname = (market === 'us' ? 'أسهم_أمريكية' : 'أسهم_سعودية') + '_' + new Date().toISOString().slice(0,10) + '.csv';
+  _downloadCSV(fname, rows);
+  showToast('✅ تم تصدير ' + data.length + ' سهم');
+}
+
+// ── استيراد الأسهم ───────────────────────────────────────────────────────────
+function importStocksCSV(event, market) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var text   = e.target.result.replace(/^﻿/, ''); // remove BOM
+      var lines  = text.split('\n').filter(function(l){ return l.trim(); });
+      if (lines.length < 2) { showToast('❌ الملف فارغ'); return; }
+      var headers = lines[0].split(',').map(function(h){ return h.trim().replace(/^"|"$/g,''); });
+      var imported = 0;
+      var inv = window.__investments || investments;
+
+      for (var i = 1; i < lines.length; i++) {
+        var cols = _parseCSVLine(lines[i]);
+        if (cols.length < 2) continue;
+        var row = {};
+        headers.forEach(function(h, idx) { row[h] = (cols[idx] || '').trim(); });
+
+        // تحقق من وجود البيانات الأساسية
+        var name = row['الاسم'] || row['name'] || '';
+        if (!name) continue;
+
+        // تحقق من التكرار
+        var exists = inv.some(function(x){ return x.name === name && x.ticker === (row['الرمز']||row['ticker']||''); });
+        if (exists) continue;
+
+        inv.push({
+          name:      name,
+          type:      'سهم',
+          ticker:    row['الرمز'] || row['ticker'] || '',
+          shares:    parseFloat(row['عدد الأسهم'] || row['shares'] || 0) || null,
+          amount:    parseFloat(row['التكلفة (ر.س)'] || row['amount'] || 0) || 0,
+          platform:  row['المنصة'] || row['platform'] || '',
+          risk:      row['المخاطرة'] || row['risk'] || 'متوسط',
+          status:    row['الحالة'] || row['status'] || 'نشطة',
+          date_in:   row['تاريخ الشراء'] || row['date_in'] || '',
+          date_out:  row['تاريخ الخروج'] || row['date_out'] || null,
+          market:    market === 'us' ? 'us' : '',
+          ret_pct:   parseFloat(row['ret_pct'] || 0) || 0,
+          ret_val:   parseFloat(row['ret_val'] || 0) || 0,
+          total:     parseFloat(row['total'] || 0) || 0,
+          dist:      row['dist'] || 'لا يوجد',
+        });
+        imported++;
+      }
+
+      if (imported > 0) {
+        triggerSync('investments');
+        renderStocks(); renderAll();
+        showToast('✅ تم استيراد ' + imported + ' سهم جديد');
+      } else {
+        showToast('⚠️ لم يُضف شيء — قد تكون البيانات مكررة');
+      }
+    } catch(err) {
+      showToast('❌ خطأ في قراءة الملف: ' + err.message);
+    }
+    event.target.value = ''; // reset input
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+// ── تصدير الصكوك والصناديق ───────────────────────────────────────────────────
+function exportOppsCSV(type) {
+  var inv = window.__investments || investments;
+  var typeMap = { sukuk: ['صك','مرابحة','سند','وديعة'], funds: ['صندوق'] };
+  var types   = typeMap[type] || [];
+  var data    = inv.filter(function(x){ return types.includes(x.type); });
+  if (!data.length) { showToast('لا توجد بيانات للتصدير'); return; }
+
+  var headers = ['الاسم','النوع','المنصة','المبلغ (ر.س)','مصدر رأس المال',
+                 'العائد %','العائد ر.س','المجموع المتوقع','المدة',
+                 'تاريخ الدخول','تاريخ الخروج','التوزيع','المخاطرة','الحالة'];
+  var rows = [headers].concat(data.map(function(d) {
+    return [
+      d.name, d.type, d.platform || '', d.amount || 0, d.capital_src || '',
+      d.ret_pct ? (d.ret_pct * 100).toFixed(2) + '%' : '',
+      d.ret_val || '', d.total || '', d.duration || '',
+      d.date_in || '', d.date_out || '', d.dist || '', d.risk || '', d.status || ''
+    ];
+  }));
+  var label = type === 'sukuk' ? 'صكوك' : 'صناديق';
+  var fname = label + '_' + new Date().toISOString().slice(0,10) + '.csv';
+  _downloadCSV(fname, rows);
+  showToast('✅ تم تصدير ' + data.length + ' ' + label);
+}
+
+// ── استيراد الصكوك والصناديق ─────────────────────────────────────────────────
+function importOppsCSV(event, type) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var text  = e.target.result.replace(/^﻿/, '');
+      var lines = text.split('\n').filter(function(l){ return l.trim(); });
+      if (lines.length < 2) { showToast('❌ الملف فارغ'); return; }
+      var headers  = lines[0].split(',').map(function(h){ return h.trim().replace(/^"|"$/g,''); });
+      var imported = 0;
+      var inv      = window.__investments || investments;
+      var defaultType = type === 'sukuk' ? 'صك' : 'صندوق';
+
+      for (var i = 1; i < lines.length; i++) {
+        var cols = _parseCSVLine(lines[i]);
+        if (cols.length < 2) continue;
+        var row  = {};
+        headers.forEach(function(h, idx){ row[h] = (cols[idx] || '').trim(); });
+
+        var name = row['الاسم'] || row['name'] || '';
+        if (!name) continue;
+        var exists = inv.some(function(x){ return x.name === name; });
+        if (exists) continue;
+
+        var retPct = parseFloat((row['العائد %'] || '0').replace('%','')) || 0;
+        inv.push({
+          name:        name,
+          type:        row['النوع'] || defaultType,
+          platform:    row['المنصة'] || row['platform'] || '',
+          amount:      parseFloat(row['المبلغ (ر.س)'] || row['amount'] || 0) || 0,
+          capital_src: row['مصدر رأس المال'] || '',
+          ret_pct:     retPct / 100,
+          ret_val:     parseFloat(row['العائد ر.س'] || row['ret_val'] || 0) || 0,
+          total:       parseFloat(row['المجموع المتوقع'] || row['total'] || 0) || 0,
+          duration:    row['المدة'] || row['duration'] || '',
+          date_in:     row['تاريخ الدخول'] || row['date_in'] || '',
+          date_out:    row['تاريخ الخروج'] || row['date_out'] || null,
+          dist:        row['التوزيع'] || row['dist'] || 'عند الاستحقاق',
+          risk:        row['المخاطرة'] || row['risk'] || 'منخفض',
+          status:      row['الحالة'] || row['status'] || 'نشطة',
+        });
+        imported++;
+      }
+
+      if (imported > 0) {
+        triggerSync('investments');
+        if (type === 'sukuk') renderSukuk(); else renderFunds();
+        renderAll();
+        showToast('✅ تم استيراد ' + imported + ' سجل');
+      } else {
+        showToast('⚠️ لم يُضف شيء — قد تكون البيانات مكررة');
+      }
+    } catch(err) {
+      showToast('❌ خطأ في قراءة الملف: ' + err.message);
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+// ── CSV Line Parser (يدعم الخلايا التي تحتوي فواصل بين quotes) ──────────────
+function _parseCSVLine(line) {
+  var result = [], cur = '', inQuote = false;
+  for (var i = 0; i < line.length; i++) {
+    var ch = line[i];
+    if (ch === '"') {
+      if (inQuote && line[i+1] === '"') { cur += '"'; i++; }
+      else inQuote = !inQuote;
+    } else if (ch === ',' && !inQuote) {
+      result.push(cur); cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  result.push(cur);
+  return result;
+}
 
 
 function saveLoansToStorage() {
