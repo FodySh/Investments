@@ -1369,7 +1369,7 @@
         <span class="nav-icon">🏦</span> القروض البنكية
       </div>
       <div class="nav-item nav-debts" onclick="showPage('debts',this)">
-        <span class="nav-icon">💸</span> الديون الشخصية
+        <span class="nav-icon">💸</span> ديون وجمعيات
       </div>
       <div class="nav-item" onclick="showPage('reports',this)">
         <span class="nav-icon">📊</span> التقارير والتحليل
@@ -1802,8 +1802,9 @@
       <!-- تبويبات + فلاتر -->
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:0">
         <div style="display:flex;gap:0">
-          <button id="opps-tab-sukuk" onclick="switchOppsTab('sukuk')" style="padding:11px 22px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:all .2s">📜 الصكوك</button>
-          <button id="opps-tab-funds" onclick="switchOppsTab('funds')" style="padding:11px 22px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s">💼 الصناديق</button>
+          <button id="opps-tab-sukuk" onclick="switchOppsTab('sukuk')" style="padding:11px 20px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:all .2s">📜 الصكوك</button>
+          <button id="opps-tab-funds" onclick="switchOppsTab('funds')" style="padding:11px 20px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s">💼 الصناديق</button>
+          <button id="opps-tab-metals" onclick="switchOppsTab('metals')" style="padding:11px 20px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s">🥇 المعادن</button>
         </div>
         <!-- فلاتر السنة والحالة -->
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding-bottom:8px">
@@ -1865,6 +1866,125 @@
                 <th>المجموع المتوقع</th><th>المخاطرة</th><th>الحالة</th><th></th>
               </tr></thead>
               <tbody id="funds-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── تبويب: المعادن ── -->
+      <div id="opps-panel-metals" style="display:none">
+
+        <!-- أزرار إضافة -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+          <div style="display:flex;gap:8px">
+            <div class="date-badge" id="metals-total-badge" style="color:var(--gold);border-color:rgba(201,168,76,0.3)">—</div>
+          </div>
+          <button onclick="showAddMetalForm()" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">➕ إضافة معدن</button>
+        </div>
+
+        <!-- فورم الإضافة -->
+        <div id="metals-add-form" style="display:none;margin-bottom:20px">
+          <div class="section-card" style="border-color:rgba(201,168,76,0.3)">
+            <div class="section-head" style="background:rgba(201,168,76,0.06)">
+              <span class="section-title" style="color:var(--gold)" id="metals-form-title">➕ إضافة معدن</span>
+              <button onclick="document.getElementById('metals-add-form').style.display='none'" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1">×</button>
+            </div>
+            <div class="section-body">
+              <div class="form-grid">
+                <div class="field-group">
+                  <label class="field-label">نوع المعدن <span class="req">*</span></label>
+                  <select class="f-select" id="m-type" onchange="calcMetal()">
+                    <option value="ذهب">🥇 ذهب</option>
+                    <option value="فضة">🥈 فضة</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">شكل المعدن</label>
+                  <select class="f-select" id="m-form">
+                    <option value="سبيكة">سبيكة</option>
+                    <option value="عملة">عملة</option>
+                    <option value="مجوهرات">مجوهرات</option>
+                    <option value="شهادة">شهادة / ورقة</option>
+                    <option value="ETF">ETF / صندوق</option>
+                    <option value="أخرى">أخرى</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">الوزن (جرام) <span class="req">*</span></label>
+                  <input class="f-input" id="m-weight" type="number" step="0.01" min="0" placeholder="مثال: 10.5" oninput="calcMetal()" style="font-weight:700" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">عيار الذهب</label>
+                  <select class="f-select" id="m-karat" onchange="calcMetal()">
+                    <option value="24">24 قيراط (999)</option>
+                    <option value="22">22 قيراط (916)</option>
+                    <option value="21" selected>21 قيراط (875)</option>
+                    <option value="18">18 قيراط (750)</option>
+                    <option value="14">14 قيراط (585)</option>
+                    <option value="999">فضة خالصة (999)</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">سعر الشراء (ر.س/جرام) <span class="req">*</span></label>
+                  <input class="f-input" id="m-buy-price" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcMetal()" style="color:var(--gold)" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">السعر الحالي (ر.س/جرام)</label>
+                  <input class="f-input" id="m-curr-price" type="number" step="0.01" min="0" placeholder="اختياري" oninput="calcMetal()" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">تاريخ الشراء</label>
+                  <input class="f-input" id="m-date" type="date" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">مكان الحفظ</label>
+                  <select class="f-select" id="m-storage">
+                    <option value="منزل">منزل</option>
+                    <option value="خزنة بنك">خزنة بنك</option>
+                    <option value="محفظة رقمية">محفظة رقمية</option>
+                    <option value="أخرى">أخرى</option>
+                  </select>
+                </div>
+              </div>
+              <!-- حساب لحظي -->
+              <div id="m-calc-box" style="display:none;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:16px;margin:12px 0">
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center">
+                  <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">تكلفة الشراء</div><div id="m-c-cost" style="font-size:16px;font-weight:800;font-family:monospace;color:var(--white)">—</div></div>
+                  <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">القيمة الحالية</div><div id="m-c-curr" style="font-size:16px;font-weight:800;font-family:monospace;color:var(--cyan)">—</div></div>
+                  <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">ر/خ</div><div id="m-c-pnl" style="font-size:16px;font-weight:800;font-family:monospace">—</div></div>
+                  <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">الوزن الخالص</div><div id="m-c-pure" style="font-size:16px;font-weight:800;font-family:monospace;color:var(--gold)">—</div></div>
+                </div>
+              </div>
+              <div class="field-group" style="margin-top:8px">
+                <label class="field-label">ملاحظات</label>
+                <textarea class="f-input" id="m-notes" rows="2" style="resize:none" placeholder="وصف، مصدر الشراء..."></textarea>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:4px">
+                <button onclick="saveMetal()" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:10px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">💾 حفظ</button>
+                <button onclick="resetMetalForm()" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-size:13px;color:var(--muted);cursor:pointer;font-family:inherit">🔄 مسح</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPIs المعادن -->
+        <div class="kpi-grid" id="metals-kpis" style="margin-bottom:20px"></div>
+
+        <!-- جدول المعادن -->
+        <div class="section-card">
+          <div class="section-head">
+            <span class="section-title">🥇 سجل المعادن الثمينة</span>
+            <span class="section-count" id="metals-count-badge">0</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr>
+                <th>النوع</th><th>الشكل</th><th>الوزن (جم)</th><th>العيار</th>
+                <th>سعر الشراء/جم</th><th>السعر الحالي/جم</th>
+                <th>التكلفة</th><th>القيمة الحالية</th><th>ر/خ</th>
+                <th>التاريخ</th><th>الحفظ</th><th></th>
+              </tr></thead>
+              <tbody id="metals-tbody"></tbody>
             </table>
           </div>
         </div>
@@ -3152,13 +3272,23 @@
     <div id="page-debts" class="page">
       <div class="page-header">
         <div>
-          <div class="page-title">💸 الديون الشخصية</div>
-          <div class="page-sub">تتبع الديون بينك وبين الآخرين — مالك وما عليك</div>
+          <div class="page-title">💸 ديون وجمعيات</div>
+          <div class="page-sub">الديون الشخصية وجمعيات الادخار</div>
         </div>
-        <button class="btn-submit" onclick="showPage('add-debt',null,'💸 إضافة دين',true)" style="font-size:13px;padding:10px 22px">
-          ➕ إضافة دين
-        </button>
+        <div style="display:flex;gap:8px" id="debts-page-actions">
+          <button class="btn-submit" onclick="showPage('add-debt',null,'💸 إضافة دين',true)" id="btn-add-debt" style="font-size:13px;padding:10px 22px">➕ إضافة دين</button>
+          <button class="btn-submit" onclick="showAddJamaaForm()" id="btn-add-jamaa" style="display:none;font-size:13px;padding:10px 22px;background:linear-gradient(135deg,#38d9a9,#20c997)">➕ إضافة جمعية</button>
+        </div>
       </div>
+
+      <!-- تبويبات الديون والجمعيات -->
+      <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border)">
+        <button id="dt-tab-debts" onclick="switchDebtsTab('debts')" style="padding:11px 22px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:all .2s">💸 الديون الشخصية</button>
+        <button id="dt-tab-jamaa" onclick="switchDebtsTab('jamaa')" style="padding:11px 22px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s">🤝 الجمعيات</button>
+      </div>
+
+      <!-- ── تبويب: الديون ── -->
+      <div id="dt-panel-debts">
 
       <!-- KPIs -->
       <div class="kpi-grid fade-up">
@@ -3343,6 +3473,106 @@
           </div>
         </div>
       </div>
+      </div><!-- end dt-panel-debts -->
+
+      <!-- ── تبويب: الجمعيات ── -->
+      <div id="dt-panel-jamaa" style="display:none">
+
+        <!-- فورم إضافة جمعية -->
+        <div id="jamaa-add-form" style="display:none;margin-bottom:20px">
+          <div class="section-card" style="border-color:rgba(56,217,169,0.3)">
+            <div class="section-head" style="background:rgba(56,217,169,0.06)">
+              <span class="section-title" style="color:var(--green)" id="jamaa-form-title">➕ إضافة جمعية</span>
+              <button onclick="document.getElementById('jamaa-add-form').style.display='none'" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1">×</button>
+            </div>
+            <div class="section-body">
+              <div class="form-grid">
+                <div class="field-group" style="grid-column:span 2">
+                  <label class="field-label">اسم الجمعية <span class="req">*</span></label>
+                  <input class="f-input" id="j-name" type="text" placeholder="مثال: جمعية الأصدقاء 2025" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">القسط الشهري (ر.س) <span class="req">*</span></label>
+                  <input class="f-input" id="j-monthly" type="number" step="0.01" min="0" placeholder="مثال: 500" oninput="calcJamaa()" style="color:var(--gold);font-weight:700" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">عدد الأعضاء <span class="req">*</span></label>
+                  <input class="f-input" id="j-members" type="number" step="1" min="2" placeholder="مثال: 12" oninput="calcJamaa()" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">دورك (رقم الشهر الذي تأخذه)</label>
+                  <input class="f-input" id="j-turn" type="number" step="1" min="1" placeholder="مثال: 6" oninput="calcJamaa()" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">تاريخ البداية</label>
+                  <input class="f-input" id="j-start" type="date" oninput="calcJamaa()" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">حالة الجمعية</label>
+                  <select class="f-select" id="j-status">
+                    <option value="نشطة">نشطة ✅</option>
+                    <option value="منتهية">منتهية</option>
+                    <option value="معلقة">معلقة ⏸️</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">طريقة السداد</label>
+                  <select class="f-select" id="j-method">
+                    <option value="تحويل بنكي">تحويل بنكي</option>
+                    <option value="نقداً">نقداً</option>
+                    <option value="مدير الجمعية">مدير الجمعية</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">مدير / منظم الجمعية</label>
+                  <input class="f-input" id="j-manager" type="text" placeholder="اسم المدير" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">رقم التواصل</label>
+                  <input class="f-input" id="j-contact" type="tel" placeholder="05xxxxxxxx" />
+                </div>
+              </div>
+              <!-- حساب لحظي -->
+              <div id="j-calc-box" style="display:none;background:rgba(56,217,169,0.06);border:1px solid rgba(56,217,169,0.2);border-radius:12px;padding:14px;margin:12px 0">
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center">
+                  <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي الجمعية</div><div id="j-c-total" style="font-size:16px;font-weight:800;font-family:monospace;color:var(--gold)">—</div></div>
+                  <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">ما ستأخذه</div><div id="j-c-receive" style="font-size:16px;font-weight:800;font-family:monospace;color:var(--green)">—</div></div>
+                  <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">موعد دورك</div><div id="j-c-turn-date" style="font-size:14px;font-weight:700;color:var(--cyan)">—</div></div>
+                  <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">المدفوع حتى الآن</div><div id="j-c-paid-so-far" style="font-size:16px;font-weight:800;font-family:monospace;color:var(--orange)">—</div></div>
+                </div>
+              </div>
+              <div class="field-group" style="margin-top:8px">
+                <label class="field-label">ملاحظات</label>
+                <textarea class="f-input" id="j-notes" rows="2" style="resize:none" placeholder="شروط خاصة، أعضاء، اتفاقيات..."></textarea>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:4px">
+                <button onclick="saveJamaa()" style="background:linear-gradient(135deg,#38d9a9,#20c997);color:#0a1628;border:none;border-radius:10px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">💾 حفظ الجمعية</button>
+                <button onclick="resetJamaaForm()" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-size:13px;color:var(--muted);cursor:pointer;font-family:inherit">🔄 مسح</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPIs الجمعيات -->
+        <div class="kpi-grid" id="jamaa-kpis" style="margin-bottom:20px"></div>
+
+        <!-- قائمة الجمعيات -->
+        <div class="section-card">
+          <div class="section-head">
+            <span class="section-title">🤝 سجل الجمعيات</span>
+            <span class="section-count" id="jamaa-count-badge">0</span>
+          </div>
+          <div id="jamaa-list" style="padding:8px 0">
+            <div id="jamaa-empty" style="padding:48px;text-align:center;color:var(--muted)">
+              <div style="font-size:32px;margin-bottom:12px">🤝</div>
+              <div>لا توجد جمعيات مسجلة</div>
+              <div style="font-size:12px;margin-top:6px">اضغط "إضافة جمعية" لتسجيل جمعية</div>
+            </div>
+            <div id="jamaa-cards" style="display:flex;flex-direction:column;gap:12px"></div>
+          </div>
+        </div>
+      </div><!-- end dt-panel-jamaa -->
+
     </div><!-- end page-debts -->
 
 </main>
@@ -4168,7 +4398,7 @@
           <div class="page-title" id="add-debt-title">💸 إضافة دين / مديونية</div>
           <div class="page-sub">سجّل الديون بينك وبين الآخرين</div>
         </div>
-        <button onclick="showPage('debts',document.querySelector('.nav-debts')||document.getElementById('mnav-debts'),'💸 الديون الشخصية')" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:9px 18px;color:var(--muted);font-size:13px;cursor:pointer;font-family:inherit">← رجوع</button>
+        <button onclick="showPage('debts',document.querySelector('.nav-debts')||document.getElementById('mnav-debts'),'💸 ديون وجمعيات')" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:9px 18px;color:var(--muted);font-size:13px;cursor:pointer;font-family:inherit">← رجوع</button>
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" class="add-form-grid">
@@ -4338,7 +4568,7 @@
       <div class="mnav-icon-wrap"><span class="mnav-icon">🏦</span></div>
       <span class="mnav-label">القروض</span>
     </div>
-    <div class="mnav-item" id="mnav-debts" onclick="showPage('debts', this, '💸 الديون الشخصية')">
+    <div class="mnav-item" id="mnav-debts" onclick="showPage('debts', this, '💸 ديون وجمعيات')">
       <div class="mnav-icon-wrap"><span class="mnav-icon">💸</span></div>
       <span class="mnav-label">الديون</span>
     </div>
@@ -6146,7 +6376,7 @@ var _currentOppsTab = 'sukuk';
 
 function switchOppsTab(tab) {
   _currentOppsTab = tab;
-  var panels = ['sukuk','funds'];
+  var panels = ['sukuk','funds','metals'];
   panels.forEach(function(t) {
     var panel = document.getElementById('opps-panel-' + t);
     var btn   = document.getElementById('opps-tab-' + t);
@@ -6158,7 +6388,8 @@ function switchOppsTab(tab) {
   });
   if (tab === 'sukuk') renderSukuk();
   if (tab === 'funds') renderFunds();
-  renderOppsFiltered();
+  if (tab === 'metals') renderMetals();
+  if (tab !== 'metals') renderOppsFiltered();
 }
 
 
@@ -6800,7 +7031,7 @@ function dbImport(event) {
 // Add PAGE_TITLES entry for db
 PAGE_TITLES['db']    = '🗄️ قاعدة البيانات';
 PAGE_TITLES['loans'] = '🏦 القروض البنكية';
-PAGE_TITLES['debts'] = '💸 الديون الشخصية';
+PAGE_TITLES['debts'] = '💸 ديون وجمعيات';
 
 //  EDIT / DELETE OPPORTUNITIES 
 let _editingOppIdx = null;
@@ -7561,46 +7792,55 @@ async function fetchUsStockPrices() {
   if (!usStocks.length) return;
 
   var icon = document.getElementById('stocks-refresh-icon');
-  if (icon) { icon.style.animation = 'spin 1s linear infinite'; }
+  if (icon) icon.style.animation = 'spin 1s linear infinite';
 
   var symbols = usStocks.map(function(s){ return s.ticker; }).join(',');
-  var url = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + symbols + '&fields=regularMarketPrice,regularMarketChangePercent,longName,shortName';
+  var PROXY   = 'https://claude-proxy.fahad-shaheen.workers.dev';
+  var updated = 0;
 
+  // ── الطلب عبر Cloudflare Worker (يتجاوز CORS) ──────────────────
   try {
-    var res = await fetch(url, {mode:'cors'});
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    var json = await res.json();
-    var results = json?.quoteResponse?.result || [];
-    results.forEach(function(q) {
-      US_STOCK_PRICES[q.symbol] = {
-        price: q.regularMarketPrice,
-        chg:   (q.regularMarketChangePercent || 0) / 100,
-        color: (q.regularMarketChangePercent || 0) >= 0 ? 'up' : 'dn',
-        name:  q.longName || q.shortName || q.symbol
-      };
+    var res = await fetch(PROXY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ _stockRequest: true, symbols: symbols, market: 'us' })
     });
-    renderUsStocksTable();
-  } catch(e) {
-    // Fallback: fetch one by one
-    for (var i = 0; i < usStocks.length; i++) {
-      var s = usStocks[i];
-      try {
-        var r2 = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/' + s.ticker + '?interval=1d&range=1d');
-        var j2 = await r2.json();
-        var meta = j2?.chart?.result?.[0]?.meta;
-        if (meta) {
-          US_STOCK_PRICES[s.ticker] = {
-            price: meta.regularMarketPrice,
-            chg:   meta.previousClose ? (meta.regularMarketPrice - meta.previousClose) / meta.previousClose : 0,
-            color: meta.regularMarketPrice >= (meta.previousClose || meta.regularMarketPrice) ? 'up' : 'dn',
-            name:  meta.longName || s.ticker
-          };
-        }
-      } catch(e2) { console.warn('US price fetch failed:', s.ticker); }
+    if (res.ok) {
+      var data = await res.json();
+      (data.quotes || []).forEach(function(q) {
+        US_STOCK_PRICES[q.symbol] = {
+          price: q.price,
+          chg:   (q.changePercent || 0) / 100,
+          color: (q.changePercent || 0) >= 0 ? 'up' : 'dn',
+          name:  q.name || q.symbol
+        };
+        updated++;
+      });
     }
-    renderUsStocksTable();
+  } catch(e) { console.warn('Worker US fetch failed:', e.message); }
+
+  // ── Fallback: Yahoo Finance مباشرة (إذا فشل الـ Worker) ─────────
+  if (updated === 0) {
+    try {
+      var url = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + symbols
+              + '&fields=regularMarketPrice,regularMarketChangePercent,longName,shortName';
+      var res2 = await fetch(url);
+      if (res2.ok) {
+        var json2 = await res2.json();
+        (json2.quoteResponse?.result || []).forEach(function(q) {
+          US_STOCK_PRICES[q.symbol] = {
+            price: q.regularMarketPrice,
+            chg:   (q.regularMarketChangePercent || 0) / 100,
+            color: (q.regularMarketChangePercent || 0) >= 0 ? 'up' : 'dn',
+            name:  q.longName || q.shortName || q.symbol
+          };
+          updated++;
+        });
+      }
+    } catch(e2) { console.warn('Yahoo US direct failed:', e2.message); }
   }
 
+  renderUsStocksTable();
   if (icon) icon.style.animation = '';
 }
 
@@ -8045,6 +8285,416 @@ async function fetchDividendsForStock() {
     showToast('❌ فشل الجلب: ' + e.message + ' — أدخل يدوياً');
   }
 }
+
+// ══════════════════════════════════════════════
+// METALS (GOLD & SILVER) — المعادن الثمينة
+// ══════════════════════════════════════════════
+var metalsData = JSON.parse(localStorage.getItem('metalsData') || '[]');
+window.metalsData = metalsData;
+var _editingMetalIdx = null;
+
+function saveMetalsToStorage() {
+  localStorage.setItem('metalsData', JSON.stringify(metalsData));
+  window.metalsData = metalsData;
+  if (typeof window.fbSaveMetals === 'function') window.fbSaveMetals();
+}
+
+function showAddMetalForm() {
+  var form = document.getElementById('metals-add-form');
+  if (!form) return;
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  if (form.style.display !== 'none') {
+    var today = new Date().toISOString().split('T')[0];
+    var d = document.getElementById('m-date');
+    if (d && !d.value) d.value = today;
+  }
+}
+
+function calcMetal() {
+  function gv(id) { var e=document.getElementById(id); return e?e.value:''; }
+  function gf(id) { return parseFloat(gv(id))||0; }
+  var weight    = gf('m-weight');
+  var buyPrice  = gf('m-buy-price');
+  var currPrice = gf('m-curr-price');
+  var karat     = parseInt(gv('m-karat')) || 21;
+  var purity    = karat <= 24 ? karat/24 : 1; // for silver karat=999 → 1
+  var pureWeight = weight * purity;
+  var cost      = weight * buyPrice;
+  var currVal   = currPrice > 0 ? weight * currPrice : 0;
+  var pnl       = currVal > 0 ? currVal - cost : 0;
+  var box       = document.getElementById('m-calc-box');
+  var fmt       = function(n){return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});};
+  var set       = function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+  if (cost > 0) {
+    if (box) box.style.display = 'block';
+    set('m-c-cost', fmt(cost) + ' ر.س');
+    set('m-c-curr', currVal > 0 ? fmt(currVal) + ' ر.س' : '—');
+    set('m-c-pure', pureWeight.toFixed(3) + ' جم');
+    var pnlEl = document.getElementById('m-c-pnl');
+    if (pnlEl) {
+      pnlEl.textContent = pnl !== 0 ? (pnl>0?'+':'')+fmt(pnl)+' ر.س' : '—';
+      pnlEl.style.color = pnl > 0 ? 'var(--green)' : pnl < 0 ? 'var(--red)' : 'var(--muted)';
+    }
+  } else {
+    if (box) box.style.display = 'none';
+  }
+}
+
+function saveMetal() {
+  function gv(id) { var e=document.getElementById(id); return e?e.value:''; }
+  function gf(id) { return parseFloat(gv(id))||0; }
+  var type = gv('m-type');
+  var weight = gf('m-weight');
+  var buyPrice = gf('m-buy-price');
+  if (!weight)    { showToast('❌ أدخل الوزن'); return; }
+  if (!buyPrice)  { showToast('❌ أدخل سعر الشراء'); return; }
+  var karat = parseInt(gv('m-karat')) || 21;
+  var purity = karat <= 24 ? karat/24 : 1;
+  var metal = {
+    type:      type || 'ذهب',
+    form:      gv('m-form'),
+    weight:    weight,
+    karat:     karat,
+    purity:    purity,
+    pure_weight: weight * purity,
+    buy_price: buyPrice,
+    curr_price:gf('m-curr-price') || 0,
+    cost:      weight * buyPrice,
+    curr_val:  gf('m-curr-price') > 0 ? weight * gf('m-curr-price') : 0,
+    storage:   gv('m-storage'),
+    date:      gv('m-date') || new Date().toISOString().split('T')[0],
+    notes:     gv('m-notes'),
+    status:    'نشطة',
+    created_at:new Date().toISOString()
+  };
+  metal.pnl = metal.curr_val > 0 ? metal.curr_val - metal.cost : 0;
+  var data = window.metalsData || metalsData;
+  if (!Array.isArray(data)) data = [];
+  if (_editingMetalIdx !== null) {
+    data[_editingMetalIdx] = metal;
+    showToast('✅ تم تحديث المعدن');
+  } else {
+    data.push(metal);
+    showToast('✅ تم حفظ ' + type + ' — ' + weight + ' جرام');
+  }
+  metalsData = data;
+  window.metalsData = data;
+  saveMetalsToStorage();
+  renderMetals();
+  resetMetalForm();
+  document.getElementById('metals-add-form').style.display = 'none';
+}
+
+function resetMetalForm() {
+  _editingMetalIdx = null;
+  ['m-weight','m-buy-price','m-curr-price','m-notes'].forEach(function(id){
+    var e=document.getElementById(id); if(e) e.value='';
+  });
+  var typeEl = document.getElementById('m-type'); if(typeEl) typeEl.value='ذهب';
+  var karatEl = document.getElementById('m-karat'); if(karatEl) karatEl.value='21';
+  var box = document.getElementById('m-calc-box'); if(box) box.style.display='none';
+}
+
+function renderMetals() {
+  var data = window.metalsData || metalsData || [];
+  var goldW = data.filter(function(x){return x.type==='ذهب';}).reduce(function(s,x){return s+(x.weight||0);},0);
+  var silverW = data.filter(function(x){return x.type==='فضة';}).reduce(function(s,x){return s+(x.weight||0);},0);
+  var totalCost = data.reduce(function(s,x){return s+(x.cost||0);},0);
+  var totalCurr = data.reduce(function(s,x){return s+(x.curr_val||0);},0);
+  var fmt = function(n){return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});};
+
+  // Badge
+  var badge = document.getElementById('metals-total-badge');
+  if (badge) badge.textContent = data.length + ' معدن — ' + fmt(totalCost) + ' ر.س';
+
+  // KPIs
+  var kpis = document.getElementById('metals-kpis');
+  if (kpis) {
+    kpis.innerHTML =
+      '<div class="kpi-card" style="--accent:var(--gold)"><div class="kpi-icon">🥇</div><div class="kpi-label">ذهب</div><div class="kpi-value">' + goldW.toFixed(2) + '</div><div class="kpi-sub">جرام</div></div>' +
+      '<div class="kpi-card" style="--accent:#a0aec0"><div class="kpi-icon">🥈</div><div class="kpi-label">فضة</div><div class="kpi-value">' + silverW.toFixed(2) + '</div><div class="kpi-sub">جرام</div></div>' +
+      '<div class="kpi-card" style="--accent:var(--gold)"><div class="kpi-icon">💰</div><div class="kpi-label">إجمالي التكلفة</div><div class="kpi-value">' + fmt(totalCost) + '</div><div class="kpi-sub">ر.س</div></div>' +
+      '<div class="kpi-card" style="--accent:var(--cyan)"><div class="kpi-icon">📊</div><div class="kpi-label">القيمة الحالية</div><div class="kpi-value">' + (totalCurr > 0 ? fmt(totalCurr) : '—') + '</div><div class="kpi-sub">ر.س</div></div>';
+  }
+
+  // Count badge
+  var cnt = document.getElementById('metals-count-badge');
+  if (cnt) cnt.textContent = data.length + ' سجل';
+
+  // Table
+  var tbody = document.getElementById('metals-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = data.map(function(m, i) {
+    var pnlColor = m.pnl > 0 ? 'var(--green)' : m.pnl < 0 ? 'var(--red)' : 'var(--muted)';
+    var typeIcon = m.type === 'ذهب' ? '🥇' : '🥈';
+    return '<tr>' +
+      '<td><span style="font-size:15px">' + typeIcon + '</span> ' + m.type + '</td>' +
+      '<td style="color:var(--muted)">' + (m.form||'—') + '</td>' +
+      '<td class="mono">' + (m.weight||0).toFixed(2) + '</td>' +
+      '<td style="color:var(--gold)">' + (m.karat||'—') + (m.karat<=24?'k':'') + '</td>' +
+      '<td class="mono">' + (m.buy_price||0).toFixed(2) + '</td>' +
+      '<td class="mono">' + (m.curr_price>0 ? m.curr_price.toFixed(2) : '—') + '</td>' +
+      '<td class="mono" style="color:var(--white)">' + (m.cost||0).toLocaleString('en-US',{maximumFractionDigits:2}) + ' ر.س</td>' +
+      '<td class="mono" style="color:var(--cyan)">' + (m.curr_val>0 ? m.curr_val.toLocaleString('en-US',{maximumFractionDigits:2})+' ر.س' : '—') + '</td>' +
+      '<td class="mono" style="color:' + pnlColor + '">' + (m.pnl !== 0 ? (m.pnl>0?'+':'')+m.pnl.toLocaleString('en-US',{maximumFractionDigits:2})+' ر.س' : '—') + '</td>' +
+      '<td style="color:var(--muted);font-size:11px">' + (m.date||'—') + '</td>' +
+      '<td style="color:var(--muted);font-size:11px">' + (m.storage||'—') + '</td>' +
+      '<td style="display:flex;gap:4px"><button class="loan-action-btn" onclick="editMetal(' + i + ')">✏️</button><button class="loan-action-btn" style="color:var(--red)" onclick="deleteMetal(' + i + ')">🗑</button></td>' +
+      '</tr>';
+  }).join('') || '<tr><td colspan="12" style="text-align:center;padding:32px;color:var(--muted)">لا توجد معادن — أضف ذهباً أو فضة</td></tr>';
+}
+
+function editMetal(idx) {
+  _editingMetalIdx = idx;
+  var m = (window.metalsData||metalsData)[idx];
+  if (!m) return;
+  function sv(id,v){var e=document.getElementById(id);if(e)e.value=v||'';}
+  sv('m-type', m.type); sv('m-form', m.form); sv('m-weight', m.weight);
+  sv('m-karat', m.karat); sv('m-buy-price', m.buy_price);
+  sv('m-curr-price', m.curr_price||''); sv('m-date', m.date);
+  sv('m-storage', m.storage); sv('m-notes', m.notes);
+  document.getElementById('metals-add-form').style.display = 'block';
+  var title = document.getElementById('metals-form-title');
+  if (title) title.textContent = '✏️ تعديل: ' + m.type;
+  calcMetal();
+}
+
+function deleteMetal(idx) {
+  if (!confirm('حذف هذا المعدن؟')) return;
+  var data = window.metalsData || metalsData;
+  data.splice(idx, 1);
+  metalsData = data; window.metalsData = data;
+  saveMetalsToStorage(); renderMetals();
+}
+
+// ══════════════════════════════════════════════
+// JAMAA (جمعيات الادخار)
+// ══════════════════════════════════════════════
+var jamaaData = JSON.parse(localStorage.getItem('jamaaData') || '[]');
+window.jamaaData = jamaaData;
+var _editingJamaaIdx = null;
+
+function saveJamaaToStorage() {
+  localStorage.setItem('jamaaData', JSON.stringify(jamaaData));
+  window.jamaaData = jamaaData;
+  if (typeof window.fbSaveJamaa === 'function') window.fbSaveJamaa();
+}
+
+function switchDebtsTab(tab) {
+  var tabs = ['debts','jamaa'];
+  tabs.forEach(function(t) {
+    var panel = document.getElementById('dt-panel-' + t);
+    var btn   = document.getElementById('dt-tab-' + t);
+    if (panel) panel.style.display = t === tab ? 'block' : 'none';
+    if (btn) {
+      btn.style.borderBottomColor = t === tab ? 'var(--gold)' : 'transparent';
+      btn.style.color = t === tab ? 'var(--gold)' : 'var(--muted)';
+    }
+  });
+  var btnDebt  = document.getElementById('btn-add-debt');
+  var btnJamaa = document.getElementById('btn-add-jamaa');
+  if (btnDebt)  btnDebt.style.display  = tab === 'debts' ? '' : 'none';
+  if (btnJamaa) btnJamaa.style.display = tab === 'jamaa' ? '' : 'none';
+  if (tab === 'jamaa') renderJamaa();
+}
+
+function showAddJamaaForm() {
+  var form = document.getElementById('jamaa-add-form');
+  if (!form) return;
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  if (form.style.display !== 'none') {
+    var today = new Date().toISOString().split('T')[0];
+    var d = document.getElementById('j-start');
+    if (d && !d.value) d.value = today;
+    calcJamaa();
+  }
+}
+
+function calcJamaa() {
+  function gv(id){var e=document.getElementById(id);return e?e.value:'';}
+  function gf(id){return parseFloat(gv(id))||0;}
+  var monthly = gf('j-monthly');
+  var members = gf('j-members');
+  var turn    = gf('j-turn');
+  var startDate = gv('j-start');
+  if (!monthly || !members) { document.getElementById('j-calc-box').style.display='none'; return; }
+  var total   = monthly * members;
+  var receive = monthly * members; // total pot
+  var fmt     = function(n){return n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});};
+  var set     = function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+  document.getElementById('j-calc-box').style.display = 'block';
+  set('j-c-total',   fmt(total)   + ' ر.س');
+  set('j-c-receive', fmt(receive) + ' ر.س');
+  // موعد الدور
+  if (turn && startDate && turn <= members) {
+    var d = new Date(startDate);
+    d.setMonth(d.getMonth() + turn - 1);
+    set('j-c-turn-date', d.toLocaleDateString('ar-SA-u-nu-latn',{year:'numeric',month:'long'}));
+  } else {
+    set('j-c-turn-date','—');
+  }
+  // المدفوع حتى الآن
+  if (startDate) {
+    var now = new Date();
+    var start = new Date(startDate);
+    var monthsPassed = Math.max(0, (now.getFullYear() - start.getFullYear())*12 + (now.getMonth()-start.getMonth()));
+    monthsPassed = Math.min(monthsPassed, members);
+    set('j-c-paid-so-far', fmt(monthly * monthsPassed) + ' ر.س (' + monthsPassed + ' شهر)');
+  } else { set('j-c-paid-so-far','—'); }
+}
+
+function saveJamaa() {
+  function gv(id){var e=document.getElementById(id);return e?e.value:'';}
+  function gf(id){return parseFloat(gv(id))||0;}
+  var name    = gv('j-name').trim();
+  var monthly = gf('j-monthly');
+  var members = gf('j-members');
+  if (!name)    { showToast('❌ أدخل اسم الجمعية'); return; }
+  if (!monthly) { showToast('❌ أدخل القسط الشهري'); return; }
+  if (!members) { showToast('❌ أدخل عدد الأعضاء'); return; }
+  var turn = gf('j-turn');
+  var startDate = gv('j-start');
+  var turnDate = '';
+  if (turn && startDate) {
+    var d = new Date(startDate);
+    d.setMonth(d.getMonth() + turn - 1);
+    turnDate = d.toISOString().split('T')[0];
+  }
+  var now = new Date();
+  var start = startDate ? new Date(startDate) : now;
+  var monthsPassed = Math.max(0, Math.min(members,
+    (now.getFullYear()-start.getFullYear())*12 + (now.getMonth()-start.getMonth())
+  ));
+  var jamaa = {
+    name:        name,
+    monthly:     monthly,
+    members:     members,
+    turn:        turn,
+    turn_date:   turnDate,
+    total_pot:   monthly * members,
+    paid_so_far: monthly * monthsPassed,
+    months_passed: monthsPassed,
+    start_date:  startDate,
+    status:      gv('j-status') || 'نشطة',
+    method:      gv('j-method'),
+    manager:     gv('j-manager'),
+    contact:     gv('j-contact'),
+    notes:       gv('j-notes'),
+    created_at:  new Date().toISOString()
+  };
+  var data = window.jamaaData || jamaaData;
+  if (!Array.isArray(data)) data = [];
+  if (_editingJamaaIdx !== null) {
+    data[_editingJamaaIdx] = jamaa;
+    showToast('✅ تم تحديث الجمعية: ' + name);
+  } else {
+    data.push(jamaa);
+    showToast('✅ تم حفظ الجمعية: ' + name);
+  }
+  jamaaData = data; window.jamaaData = data;
+  saveJamaaToStorage();
+  renderJamaa();
+  resetJamaaForm();
+  document.getElementById('jamaa-add-form').style.display = 'none';
+}
+
+function resetJamaaForm() {
+  _editingJamaaIdx = null;
+  ['j-name','j-monthly','j-members','j-turn','j-start','j-manager','j-contact','j-notes'].forEach(function(id){
+    var e=document.getElementById(id); if(e) e.value='';
+  });
+  document.getElementById('j-calc-box').style.display = 'none';
+}
+
+function renderJamaa() {
+  var data = window.jamaaData || jamaaData || [];
+  var active  = data.filter(function(x){return x.status==='نشطة';});
+  var totalPot = data.reduce(function(s,x){return s+(x.total_pot||0);},0);
+  var totalPaid = data.reduce(function(s,x){return s+(x.paid_so_far||0);},0);
+  var fmt = function(n){return n.toLocaleString('en-US',{maximumFractionDigits:0});};
+
+  // KPIs
+  var kpis = document.getElementById('jamaa-kpis');
+  if (kpis) {
+    kpis.innerHTML =
+      '<div class="kpi-card" style="--accent:var(--green)"><div class="kpi-icon">✅</div><div class="kpi-label">نشطة</div><div class="kpi-value">'+active.length+'</div><div class="kpi-sub">جمعية</div></div>' +
+      '<div class="kpi-card" style="--accent:var(--gold)"><div class="kpi-icon">🏦</div><div class="kpi-label">إجمالي الأوعية</div><div class="kpi-value">'+fmt(totalPot)+'</div><div class="kpi-sub">ر.س</div></div>' +
+      '<div class="kpi-card" style="--accent:var(--orange)"><div class="kpi-icon">💸</div><div class="kpi-label">المدفوع حتى الآن</div><div class="kpi-value">'+fmt(totalPaid)+'</div><div class="kpi-sub">ر.س</div></div>' +
+      '<div class="kpi-card" style="--accent:var(--cyan)"><div class="kpi-icon">📋</div><div class="kpi-label">إجمالي الجمعيات</div><div class="kpi-value">'+data.length+'</div><div class="kpi-sub">جمعية</div></div>';
+  }
+
+  var cnt = document.getElementById('jamaa-count-badge');
+  if (cnt) cnt.textContent = data.length + ' جمعية';
+  var empty = document.getElementById('jamaa-empty');
+  var cards = document.getElementById('jamaa-cards');
+  if (!cards) return;
+  if (!data.length) {
+    if (empty) empty.style.display = 'block';
+    cards.innerHTML = '';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  cards.innerHTML = data.map(function(j, i) {
+    var pct = j.total_pot > 0 ? Math.min(100,(j.paid_so_far/j.total_pot*100)).toFixed(0) : 0;
+    var statusColor = j.status==='نشطة' ? 'var(--green)' : 'var(--muted)';
+    var statusBg    = j.status==='نشطة' ? 'rgba(0,230,118,0.1)' : 'rgba(136,153,187,0.1)';
+    return '<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:10px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<span style="font-size:22px">🤝</span>' +
+          '<div><div style="font-size:15px;font-weight:700">' + j.name + '</div>' +
+          '<div style="font-size:11px;color:var(--muted)">' + (j.manager?'مدير: '+j.manager:'') + '</div></div>' +
+        '</div>' +
+        '<span style="font-size:11px;padding:3px 10px;border-radius:8px;background:'+statusBg+';color:'+statusColor+'">' + j.status + '</span>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font-size:12px">' +
+        '<div><div style="color:var(--muted);margin-bottom:2px">القسط/شهر</div><div style="font-family:monospace;font-weight:700;color:var(--gold)">' + fmt(j.monthly) + ' ر.س</div></div>' +
+        '<div><div style="color:var(--muted);margin-bottom:2px">الأعضاء</div><div style="font-family:monospace;font-weight:700">' + j.members + ' عضو</div></div>' +
+        '<div><div style="color:var(--muted);margin-bottom:2px">دورك</div><div style="font-family:monospace;font-weight:700;color:var(--cyan)">' + (j.turn ? 'الشهر '+j.turn : '—') + '</div></div>' +
+        '<div><div style="color:var(--muted);margin-bottom:2px">إجمالي الوعاء</div><div style="font-family:monospace;font-weight:700;color:var(--green)">' + fmt(j.total_pot) + ' ر.س</div></div>' +
+      '</div>' +
+      (j.turn_date ? '<div style="font-size:11px;color:var(--cyan)">📅 موعد دورك: ' + j.turn_date + '</div>' : '') +
+      '<div>' +
+        '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px">' +
+          '<span>تقدم السداد</span><span>' + pct + '% (' + fmt(j.paid_so_far) + ' / ' + fmt(j.total_pot) + ' ر.س)</span>' +
+        '</div>' +
+        '<div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden">' +
+          '<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--green),#38d9a9);border-radius:3px;transition:width .5s"></div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:8px">' +
+        (j.contact ? '<a href="https://wa.me/966'+j.contact.replace(/^0/,'')+'" target="_blank" style="background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.25);border-radius:8px;padding:6px 12px;font-size:11px;color:#25d366;text-decoration:none">💬 واتساب</a>' : '') +
+        '<button class="loan-action-btn" onclick="editJamaa('+i+')" style="margin-right:auto">✏️ تعديل</button>' +
+        '<button class="loan-action-btn" style="color:var(--red)" onclick="deleteJamaa('+i+')">🗑</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function editJamaa(idx) {
+  _editingJamaaIdx = idx;
+  var j = (window.jamaaData||jamaaData)[idx];
+  if (!j) return;
+  function sv(id,v){var e=document.getElementById(id);if(e)e.value=v||'';}
+  sv('j-name',j.name); sv('j-monthly',j.monthly); sv('j-members',j.members);
+  sv('j-turn',j.turn); sv('j-start',j.start_date); sv('j-status',j.status);
+  sv('j-method',j.method); sv('j-manager',j.manager);
+  sv('j-contact',j.contact); sv('j-notes',j.notes);
+  document.getElementById('jamaa-add-form').style.display = 'block';
+  var title = document.getElementById('jamaa-form-title');
+  if (title) title.textContent = '✏️ تعديل: ' + j.name;
+  calcJamaa();
+}
+
+function deleteJamaa(idx) {
+  if (!confirm('حذف هذه الجمعية؟')) return;
+  var data = window.jamaaData || jamaaData;
+  data.splice(idx, 1);
+  jamaaData = data; window.jamaaData = data;
+  saveJamaaToStorage(); renderJamaa();
+}
+
 
 function saveLoansToStorage() {
   var data = window.loansData || loansData || [];
@@ -9022,7 +9672,7 @@ function _gate(show) {
 
 function _rerender() {
   ["renderAll","renderSukuk","renderFunds","renderStocks",
-   "renderLoans","renderDebts","renderUsStocksTable"].forEach(function(fn) {
+   "renderLoans","renderDebts","renderUsStocksTable","renderMetals","renderJamaa"].forEach(function(fn) {
     if (typeof window[fn] === "function") window[fn]();
   });
   // Refresh active reports tab
