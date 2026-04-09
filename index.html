@@ -6527,20 +6527,45 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 //  PAGE NAVIGATION 
+function toggleMobileMore() {
+  var menu    = document.getElementById('mobile-more-menu');
+  var overlay = document.getElementById('mobile-more-overlay');
+  var btn     = document.getElementById('mnav-more');
+  if (!menu) return;
+  var isOpen  = menu.style.display === 'block';
+  if (isOpen) {
+    closeMobileMore();
+  } else {
+    menu.style.display    = 'block';
+    overlay.style.display = 'block';
+    if (btn) btn.classList.add('active');
+  }
+}
+
+function closeMobileMore() {
+  var m = document.getElementById('mobile-more-menu');
+  var o = document.getElementById('mobile-more-overlay');
+  if (m) m.style.display = 'none';
+  if (o) o.style.display = 'none';
+  var btn = document.getElementById('mnav-more');
+  if (btn) btn.classList.remove('active');
+}
+
 const PAGE_TITLES = {
-  'add-stock': '📈 إضافة سهم',
-  'add-loan':  '🏦 إضافة قرض',
-  'add-debt':  '💸 إضافة دين',
-  'reports':   '📊 التقارير والتحليل',
-  'sukuk':     '🏦 الفرص الاستثمارية',
-  'funds':     '🏦 الفرص الاستثمارية',
-  dashboard: '📊 لوحة التحكم',
-  stocks:    '📈 الأسهم',
-  sukuk:     '🏛 الصكوك',
-  funds:     '💼 الصناديق',
-  all:       '📋 جميع الفرص',
-  analyst:   '🔍 رأي المحلل',
-  add:       '➕ إضافة فرصة',
+  'add-stock':  '📈 إضافة سهم',
+  'add-loan':   '🏦 إضافة قرض',
+  'add-debt':   '💸 إضافة دين',
+  'reports':    '📊 التقارير والتحليل',
+  'sukuk':      '🏦 الفرص الاستثمارية',
+  'funds':      '🏦 الفرص الاستثمارية',
+  'dashboard':  '📊 لوحة التحكم',
+  'stocks':     '📈 الأسهم',
+  'all':        '📋 جميع الفرص',
+  'analyst':    '🔍 رأي المحلل',
+  'add':        '➕ إضافة فرصة',
+  'loans':      '🏦 القروض البنكية',
+  'debts':      '💸 ديون وجمعيات',
+  'db':         '🗄️ قاعدة البيانات',
 };
 
 function showPage(id, navEl, mobileTitle, noScroll){
@@ -6577,8 +6602,8 @@ function showPage(id, navEl, mobileTitle, noScroll){
   var mnavTarget = mnavMap[id] || 'mnav-more';
   if (document.getElementById(mnavTarget)) {
     document.getElementById(mnavTarget).classList.add('active');
-  } else {} else {
-    const mobMatch = document.getElementById('mnav-'+id);
+  } else {
+    var mobMatch = document.getElementById('mnav-'+id);
     if (mobMatch) mobMatch.classList.add('active');
   }
 
@@ -10031,30 +10056,6 @@ function closeMobUserMenu() {
 }
 
 // Also update demoSignIn/demoSignOut to update mobile UI
-
-function toggleMobileMore() {
-  const menu    = document.getElementById('mobile-more-menu');
-  const overlay = document.getElementById('mobile-more-overlay');
-  const btn     = document.getElementById('mnav-more');
-  const isOpen  = menu.style.display === 'block';
-  if (isOpen) {
-    closeMobileMore();
-  } else {
-    menu.style.display    = 'block';
-    overlay.style.display = 'block';
-    btn.classList.add('active');
-  }
-}
-
-function closeMobileMore() {
-  document.getElementById('mobile-more-menu').style.display    = 'none';
-  document.getElementById('mobile-more-overlay').style.display = 'none';
-  // Only remove active from "more" btn if another page isn't active via it
-  const btn = document.getElementById('mnav-more');
-  if (btn && !['db','stocks','sukuk','funds','add'].includes(window.__currentPage)) {
-    btn.classList.remove('active');
-  }
-}
 
 
 </script>
