@@ -9146,7 +9146,7 @@ function renderSettingsList(key, items) {
   listEl.innerHTML = items.map(function(item, i) {
     return '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(255,255,255,0.04);border-radius:9px;border:1px solid var(--border)">'
       + '<span style="flex:1;font-size:12px">' + item + '</span>'
-      + '<button onclick="removeSettingsItem(\\'' + key + \\'',' + i + ')" style="background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.2);border-radius:6px;padding:2px 8px;cursor:pointer;color:var(--red);font-size:11px;flex-shrink:0">حذف</button>'
+      + '<button onclick="removeSettingsItem(\'' + key + '\',' + i + ')" style="background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.2);border-radius:6px;padding:2px 8px;cursor:pointer;color:var(--red);font-size:11px;flex-shrink:0">حذف</button>'
       + '</div>';
   }).join('');
 }
@@ -10215,30 +10215,51 @@ function _loadData(uid) {
   _badge("loading");
   _gate(false);
 
+  // تحقق إذا كان المستخدم جديداً (أول تسجيل دخول)
+  var user = window.__firebaseUser;
+  var isNewUser = false;
+  if (user && user.metadata) {
+    var created   = new Date(user.metadata.creationTime).getTime();
+    var lastLogin = new Date(user.metadata.lastSignInTime).getTime();
+    // إذا الفرق أقل من دقيقتين → مستخدم جديد
+    isNewUser = (lastLogin - created) < 120000;
+  }
+
   _read(uid, "investments").then(function(inv) {
     if (inv && inv.length > 0) {
+      // بيانات موجودة في Firebase → حمّلها
       window.__investments.length = 0;
       inv.forEach(function(r){ window.__investments.push(r); });
+    } else if (isNewUser) {
+      // مستخدم جديد → ابدأ بمحفظة فارغة
+      window.__investments.length = 0;
+      investments.length = 0;
+      _write(uid, "investments", []);
     } else {
+      // مستخدم قديم بدون بيانات في Firebase → احفظ البيانات المحلية
       _write(uid, "investments", Array.from(window.__investments));
     }
     return _read(uid, "loans");
   }).then(function(loans) {
     if (loans) {
-      if (!Array.isArray(window.loansData)) window.loansData = loansData;
       if (!Array.isArray(window.loansData)) window.loansData = [];
       window.loansData.length = 0;
       loans.forEach(function(r){ window.loansData.push(r); });
       loansData = window.loansData;
+    } else if (isNewUser) {
+      window.loansData = []; loansData = [];
+      _write(uid, "loans", []);
     }
     return _read(uid, "debts");
   }).then(function(debts) {
     if (debts) {
-      if (!Array.isArray(window.debtsData)) window.debtsData = debtsData;
       if (!Array.isArray(window.debtsData)) window.debtsData = [];
       window.debtsData.length = 0;
       debts.forEach(function(r){ window.debtsData.push(r); });
       debtsData = window.debtsData;
+    } else if (isNewUser) {
+      window.debtsData = []; debtsData = [];
+      _write(uid, "debts", []);
     }
     return _read(uid, "dividends");
   }).then(function(divs) {
