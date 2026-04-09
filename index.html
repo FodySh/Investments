@@ -8798,29 +8798,6 @@ function generateLoanSanad(idx) {
 // ══════════════════════════════════════════════════════
 // واتساب للقروض
 // ══════════════════════════════════════════════════════
-function sendLoanWhatsApp(idx) {
-  var l = (window.loansData || loansData)[idx];
-  if (!l) return;
-  var userName = (window.__firebaseUser && window.__firebaseUser.displayName) || 'صاحب المحفظة';
-  var pmt  = (l.installment || 0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-  var rem  = (l.remaining || 0).toLocaleString('en-US', {maximumFractionDigits:0});
-  var next = l.next_date || '—';
-
-  var nl = String.fromCharCode(10);
-  var msg = ['🏦 *تذكير - قسط القرض*','',
-    '• اسم القرض: ' + l.name,
-    '• البنك: ' + (l.bank || '—'),
-    '• القسط الشهري: *' + pmt + ' ر.س*',
-    '• الرصيد المتبقي: ' + rem + ' ر.س',
-    '• تاريخ القسط القادم: *' + next + '*',
-    '',
-    '— محفظتي المالية 📊'
-  ].join(nl);
-
-  var url = 'https://wa.me/?text=' + encodeURIComponent(msg);
-  window.open(url, '_blank');
-}
-
 // ══════════════════════════════════════════════════════
 // إضافة دين لتقويم Google Calendar
 // ══════════════════════════════════════════════════════
@@ -9468,7 +9445,6 @@ function renderLoans() {
           <button class="loan-action-btn" onclick="openLoanEditPage(${i})">✏️ تعديل</button>
           <button class="loan-action-btn" style="color:var(--red);border-color:rgba(255,77,77,0.2)" onclick="deleteLoan(${i})">🗑 حذف</button>
           <button class="loan-action-btn" onclick="generateLoanSanad(${i})" style="color:#a78bfa;border-color:rgba(167,139,250,0.3)">📜 سند أمر</button>
-          <button class="loan-action-btn" onclick="sendLoanWhatsApp(${i})" style="color:#25d366;border-color:rgba(37,211,102,0.3)">📲 واتساب</button>
         </div>
       </div>
       <div class="loan-card-amounts">
