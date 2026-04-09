@@ -4962,7 +4962,7 @@ async function runAIAnalysis() {
     var payload = {
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1000,
-      system: 'انت محلل ومستشار مالي خبير في السوق السعودي و الامريكي في اكبر شركات المالية. اجب فقط بـ JSON صالح بدون اي نص خارجه ابدا.',
+      system: 'انت محلل مالي خبير في السوق السعودي. اجب فقط بـ JSON صالح بدون اي نص خارجه ابدا.',
       messages: [{ role: 'user', content: 'حلل هذه المحفظة: ' + summary + '\n\nارجع JSON بالضبط:\n{"score":85,"rating":"جيد جداً","summary":"ملخص 2-3 جمل","structure":"تحليل الهيكل 3-4 جمل","strengths":"نقطة1\\nنقطة2\\nنقطة3","warnings":"نقطة1\\nنقطة2\\nنقطة3","tips":"توصية1\\nتوصية2\\nتوصية3","kpi1_label":"ROI الاجمالي","kpi1_value":"'+roi+'%","kpi2_label":"افضل عائد","kpi2_value":"'+(sorted[0]?((sorted[0].ret_pct||0)*100).toFixed(1)+'%':'—')+'","kpi3_label":"اسوا عائد","kpi3_value":"'+(sorted[sorted.length-1]?((sorted[sorted.length-1].ret_pct||0)*100).toFixed(1)+'%':'—')+'"}'  }]
     };
 
@@ -8799,30 +8799,47 @@ function deleteJamaa(idx) {
 // إضافة دين لتقويم Google Calendar
 // ══════════════════════════════════════════════════════
 function addDebtToGoogleCalendar(idx) {
-  var d = debtsData[idx];
-  if (!d || !d.due_date) { showToast('لا يوجد تاريخ استحقاق لهذا الدين'); return; }
+  var dd = window.debtsData || debtsData;
+  var d  = dd[idx];
+  if (!d) return;
+  if (!d.due_date) {
+    showToast('⚠️ لا يوجد تاريخ استحقاق — أضف تاريخاً عند تعديل الدين');
+    return;
+  }
 
-  var isOwe    = d.direction === 'owe';
-  var title    = encodeURIComponent((isOwe ? '⬇️ سداد دين لـ: ' : '⬆️ استرداد دين من: ') + d.person);
-  var amt      = (d.remaining || d.amount || 0).toLocaleString('en-US', {maximumFractionDigits:0});
-  var nl2 = String.fromCharCode(10);
-  var detailsArr = [(isOwe ? 'سداد مبلغ ' : 'استرداد مبلغ ') + amt + ' ر.س'];
-  if (d.reason)  detailsArr.push('السبب: ' + d.reason);
-  if (d.contact) detailsArr.push('التواصل: ' + d.contact);
-  var details = encodeURIComponent(detailsArr.join(nl2));
+  var isOwe  = d.direction === 'owe';
+  var amt    = (d.remaining || d.amount || 0).toLocaleString('en-US', {maximumFractionDigits:0});
+  var nl     = String.fromCharCode(10);
 
-  // Format date: YYYYMMDD
-  var dt = d.due_date.replace(/-/g, '');
-  var dtNext = dt; // all-day event
+  // عنوان الحدث
+  var titleText = (isOwe ? '💸 سداد دين — ' : '💰 استرداد دين — ') + d.person
+                + ' (' + amt + ' ر.س)';
+
+  // تفاصيل الحدث
+  var detailsArr = [
+    (isOwe ? '📌 عليك سداد مبلغ: ' : '📌 لك مبلغ: ') + amt + ' ر.س',
+    '👤 الشخص: ' + d.person
+  ];
+  if (d.reason)   detailsArr.push('📝 السبب: ' + d.reason);
+  if (d.contact)  detailsArr.push('📞 التواصل: ' + d.contact);
+  if (d.method)   detailsArr.push('💳 طريقة السداد: ' + d.method);
+  detailsArr.push('');
+  detailsArr.push('— محفظتي المالية 📊');
+
+  // تحويل التاريخ: YYYY-MM-DD → YYYYMMDD
+  var dt      = d.due_date.replace(/-/g, '');
+  // نهاية الحدث: اليوم نفسه + 1 (Google Calendar all-day)
+  var dtEnd   = dt; // same day
 
   var calUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
-    + '&text=' + title
-    + '&dates=' + dt + '/' + dt
-    + '&details=' + details
-    + '&location=' + encodeURIComponent('المملكة العربية السعودية');
+    + '&text='     + encodeURIComponent(titleText)
+    + '&dates='    + dt + '/' + dt
+    + '&details='  + encodeURIComponent(detailsArr.join(nl))
+    + '&location=' + encodeURIComponent('المملكة العربية السعودية')
+    + '&trp=false';
 
   window.open(calUrl, '_blank');
-  showToast('📅 جاري فتح تقويم Google...');
+  showToast('📅 تم فتح تقويم Google — أضف التذكير');
 }
 
 // ══════════════════════════════════════════════════════
