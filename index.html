@@ -1353,13 +1353,12 @@
       <div class="nav-item" onclick="showPage('stocks',this)">
         <span class="nav-icon">📈</span> الأسهم
       </div>
-      <div class="nav-item" onclick="showPage('all',this)">
-        <span class="nav-icon">📋</span> جميع الفرص
-      </div>
       <div class="nav-item" onclick="showPage('sukuk',this)">
         <span class="nav-icon">🏦</span> الفرص
       </div>
-
+      <div class="nav-item" onclick="showPage('all',this)">
+        <span class="nav-icon">📋</span> جميع الفرص
+      </div>
 
 
       <div class="nav-item nav-db" onclick="showPage('db',this)">
@@ -1799,26 +1798,10 @@
         </div>
       </div>
 
-      <!-- تبويبات + فلاتر -->
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:0">
-        <div style="display:flex;gap:0">
-          <button id="opps-tab-sukuk" onclick="switchOppsTab('sukuk')" style="padding:11px 22px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:all .2s">📜 الصكوك</button>
-          <button id="opps-tab-funds" onclick="switchOppsTab('funds')" style="padding:11px 22px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s">💼 الصناديق</button>
-        </div>
-        <!-- فلاتر السنة والحالة -->
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding-bottom:8px">
-          <select id="opps-filter-year" onchange="renderOppsFiltered()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--white);font-size:12px;font-family:inherit;outline:none">
-            <option value="">كل السنوات</option>
-          </select>
-          <select id="opps-filter-status" onchange="renderOppsFiltered()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--white);font-size:12px;font-family:inherit;outline:none">
-            <option value="">كل الحالات</option>
-            <option value="نشطة">نشطة ✅</option>
-            <option value="مستلمة">مستلمة 📥</option>
-            <option value="مؤجلة">مؤجلة ⏳</option>
-            <option value="ملغاة">ملغاة ❌</option>
-          </select>
-          <input type="text" id="opps-search" oninput="renderOppsFiltered()" placeholder="🔍 بحث..." style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--white);font-size:12px;font-family:inherit;outline:none;width:140px">
-        </div>
+      <!-- تبويبات -->
+      <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border)">
+        <button id="opps-tab-sukuk" onclick="switchOppsTab('sukuk')" style="padding:11px 22px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:all .2s">📜 الصكوك</button>
+        <button id="opps-tab-funds" onclick="switchOppsTab('funds')" style="padding:11px 22px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s">💼 الصناديق</button>
       </div>
 
       <!-- تبويب: الصكوك -->
@@ -2767,12 +2750,9 @@
           <div class="page-sub">تعديل مباشر على جميع سجلات الفرص الاستثمارية</div>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="db-btn db-btn-save" onclick="dbSaveAll()">💾 حفظ</button>
-          <button class="db-btn db-btn-export" onclick="dbExportExcel()" style="background:rgba(0,230,118,0.1);border-color:rgba(0,230,118,0.3);color:var(--green)">📊 تصدير Excel</button>
-          <button class="db-btn db-btn-export" onclick="dbExport()" style="font-size:11px">📤 JSON</button>
-          <button class="db-btn db-btn-import" onclick="document.getElementById('db-import-excel-file').click()" style="background:rgba(0,212,255,0.1);border-color:rgba(0,212,255,0.3);color:var(--cyan)">📥 استيراد Excel</button>
-          <input type="file" id="db-import-excel-file" accept=".xlsx,.xls,.csv" style="display:none" onchange="dbImportExcel(event)"/>
-          <button class="db-btn db-btn-import" onclick="document.getElementById('db-import-file').click()" style="font-size:11px">📥 JSON</button>
+          <button class="db-btn db-btn-save" onclick="dbSaveAll()">💾 حفظ التعديلات</button>
+          <button class="db-btn db-btn-export" onclick="dbExport()">📤 تصدير JSON</button>
+          <button class="db-btn db-btn-import" onclick="document.getElementById('db-import-file').click()">📥 استيراد</button>
           <input type="file" id="db-import-file" accept=".json" style="display:none" onchange="dbImport(event)"/>
           <button class="db-btn db-btn-add" onclick="dbAddRow()">➕ صف جديد</button>
         </div>
@@ -4326,15 +4306,12 @@
       <div class="mnav-icon-wrap"><span class="mnav-icon">📊</span></div>
       <span class="mnav-label">الرئيسية</span>
     </div>
-    <div class="mnav-item" id="mnav-all" onclick="showPage('all', this, '📋 جميع الفرص')">
-      <div class="mnav-icon-wrap"><span class="mnav-icon">📋</span></div>
-      <span class="mnav-label">الفرص</span>
-    </div>
     <div class="mnav-item" id="mnav-analyst" onclick="showPage('reports', this, '📊 التقارير والتحليل'); setTimeout(function(){switchReportsTab('analyst');},100)">
       <div class="mnav-icon-wrap"><span class="mnav-icon">🔍</span></div>
       <span class="mnav-label">المحلل</span>
     </div>
-
+    <div class="mnav-item" id="mnav-all" onclick="showPage('all', this, '📋 جميع الفرص')">
+      <div class="mnav-icon-wrap"><span class="mnav-icon">📋</span></div>
       <span class="mnav-label">الفرص</span>
     </div>
     <div class="mnav-item" id="mnav-loans" onclick="showPage('loans', this, '🏦 القروض البنكية')">
@@ -6161,7 +6138,6 @@ function switchOppsTab(tab) {
   });
   if (tab === 'sukuk') renderSukuk();
   if (tab === 'funds') renderFunds();
-  renderOppsFiltered();
 }
 
 
@@ -6188,9 +6164,22 @@ function renderSukuk() {
   const oppsBadge = document.getElementById('opps-total-badge');
   if (oppsBadge) oppsBadge.textContent = (sukukData.length + fundsData.length) + ' فرصة';
 
-  // Apply filters (delegates actual rendering)
-  initOppsYearFilter();
-  renderOppsFiltered();
+  const tbody = document.getElementById('sukuk-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = sukukData.map((d, i) => {
+    const realIdx = _inv.indexOf(d);
+    return `<tr>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.name}</td>
+      <td style="color:#8899bb">${d.platform}</td>
+      <td class="mono">${fmtNum(d.amount)}</td>
+      <td>${fmtPct(d.ret_pct)}</td>
+      <td class="mono ${d.ret_val >= 0 ? 'up' : 'dn'}">${fmtNum(d.ret_val, 2)}</td>
+      <td style="color:#8899bb;font-size:11px">${d.date_out || '—'}</td>
+      <td>${riskPill(d.risk)}</td>
+      <td>${statusPill(d.status)}</td>
+      <td><button class="loan-action-btn" onclick="openEditOpp(${realIdx})">✏️</button></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--muted)">لا توجد صكوك</td></tr>';
 }
 
 function renderFunds() {
@@ -6206,8 +6195,22 @@ function renderFunds() {
   const cnt2El = document.getElementById('funds-count-badge2');
   if (cnt2El) cnt2El.textContent = fundsData.length + ' صندوق';
 
-  // Apply filters (delegates actual rendering)
-  renderOppsFiltered();
+  const tbody = document.getElementById('funds-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = fundsData.map((d, i) => {
+    const realIdx = _inv.indexOf(d);
+    return `<tr>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.name}</td>
+      <td style="color:#8899bb">${d.platform}</td>
+      <td class="mono">${fmtNum(d.amount)}</td>
+      <td>${fmtPct(d.ret_pct)}</td>
+      <td class="mono ${d.ret_val >= 0 ? 'up' : 'dn'}">${fmtNum(d.ret_val, 2)}</td>
+      <td class="mono" style="color:#c9a84c">${fmtNum(d.total, 2)}</td>
+      <td>${riskPill(d.risk)}</td>
+      <td>${statusPill(d.status)}</td>
+      <td><button class="loan-action-btn" onclick="openEditOpp(${realIdx})">✏️</button></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--muted)">لا توجد صناديق</td></tr>';
 }
 
 function resetForm() {
@@ -6672,258 +6675,6 @@ function dbSaveAll() {
   dbRender();
   showToast(`✅ تم حفظ ${count} تعديل وتحديث جميع الصفحات`);
 }
-
-// ══════════════════════════════════════════════
-// OPPORTUNITIES PAGE — FILTERS
-// ══════════════════════════════════════════════
-function initOppsYearFilter() {
-  var inv = window.__investments || investments;
-  var years = new Set();
-  inv.forEach(function(x) {
-    var d = x.date_in || x.added_at || '';
-    var y = d.split('/')[2] || d.split('-')[0] || '';
-    if (y && y.length === 4) years.add(y);
-  });
-  var sel = document.getElementById('opps-filter-year');
-  if (!sel) return;
-  var current = sel.value;
-  var opts = '<option value="">كل السنوات</option>';
-  Array.from(years).sort().reverse().forEach(function(y) {
-    opts += '<option value="' + y + '"' + (y === current ? ' selected' : '') + '>' + y + '</option>';
-  });
-  sel.innerHTML = opts;
-}
-
-function renderOppsFiltered() {
-  var year   = (document.getElementById('opps-filter-year')   || {}).value   || '';
-  var status = (document.getElementById('opps-filter-status') || {}).value   || '';
-  var search = ((document.getElementById('opps-search')       || {}).value   || '').toLowerCase();
-  var tab    = _currentOppsTab || 'sukuk';
-
-  var inv = window.__investments || investments;
-  var filtered = inv.filter(function(x) {
-    // type filter per tab
-    if (tab === 'sukuk' && x.type !== 'صك' && x.type !== 'مرابحة') return false;
-    if (tab === 'funds' && x.type !== 'صندوق') return false;
-    // year filter
-    if (year) {
-      var d = x.date_in || x.added_at || '';
-      var y = d.split('/')[2] || d.split('-')[0] || '';
-      if (y !== year) return false;
-    }
-    // status filter
-    if (status && (x.status || '') !== status) return false;
-    // search
-    if (search && !JSON.stringify(x).toLowerCase().includes(search)) return false;
-    return true;
-  });
-
-  var badge = document.getElementById('opps-total-badge');
-  if (badge) badge.textContent = filtered.length + ' فرصة' + (year ? ' — ' + year : '') + (status ? ' — ' + status : '');
-
-  var tbodyId = tab === 'sukuk' ? 'sukuk-tbody' : 'funds-tbody';
-  var tbody = document.getElementById(tbodyId);
-  if (!tbody) return;
-
-  if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--muted)">لا توجد نتائج</td></tr>';
-    return;
-  }
-
-  if (tab === 'sukuk') {
-    tbody.innerHTML = filtered.map(function(d) {
-      var realIdx = inv.indexOf(d);
-      return '<tr>' +
-        '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + d.name + '</td>' +
-        '<td style="color:#8899bb">' + d.platform + '</td>' +
-        '<td class="mono">' + fmtNum(d.amount) + '</td>' +
-        '<td>' + fmtPct(d.ret_pct) + '</td>' +
-        '<td class="mono ' + (d.ret_val >= 0 ? 'up' : 'dn') + '">' + fmtNum(d.ret_val, 2) + '</td>' +
-        '<td style="color:#8899bb;font-size:11px">' + (d.date_out || '—') + '</td>' +
-        '<td>' + riskPill(d.risk) + '</td>' +
-        '<td>' + statusPill(d.status) + '</td>' +
-        '<td><button class="loan-action-btn" onclick="openEditOpp(' + realIdx + ')">✏️</button></td>' +
-        '</tr>';
-    }).join('');
-  } else {
-    tbody.innerHTML = filtered.map(function(d) {
-      var realIdx = inv.indexOf(d);
-      return '<tr>' +
-        '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + d.name + '</td>' +
-        '<td style="color:#8899bb">' + d.platform + '</td>' +
-        '<td class="mono">' + fmtNum(d.amount) + '</td>' +
-        '<td>' + fmtPct(d.ret_pct) + '</td>' +
-        '<td class="mono ' + (d.ret_val >= 0 ? 'up' : 'dn') + '">' + fmtNum(d.ret_val, 2) + '</td>' +
-        '<td class="mono" style="color:var(--gold)">' + fmtNum(d.total, 2) + '</td>' +
-        '<td>' + riskPill(d.risk) + '</td>' +
-        '<td>' + statusPill(d.status) + '</td>' +
-        '<td><button class="loan-action-btn" onclick="openEditOpp(' + realIdx + ')">✏️</button></td>' +
-        '</tr>';
-    }).join('');
-  }
-}
-
-// ══════════════════════════════════════════════
-// DATABASE — EXCEL EXPORT / IMPORT
-// ══════════════════════════════════════════════
-function dbExportExcel() {
-  // Load SheetJS if not available
-  if (typeof XLSX === 'undefined') {
-    var s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
-    s.onload = function() { _doExportExcel(); };
-    s.onerror = function() { showToast('❌ فشل تحميل مكتبة Excel — تحقق من الاتصال'); };
-    document.head.appendChild(s);
-  } else {
-    _doExportExcel();
-  }
-}
-
-function _doExportExcel() {
-  try {
-    var inv = window.__investments || investments;
-    var rows = inv.map(function(x) {
-      return {
-        'الاسم':           x.name       || '',
-        'النوع':           x.type       || '',
-        'المنصة':          x.platform   || '',
-        'المبلغ':          x.amount     || 0,
-        'نسبة العائد':     x.ret_pct != null ? (x.ret_pct * 100).toFixed(2) : 0,
-        'قيمة العائد':     x.ret_val    || 0,
-        'المجموع المتوقع': x.total      || 0,
-        'تاريخ الخروج':   x.date_out   || '',
-        'المخاطرة':        x.risk       || '',
-        'الحالة':          x.status     || '',
-        'رمز السهم':       x.ticker     || '',
-        'عدد الأسهم':     x.shares     || '',
-        'السوق':           x.market     || 'sa',
-        'تاريخ الإضافة':  x.added_at   || ''
-      };
-    });
-
-    var ws = XLSX.utils.json_to_sheet(rows, { skipHeader: false });
-    // Set column widths
-    ws['!cols'] = [
-      {wch:35},{wch:10},{wch:15},{wch:12},{wch:12},
-      {wch:12},{wch:14},{wch:14},{wch:10},{wch:10},
-      {wch:10},{wch:10},{wch:8},{wch:20}
-    ];
-
-    var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'المحفظة');
-
-    // Summary sheet
-    var totalAmt = inv.reduce(function(s,x){return s+(x.amount||0);},0);
-    var totalRet = inv.reduce(function(s,x){return s+(x.ret_val||0);},0);
-    var summaryData = [
-      {'البيان':'إجمالي المستثمر', 'القيمة': totalAmt},
-      {'البيان':'إجمالي العوائد',   'القيمة': totalRet},
-      {'البيان':'ROI %',            'القيمة': totalAmt>0?(totalRet/totalAmt*100).toFixed(2)+'%':'0%'},
-      {'البيان':'عدد الفرص',        'القيمة': inv.length},
-      {'البيان':'نشطة',             'القيمة': inv.filter(function(x){return x.status==='نشطة';}).length},
-      {'البيان':'مستلمة',           'القيمة': inv.filter(function(x){return x.status==='مستلمة';}).length},
-      {'البيان':'تاريخ التصدير',    'القيمة': new Date().toLocaleDateString('ar-SA')}
-    ];
-    var wsSummary = XLSX.utils.json_to_sheet(summaryData);
-    wsSummary['!cols'] = [{wch:20},{wch:20}];
-    XLSX.utils.book_append_sheet(wb, wsSummary, 'ملخص');
-
-    var fileName = 'محفظتي_الاستثمارية_' + new Date().toISOString().split('T')[0] + '.xlsx';
-    XLSX.writeFile(wb, fileName);
-    showToast('📊 تم تصدير ' + inv.length + ' فرصة إلى Excel');
-  } catch(e) {
-    showToast('❌ خطأ في التصدير: ' + e.message);
-  }
-}
-
-function dbImportExcel(event) {
-  var file = event.target.files[0];
-  if (!file) return;
-  event.target.value = '';
-
-  if (typeof XLSX === 'undefined') {
-    var s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
-    s.onload = function() { _doImportExcel(file); };
-    s.onerror = function() { showToast('❌ فشل تحميل مكتبة Excel'); };
-    document.head.appendChild(s);
-  } else {
-    _doImportExcel(file);
-  }
-}
-
-function _doImportExcel(file) {
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      var wb   = XLSX.read(e.target.result, { type: 'array' });
-      var ws   = wb.Sheets[wb.SheetNames[0]];
-      var rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
-
-      if (!rows.length) { showToast('❌ الملف فارغ'); return; }
-
-      // Map Excel columns → investment object
-      var colMap = {
-        'الاسم':'name','النوع':'type','المنصة':'platform',
-        'المبلغ':'amount','نسبة العائد':'ret_pct','قيمة العائد':'ret_val',
-        'المجموع المتوقع':'total','تاريخ الخروج':'date_out',
-        'المخاطرة':'risk','الحالة':'status','رمز السهم':'ticker',
-        'عدد الأسهم':'shares','السوق':'market',
-        // English fallback
-        'name':'name','type':'type','platform':'platform',
-        'amount':'amount','ret_pct':'ret_pct','ret_val':'ret_val',
-        'total':'total','date_out':'date_out','risk':'risk',
-        'status':'status','ticker':'ticker','shares':'shares'
-      };
-
-      var imported = rows.map(function(row) {
-        var obj = {};
-        Object.keys(row).forEach(function(k) {
-          var mapped = colMap[k.trim()];
-          if (mapped) obj[mapped] = row[k];
-        });
-        // Fix types
-        obj.amount  = parseFloat(obj.amount)  || 0;
-        obj.ret_val = parseFloat(obj.ret_val) || 0;
-        obj.total   = parseFloat(obj.total)   || obj.amount + obj.ret_val;
-        obj.ret_pct = parseFloat(obj.ret_pct) || (obj.amount > 0 ? obj.ret_val/obj.amount : 0);
-        if (obj.ret_pct > 1) obj.ret_pct = obj.ret_pct / 100; // was percentage
-        obj.status  = obj.status  || 'نشطة';
-        obj.risk    = obj.risk    || 'متوسط';
-        obj.type    = obj.type    || 'صك';
-        obj.name    = obj.name    || 'فرصة مستوردة';
-        return obj;
-      }).filter(function(x){ return x.name && x.amount >= 0; });
-
-      if (!imported.length) { showToast('❌ لا توجد بيانات صالحة في الملف'); return; }
-
-      // Confirm before overwrite
-      var msg = 'سيتم استيراد ' + imported.length + ' فرصة.
-هل تريد إضافتها للموجودة أم استبدال الكل؟
-
-اضغط OK للإضافة، Cancel للاستبدال';
-      if (confirm(msg)) {
-        // Add to existing
-        imported.forEach(function(r){ (window.__investments||investments).push(r); });
-        showToast('✅ تم إضافة ' + imported.length + ' فرصة من Excel');
-      } else {
-        // Replace all
-        var inv = window.__investments || investments;
-        inv.length = 0;
-        imported.forEach(function(r){ inv.push(r); });
-        showToast('✅ تم استبدال البيانات بـ ' + imported.length + ' فرصة من Excel');
-      }
-
-      triggerSync('investments');
-      dbRender();
-      renderAll(); renderStocks(); renderSukuk(); renderFunds();
-    } catch(err) {
-      showToast('❌ خطأ في قراءة الملف: ' + err.message);
-    }
-  };
-  reader.readAsArrayBuffer(file);
-}
-
 
 function dbExport() {
   const json = JSON.stringify(investments, null, 2);
