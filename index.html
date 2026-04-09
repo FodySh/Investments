@@ -4732,67 +4732,7 @@
 
 <script>
 //  DATA 
-const investments = [
-  {name:"60 سهم في شركة المراعي",type:"سهم",platform:"دراية",amount:3608.22,ret_pct:-0.2299,ret_val:-828.58,total:2775.53,date_out:null,duration:null,dist:"سنوية",risk:"متوسط",status:"نشطة",ticker:"2280",shares:60},
-  {name:"205 صندوق الراجحي للنمو",type:"صندوق",platform:"دراية",amount:5000,ret_pct:0.0887,ret_val:433.31,total:5318.31,date_out:"عند الحاجة",duration:null,dist:"لا يوجد",risk:"متوسط",status:"نشطة"},
-  {name:"74 صندوق الراجحي للأسهم",type:"صندوق",platform:"دراية",amount:5700,ret_pct:0.1455,ret_val:810.58,total:6381.58,date_out:"عند الحاجة",duration:null,dist:"لا يوجد",risk:"عالي",status:"نشطة"},
-  {name:"252 سهم في الكهرباء",type:"سهم",platform:"منصة الأهلي",amount:5008.37,ret_pct:0.0349,ret_val:174.49,total:5174.17,date_out:null,duration:null,dist:"سنوية",risk:"عالي",status:"مستلمة",ticker:"5110",shares:252},
-  {name:"206 صندوق الراجحي للنمو",type:"صندوق",platform:"دراية",amount:3582.5,ret_pct:0.0492,ret_val:172.21,total:3672.32,date_out:null,duration:null,dist:"لا يوجد",risk:"متوسط",status:"نشطة"},
-  {name:"168 صندوق دراية المرن للأسهم",type:"صندوق",platform:"دراية",amount:6000,ret_pct:0.2727,ret_val:1579.75,total:7372.75,date_out:null,duration:null,dist:"لا يوجد",risk:"عالي",status:"نشطة"},
-  {name:"محفظة عالية المخاطر فهد",type:"صندوق",platform:"ابيان",amount:11679,ret_pct:0.1617,ret_val:1888.49,total:13567.49,date_out:null,duration:null,dist:"ربع سنوي",risk:"عالي",status:"نشطة"},
-  {name:"محفظة متوسطة المخاطر تركي",type:"صندوق",platform:"ابيان",amount:3400,ret_pct:0.0981,ret_val:333.54,total:3733.54,date_out:null,duration:null,dist:"ربع سنوي",risk:"متوسط",status:"نشطة"},
-  {name:"صكوك المرابحة 1003-17",type:"صك",platform:"ترميز",amount:4000,ret_pct:0.1061,ret_val:390,total:4390,date_out:"22/07/2024",duration:"9 أشهر",dist:"شهري",risk:"منخفض",status:"مستلمة"},
-  {name:"صكوك المرابحة 1009-02",type:"صك",platform:"ترميز",amount:4000,ret_pct:0.1279,ret_val:511.6,total:4511.6,date_out:"27/06/2024",duration:"10 أشهر",dist:"نصف سنوي",risk:"منخفض",status:"مستلمة"},
-  {name:"صكوك التطوير العقاري 1068-04",type:"صك",platform:"ترميز",amount:6000,ret_pct:0.2275,ret_val:1365,total:7365,date_out:"02/04/2026",duration:"21 شهر",dist:"دوري",risk:"منخفض",status:"مستلمة"},
-  {name:"صكوك المرابحة 1003-16",type:"صك",platform:"ترميز",amount:5000,ret_pct:0.0923,ret_val:461.5,total:5461.5,date_out:"17/03/2024",duration:"8 أشهر",dist:"ربع شهري",risk:"منخفض",status:"مستلمة"},
-  {name:"صكوك التطوير العقاري 1060-05",type:"صك",platform:"ترميز",amount:5000,ret_pct:0.1875,ret_val:937.5,total:5937.5,date_out:"07/01/2026",duration:"18 شهر",dist:"دوري",risk:"منخفض",status:"مستلمة"},
-  {name:"صكوك المرابحة 1021-03",type:"صك",platform:"ترميز",amount:5000,ret_pct:0.13,ret_val:650,total:5650,date_out:"20/11/2024",duration:"12 شهر",dist:"نصف سنوي",risk:"منخفض",status:"مستلمة"},
-  {name:"صندوق سلفة للتمويل غير المباشر",type:"صندوق",platform:"عوائد",amount:10000,ret_pct:0.2,ret_val:2000,total:12000,date_out:null,duration:"24 شهر",dist:"نصف سنوي",risk:"عالي",status:"نشطة"},
-  {name:"OID-5970-1082",type:"صك",platform:"منافع",amount:3000,ret_pct:0.045,ret_val:135.14,total:3135.14,date_out:"08/11/2023",duration:null,dist:null,risk:"منخفض",status:"مستلمة"},
-  {name:"OID-0802-8744",type:"صك",platform:"منافع",amount:5000,ret_pct:0.033,ret_val:164.77,total:5164.77,date_out:"09/11/2023",duration:null,dist:null,risk:"منخفض",status:"مستلمة"},
-  {name:"OID-8312-4959",type:"صك",platform:"منافع",amount:1000,ret_pct:0.0382,ret_val:38.2,total:1038.2,date_out:"10/10/2023",duration:null,dist:null,risk:"منخفض",status:"مستلمة"},
-  {name:"OID-9638-8661",type:"صك",platform:"منافع",amount:5000,ret_pct:0.0256,ret_val:128.21,total:5128.21,date_out:"07/08/2023",duration:null,dist:null,risk:"منخفض",status:"مستلمة"},
-  {name:"OID-1652-2172",type:"صك",platform:"منافع",amount:3000,ret_pct:0.0413,ret_val:123.82,total:3123.82,date_out:"06/08/2023",duration:null,dist:null,risk:"منخفض",status:"مستلمة"},
-  {name:"OID-7599-9549",type:"صك",platform:"منافع",amount:5000,ret_pct:0.033,ret_val:165.24,total:5165.24,date_out:"04/07/2023",duration:null,dist:null,risk:"منخفض",status:"مستلمة"},
-  {name:"OID-1652-7861",type:"صك",platform:"منافع",amount:5000,ret_pct:0.0246,ret_val:123.2,total:5123.2,date_out:"06/06/2023",duration:null,dist:null,risk:"منخفض",status:"مستلمة"},
-  {name:"OID-8237-2323",type:"صك",platform:"منافع",amount:3000,ret_pct:0.0335,ret_val:100.49,total:3100.49,date_out:"07/12/2023",duration:null,dist:null,risk:"منخفض",status:"مستلمة"},
-  {name:"OID-5970-5649",type:"صك",platform:"منافع",amount:3000,ret_pct:0.053,ret_val:158.9,total:3158.9,date_out:"10/12/2023",duration:null,dist:null,risk:"منخفض",status:"مستلمة"},
-  {name:"OID-3942-6969",type:"صك",platform:"منافع",amount:1000,ret_pct:0.0358,ret_val:35.75,total:1035.75,date_out:"13/12/2023",duration:null,dist:null,risk:"منخفض",status:"مستلمة"},
-  {name:"OID-9483-6897",type:"صك",platform:"منافع",amount:10000,ret_pct:0.0328,ret_val:328.02,total:10328.02,date_out:"31/12/2023",duration:null,dist:null,risk:"منخفض",status:"مستلمة"},
-  {name:"OID-3343-6108",type:"صك",platform:"منافع",amount:5000,ret_pct:0.0538,ret_val:207.13,total:5207.13,date_out:"31/03/2024",duration:null,dist:null,risk:"منخفض",status:"مستلمة"},
-  {name:"OID-4982-4037",type:"صك",platform:"منافع",amount:5000,ret_pct:0.0429,ret_val:214.5,total:5214.5,date_out:"11/02/2024",duration:null,dist:null,risk:"منخفض",status:"مستلمة"},
-  {name:"OID-1734-1752",type:"صك",platform:"منافع",amount:2000,ret_pct:0.0479,ret_val:73.77,total:2073.77,date_out:"11/03/2024",duration:null,dist:null,risk:"منخفض",status:"مستلمة"},
-  {name:"OID-7984-8264",type:"صك",platform:"منافع",amount:1000,ret_pct:0.0452,ret_val:34.8,total:1034.8,date_out:"13/03/2024",duration:null,dist:null,risk:"منخفض",status:"مستلمة"},
-  {name:"صكوك المرابحة 1019-02",type:"صك",platform:"ترميز",amount:10000,ret_pct:0.0817,ret_val:817,total:10817,date_out:"04/07/2024",duration:"7 أشهر",dist:"نصف سنوي",risk:"منخفض",status:"مستلمة"},
-  {name:"صكوك المرابحة 1011-28",type:"صك",platform:"ترميز",amount:4000,ret_pct:0.4067,ret_val:1626.8,total:5626.8,date_out:"28/09/2026",duration:"24 شهر",dist:"نصف سنوي",risk:"منخفض",status:"نشطة"},
-  {name:"صكوك المرابحة 1014-06",type:"صك",platform:"ترميز",amount:5000,ret_pct:0.1167,ret_val:583.5,total:5583.5,date_out:"01/12/2024",duration:"10 أشهر",dist:"سنوي",risk:"منخفض",status:"مستلمة"},
-  {name:"OID-4284-4109",type:"صك",platform:"منافع",amount:3000,ret_pct:0.0414,ret_val:109.92,total:3109.92,date_out:"26/06/2024",duration:"4 أشهر",dist:"لا يوجد",risk:"منخفض",status:"مستلمة"},
-  {name:"قرض لانفال",type:"سند",platform:"منصة الأهلي",amount:15000,ret_pct:0,ret_val:0,total:15000,date_out:null,duration:null,dist:"لا يوجد",risk:"متوسط",status:"نشطة"},
-  {name:"قرض لمريم",type:"سند",platform:"منصة الأهلي",amount:2000,ret_pct:-1,ret_val:-2000,total:0,date_out:null,duration:null,dist:"لا يوجد",risk:"عالي",status:"نشطة"},
-  {name:"اكتتاب المطاحن الحديثة",type:"سهم",platform:"منصة الأهلي",amount:366,ret_pct:0,ret_val:0,total:366,date_out:null,duration:null,dist:null,risk:"منخفض",status:"نشطة",ticker:"2284",shares:12},
-  {name:"صكوك المرابحة 1031-01",type:"صك",platform:"ترميز",amount:3000,ret_pct:0.032,ret_val:96,total:3096,date_out:"25/06/2024",duration:"3 أشهر",dist:null,risk:"منخفض",status:"مستلمة"},
-  {name:"صكوك المرابحة 1016-09",type:"صك",platform:"ترميز",amount:2000,ret_pct:0.14,ret_val:280,total:2280,date_out:"19/03/2026",duration:"سنتين",dist:"ربع شهري",risk:"منخفض",status:"مستلمة"},
-  {name:"OID-2534-2130",type:"صك",platform:"منافع",amount:2000,ret_pct:0.04,ret_val:78.85,total:2078.85,date_out:"01/08/2024",duration:"4 أشهر",dist:"لا يوجد",risk:"منخفض",status:"مستلمة"},
-  {name:"OID-9638-5867",type:"صك",platform:"منافع",amount:1000,ret_pct:0.0383,ret_val:37.15,total:1037.15,date_out:"04/08/2024",duration:"4 أشهر",dist:"لا يوجد",risk:"منخفض",status:"مستلمة"},
-  {name:"اكتتاب أرامكو",type:"سهم",platform:"منصة الأهلي",amount:1853,ret_pct:null,ret_val:0,total:1853,date_out:null,duration:null,dist:null,risk:"منخفض",status:"نشطة",ticker:"2222",shares:68},
-  {name:"اكتتاب فقيه",type:"سهم",platform:"منصة الأهلي",amount:575,ret_pct:null,ret_val:0,total:575,date_out:null,duration:null,dist:null,risk:"منخفض",status:"نشطة",ticker:"4017",shares:15},
-  {name:"اكتتاب مياهنا",type:"سهم",platform:"رياض المالية",amount:368,ret_pct:null,ret_val:0,total:368,date_out:null,duration:null,dist:null,risk:"منخفض",status:"نشطة",ticker:"2084",shares:29},
-  {name:"اكتتاب تالكو",type:"سهم",platform:"رياض المالية",amount:172,ret_pct:null,ret_val:0,total:172,date_out:null,duration:null,dist:null,risk:"منخفض",status:"نشطة",ticker:"4143",shares:4},
-  {name:"اكتتاب سماسكو",type:"سهم",platform:"منصة الأهلي",amount:232.5,ret_pct:null,ret_val:0,total:232.5,date_out:null,duration:null,dist:null,risk:"منخفض",status:"نشطة",ticker:"1834",shares:45},
-  {name:"اكتتاب الخبير",type:"سهم",platform:"منصة الأهلي",amount:1000,ret_pct:0,ret_val:0,total:1000,date_out:null,duration:null,dist:null,risk:"متوسط",status:"نشطة",ticker:"4163",shares:50},
-  {name:"OID-9507-2705",type:"صك",platform:"منافع",amount:2000,ret_pct:0.0351,ret_val:70.2,total:2070.2,date_out:"11/07/2024",duration:"4 أشهر",dist:"لا يوجد",risk:"منخفض",status:"مستلمة"},
-  {name:"OID-0779-5294",type:"صك",platform:"منافع",amount:1000,ret_pct:0.033,ret_val:33,total:1033,date_out:"30/10/2024",duration:"4 أشهر",dist:"لا يوجد",risk:"منخفض",status:"مستلمة"},
-  {name:"OID-1359-7222",type:"صك",platform:"منافع",amount:2000,ret_pct:0.0493,ret_val:75.91,total:2054.29,date_out:"27/10/2024",duration:"4 أشهر",dist:"لا يوجد",risk:"منخفض",status:"مستلمة"},
-  {name:"مرابحة 1 شهر (نشطة)",type:"صك",platform:"عوائد",amount:1000,ret_pct:0.0562,ret_val:4.68,total:1004.68,date_out:"04/08/2024",duration:"1 شهر",dist:"لا يوجد",risk:"منخفض",status:"نشطة"},
-  {name:"مرابحة 1 شهر (مستلمة)",type:"صك",platform:"عوائد",amount:1000,ret_pct:0.0572,ret_val:57.2,total:1057.2,date_out:"14/07/2024",duration:"1 شهر",dist:"شهري",risk:"منخفض",status:"مستلمة"},
-  {name:"OID-3942-7637",type:"صك",platform:"منافع",amount:2000,ret_pct:0.0375,ret_val:57.1,total:2039.85,date_out:"09/10/2024",duration:"3 أشهر",dist:"لا يوجد",risk:"منخفض",status:"مستلمة"},
-  {name:"صكوك مرابحة 1077-01",type:"صك",platform:"ترميز",amount:4000,ret_pct:0.0325,ret_val:130,total:4130,date_out:"30/10/2024",duration:"3 أشهر",dist:"لا يوجد",risk:"منخفض",status:"مستلمة"},
-  {name:"صكوك مقام العقارية 22-1121",type:"صك",platform:"ترميز",amount:5000,ret_pct:0.1022,ret_val:511,total:5511,date_out:"27/08/2026",duration:"12 شهر",dist:"سنوي",risk:"منخفض",status:"نشطة"},
-  {name:"صكوك مرابحة 1127-02",type:"صك",platform:"ترميز",amount:7000,ret_pct:0.1129,ret_val:731.87,total:7679.37,date_out:"05/11/2025",duration:"9 أشهر",dist:"لا يوجد",risk:"منخفض",status:"نشطة"},
-  {name:"صكوك التطوير العقاري 1071-06",type:"صك",platform:"ترميز",amount:3000,ret_pct:0.15,ret_val:405,total:3360,date_out:null,duration:null,dist:null,risk:"منخفض",status:"نشطة"},
-  {name:"OID-9849-8604",type:"صك",platform:"منافع",amount:17000,ret_pct:0.0583,ret_val:981.1,total:17971.1,date_out:"25/02/2026",duration:"5 أشهر",dist:"لا يوجد",risk:"منخفض",status:"نشطة"},
-  {name:"صكوك المرابحة 1194-08",type:"صك",platform:"ترميز",amount:1000,ret_pct:0.0987,ret_val:98.7,total:1098.7,date_out:"20/12/2026",duration:"9 أشهر",dist:"ربع سنوي",risk:"منخفض",status:"نشطة",sector:"مقاولات",apr:0.1315,irr:0,issue_size:500000,min_invest:1000},
-];
+const investments = [];
 
 // Expose globally so Firebase module can access and sync
 window.__investments = investments;
@@ -10291,8 +10231,9 @@ function _loadData(uid) {
       investments.length = 0;
       _write(uid, "investments", []);
     } else {
-      // مستخدم قديم بدون بيانات في Firebase → احفظ البيانات المحلية
-      _write(uid, "investments", Array.from(window.__investments));
+      // لا بيانات في Firebase → ابدأ بمحفظة فارغة (لا تكتب شيء)
+      window.__investments.length = 0;
+      investments.length = 0;
     }
     return _read(uid, "loans");
   }).then(function(loans) {
@@ -10412,8 +10353,13 @@ _auth.onAuthStateChanged(function(user) {
     _gate(false);  // Hide login banner
     _loadData(user.uid);
   } else {
-    _gate(true);   // Show login banner — but keep default data visible
-    // Don't call _clearData() — let user see demo data without login
+    _gate(true);  // Show login banner
+    // Clear any stale data shown before login
+    if (window.__investments) window.__investments.length = 0;
+    if (window.loansData)     window.loansData.length    = 0;
+    if (window.debtsData)     window.debtsData.length    = 0;
+    if (typeof renderAll      === 'function') renderAll();
+    if (typeof renderDashboard=== 'function') renderDashboard();
   }
 });
 
