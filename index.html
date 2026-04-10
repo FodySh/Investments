@@ -2,6 +2,9 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>محفظتي المالية</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -1757,9 +1760,10 @@
       </div>
 
       <!-- تبويبات السوق -->
-      <div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0">
-        <button id="tab-sa" onclick="switchStocksTab('sa')" style="padding:10px 20px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer">🇸🇦 السوق السعودي</button>
-        <button id="tab-us" onclick="switchStocksTab('us')" style="padding:10px 20px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer">🇺🇸 السوق الأمريكي</button>
+      <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0">
+        <button id="tab-sa" onclick="switchStocksTab('sa')" style="padding:10px 22px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:all .2s">🇸🇦 السعودي</button>
+        <button id="tab-us" onclick="switchStocksTab('us')" style="padding:10px 22px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s">🇺🇸 الأمريكي</button>
+        <button id="tab-dividends" onclick="switchStocksTab('dividends')" style="padding:10px 22px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s">💰 التوزيعات</button>
       </div>
 
       <!-- السوق السعودي -->
@@ -1818,6 +1822,113 @@
           </div>
         </div>
         <div class="stocks-grid fade-up delay-2" id="us-stocks-cards-grid" style="margin-top:20px"></div>
+      </div>
+
+      <!-- تبويب: التوزيعات -->
+      <div id="stocks-tab-dividends" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+          <div>
+            <div style="font-size:16px;font-weight:700">💰 توزيعات الأسهم السعودية</div>
+            <div style="font-size:12px;color:var(--muted)">توزيعات الأسهم المحتفظ بها — تاريخية وقادمة</div>
+          </div>
+          <button onclick="showAddDividendForm()" style="background:linear-gradient(135deg,#00e676,#00b248);color:#0a1628;border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px">➕ إضافة توزيعة</button>
+        </div>
+
+        <!-- KPIs التوزيعات -->
+        <div class="kpi-grid" id="div-kpis-s2" style="margin-bottom:20px"></div>
+
+        <!-- فورم إضافة توزيعة (مخفي) -->
+        <div id="div-add-form-s2" style="display:none;margin-bottom:20px">
+          <div class="section-card" style="border-color:rgba(0,230,118,0.25)">
+            <div class="section-head" style="background:rgba(0,230,118,0.06)">
+              <span class="section-title" style="color:var(--green)">➕ تسجيل توزيعة</span>
+              <button onclick="document.getElementById('div-add-form-s2').style.display='none'" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer">×</button>
+            </div>
+            <div class="section-body">
+              <div class="form-grid">
+                <div class="field-group">
+                  <label class="field-label">السهم <span class="req">*</span></label>
+                  <select class="f-select" id="div-ticker-sel-s2" onchange="onDivTickerChange()">
+                    <option value="">— اختر السهم —</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">نوع التوزيعة</label>
+                  <select class="f-select" id="div-type-s2">
+                    <option value="cash">نقدية</option>
+                    <option value="stock">أسهم مجانية</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">قيمة التوزيعة للسهم (ر.س) <span class="req">*</span></label>
+                  <input class="f-input" id="div-per-share-s2" type="number" step="0.001" min="0" placeholder="مثال: 0.75" oninput="calcDividend()" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">تاريخ الإعلان</label>
+                  <input class="f-input" id="div-announce-date-s2" type="date" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">تاريخ الاستحقاق (Ex-Dividend)</label>
+                  <input class="f-input" id="div-ex-date-s2" type="date" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">تاريخ الدفع</label>
+                  <input class="f-input" id="div-pay-date-s2" type="date" />
+                </div>
+              </div>
+              <!-- حساب لحظي -->
+              <div id="div-calc-box-s2" style="display:none;background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.2);border-radius:12px;padding:16px;margin:12px 0">
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center">
+                  <div>
+                    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">عدد أسهمك</div>
+                    <div id="div-c-shares-s2" style="font-size:18px;font-weight:800;font-family:monospace;color:var(--cyan)">—</div>
+                  </div>
+                  <div>
+                    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي التوزيعة</div>
+                    <div id="div-c-total-s2" style="font-size:18px;font-weight:800;font-family:monospace;color:var(--green)">—</div>
+                  </div>
+                  <div>
+                    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">عائد التوزيعة %</div>
+                    <div id="div-c-yield-s2" style="font-size:18px;font-weight:800;font-family:monospace;color:var(--gold)">—</div>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:4px">
+                <button onclick="saveDividend()" style="background:linear-gradient(135deg,#00e676,#00b248);color:#0a1628;border:none;border-radius:10px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">💾 حفظ التوزيعة</button>
+                <button onclick="fetchDividendsForStock()" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;color:var(--cyan);cursor:pointer;font-family:inherit">🔄 جلب من Yahoo Finance</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- قاعدة بيانات التوزيعات المعروفة -->
+        <div id="div-known-alert" style="display:none;background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.2);border-radius:12px;padding:14px 18px;margin-bottom:16px;font-size:13px;color:var(--green)"></div>
+
+        <!-- جدول التوزيعات -->
+        <div class="section-card">
+          <div class="section-head">
+            <span class="section-title">📋 سجل التوزيعات</span>
+            <span class="section-count" id="div-count-badge">0 توزيعة</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>السهم</th><th>الرمز</th><th>النوع</th>
+                  <th>قيمة السهم</th><th>أسهمك</th><th>إجمالي المستلم</th>
+                  <th>العائد %</th><th>تاريخ Ex-Div</th><th>تاريخ الدفع</th><th>الحالة</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="div-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ملخص سنوي -->
+        <div class="section-card" style="margin-top:16px">
+          <div class="section-head"><span class="section-title">📈 ملخص الدخل من التوزيعات</span></div>
+          <div class="section-body" id="div-summary-s2"></div>
+        </div>
       </div>
     </div>
 
@@ -1883,7 +1994,7 @@
               <thead><tr>
                 <th>اسم الصك</th><th>المنصة</th><th>المبلغ</th>
                 <th>العائد %</th><th>العائد ر.س</th>
-                <th>تاريخ الخروج</th><th>المخاطرة</th><th>الحالة</th><th></th>
+                <th>تاريخ الدخول</th><th>المخاطرة</th><th>الحالة</th><th></th>
               </tr></thead>
               <tbody id="sukuk-tbody"></tbody>
             </table>
@@ -1911,7 +2022,7 @@
               <thead><tr>
                 <th>اسم الصندوق</th><th>المنصة</th><th>المبلغ</th>
                 <th>العائد %</th><th>العائد ر.س</th>
-                <th>المجموع المتوقع</th><th>المخاطرة</th><th>الحالة</th><th></th>
+                <th>تاريخ الدخول</th><th>المخاطرة</th><th>الحالة</th><th></th>
               </tr></thead>
               <tbody id="funds-tbody"></tbody>
             </table>
@@ -2312,7 +2423,7 @@
           <div class="step-num">2</div> البيانات المالية
         </div>
         <div class="step" id="step-3" onclick="goStep(3)">
-          <div class="step-num">3</div> العوائد والتوزيعات
+          <div class="step-num">3</div> التوزيعات
         </div>
         <div class="step" id="step-4" onclick="goStep(4)">
           <div class="step-num">4</div> التوقيت والمدة
@@ -2429,35 +2540,27 @@
         <div class="form-step" id="fstep-2" style="display:none">
           <div class="form-section">
             <div class="form-section-title">💰 البيانات المالية الأساسية</div>
+
+            <!-- المبلغ + العملة في صف واحد -->
             <div class="form-grid">
-              <div class="field-group">
-                <label class="field-label">المبلغ المستثمر (ر.س) <span class="req">*</span></label>
-                <input class="f-input" id="f-amount" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAuto()" />
+              <div class="field-group" style="grid-column:span 2">
+                <label class="field-label">المبلغ المستثمر <span class="req">*</span></label>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <select class="f-select" id="f-currency" style="width:140px;flex-shrink:0">
+                    <option value="ر.س" selected>🇸🇦 ر.س</option>
+                    <option value="USD">🇺🇸 USD</option>
+                    <option value="EUR">🇪🇺 EUR</option>
+                    <option value="GBP">🇬🇧 GBP</option>
+                    <option value="AED">🇦🇪 AED</option>
+                    <option value="KWD">🇰🇼 KWD</option>
+                  </select>
+                  <input class="f-input" id="f-amount" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAuto()" style="flex:1" />
+                </div>
                 <div class="field-error" id="err-amount">يرجى إدخال المبلغ المستثمر</div>
               </div>
+
               <div class="field-group">
-                <label class="field-label">العملة</label>
-                <select class="f-select" id="f-currency">
-                  <option value="ر.س" selected>🇸🇦 ريال سعودي (ر.س)</option>
-                  <option value="USD">🇺🇸 دولار أمريكي (USD)</option>
-                  <option value="EUR">🇪🇺 يورو (EUR)</option>
-                  <option value="GBP">🇬🇧 جنيه إسترليني (GBP)</option>
-                  <option value="AED">🇦🇪 درهم إماراتي (AED)</option>
-                  <option value="KWD">🇰🇼 دينار كويتي (KWD)</option>
-                </select>
-              </div>
-              <div class="field-group">
-                <label class="field-label">رسوم الاشتراك (ر.س)</label>
-                <input class="f-input" id="f-fees" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAuto()" />
-              </div>
-            </div>
-            <div class="form-grid">
-              <div class="field-group">
-                <label class="field-label">ضرائب ورسوم أخرى (ر.س)</label>
-                <input class="f-input" id="f-tax" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAuto()" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">القيمة السوقية الحالية (ر.س) <span class="hint">— إن وُجدت</span></label>
+                <label class="field-label">القيمة السوقية الحالية <span class="hint">— إن وُجدت</span></label>
                 <input class="f-input" id="f-market-val" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAuto()" />
               </div>
               <div class="field-group">
@@ -2465,44 +2568,70 @@
                 <input class="f-input" id="f-ownership" type="number" step="0.01" min="0" max="100" placeholder="مثال: 5.5" />
               </div>
             </div>
+
+            <!-- العوائد — منقولة من Step 3 -->
+            <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+              <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">📈 العوائد</div>
+              <div class="form-grid">
+                <div class="field-group">
+                  <label class="field-label">نسبة العائد %</label>
+                  <input class="f-input" id="f-ret-pct" type="number" step="0.01" placeholder="مثال: 10.5" oninput="calcAuto()" />
+                </div>
+              </div>
+              <div class="form-grid">
+                <div class="field-group">
+                  <label class="field-label">قيمة العائد الإجمالي <span class="hint">— أو يُحسب تلقائياً</span></label>
+                  <input class="f-input" id="f-ret-val" type="number" step="0.01" placeholder="0.00" oninput="calcAuto()" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">رسوم الوكالة / الاشتراك</label>
+                  <input class="f-input" id="f-fees" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAuto()" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label">الضريبة</label>
+                  <input class="f-input" id="f-tax" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAuto()" />
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- LIVE CALC PREVIEW -->
           <div class="calc-box" id="calc-preview">
             <div class="calc-item">
-              <div class="calc-label">صافي المبلغ بعد الرسوم</div>
+              <div class="calc-label">صافي المبلغ بعد الرسوم والضريبة</div>
               <div class="calc-val" id="c-net">—</div>
             </div>
             <div class="calc-item">
-              <div class="calc-label">الربح / الخسارة غير المحققة</div>
+              <div class="calc-label">قيمة العائد</div>
+              <div class="calc-val" id="c-ret2">—</div>
+            </div>
+            <div class="calc-item">
+              <div class="calc-label">المجموع المتوقع (أصل + عائد)</div>
+              <div class="calc-val" id="c-total2" style="color:var(--gold)">—</div>
+            </div>
+            <div class="calc-item">
+              <div class="calc-label">ر/خ غير محققة</div>
               <div class="calc-val" id="c-unrealized">—</div>
             </div>
           </div>
 
+          <!-- hidden field for compatibility -->
+          <input type="hidden" id="f-total" />
+
           <div style="display:flex;justify-content:flex-start;gap:12px">
-            <button class="btn-submit" onclick="nextStep(2)">التالي ← العوائد والتوزيعات</button>
+            <button class="btn-submit" onclick="nextStep(2)">التالي ← التوزيعات</button>
             <button class="btn-reset" onclick="prevStep(2)">← رجوع</button>
           </div>
         </div>
 
-        <!-- ══ STEP 3: العوائد والتوزيعات ══ -->
+        <!-- ══ STEP 3: التوزيعات ══ -->
         <div class="form-step" id="fstep-3" style="display:none">
           <div class="form-section">
-            <div class="form-section-title">📈 العوائد والتوزيعات</div>
+            <div class="form-section-title">📈 التوزيعات</div>
             <div class="form-grid">
-              <div class="field-group">
-                <label class="field-label">نسبة العائد السنوي %</label>
-                <input class="f-input" id="f-ret-pct" type="number" step="0.01" placeholder="مثال: 10.5" oninput="calcAuto()" />
+              <div class="field-group" style="display:none">
+                <input class="f-input" id="f-ret-pct-step3-sync" type="number" style="display:none" />
               </div>
-              <div class="field-group">
-                <label class="field-label">قيمة العائد الإجمالي (ر.س) <span class="hint">— أو تُحسب تلقائياً</span></label>
-                <input class="f-input" id="f-ret-val" type="number" step="0.01" placeholder="0.00" oninput="calcAuto()" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">المجموع المتوقع (أصل + عائد)</label>
-                <input class="f-input" id="f-total" type="number" step="0.01" placeholder="يُحسب تلقائياً" style="color:var(--gold)" readonly />
-              </div>
-            </div>
             <div class="form-grid">
               <div class="field-group">
                 <label class="field-label">نوع التوزيعات</label>
@@ -3651,8 +3780,8 @@
         <button id="rtab-calendar"  onclick="switchReportsTab('calendar')"  style="padding:11px 18px;font-size:12px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0">📅 الاستحقاقات</button>
         <button id="rtab-cashflow"  onclick="switchReportsTab('cashflow')"  style="padding:11px 18px;font-size:12px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0">💧 التدفق المالي</button>
         <button id="rtab-dividends" onclick="switchReportsTab('dividends')" style="padding:11px 18px;font-size:12px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0">💰 التوزيعات</button>
-        <button id="rtab-analyst"   onclick="switchReportsTab('analyst')"   style="padding:11px 18px;font-size:12px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0">🤖 رأي المحلل</button>
         <button id="rtab-insights"  onclick="switchReportsTab('insights')"  style="padding:11px 18px;font-size:12px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0">🔬 التحليل المتقدم</button>
+        <button id="rtab-analyst"   onclick="switchReportsTab('analyst')"   style="padding:11px 18px;font-size:12px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0">🤖 رأي المحلل</button>
       </div>
       <div style="margin-bottom:20px"></div>
 
@@ -3810,61 +3939,6 @@
       </div>
       </div>
 
-      <!-- ── تبويب: التحليل المتقدم ── -->
-      <div id="rtab-panel-insights" style="display:none">
-        <div style="font-size:16px;font-weight:700;margin-bottom:16px">🔬 التحليل المتقدم</div>
-        <div class="two-col fade-up" style="margin-bottom:12px">
-          <div class="section-card">
-            <div class="section-head"><span class="section-title">⚡ نسبة شارب (Sharpe Ratio)</span></div>
-            <div class="section-body" id="sharpe-body">
-              <div style="text-align:center;padding:20px">
-                <div id="sharpe-value" style="font-size:48px;font-weight:800;font-family:monospace;color:var(--gold)">—</div>
-                <div id="sharpe-label" style="font-size:13px;color:var(--muted);margin-top:8px">—</div>
-                <div style="margin-top:16px;padding:12px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:12px;color:var(--muted);text-align:right;line-height:1.7">
-                  نسبة شارب = (عائد المحفظة - معدل الخطر الصفري) / الانحراف المعياري للعوائد<br>
-                  <span style="color:var(--green)">فوق 1.0</span> ممتاز  •  <span style="color:var(--gold)">0.5-1.0</span> جيد  •  <span style="color:var(--red)">تحت 0.5</span> ضعيف
-                </div>
-              </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px" id="sharpe-details"></div>
-            </div>
-          </div>
-          <div class="section-card">
-            <div class="section-head">
-              <span class="section-title">📈 مقارنة بالبنشمارك</span>
-              <button onclick="refreshBenchmark()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--muted);cursor:pointer;font-family:inherit">تحديث</button>
-            </div>
-            <div class="section-body" id="benchmark-body">
-              <div style="display:flex;flex-direction:column;gap:10px" id="benchmark-bars"></div>
-              <div style="margin-top:12px;font-size:11px;color:var(--muted);text-align:center" id="benchmark-note">يتم جلب بيانات SAIBOR ومؤشر تداول تلقائياً</div>
-            </div>
-          </div>
-        </div>
-        <div class="section-card fade-up" id="import-preview" style="display:none;margin-bottom:16px">
-          <div class="section-head">
-            <span class="section-title">📥 معاينة البيانات المستوردة</span>
-            <div style="display:flex;gap:8px">
-              <button onclick="confirmImport()" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:6px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">✓ استيراد الكل</button>
-              <button onclick="document.getElementById('import-preview').style.display='none'" style="background:none;border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:12px;color:var(--muted);cursor:pointer;font-family:inherit">إلغاء</button>
-            </div>
-          </div>
-          <div class="table-wrap" style="max-height:300px">
-            <table class="data-table"><thead id="import-thead"></thead><tbody id="import-tbody"></tbody></table>
-          </div>
-          <div style="padding:12px 16px;font-size:12px;color:var(--muted)" id="import-stats"></div>
-        </div>
-        <div class="section-card fade-up" id="pdf-preview-card">
-          <div class="section-head"><span class="section-title">📄 تقرير المحفظة PDF</span></div>
-          <div class="section-body">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-              <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);cursor:pointer"><input type="checkbox" id="pdf-inc-investments" checked style="accent-color:var(--gold)"> الاستثمارات</label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);cursor:pointer"><input type="checkbox" id="pdf-inc-loans" checked style="accent-color:var(--gold)"> القروض</label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);cursor:pointer"><input type="checkbox" id="pdf-inc-debts" checked style="accent-color:var(--gold)"> الديون</label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);cursor:pointer"><input type="checkbox" id="pdf-inc-cashflow" checked style="accent-color:var(--gold)"> التدفق النقدي</label>
-            </div>
-            <button onclick="exportPDF()" style="background:linear-gradient(135deg,#f87171,#ef4444);color:white;border:none;border-radius:10px;padding:12px 32px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:10px">📄 إنشاء وتنزيل التقرير</button>
-          </div>
-        </div>
-      </div>
 
       <!-- ── تبويب: توزيعات الأسهم ── -->
       <div id="rtab-panel-dividends" style="display:none">
@@ -3877,61 +3951,61 @@
         </div>
 
         <!-- KPIs التوزيعات -->
-        <div class="kpi-grid" id="div-kpis" style="margin-bottom:20px"></div>
+        <div class="kpi-grid" id="div-kpis-s2" style="margin-bottom:20px"></div>
 
         <!-- فورم إضافة توزيعة (مخفي) -->
-        <div id="div-add-form" style="display:none;margin-bottom:20px">
+        <div id="div-add-form-s2" style="display:none;margin-bottom:20px">
           <div class="section-card" style="border-color:rgba(0,230,118,0.25)">
             <div class="section-head" style="background:rgba(0,230,118,0.06)">
               <span class="section-title" style="color:var(--green)">➕ تسجيل توزيعة</span>
-              <button onclick="document.getElementById('div-add-form').style.display='none'" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer">×</button>
+              <button onclick="document.getElementById('div-add-form-s2').style.display='none'" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer">×</button>
             </div>
             <div class="section-body">
               <div class="form-grid">
                 <div class="field-group">
                   <label class="field-label">السهم <span class="req">*</span></label>
-                  <select class="f-select" id="div-ticker-sel" onchange="onDivTickerChange()">
+                  <select class="f-select" id="div-ticker-sel-s2" onchange="onDivTickerChange()">
                     <option value="">— اختر السهم —</option>
                   </select>
                 </div>
                 <div class="field-group">
                   <label class="field-label">نوع التوزيعة</label>
-                  <select class="f-select" id="div-type">
+                  <select class="f-select" id="div-type-s2">
                     <option value="cash">نقدية</option>
                     <option value="stock">أسهم مجانية</option>
                   </select>
                 </div>
                 <div class="field-group">
                   <label class="field-label">قيمة التوزيعة للسهم (ر.س) <span class="req">*</span></label>
-                  <input class="f-input" id="div-per-share" type="number" step="0.001" min="0" placeholder="مثال: 0.75" oninput="calcDividend()" />
+                  <input class="f-input" id="div-per-share-s2" type="number" step="0.001" min="0" placeholder="مثال: 0.75" oninput="calcDividend()" />
                 </div>
                 <div class="field-group">
                   <label class="field-label">تاريخ الإعلان</label>
-                  <input class="f-input" id="div-announce-date" type="date" />
+                  <input class="f-input" id="div-announce-date-s2" type="date" />
                 </div>
                 <div class="field-group">
                   <label class="field-label">تاريخ الاستحقاق (Ex-Dividend)</label>
-                  <input class="f-input" id="div-ex-date" type="date" />
+                  <input class="f-input" id="div-ex-date-s2" type="date" />
                 </div>
                 <div class="field-group">
                   <label class="field-label">تاريخ الدفع</label>
-                  <input class="f-input" id="div-pay-date" type="date" />
+                  <input class="f-input" id="div-pay-date-s2" type="date" />
                 </div>
               </div>
               <!-- حساب لحظي -->
-              <div id="div-calc-box" style="display:none;background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.2);border-radius:12px;padding:16px;margin:12px 0">
+              <div id="div-calc-box-s2" style="display:none;background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.2);border-radius:12px;padding:16px;margin:12px 0">
                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center">
                   <div>
                     <div style="font-size:10px;color:var(--muted);margin-bottom:4px">عدد أسهمك</div>
-                    <div id="div-c-shares" style="font-size:18px;font-weight:800;font-family:monospace;color:var(--cyan)">—</div>
+                    <div id="div-c-shares-s2" style="font-size:18px;font-weight:800;font-family:monospace;color:var(--cyan)">—</div>
                   </div>
                   <div>
                     <div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي التوزيعة</div>
-                    <div id="div-c-total" style="font-size:18px;font-weight:800;font-family:monospace;color:var(--green)">—</div>
+                    <div id="div-c-total-s2" style="font-size:18px;font-weight:800;font-family:monospace;color:var(--green)">—</div>
                   </div>
                   <div>
                     <div style="font-size:10px;color:var(--muted);margin-bottom:4px">عائد التوزيعة %</div>
-                    <div id="div-c-yield" style="font-size:18px;font-weight:800;font-family:monospace;color:var(--gold)">—</div>
+                    <div id="div-c-yield-s2" style="font-size:18px;font-weight:800;font-family:monospace;color:var(--gold)">—</div>
                   </div>
                 </div>
               </div>
@@ -3969,7 +4043,7 @@
         <!-- ملخص سنوي -->
         <div class="section-card" style="margin-top:16px">
           <div class="section-head"><span class="section-title">📈 ملخص الدخل من التوزيعات</span></div>
-          <div class="section-body" id="div-summary"></div>
+          <div class="section-body" id="div-summary-s2"></div>
         </div>
       </div>
 
@@ -4435,6 +4509,54 @@
 
           <button onclick="saveAddLoan()" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:700;cursor:pointer;width:100%;font-family:inherit;box-shadow:0 4px 20px rgba(201,168,76,0.3);transition:all .2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">💾 حفظ القرض</button>
           <button onclick="resetAddLoan()" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:14px;padding:12px;font-size:13px;color:var(--muted);cursor:pointer;width:100%;font-family:inherit">🔄 مسح</button>
+        </div>
+      </div>
+
+      <!-- جدول الاستهلاك -->
+      <div id="amort-section" style="display:none;margin-top:28px">
+        <div class="section-card">
+          <div class="section-head" style="cursor:pointer" onclick="toggleAmortTable()">
+            <span class="section-title">📅 جدول الدفعات والاستهلاك</span>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span id="amort-toggle-icon" style="font-size:12px;color:var(--muted)">▼ إخفاء</span>
+              <span class="section-count" id="amort-count">—</span>
+            </div>
+          </div>
+          <div id="amort-table-wrap">
+            <!-- ملخص سريع -->
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border)">
+              <div style="text-align:center">
+                <div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي المدفوعات</div>
+                <div id="amort-total-pay" style="font-size:16px;font-weight:800;font-family:monospace;color:var(--white)">—</div>
+              </div>
+              <div style="text-align:center">
+                <div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي الأصل</div>
+                <div id="amort-total-principal" style="font-size:16px;font-weight:800;font-family:monospace;color:var(--cyan)">—</div>
+              </div>
+              <div style="text-align:center">
+                <div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي الفوائد</div>
+                <div id="amort-total-interest" style="font-size:16px;font-weight:800;font-family:monospace;color:var(--red)">—</div>
+              </div>
+              <div style="text-align:center">
+                <div style="font-size:10px;color:var(--muted);margin-bottom:4px">تكلفة الفائدة</div>
+                <div id="amort-cost-pct" style="font-size:16px;font-weight:800;font-family:monospace;color:var(--orange)">—</div>
+              </div>
+            </div>
+            <div class="table-wrap" style="max-height:420px;overflow-y:auto">
+              <table class="data-table" style="font-size:12px">
+                <thead style="position:sticky;top:0;z-index:2;background:var(--card)"><tr>
+                  <th>#</th>
+                  <th>تاريخ الدفعة</th>
+                  <th>القسط الشهري</th>
+                  <th>الأصل المسدَّد</th>
+                  <th>الفائدة</th>
+                  <th>الرصيد المتبقي</th>
+                  <th>نسبة الفائدة من القسط</th>
+                </tr></thead>
+                <tbody id="amort-tbody"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -5072,7 +5194,7 @@ const sukukData = investments.filter(x=>x.type==='صك');
 document.getElementById('sukuk-tbody').innerHTML = sukukData.map((d,i)=>`
   <tr>
     <td>${d.name}</td>
-    <td style="color:#8899bb">${d.platform}</td>
+    <td>${platformPill(d.platform||"")}</td>
     <td class="mono">${fmtNum(d.amount)}</td>
     <td>${fmtPct(d.ret_pct)}</td>
     <td class="mono ${d.ret_val>=0?'up':'dn'}">${fmtNum(d.ret_val,2)}</td>
@@ -5086,7 +5208,7 @@ const fundsData = investments.filter(x=>x.type==='صندوق');
 document.getElementById('funds-tbody').innerHTML = fundsData.map((d,i)=>`
   <tr>
     <td>${d.name}</td>
-    <td style="color:#8899bb">${d.platform}</td>
+    <td>${platformPill(d.platform||"")}</td>
     <td class="mono">${fmtNum(d.amount)}</td>
     <td>${fmtPct(d.ret_pct)}</td>
     <td class="mono ${d.ret_val>=0?'up':'dn'}">${fmtNum(d.ret_val,2)}</td>
@@ -5123,7 +5245,7 @@ function renderAll(){
       <td style="color:#8899bb">${i+1}</td>
       <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${d.name}">${d.name}</td>
       <td>${typePill(d.type)}</td>
-      <td style="color:#8899bb">${d.platform}</td>
+      <td>${platformPill(d.platform||"")}</td>
       <td class="mono">${fmtNum(d.amount,2)}</td>
       <td>${fmtPct(d.ret_pct)}</td>
       <td class="mono ${(d.ret_val||0)>=0?'up':'dn'}">${fmtNum(d.ret_val,2)}</td>
@@ -5272,7 +5394,7 @@ document.addEventListener('DOMContentLoaded', function() {
   setTimeout(startStockPriceUpdater, 1500);
   setTimeout(renderCalendar, 800);
   setTimeout(renderCashflow, 900);
-  setTimeout(function() { renderSharpe(); renderBenchmark(); }, 1000);
+  setTimeout(function() { }, 1000);
   checkMaturityAlerts();
   setInterval(checkMaturityAlerts, 60 * 60 * 1000); // re-check every hour
 });
@@ -5281,7 +5403,7 @@ document.addEventListener('DOMContentLoaded', function() {
 var _origShowPage = showPage;
 showPage = function(id, navEl, mobileTitle, noScroll) {
   _origShowPage(id, navEl, mobileTitle, noScroll);
-  if (id === 'reports')  { renderCalendar(); renderCashflow(); renderSharpe(); renderBenchmark(); renderDividendsTab(); }
+  if (id === 'reports')  { renderCalendar(); renderCashflow(); renderDividendsTab(); }
   if (id === 'analyst')  { id = 'reports'; window.__currentPage = 'reports'; setTimeout(function(){ switchReportsTab('analyst'); }, 80); }
   // Only scroll to top if NOT called from a form button
   if (!noScroll) {
@@ -5529,890 +5651,6 @@ function renderCashflow() {
 // 
 // 4. SHARPE RATIO
 // 
-function renderSharpe() {
-  var inv = window.__investments || [];
-  if (!inv.length) return;
-
-  var riskFreeRate = 0.055; // SAIBOR ~5.5%
-  var returns = inv.filter(function(x){return x.ret_pct!=null && !isNaN(x.ret_pct) && x.ret_pct!==0;})
-                   .map(function(x){return x.ret_pct;});
-  if (!returns.length) return;
-
-  var avgReturn = returns.reduce(function(s,r){return s+r;},0) / returns.length;
-  var variance  = returns.reduce(function(s,r){return s+Math.pow(r-avgReturn,2);},0) / returns.length;
-  var stdDev    = Math.sqrt(variance);
-  var sharpe    = stdDev > 0 ? ((avgReturn - riskFreeRate) / stdDev).toFixed(2) : '—';
-  var sharpeNum = parseFloat(sharpe);
-
-  var valEl  = document.getElementById('sharpe-value');
-  var lblEl  = document.getElementById('sharpe-label');
-  var detEl  = document.getElementById('sharpe-details');
-
-  if (valEl) {
-    valEl.textContent = sharpe;
-    valEl.style.color = sharpeNum>=1?'var(--green)':sharpeNum>=0.5?'var(--gold)':'var(--red)';
-  }
-  if (lblEl) {
-    var desc = sharpeNum>=1?'ممتاز — المخاطرة تستحق العائد':sharpeNum>=0.5?'جيد — أداء مقبول':'ضعيف — المخاطرة أعلى من العائد';
-    lblEl.textContent = desc;
-    lblEl.style.color = sharpeNum>=1?'var(--green)':sharpeNum>=0.5?'var(--gold)':'var(--red)';
-  }
-
-  var totalAmt = inv.reduce(function(s,x){return s+(x.amount||0);},0);
-  var totalRet = inv.reduce(function(s,x){return s+(x.ret_val||0);},0);
-  var roi = totalAmt>0?(totalRet/totalAmt*100).toFixed(2):0;
-
-  if (detEl) {
-    detEl.innerHTML = [
-      {l:'متوسط العائد السنوي', v:(avgReturn*100).toFixed(2)+'%', c:'var(--gold)'},
-      {l:'معدل الخطر الصفري (SAIBOR)', v:(riskFreeRate*100).toFixed(1)+'%', c:'var(--muted)'},
-      {l:'الانحراف المعياري', v:(stdDev*100).toFixed(2)+'%', c:'var(--cyan)'},
-      {l:'ROI الإجمالي', v:roi+'%', c:'var(--green)'},
-    ].map(function(d){
-      return '<div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px 14px;text-align:center">' +
-        '<div style="font-size:16px;font-weight:700;color:'+d.c+';font-family:monospace">'+d.v+'</div>' +
-        '<div style="font-size:11px;color:var(--muted);margin-top:3px">'+d.l+'</div></div>';
-    }).join('');
-  }
-}
-
-// 
-// 5. BENCHMARK COMPARISON
-// 
-async function refreshBenchmark() {
-  renderBenchmark(true);
-}
-
-function renderBenchmark(live) {
-  var inv = window.__investments || [];
-  var totalAmt = inv.reduce(function(s,x){return s+(x.amount||0);},0);
-  var totalRet = inv.reduce(function(s,x){return s+(x.ret_val||0);},0);
-  var roi = totalAmt>0?(totalRet/totalAmt*100).toFixed(2):0;
-
-  // Benchmarks (static data updated periodically — real-time via Yahoo Finance)
-  var benchmarks = [
-    { label:'محفظتك', value:parseFloat(roi), color:'var(--gold)', icon:'💼' },
-    { label:'SAIBOR 3M', value:5.52, color:'var(--cyan)', icon:'🏦', note:'معدل الإقراض السعودي' },
-    { label:'مؤشر تداول (تاسي)', value:4.8, color:'#a78bfa', icon:'📈', note:'عائد سنوي تقريبي' },
-    { label:'التضخم السعودي', value:2.1, color:'var(--orange)', icon:'📊', note:'مارس 2026' },
-    { label:'وديعة بنكية', value:3.5, color:'var(--muted)', icon:'🏧', note:'متوسط البنوك السعودية' },
-  ];
-
-  var maxVal = Math.max.apply(null, benchmarks.map(function(b){return b.value;})) || 1;
-  var barsEl = document.getElementById('benchmark-bars');
-  if (!barsEl) return;
-
-  barsEl.innerHTML = benchmarks.map(function(b) {
-    var pct    = (b.value / maxVal * 100).toFixed(1);
-    var isYou  = b.label === 'محفظتك';
-    var diff   = isYou ? '' : (parseFloat(roi) > b.value ?
-      '<span style="font-size:11px;color:var(--green);margin-right:6px">+' + (parseFloat(roi)-b.value).toFixed(2) + '% أفضل</span>' :
-      '<span style="font-size:11px;color:var(--red);margin-right:6px">' + (parseFloat(roi)-b.value).toFixed(2) + '%</span>');
-
-    return '<div style="margin-bottom:8px">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">' +
-        '<span style="font-size:13px;color:var(--white);font-weight:'+(isYou?'700':'400')+'">' + b.icon + ' ' + b.label + '</span>' +
-        '<div style="display:flex;align-items:center;gap:4px">' +
-          diff +
-          '<span style="font-size:14px;font-weight:700;font-family:monospace;color:'+b.color+'">' + b.value.toFixed(2) + '%</span>' +
-        '</div>' +
-      '</div>' +
-      '<div style="height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden">' +
-        '<div style="height:100%;width:'+pct+'%;background:'+b.color+';border-radius:4px;transition:width .8s ease"></div>' +
-      '</div>' +
-      (b.note ? '<div style="font-size:10px;color:var(--muted);margin-top:2px">'+b.note+'</div>' : '') +
-    '</div>';
-  }).join('');
-}
-
-// 
-// 6. IMPORT EXCEL / CSV
-// 
-var _importedRows = [];
-
-function importPortfolioFile(event) {
-  var file = event.target.files[0];
-  if (!file) return;
-  event.target.value = '';
-  var ext = file.name.split('.').pop().toLowerCase();
-
-  if (ext === 'csv') {
-    var reader = new FileReader();
-    reader.onload = function(e) { parseCSVImport(e.target.result); };
-    reader.readAsText(file, 'UTF-8');
-  } else {
-    // XLSX — use SheetJS from CDN
-    if (typeof XLSX === 'undefined') {
-      var s = document.createElement('script');
-      s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
-      s.onload = function() { readXLSX(file); };
-      document.head.appendChild(s);
-    } else {
-      readXLSX(file);
-    }
-  }
-}
-
-function readXLSX(file) {
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      var wb    = XLSX.read(e.target.result, {type:'array'});
-      var ws    = wb.Sheets[wb.SheetNames[0]];
-      var data  = XLSX.utils.sheet_to_json(ws, {defval:''});
-      showImportPreview(data);
-    } catch(err) {
-      if (typeof showToast==='function') showToast('خطأ في قراءة الملف: ' + err.message);
-    }
-  };
-  reader.readAsArrayBuffer(file);
-}
-
-function parseCSVImport(text) {
-  var lines   = text.split('\n').filter(function(l){return l.trim();});
-  var headers = lines[0].split(',').map(function(h){return h.trim().replace(/"/g,'');});
-  var data    = lines.slice(1).map(function(l) {
-    var vals = l.split(',');
-    var obj  = {};
-    headers.forEach(function(h,i){ obj[h] = (vals[i]||'').trim().replace(/"/g,''); });
-    return obj;
-  });
-  showImportPreview(data);
-}
-
-function showImportPreview(data) {
-  if (!data.length) { if (typeof showToast==='function') showToast('الملف فارغ'); return; }
-  _importedRows = data;
-
-  var keys    = Object.keys(data[0]);
-  var preview = document.getElementById('import-preview');
-  var thead   = document.getElementById('import-thead');
-  var tbody   = document.getElementById('import-tbody');
-  var stats   = document.getElementById('import-stats');
-  if (!preview) return;
-
-  thead.innerHTML = '<tr>' + keys.map(function(k){return '<th>'+k+'</th>';}).join('') + '</tr>';
-  tbody.innerHTML = data.slice(0,10).map(function(row) {
-    return '<tr>' + keys.map(function(k){return '<td>'+row[k]+'</td>';}).join('') + '</tr>';
-  }).join('');
-  if (stats) stats.textContent = data.length + ' سجل — يعرض أول 10 فقط. اضغط "استيراد الكل" لإضافتها للمحفظة.';
-  preview.style.display = 'block';
-  preview.scrollIntoView({behavior:'smooth'});
-  if (typeof showToast==='function') showToast('تم قراءة ' + data.length + ' سجل — راجع المعاينة');
-}
-
-var _colMap = {
-  name:['name','اسم','الاسم','فرصة','opportunity'],
-  type:['type','نوع','النوع'],
-  platform:['platform','منصة','المنصة'],
-  amount:['amount','مبلغ','المبلغ','invested','investment'],
-  ret_pct:['ret_pct','عائد%','return%','roi'],
-  ret_val:['ret_val','عائد','return','profit'],
-  total:['total','مجموع','المجموع'],
-  status:['status','حالة','الحالة'],
-  risk:['risk','مخاطرة','المخاطرة'],
-};
-
-function mapRow(row) {
-  var keys = Object.keys(row).map(function(k){return k.toLowerCase();});
-  var out  = {name:'فرصة مستوردة',type:'أخرى',platform:'أخرى',amount:0,ret_pct:0,ret_val:0,total:0,status:'نشطة',risk:'متوسط'};
-  Object.keys(_colMap).forEach(function(field) {
-    _colMap[field].forEach(function(alias) {
-      var idx = keys.findIndex(function(k){return k.includes(alias);});
-      if (idx !== -1) {
-        var val = Object.values(row)[idx];
-        if (['amount','ret_pct','ret_val','total'].includes(field)) val = parseFloat(String(val).replace(/,/g,'')) || 0;
-        out[field] = val;
-      }
-    });
-  });
-  if (out.amount && !out.total) out.total = out.amount + out.ret_val;
-  return out;
-}
-
-function confirmImport() {
-  if (!_importedRows.length) return;
-  var mapped = _importedRows.map(mapRow);
-  mapped.forEach(function(row) { window.__investments.push(row); });
-  if (typeof triggerSync==='function') triggerSync('investments');
-  if (typeof renderAll==='function') renderAll();
-  if (typeof renderSukuk==='function') renderSukuk();
-  if (typeof renderFunds==='function') renderFunds();
-  document.getElementById('import-preview').style.display = 'none';
-  _importedRows = [];
-  if (typeof showToast==='function') showToast('تم استيراد ' + mapped.length + ' فرصة بنجاح');
-}
-
-// 
-// 7. PDF EXPORT
-// 
-function exportPDF() {
-  var inv      = window.__investments || [];
-  var loans    = window.loansData     || [];
-  var debts    = window.debtsData     || [];
-  var incInv   = (document.getElementById('pdf-inc-investments')||{checked:true}).checked;
-  var incLoans = (document.getElementById('pdf-inc-loans')||{checked:true}).checked;
-  var incDebts = (document.getElementById('pdf-inc-debts')||{checked:true}).checked;
-  var incCF    = (document.getElementById('pdf-inc-cashflow')||{checked:true}).checked;
-
-  var totalAmt = inv.reduce(function(s,x){return s+(x.amount||0);},0);
-  var totalRet = inv.reduce(function(s,x){return s+(x.ret_val||0);},0);
-  var roi      = totalAmt>0?(totalRet/totalAmt*100).toFixed(2):0;
-  var active   = inv.filter(function(x){return x.status==='نشطة';}).length;
-  var now      = new Date().toLocaleDateString('ar-SA');
-
-  var rows = incInv ? inv.map(function(x,i){
-    return '<tr style="border-bottom:1px solid #e5e7eb">' +
-      '<td style="padding:8px;font-size:12px">'+(i+1)+'</td>'+
-      '<td style="padding:8px;font-size:11px;max-width:200px">'+x.name+'</td>'+
-      '<td style="padding:8px;font-size:12px">'+x.type+'</td>'+
-      '<td style="padding:8px;font-size:12px">'+x.platform+'</td>'+
-      '<td style="padding:8px;font-size:12px;text-align:left;font-family:monospace">'+(x.amount||0).toLocaleString('en-US',{maximumFractionDigits:0})+'</td>'+
-      '<td style="padding:8px;font-size:12px;text-align:left;color:'+(x.ret_val>=0?'green':'red')+'">'+((x.ret_pct||0)*100).toFixed(1)+'%</td>'+
-      '<td style="padding:8px;font-size:12px;text-align:left;font-family:monospace">'+(x.total||0).toLocaleString('en-US',{maximumFractionDigits:0})+'</td>'+
-      '<td style="padding:8px;font-size:12px">'+x.status+'</td>'+
-    '</tr>';
-  }).join('') : '';
-
-  var html = '<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">'+
-    '<title>تقرير المحفظة الاستثمارية</title>'+
-    '<style>body{font-family:Arial,sans-serif;color:#111;margin:40px;direction:rtl} '+
-    'table{width:100%;border-collapse:collapse;margin-top:16px} '+
-    'th{background:#071510;color:white;padding:10px 8px;font-size:12px;text-align:right} '+
-    '.kpi{display:inline-block;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 20px;margin:6px;min-width:140px;text-align:center} '+
-    '.kpi-v{font-size:22px;font-weight:700;font-family:monospace} '+
-    '.kpi-l{font-size:11px;color:#6b7280;margin-top:4px} '+
-    'h2{color:#071510;border-bottom:2px solid #c9a84c;padding-bottom:8px;margin-top:28px} '+
-    '@media print{.no-print{display:none}}'+
-    '</style></head><body>'+
-
-    '<div style="text-align:center;margin-bottom:32px;padding-bottom:20px;border-bottom:2px solid #c9a84c">'+
-    '<h1 style="color:#071510;margin:0">محفظتي المالية</h1>'+
-    '<div style="color:#6b7280;margin-top:8px">تقرير شامل — '+now+'</div></div>'+
-
-    '<div style="margin-bottom:24px">'+
-    '<div class="kpi"><div class="kpi-v" style="color:#c9a84c">'+totalAmt.toLocaleString('en-US',{maximumFractionDigits:0})+'</div><div class="kpi-l">إجمالي مستثمر (ر.س)</div></div>'+
-    '<div class="kpi"><div class="kpi-v" style="color:green">'+totalRet.toLocaleString('en-US',{maximumFractionDigits:0})+'</div><div class="kpi-l">إجمالي العوائد (ر.س)</div></div>'+
-    '<div class="kpi"><div class="kpi-v" style="color:#2563eb">'+roi+'%</div><div class="kpi-l">ROI الإجمالي</div></div>'+
-    '<div class="kpi"><div class="kpi-v">'+inv.length+'</div><div class="kpi-l">عدد الفرص</div></div>'+
-    '<div class="kpi"><div class="kpi-v" style="color:green">'+active+'</div><div class="kpi-l">نشطة</div></div>'+
-    '</div>';
-
-  if (incInv && rows) {
-    html += '<h2>الاستثمارات</h2><table><thead><tr><th>#</th><th>الاسم</th><th>النوع</th><th>المنصة</th><th>المبلغ</th><th>العائد%</th><th>المجموع</th><th>الحالة</th></tr></thead><tbody>'+rows+'</tbody></table>';
-  }
-
-  if (incLoans && loans.length) {
-    html += '<h2>القروض البنكية</h2><table><thead><tr><th>القرض</th><th>البنك</th><th>الأصل</th><th>المتبقي</th><th>القسط</th></tr></thead><tbody>'+
-      loans.map(function(l){return '<tr><td style="padding:8px">'+l.name+'</td><td style="padding:8px">'+l.bank+'</td><td style="padding:8px;font-family:monospace">'+( l.principal||0).toLocaleString('en-US',{maximumFractionDigits:0})+'</td><td style="padding:8px;font-family:monospace;color:red">'+(l.remaining||0).toLocaleString('en-US',{maximumFractionDigits:0})+'</td><td style="padding:8px;font-family:monospace">'+(l.installment||0).toLocaleString('en-US',{maximumFractionDigits:0})+'</td></tr>';}).join('')+'</tbody></table>';
-  }
-
-  if (incDebts && debts.length) {
-    html += '<h2>الديون الشخصية</h2><table><thead><tr><th>الشخص</th><th>النوع</th><th>المبلغ</th><th>المتبقي</th></tr></thead><tbody>'+
-      debts.map(function(d){return '<tr><td style="padding:8px">'+d.person+'</td><td style="padding:8px">'+(d.direction==='owe'?'عليّ':'لي')+'</td><td style="padding:8px;font-family:monospace">'+(d.amount||0).toLocaleString('en-US',{maximumFractionDigits:0})+'</td><td style="padding:8px;font-family:monospace">'+(d.remaining||0).toLocaleString('en-US',{maximumFractionDigits:0})+'</td></tr>';}).join('')+'</tbody></table>';
-  }
-
-  html += '<div style="margin-top:40px;padding-top:16px;border-top:1px solid #e5e7eb;text-align:center;color:#9ca3af;font-size:11px">محفظتي المالية — تم إنشاء هذا التقرير تلقائياً في '+now+'</div></body></html>';
-
-  var blob = new Blob([html], {type:'text/html;charset=utf-8'});
-  var url  = URL.createObjectURL(blob);
-  var a    = document.createElement('a');
-  a.href   = url;
-  a.download = 'portfolio-report-' + new Date().toISOString().split('T')[0] + '.html';
-  a.click();
-  URL.revokeObjectURL(url);
-
-  // Also open print dialog for PDF
-  var win = window.open(url, '_blank');
-  if (win) setTimeout(function(){try{win.print();}catch(e){}}, 800);
-
-  if (typeof showToast==='function') showToast('تم إنشاء التقرير — اختر "طباعة كـ PDF"');
-}
-
-
-function renderStocks() {
-  const inv = window.__investments || investments;
-  const stockData = inv.filter(x => x.type === 'سهم' && x.market !== 'us');
-
-  // Update header badges
-  const totalInvested = stockData.reduce((s, r) => s + (r.amount || 0), 0);
-  const badge = document.getElementById('stocks-total-badge');
-  if (badge) badge.textContent = 'إجمالي مستثمر: ' + totalInvested.toLocaleString('en-US', {maximumFractionDigits:0}) + ' ر.س';
-  const countBadge = document.getElementById('stocks-count-badge');
-  if (countBadge) countBadge.textContent = stockData.length + ' سهم';
-
-  //  TABLE 
-  const tbody = document.getElementById('stocks-tbody');
-  if (tbody) {
-    tbody.innerHTML = stockData.map(d => {
-      const p = d.ticker ? STOCK_PRICES[d.ticker] : null;
-      const currPrice = p?.price;
-      const buyPricePerShare = (d.shares && d.amount) ? d.amount / d.shares : null;
-      const mktVal = (currPrice && d.shares) ? currPrice * d.shares : null;
-      const pnl = (mktVal && d.amount) ? mktVal - d.amount : null;
-      const chgPct = p?.chg;
-
-      const priceCell = currPrice
-        ? `<span class="mono ${p.color}">${currPrice.toFixed(2)}</span>`
-        : `<span style="color:#8899bb">—</span>`;
-
-      const chgCell = chgPct != null
-        ? `<span class="${chgPct >= 0 ? 'up' : 'dn'}">${chgPct >= 0 ? '▲' : '▼'} ${(Math.abs(chgPct)*100).toFixed(1)}%</span>`
-        : `<span style="color:#8899bb">—</span>`;
-
-      const mktCell = mktVal
-        ? `<span class="mono">${mktVal.toLocaleString('en-US',{minimumFractionDigits:2})}</span>`
-        : `<span style="color:#8899bb">—</span>`;
-
-      const pnlCell = pnl != null
-        ? `<span class="mono ${pnl >= 0 ? 'up' : 'dn'}">${pnl >= 0 ? '+' : ''}${pnl.toLocaleString('en-US',{minimumFractionDigits:2})}</span>`
-        : `<span style="color:#8899bb">—</span>`;
-
-      return `<tr>
-        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${d.name}">${d.name}</td>
-        <td><span style="font-family:'JetBrains Mono',monospace;background:rgba(201,168,76,0.12);color:#e8c97a;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700">${d.ticker || '—'}</span></td>
-        <td><span class="mono" style="color:#00d4ff">${d.shares != null ? d.shares.toLocaleString('en-US') : '<span style="color:#ff9800;font-size:11px">يحتاج تحديث</span>'}</span></td>
-        <td class="mono">${(d.amount||0).toLocaleString('en-US',{minimumFractionDigits:2})}</td>
-        <td class="mono" style="color:var(--gold)">${buyPricePerShare ? buyPricePerShare.toFixed(2) : '<span style="color:#8899bb">—</span>'}</td>
-        <td>${priceCell}</td>
-        <td>${chgCell}</td>
-        <td>${mktCell}</td>
-        <td>${pnlCell}</td>
-        <td style="color:#8899bb">${d.platform||'—'}</td>
-        <td>${riskPill(d.risk)}</td>
-        <td>${statusPill(d.status)}</td>
-      </tr>`;
-    }).join('');
-  }
-
-  //  CARDS 
-  const grid = document.getElementById('stocks-cards-grid');
-  if (!grid) return;
-
-  const SPARKLINES = {
-    'dn': '0,8 20,12 40,10 60,20 80,25 100,30 120,28',
-    'up': '0,30 20,26 40,22 60,16 80,10 100,6 120,4',
-    '':   '0,18 20,16 40,18 60,17 80,18 100,17 120,18',
-  };
-
-  grid.innerHTML = stockData.map(d => {
-    const p = d.ticker ? STOCK_PRICES[d.ticker] : null;
-    const currPrice = p?.price;
-    const chgPct = p?.chg;
-    const color = p?.color || '';
-    const buyPricePerShare = (d.shares && d.amount) ? d.amount / d.shares : null;
-    const mktVal = (currPrice && d.shares) ? currPrice * d.shares : null;
-    const pnl = (mktVal && d.amount) ? mktVal - d.amount : null;
-
-    const borderColor = color === 'up'
-      ? 'rgba(0,230,118,0.3)' : color === 'dn'
-      ? 'rgba(255,68,68,0.3)' : 'rgba(136,153,187,0.2)';
-
-    const sparkColor = color === 'up' ? '#00e676' : color === 'dn' ? '#ff4444' : '#8899bb';
-    const sparkPts = SPARKLINES[color] || SPARKLINES[''];
-    const sparkFill = color === 'up'
-      ? 'rgba(0,230,118,0.1)' : color === 'dn'
-      ? 'rgba(255,68,68,0.1)' : 'rgba(136,153,187,0.06)';
-
-    const priceDisplay = currPrice ? currPrice.toFixed(2) : '—';
-    const priceClass = color || '';
-
-    let infoBox = '';
-    if (pnl != null) {
-      const bgColor = pnl >= 0 ? 'rgba(0,230,118,0.1)' : 'rgba(255,68,68,0.1)';
-      const txtColor = pnl >= 0 ? '#00e676' : '#ff4444';
-      const label = pnl >= 0 ? 'ربح غير محقق' : 'خسارة غير محققة';
-      infoBox = `<div style="margin-top:10px;padding:8px 10px;background:${bgColor};border-radius:8px;font-size:11px;color:${txtColor}">
-        ${label}: ${pnl >= 0 ? '+' : ''}${pnl.toLocaleString('en-US',{minimumFractionDigits:2})} ر.س
-      </div>`;
-    } else if (!d.shares) {
-      infoBox = `<div style="margin-top:10px;padding:8px 10px;background:rgba(255,152,0,0.08);border-radius:8px;font-size:11px;color:#ff9800">
-        ⚠ عدد الأسهم غير محدد — أدخله في قاعدة البيانات
-      </div>`;
-    } else {
-      infoBox = `<div style="margin-top:10px;padding:8px 10px;background:rgba(136,153,187,0.08);border-radius:8px;font-size:11px;color:#8899bb">
-        السعر غير متوفر حالياً
-      </div>`;
-    }
-
-    const sharesLine = d.shares != null
-      ? `${d.shares.toLocaleString('en-US')} سهم`
-      : `<span style="color:#ff9800">عدد الأسهم غير محدد</span>`;
-
-    const buyLine = buyPricePerShare
-      ? ` · سعر الشراء: ${buyPricePerShare.toFixed(2)} ر.س` : '';
-
-    return `<div class="stock-card" style="border-color:${borderColor}">
-      <!-- Header: ticker + platform -->
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="
-            font-family:'JetBrains Mono',monospace;
-            font-size:15px;font-weight:800;
-            background:rgba(201,168,76,0.15);
-            color:#e8c97a;
-            padding:4px 10px;border-radius:7px;
-            letter-spacing:1px;
-            border:1px solid rgba(201,168,76,0.25)
-          ">${d.ticker || '—'}</span>
-          <span style="font-size:10px;color:#8899bb">${d.platform||''}</span>
-        </div>
-        <div style="
-          font-size:11px;font-weight:700;
-          color:#00d4ff;
-          background:rgba(0,212,255,0.1);
-          border:1px solid rgba(0,212,255,0.2);
-          padding:3px 9px;border-radius:6px;
-          font-family:'JetBrains Mono',monospace;
-        ">${d.shares != null ? d.shares.toLocaleString('en-US') + ' سهم' : '—'}</div>
-      </div>
-
-      <!-- Company name -->
-      <div class="stock-name">${d.name.replace(/^\d+ سهم في /,'').replace(/^اكتتاب /,'')}</div>
-
-      <!-- Price + change -->
-      <div class="stock-price ${priceClass}">${priceDisplay}</div>
-      <div class="stock-change ${priceClass}">
-        ${chgPct != null ? (chgPct >= 0 ? '▲' : '▼') + ' ' + (Math.abs(chgPct)*100).toFixed(1) + '% من سعر الشراء' : 'سعر الاكتتاب'}
-      </div>
-
-      <!-- Buy info -->
-      <div class="stock-ipo" style="font-size:11px;color:#8899bb;margin-top:6px">
-        مستثمر: <span style="color:#f0f4ff;font-weight:600">${(d.amount||0).toLocaleString('en-US',{minimumFractionDigits:2})} ر.س</span>${buyLine}
-      </div>
-
-      ${infoBox}
-
-      <svg class="mini-sparkline" viewBox="0 0 120 36" preserveAspectRatio="none">
-        <polyline points="${sparkPts}" fill="none" stroke="${sparkColor}" stroke-width="2" opacity=".8"/>
-        <polyline points="${sparkPts} 120,36 0,36" fill="${sparkFill}" stroke="none"/>
-      </svg>
-    </div>`;
-  }).join('');
-}
-
-renderAll();
-renderStocks();
-// Init dashboard year filter after data is loaded
-setTimeout(function() {
-  initDashboardYears();
-  renderDashboard();
-}, 100);
-
-function filterAll(v){ currentSearch=v; renderAll(); }
-function setFilter(f,btn){
-  currentFilter=f;
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderAll();
-}
-
-//  FORM LOGIC 
-let currentStep = 1;
-const TOTAL_STEPS = 6;
-let savedOpportunities = [];
-
-function goStep(n) {
-  // Hide all steps
-  document.querySelectorAll('.form-step').forEach(s => s.style.display = 'none');
-  document.getElementById('fstep-' + n).style.display = 'block';
-
-  // Update step bar
-  for (let i = 1; i <= TOTAL_STEPS; i++) {
-    const s = document.getElementById('step-' + i);
-    s.classList.remove('active', 'done');
-    if (i < n) s.classList.add('done');
-    else if (i === n) s.classList.add('active');
-  }
-  currentStep = n;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  // Update summary on step 6
-  if (n === 6) updateSummary();
-}
-
-function nextStep(from) {
-  if (!validateStep(from)) return;
-  goStep(from + 1);
-}
-function prevStep(from) { goStep(from - 1); }
-
-function validateStep(step) {
-  let valid = true;
-  const checks = {
-    1: [
-      { id: 'f-name', errId: 'err-name', check: v => v.trim() !== '' },
-      { id: 'f-type', errId: 'err-type', check: v => v !== '' },
-      { id: 'f-platform', errId: 'err-platform', check: v => v !== '' || document.getElementById('f-platform-other').value.trim() !== '' },
-    ],
-    2: [
-      { id: 'f-amount', errId: 'err-amount', check: v => v !== '' && parseFloat(v) !== 0 },
-    ],
-    4: [
-      { id: 'f-date-in', errId: 'err-date-in', check: v => v !== '' },
-      { id: 'f-status', errId: 'err-status', check: v => v !== '' },
-    ],
-    6: [
-      { id: 'f-risk', errId: 'err-risk', check: v => v !== '' },
-    ],
-  };
-  if (checks[step]) {
-    checks[step].forEach(({ id, errId, check }) => {
-      const el = document.getElementById(id);
-      const errEl = document.getElementById(errId);
-      if (el && errEl) {
-        if (!check(el.value)) {
-          el.classList.add('error');
-          errEl.classList.add('show');
-          valid = false;
-        } else {
-          el.classList.remove('error');
-          errEl.classList.remove('show');
-        }
-      }
-    });
-  }
-  return valid;
-}
-
-function g(id) {
-  const el = document.getElementById(id);
-  return el ? el.value : '';
-}
-function gf(id) { return parseFloat(g(id)) || 0; }
-
-// Auto-calculate financial values
-function calcAuto() {
-  const amount = gf('f-amount');
-  const fees = gf('f-fees');
-  const tax = gf('f-tax');
-  const marketVal = gf('f-market-val');
-  const retPct = gf('f-ret-pct');
-  let retVal = gf('f-ret-val');
-
-  const net = amount - fees - tax;
-  const unrealized = marketVal > 0 ? marketVal - net : null;
-
-  // Update net display
-  ['c-net', 'c-net2'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = net > 0 ? net.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' ر.س' : '—';
-  });
-
-  const unEl = document.getElementById('c-unrealized');
-  if (unEl) unEl.textContent = unrealized !== null
-    ? (unrealized >= 0 ? '+' : '') + unrealized.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' ر.س'
-    : '—';
-
-  // Calc return value from pct if not manually set
-  if (retPct > 0 && retVal === 0 && net > 0) {
-    retVal = net * (retPct / 100);
-    document.getElementById('f-ret-val').value = retVal.toFixed(2);
-  }
-
-  const totalExpected = net + retVal;
-  const totalEl = document.getElementById('f-total');
-  if (totalEl) totalEl.value = totalExpected > 0 ? totalExpected.toFixed(2) : '';
-
-  const roi = net > 0 && retVal !== 0 ? retVal / net : null;
-
-  const c2 = document.getElementById('c-ret2');
-  if (c2) c2.textContent = retVal !== 0 ? retVal.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' ر.س' : '—';
-
-  const ct = document.getElementById('c-total2');
-  if (ct) ct.textContent = totalExpected > 0 ? totalExpected.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' ر.س' : '—';
-
-  const cr = document.getElementById('c-roi');
-  if (cr) cr.textContent = roi !== null ? (roi * 100).toFixed(2) + '%' : '—';
-
-  calcDays();
-}
-
-function calcDays() {
-  const dateIn = g('f-date-in');
-  const dateOut = g('f-date-out');
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  let daysSince = null, daysLeft = null;
-
-  if (dateIn) {
-    const dIn = new Date(dateIn);
-    daysSince = Math.floor((today - dIn) / 86400000);
-    document.getElementById('f-days-rem').value = '';
-  }
-
-  if (dateOut) {
-    const dOut = new Date(dateOut);
-    daysLeft = Math.floor((dOut - today) / 86400000);
-    document.getElementById('f-days-rem').value = daysLeft >= 0 ? daysLeft + ' يوم' : 'انتهت المدة';
-  }
-
-  const cDs = document.getElementById('c-days-since');
-  if (cDs) cDs.textContent = daysSince !== null ? daysSince + ' يوم' : '—';
-  const cDl = document.getElementById('c-days-left');
-  if (cDl) cDl.textContent = daysLeft !== null ? (daysLeft >= 0 ? daysLeft + ' يوم' : 'منتهية') : '—';
-
-  // Annualized ROI
-  const net = gf('f-amount') - gf('f-fees') - gf('f-tax');
-  const retVal = gf('f-ret-val');
-  if (net > 0 && daysSince > 0 && retVal !== 0) {
-    const roi = retVal / net;
-    const annRoi = roi / (daysSince / 365);
-    const cAnn = document.getElementById('c-ann-roi');
-    if (cAnn) cAnn.textContent = (annRoi * 100).toFixed(2) + '%';
-  }
-
-  // MOIC
-  const total = parseFloat(g('f-total')) || 0;
-  if (net > 0 && total > 0) {
-    const moic = total / net;
-    const cMoic = document.getElementById('c-moic');
-    if (cMoic) cMoic.textContent = moic.toFixed(2) + 'x';
-  }
-}
-
-function calcStockPrice() {
-  const shares = gf('f-shares');
-  const buyPrice = gf('f-buy-price');
-  const currPrice = gf('f-curr-price');
-
-  if (shares > 0 && buyPrice > 0) {
-    // Auto-fill amount if empty
-    const amountEl = document.getElementById('f-amount');
-    if (!amountEl.value) amountEl.value = (shares * buyPrice).toFixed(2);
-  }
-
-  if (shares > 0 && currPrice > 0) {
-    const mktVal = shares * currPrice;
-    const cost = shares * buyPrice;
-    const pnl = mktVal - cost;
-    const chg = cost > 0 ? pnl / cost : 0;
-
-    const box = document.getElementById('stock-calc-box');
-    if (box) box.style.display = 'flex';
-
-    const cm = document.getElementById('c-mkt-val');
-    if (cm) cm.textContent = mktVal.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' ر.س';
-
-    const cp = document.getElementById('c-stock-pnl');
-    if (cp) {
-      cp.textContent = (pnl >= 0 ? '+' : '') + pnl.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' ر.س';
-      cp.style.color = pnl >= 0 ? 'var(--green)' : 'var(--red)';
-    }
-
-    const cc = document.getElementById('c-stock-chg');
-    if (cc) {
-      cc.textContent = (chg >= 0 ? '+' : '') + (chg * 100).toFixed(2) + '%';
-      cc.style.color = chg >= 0 ? 'var(--green)' : 'var(--red)';
-    }
-  }
-}
-
-// Show/hide type-specific panels
-function onTypeChange() {
-  const type = g('f-type');
-  const panels = ['panel-sukuk', 'panel-stock', 'panel-estate', 'panel-default'];
-  panels.forEach(p => {
-    const el = document.getElementById(p);
-    if (el) el.classList.remove('show');
-  });
-
-  if (['صك', 'سند', 'مرابحة', 'وديعة'].includes(type)) {
-    document.getElementById('panel-sukuk').classList.add('show');
-    document.getElementById('panel-default').classList.remove('show');
-    document.getElementById('panel-default').style.display = 'none';
-  } else if (['سهم', 'صندوق', 'عقد آجل'].includes(type)) {
-    document.getElementById('panel-stock').classList.add('show');
-    document.getElementById('panel-default').classList.remove('show');
-    document.getElementById('panel-default').style.display = 'none';
-  } else if (type === 'عقار') {
-    document.getElementById('panel-estate').classList.add('show');
-    document.getElementById('panel-default').classList.remove('show');
-    document.getElementById('panel-default').style.display = 'none';
-  } else {
-    document.getElementById('panel-default').style.display = 'block';
-  }
-}
-
-// Build summary
-function updateSummary() {
-  const net = gf('f-amount') - gf('f-fees') - gf('f-tax');
-  const retVal = gf('f-ret-val');
-  const total = parseFloat(g('f-total')) || (net + retVal);
-  const roi = net > 0 ? retVal / net : 0;
-  const platform = g('f-platform') || g('f-platform-other');
-
-  const fields = [
-    { label: 'اسم الفرصة', val: g('f-name') || '—' },
-    { label: 'النوع', val: g('f-type') || '—' },
-    { label: 'المنصة', val: platform || '—' },
-    { label: 'مصدر رأس المال', val: g('f-capital-src') || '—' },
-    { label: 'المبلغ المستثمر', val: gf('f-amount').toLocaleString('en-US') + ' ر.س' },
-    { label: 'الرسوم', val: gf('f-fees') + ' ر.س' },
-    { label: 'صافي المبلغ', val: net.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' ر.س' },
-    { label: 'نسبة العائد', val: g('f-ret-pct') ? g('f-ret-pct') + '%' : '—' },
-    { label: 'قيمة العائد', val: retVal ? retVal.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' ر.س' : '—' },
-    { label: 'المجموع المتوقع', val: total > 0 ? total.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' ر.س' : '—' },
-    { label: 'ROI', val: roi !== 0 ? (roi * 100).toFixed(2) + '%' : '—' },
-    { label: 'تاريخ الدخول', val: g('f-date-in') || '—' },
-    { label: 'تاريخ الخروج', val: g('f-date-out') || '—' },
-    { label: 'الحالة', val: g('f-status') || '—' },
-    { label: 'مستوى المخاطرة', val: g('f-risk') || '—' },
-    { label: 'تقييم المحلل', val: g('f-analyst-rating') || 'قيد التقييم' },
-    { label: 'التوزيع', val: g('f-dist-freq') || '—' },
-    { label: 'ملاحظات', val: g('f-notes') ? g('f-notes').substring(0, 60) + (g('f-notes').length > 60 ? '...' : '') : '—' },
-  ];
-
-  document.getElementById('summary-body').innerHTML = fields.map(f => `
-    <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:10px 14px">
-      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">${f.label}</div>
-      <div style="font-size:13px;font-weight:600;color:var(--white)">${f.val}</div>
-    </div>`).join('');
-}
-
-// Save opportunity
-function saveOpportunity() {
-  if (!validateStep(6)) return;
-
-  const net = gf('f-amount') - gf('f-fees') - gf('f-tax');
-  const retPct = gf('f-ret-pct') / 100;
-  const retVal = gf('f-ret-val') || net * retPct;
-  const platform = g('f-platform') !== 'أخرى' && g('f-platform') !== '' ? g('f-platform') : g('f-platform-other');
-
-  const opp = {
-    name: g('f-name'),
-    code: g('f-code'),
-    type: g('f-type'),
-    subtype: g('f-subtype'),
-    sector: g('f-sector'),
-    platform,
-    capital_src: g('f-capital-src'),
-    amount: gf('f-amount'),
-    currency: g('f-currency'),
-    fees: gf('f-fees'),
-    tax: gf('f-tax'),
-    net,
-    market_val: gf('f-market-val'),
-    ownership: gf('f-ownership'),
-    ret_pct: retPct,
-    ret_val: retVal,
-    total: parseFloat(g('f-total')) || net + retVal,
-    dist_type: g('f-dist-type'),
-    dist_freq: g('f-dist-freq'),
-    dist_amt: gf('f-dist-amt'),
-    dist_received: gf('f-dist-received'),
-    last_dist: g('f-last-dist'),
-    date_in: g('f-date-in'),
-    date_out: g('f-date-out'),
-    duration: g('f-duration'),
-    status: g('f-status'),
-    redeemed: g('f-redeemed'),
-    // Sukuk/Bond
-    isin: g('f-isin'),
-    issuer: g('f-issuer'),
-    sukuk_type: g('f-sukuk-type'),
-    coupon: gf('f-coupon'),
-    face_val: gf('f-face-val'),
-    credit_rating: g('f-credit-rating'),
-    // Stock/Fund
-    company: g('f-company'),
-    ticker: g('f-ticker'),
-    shares: gf('f-shares'),
-    buy_price: gf('f-buy-price'),
-    curr_price: gf('f-curr-price'),
-    pe: gf('f-pe'),
-    // Estate
-    estate_type: g('f-estate-type'),
-    location: g('f-location'),
-    area: gf('f-area'),
-    rent: gf('f-rent'),
-    // Risk
-    risk: g('f-risk'),
-    risk_score: gf('f-risk-score'),
-    guarantee: g('f-guarantee'),
-    guarantee_val: gf('f-guarantee-val'),
-    stop_loss: gf('f-stop-loss'),
-    max_loss: gf('f-max-loss'),
-    // Management
-    analyst_rating: g('f-analyst-rating') || 'قيد التقييم',
-    review_status: g('f-review-status'),
-    owner: g('f-owner'),
-    notes: g('f-notes'),
-    docs: g('f-docs'),
-    doc_url: g('f-doc-url'),
-    added_at: new Date().toISOString(),
-  };
-
-  savedOpportunities.push(opp);
-
-  triggerSync('investments');
-  // Add to main investments array so it appears in all tables
-  investments.push({
-    name: opp.name, type: opp.type, platform: opp.platform,
-    amount: opp.amount, ret_pct: opp.ret_pct, ret_val: opp.ret_val,
-    total: opp.total, date_out: opp.date_out, duration: opp.duration,
-    dist: opp.dist_freq, risk: opp.risk, status: opp.status,
-  });
-
-  // Re-render all tables
-  renderAll();
-  renderSukuk();
-  renderFunds();
-
-  // Show saved list
-  renderSavedList();
-
-  // Toast
-  showToast('✅ تم حفظ الفرصة: ' + opp.name);
-
-  // Reset form for next entry
-  resetForm();
-  goStep(1);
-}
-
-function renderSavedList() {
-  const section = document.getElementById('saved-section');
-  const list = document.getElementById('saved-list');
-  const count = document.getElementById('saved-list-count');
-  const badge = document.getElementById('saved-count-badge');
-  const badgeNum = document.getElementById('saved-count');
-
-  section.style.display = 'block';
-  badge.style.display = 'flex';
-  badgeNum.textContent = savedOpportunities.length;
-  count.textContent = savedOpportunities.length + ' فرصة';
-
-  list.innerHTML = savedOpportunities.map((o, i) => `
-    <div class="saved-entry">
-      <div>
-        <div class="saved-entry-name">${o.name}</div>
-        <div class="saved-entry-meta">
-          ${o.type} · ${o.platform} · ${o.amount.toLocaleString('en-US')} ر.س
-          · عائد: ${o.ret_val !== 0 ? o.ret_val.toLocaleString('en-US', {minimumFractionDigits:2}) + ' ر.س' : '—'}
-          · ${o.status}
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <span class="saved-entry-meta">${new Date(o.added_at).toLocaleTimeString('en-GB')}</span>
-        <button class="saved-entry-del" onclick="deleteEntry(${i})">حذف</button>
-      </div>
-    </div>`).join('');
-}
-
-function deleteEntry(idx) {
-  savedOpportunities.splice(idx, 1);
-  if (savedOpportunities.length === 0) {
-    document.getElementById('saved-section').style.display = 'none';
-    document.getElementById('saved-count-badge').style.display = 'none';
-  } else {
-    renderSavedList();
-  }
-  showToast('🗑 تم حذف الفرصة');
-}
-
-
-// Live prices map (ticker  {price, change_pct})
 // ══════════════════════════════════════════════
 // OPPORTUNITIES PAGE — TABS (Sukuk + Funds)
 // ══════════════════════════════════════════════
@@ -7009,6 +6247,26 @@ function initOppsYearFilter() {
   sel.innerHTML = opts;
 }
 
+// ── ألوان المنصات ────────────────────────────────────────────────────────────
+function platformPill(name) {
+  if (!name) return '<span style="color:var(--muted)">—</span>';
+  var map = {
+    'ترميز':             { bg: 'rgba(99,102,241,0.15)',  border: 'rgba(99,102,241,0.35)',  color: '#818cf8' },
+    'منافع':             { bg: 'rgba(16,185,129,0.15)',  border: 'rgba(16,185,129,0.35)',  color: '#34d399' },
+    'دراية':             { bg: 'rgba(245,158,11,0.15)',  border: 'rgba(245,158,11,0.35)',  color: '#fbbf24' },
+    'ابيان':             { bg: 'rgba(239,68,68,0.15)',   border: 'rgba(239,68,68,0.35)',   color: '#f87171' },
+    'عوائد':             { bg: 'rgba(6,182,212,0.15)',   border: 'rgba(6,182,212,0.35)',   color: '#22d3ee' },
+    'منصة الأهلي':       { bg: 'rgba(34,197,94,0.15)',  border: 'rgba(34,197,94,0.35)',   color: '#4ade80' },
+    'رياض المالية':      { bg: 'rgba(168,85,247,0.15)', border: 'rgba(168,85,247,0.35)',  color: '#c084fc' },
+    'الراجحي المالية':   { bg: 'rgba(251,146,60,0.15)', border: 'rgba(251,146,60,0.35)',  color: '#fb923c' },
+    'بنك البلاد':        { bg: 'rgba(20,184,166,0.15)', border: 'rgba(20,184,166,0.35)',  color: '#2dd4bf' },
+    'إتقان':             { bg: 'rgba(217,70,239,0.15)', border: 'rgba(217,70,239,0.35)',  color: '#e879f9' },
+    'Interactive Brokers': { bg: 'rgba(59,130,246,0.15)', border: 'rgba(59,130,246,0.35)', color: '#60a5fa' },
+  };
+  var s = map[name] || { bg: 'rgba(136,153,187,0.12)', border: 'rgba(136,153,187,0.25)', color: '#8899bb' };
+  return '<span style="background:' + s.bg + ';border:1px solid ' + s.border + ';color:' + s.color + ';border-radius:8px;padding:2px 9px;font-size:11px;font-weight:600;white-space:nowrap">' + name + '</span>';
+}
+
 function renderOppsFiltered() {
   var year   = (document.getElementById('opps-filter-year')   || {}).value   || '';
   var status = (document.getElementById('opps-filter-status') || {}).value   || '';
@@ -7050,11 +6308,11 @@ function renderOppsFiltered() {
       var realIdx = inv.indexOf(d);
       return '<tr>' +
         '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + d.name + '</td>' +
-        '<td style="color:#8899bb">' + d.platform + '</td>' +
+        '<td>' + platformPill(d.platform) + '</td>' +
         '<td class="mono">' + fmtNum(d.amount) + '</td>' +
         '<td>' + fmtPct(d.ret_pct) + '</td>' +
         '<td class="mono ' + (d.ret_val >= 0 ? 'up' : 'dn') + '">' + fmtNum(d.ret_val, 2) + '</td>' +
-        '<td style="color:#8899bb;font-size:11px">' + (d.date_out || '—') + '</td>' +
+        '<td style="color:var(--muted);font-size:11px">' + (d.date_in || '—') + '</td>' +
         '<td>' + riskPill(d.risk) + '</td>' +
         '<td>' + statusPill(d.status) + '</td>' +
         '<td><button class="loan-action-btn" onclick="openEditOpp(' + realIdx + ')">✏️</button></td>' +
@@ -7065,11 +6323,11 @@ function renderOppsFiltered() {
       var realIdx = inv.indexOf(d);
       return '<tr>' +
         '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + d.name + '</td>' +
-        '<td style="color:#8899bb">' + d.platform + '</td>' +
+        '<td>' + platformPill(d.platform) + '</td>' +
         '<td class="mono">' + fmtNum(d.amount) + '</td>' +
         '<td>' + fmtPct(d.ret_pct) + '</td>' +
         '<td class="mono ' + (d.ret_val >= 0 ? 'up' : 'dn') + '">' + fmtNum(d.ret_val, 2) + '</td>' +
-        '<td class="mono" style="color:var(--gold)">' + fmtNum(d.total, 2) + '</td>' +
+        '<td style="color:var(--muted);font-size:11px">' + (d.date_in || '—') + '</td>' +
         '<td>' + riskPill(d.risk) + '</td>' +
         '<td>' + statusPill(d.status) + '</td>' +
         '<td><button class="loan-action-btn" onclick="openEditOpp(' + realIdx + ')">✏️</button></td>' +
@@ -7505,9 +6763,15 @@ function calcAddLoan() {
     totalInt = 0;
   }
 
-  var remaining = Math.max(0, principal - paid);
-  var pct = principal > 0 ? Math.min(100,(paid/principal)*100) : 0;
-
+  // حساب المتبقي الحقيقي بناءً على جدول الاستهلاك
+  var remaining = principal;
+  var pct = 0;
+  if (rate > 0 && months > 0 && paid > 0) {
+    // paid هو المبلغ المسدد فعلاً — نحسب كم قسط سُدِّد
+      // المتبقي الصحيح = (الأصل + إجمالي الفائدة) - المبلغ المسدد
+  var remaining = Math.max(0, totalAmt - paid);
+  var pct = totalAmt > 0 ? Math.min(100, (paid / totalAmt * 100)) : 0;
+  
   set('al-c-pmt', pmt > 0 ? fmt(pmt) : '—');
   set('al-c-interest', totalInt > 0 ? fmt(totalInt) : '—');
   set('al-c-total', totalAmt > 0 ? fmt(totalAmt) : '—');
@@ -7519,7 +6783,6 @@ function calcAddLoan() {
     var endDate = new Date(startVal);
     endDate.setMonth(endDate.getMonth() + months);
     set('al-d-end-date', endDate.toLocaleDateString('ar-SA-u-nu-latn',{year:'numeric',month:'long'}));
-    // update end date field if visible
     var endFld = document.getElementById('al-end');
     if (endFld) endFld.value = endDate.toISOString().split('T')[0];
   } else { set('al-d-end-date','—'); }
@@ -7528,6 +6791,11 @@ function calcAddLoan() {
   var pctEl = document.getElementById('al-progress-pct');
   if (bar) bar.style.width = pct.toFixed(0) + '%';
   if (pctEl) pctEl.textContent = pct.toFixed(0) + '%';
+
+  // بناء جدول الاستهلاك
+  if (typeof buildAmortizationTable === 'function') {
+    buildAmortizationTable(principal, rate, months, startVal);
+  }
 }
 
 function saveAddLoan() {
@@ -7757,23 +7025,19 @@ var _tickerFetchTimer = null;
 // ── تبديل تبويب الأسهم SA/US ─────────────────────────────────────────────────
 function switchStocksTab(tab) {
   _currentStocksTab = tab;
-  var sa = document.getElementById('stocks-tab-sa');
-  var us = document.getElementById('stocks-tab-us');
-  var btnSa = document.getElementById('tab-sa');
-  var btnUs = document.getElementById('tab-us');
-  if (tab === 'sa') {
-    if (sa) sa.style.display = 'block';
-    if (us) us.style.display = 'none';
-    if (btnSa) { btnSa.style.borderBottomColor = 'var(--gold)'; btnSa.style.color = 'var(--gold)'; }
-    if (btnUs) { btnUs.style.borderBottomColor = 'transparent'; btnUs.style.color = 'var(--muted)'; }
-  } else {
-    if (sa) sa.style.display = 'none';
-    if (us) us.style.display = 'block';
-    if (btnUs) { btnUs.style.borderBottomColor = 'var(--gold)'; btnUs.style.color = 'var(--gold)'; }
-    if (btnSa) { btnSa.style.borderBottomColor = 'transparent'; btnSa.style.color = 'var(--muted)'; }
-    renderUsStocksTable();
-    fetchUsStockPrices();
-  }
+  var tabs   = ['sa','us','dividends'];
+  var colors = { sa: 'var(--gold)', us: '#60a5fa', dividends: 'var(--green)' };
+  tabs.forEach(function(t) {
+    var el  = document.getElementById('stocks-tab-' + t);
+    var btn = document.getElementById('tab-' + t);
+    if (el)  el.style.display = t === tab ? 'block' : 'none';
+    if (btn) {
+      btn.style.borderBottomColor = t === tab ? colors[t] : 'transparent';
+      btn.style.color             = t === tab ? colors[t] : 'var(--muted)';
+    }
+  });
+  if (tab === 'us')        fetchUsStockPrices();
+  if (tab === 'dividends') { if(typeof renderDividendsTab==='function') renderDividendsTab(); }
 }
 
 // ── تبديل سوق في فورم الإضافة ─────────────────────────────────────────────────
@@ -8097,7 +7361,7 @@ function renderDividendsTab() {
     return s + annual;
   }, 0);
 
-  var kpiEl = document.getElementById('div-kpis');
+  var kpiEl = document.getElementById('div-kpis-s2');
   if (kpiEl) {
     var fmt = function(n){ return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); };
     kpiEl.innerHTML =
@@ -8156,7 +7420,7 @@ function renderDividendsTab() {
 }
 
 function renderDividendsSummary(saStocks) {
-  var summaryEl = document.getElementById('div-summary');
+  var summaryEl = document.getElementById('div-summary-s2');
   if (!summaryEl) return;
 
   // اجمع حسب السنة
@@ -8193,7 +7457,7 @@ function renderDividendsSummary(saStocks) {
 
 // ── إضافة توزيعة ─────────────────────────────────────────────────────────────
 function showAddDividendForm() {
-  var form = document.getElementById('div-add-form');
+  var form = document.getElementById('div-add-form-s2');
   if (!form) return;
   form.style.display = form.style.display === 'none' ? 'block' : 'none';
   if (form.style.display === 'none') return;
@@ -8201,7 +7465,7 @@ function showAddDividendForm() {
   // ملء قائمة الأسهم النشطة
   var inv = window.__investments || investments;
   var saStocks = inv.filter(function(x){ return x.type==='سهم' && x.status==='نشطة' && x.market !== 'us'; });
-  var sel = document.getElementById('div-ticker-sel');
+  var sel = document.getElementById('div-ticker-sel-s2');
   if (sel) {
     sel.innerHTML = '<option value="">— اختر السهم —</option>' +
       saStocks.map(function(x){
@@ -8210,26 +7474,26 @@ function showAddDividendForm() {
   }
   // تاريخ اليوم
   var today = new Date().toISOString().split('T')[0];
-  var exDate = document.getElementById('div-ex-date');
-  var payDate = document.getElementById('div-pay-date');
-  var annDate = document.getElementById('div-announce-date');
+  var exDate = document.getElementById('div-ex-date-s2');
+  var payDate = document.getElementById('div-pay-date-s2');
+  var annDate = document.getElementById('div-announce-date-s2');
   if (annDate) annDate.value = today;
   form.scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
 function onDivTickerChange() {
-  var perShare = document.getElementById('div-per-share');
+  var perShare = document.getElementById('div-per-share-s2');
   if (perShare) perShare.value = '';
   calcDividend();
   // تعبئة تلقائية من قاعدة البيانات المعروفة
-  var sel = document.getElementById('div-ticker-sel');
+  var sel = document.getElementById('div-ticker-sel-s2');
   if (!sel || !sel.value) return;
   var known = KNOWN_DIVIDENDS[sel.value];
   if (known && known.history.length) {
     var latest = known.history[0];
     if (perShare) perShare.value = latest.per_share;
-    var exDate = document.getElementById('div-ex-date');
-    var payDate = document.getElementById('div-pay-date');
+    var exDate = document.getElementById('div-ex-date-s2');
+    var payDate = document.getElementById('div-pay-date-s2');
     if (exDate && !exDate.value) exDate.value = latest.ex_date;
     if (payDate && !payDate.value) payDate.value = latest.pay_date;
     calcDividend();
@@ -8238,10 +7502,10 @@ function onDivTickerChange() {
 }
 
 function calcDividend() {
-  var sel = document.getElementById('div-ticker-sel');
-  var perShare = parseFloat((document.getElementById('div-per-share')||{}).value) || 0;
+  var sel = document.getElementById('div-ticker-sel-s2');
+  var perShare = parseFloat((document.getElementById('div-per-share-s2')||{}).value) || 0;
   if (!sel || !sel.value || !perShare) {
-    document.getElementById('div-calc-box').style.display = 'none';
+    document.getElementById('div-calc-box-s2').style.display = 'none';
     return;
   }
   var opt = sel.options[sel.selectedIndex];
@@ -8254,39 +7518,39 @@ function calcDividend() {
   set('div-c-shares', shares.toLocaleString('en-US') + ' سهم');
   set('div-c-total',  fmt(total) + ' ر.س');
   set('div-c-yield',  yieldPct.toFixed(2) + '%');
-  document.getElementById('div-calc-box').style.display = 'block';
+  document.getElementById('div-calc-box-s2').style.display = 'block';
 }
 
 function saveDividend() {
-  var sel = document.getElementById('div-ticker-sel');
-  var perShare = parseFloat((document.getElementById('div-per-share')||{}).value) || 0;
+  var sel = document.getElementById('div-ticker-sel-s2');
+  var perShare = parseFloat((document.getElementById('div-per-share-s2')||{}).value) || 0;
   if (!sel || !sel.value) { showToast('❌ اختر السهم'); return; }
   if (!perShare)           { showToast('❌ أدخل قيمة التوزيعة للسهم'); return; }
   var opt    = sel.options[sel.selectedIndex];
   var shares = parseInt(opt?.dataset?.shares) || 0;
   var amount = parseFloat(opt?.dataset?.amount) || 0;
   var total  = perShare * shares;
-  var exDate = (document.getElementById('div-ex-date')||{}).value || '';
+  var exDate = (document.getElementById('div-ex-date-s2')||{}).value || '';
   var now    = new Date();
   var exD    = exDate ? new Date(exDate) : null;
   var status = exD && exD <= now ? 'مستلمة' : 'قادمة';
   var record = {
     ticker:       sel.value,
     stock_name:   opt?.dataset?.name || sel.value,
-    type:         (document.getElementById('div-type')||{}).value || 'cash',
+    type:         (document.getElementById('div-type-s2')||{}).value || 'cash',
     per_share:    perShare,
     shares:       shares,
     total_amount: total,
     yield_pct:    amount > 0 ? total/amount*100 : 0,
-    announce_date:(document.getElementById('div-announce-date')||{}).value || '',
+    announce_date:(document.getElementById('div-announce-date-s2')||{}).value || '',
     ex_date:      exDate,
-    pay_date:     (document.getElementById('div-pay-date')||{}).value || '',
+    pay_date:     (document.getElementById('div-pay-date-s2')||{}).value || '',
     status:       status,
     created_at:   new Date().toISOString()
   };
   dividendsData.unshift(record);
   saveDividendsToStorage();
-  document.getElementById('div-add-form').style.display = 'none';
+  document.getElementById('div-add-form-s2').style.display = 'none';
   renderDividendsTab();
   showToast('✅ تم حفظ توزيعة ' + sel.value + ': ' + total.toLocaleString('en-US',{maximumFractionDigits:2}) + ' ر.س');
 }
@@ -8344,7 +7608,7 @@ function autoImportKnownDividends() {
 
 // ── جلب توزيعات من Yahoo Finance ─────────────────────────────────────────────
 async function fetchDividendsForStock() {
-  var sel = document.getElementById('div-ticker-sel');
+  var sel = document.getElementById('div-ticker-sel-s2');
   if (!sel || !sel.value) { showToast('❌ اختر السهم أولاً'); return; }
   var ticker = sel.value + '.SR';
   showToast('⏳ جاري الجلب من Yahoo Finance...');
@@ -8381,7 +7645,7 @@ async function fetchDividendsForStock() {
       saveDividendsToStorage();
       renderDividendsTab();
       showToast('✅ تم استيراد ' + count + ' توزيعة من Yahoo Finance');
-      document.getElementById('div-add-form').style.display = 'none';
+      document.getElementById('div-add-form-s2').style.display = 'none';
     } else {
       showToast('ℹ️ التوزيعات موجودة مسبقاً');
     }
@@ -9452,6 +8716,163 @@ function _parseCSVLine(line) {
   }
   result.push(cur);
   return result;
+}
+
+
+// ══════════════════════════════════════════════════════
+// جدول الاستهلاك — Amortization Schedule
+// ══════════════════════════════════════════════════════
+
+var _amortVisible = true;
+
+function toggleAmortTable() {
+  _amortVisible = !_amortVisible;
+  var wrap = document.getElementById('amort-table-wrap');
+  var icon = document.getElementById('amort-toggle-icon');
+  if (wrap) wrap.style.display = _amortVisible ? '' : 'none';
+  if (icon) icon.textContent = _amortVisible ? '▼ إخفاء' : '▶ عرض';
+}
+
+function buildAmortizationTable(principal, annualRate, months, startDate) {
+  var section  = document.getElementById('amort-section');
+  var tbody    = document.getElementById('amort-tbody');
+  var countEl  = document.getElementById('amort-count');
+  if (!section || !tbody) return;
+
+  if (!principal || !months || months <= 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = 'block';
+
+  var r         = annualRate > 0 ? (annualRate / 100) / 12 : 0;
+  var pmt       = r > 0
+    ? principal * (r * Math.pow(1+r,months)) / (Math.pow(1+r,months) - 1)
+    : principal / months;
+
+  var balance   = principal;
+  var rows      = [];
+  var totalPay  = 0, totalPrinc = 0, totalInt = 0;
+  var fmt = function(n){ return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+
+  var start = startDate ? new Date(startDate) : new Date();
+
+  for (var i = 1; i <= months; i++) {
+    var interest  = balance * r;
+    var princPart = pmt - interest;
+    if (i === months) princPart = balance; // آخر قسط: سداد الرصيد كاملاً
+    balance -= princPart;
+    if (balance < 0.01) balance = 0;
+
+    totalPay   += pmt;
+    totalPrinc += princPart;
+    totalInt   += interest;
+
+    // تاريخ الدفعة
+    var dDate = new Date(start);
+    dDate.setMonth(dDate.getMonth() + i);
+    var dateStr = dDate.toLocaleDateString('ar-SA-u-nu-latn',{year:'numeric',month:'short'});
+
+    rows.push({
+      num:       i,
+      date:      dateStr,
+      pmt:       pmt,
+      princPart: princPart,
+      interest:  interest,
+      balance:   balance,
+      intPct:    pmt > 0 ? (interest / pmt * 100) : 0
+    });
+  }
+
+  // تحديث ملخص
+  var set = function(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; };
+  set('amort-total-pay',       fmt(totalPay)   + ' ر.س');
+  set('amort-total-principal', fmt(totalPrinc) + ' ر.س');
+  set('amort-total-interest',  fmt(totalInt)   + ' ر.س');
+  set('amort-cost-pct',        (totalInt/principal*100).toFixed(2) + '%');
+  if (countEl) countEl.textContent = months + ' قسط';
+
+  // بناء الجدول
+  tbody.innerHTML = rows.map(function(r) {
+    var intColor = r.intPct > 50 ? 'var(--red)' : r.intPct > 25 ? 'var(--orange)' : 'var(--green)';
+    var isLast   = r.num === months;
+    return '<tr style="' + (isLast ? 'background:rgba(201,168,76,0.06)' : '') + '">' +
+      '<td style="color:var(--muted);font-size:11px">' + r.num + '</td>' +
+      '<td style="font-size:11px;color:var(--muted)">' + r.date + '</td>' +
+      '<td class="mono" style="color:var(--gold);font-weight:700">' + fmt(r.pmt) + '</td>' +
+      '<td class="mono" style="color:var(--cyan)">' + fmt(r.princPart) + '</td>' +
+      '<td class="mono" style="color:var(--red)">' + fmt(r.interest) + '</td>' +
+      '<td class="mono" style="color:var(--white);font-weight:700">' + (r.balance > 0 ? fmt(r.balance) : '<span style="color:var(--green)">✅ مسدَّد</span>') + '</td>' +
+      '<td>' +
+        '<div style="display:flex;align-items:center;gap:6px">' +
+          '<div style="height:6px;width:60px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden">' +
+            '<div style="height:100%;width:' + r.intPct.toFixed(0) + '%;background:' + intColor + ';border-radius:3px"></div>' +
+          '</div>' +
+          '<span style="font-size:10px;color:' + intColor + '">' + r.intPct.toFixed(1) + '%</span>' +
+        '</div>' +
+      '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+
+// ── Sharpe Ratio ─────────────────────────────────────────────────────────────
+function renderSharpe() {
+  var inv = window.__investments || [];
+  if (!inv.length) return;
+  var active = inv.filter(function(x){ return x.status==='نشطة'; });
+  var returns = active.map(function(x){ return x.ret_pct || 0; });
+  var n = returns.length;
+  if (!n) return;
+  var avgReturn = returns.reduce(function(s,r){ return s+r; },0) / n;
+  var variance  = returns.reduce(function(s,r){ return s+Math.pow(r-avgReturn,2); },0) / n;
+  var stdDev    = Math.sqrt(variance);
+  var riskFreeRate = 0.055;
+  var sharpe    = stdDev > 0 ? ((avgReturn - riskFreeRate) / stdDev).toFixed(2) : '—';
+  var sharpeNum = parseFloat(sharpe);
+  var label     = sharpeNum > 1 ? '🟢 ممتاز' : sharpeNum > 0 ? '🟡 مقبول' : '🔴 ضعيف';
+  var valEl = document.getElementById('sharpe-value');
+  var lblEl = document.getElementById('sharpe-label');
+  var detEl = document.getElementById('sharpe-details');
+  if (valEl) { valEl.textContent = isNaN(sharpeNum) ? '—' : sharpe; valEl.style.color = sharpeNum>1?'var(--green)':sharpeNum>0?'var(--gold)':'var(--red)'; }
+  if (lblEl) lblEl.textContent = label;
+  if (detEl) detEl.innerHTML =
+    '<div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">متوسط العائد</div><div style="font-size:18px;font-weight:700;color:var(--cyan);font-family:monospace">' + (avgReturn*100).toFixed(2) + '%</div></div>' +
+    '<div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">الانحراف المعياري</div><div style="font-size:18px;font-weight:700;color:var(--orange);font-family:monospace">' + (stdDev*100).toFixed(2) + '%</div></div>';
+}
+
+// ── Benchmark Comparison ──────────────────────────────────────────────────────
+function renderBenchmark() {
+  var inv = window.__investments || [];
+  var totalAmt = inv.reduce(function(s,x){return s+(x.amount||0);},0);
+  if (!totalAmt) return;
+  var totalRet = inv.reduce(function(s,x){return s+(x.ret_val||0);},0);
+  var roi = totalAmt > 0 ? (totalRet/totalAmt*100) : 0;
+  var benchmarks = [
+    { label:'محفظتك', value:roi, color:'var(--gold)', icon:'💼', note:'العائد الفعلي' },
+    { label:'SAIBOR 3M', value:5.52, color:'var(--cyan)', icon:'🏦', note:'معدل الإقراض السعودي' },
+    { label:'مؤشر تداول (تاسي)', value:4.8, color:'#a78bfa', icon:'📈', note:'عائد سنوي تقريبي' },
+    { label:'التضخم السعودي', value:2.1, color:'var(--orange)', icon:'📊', note:'مارس 2026' },
+    { label:'وديعة بنكية', value:3.5, color:'var(--muted)', icon:'🏧', note:'متوسط البنوك السعودية' },
+  ];
+  var maxVal = Math.max.apply(null, benchmarks.map(function(b){return b.value;})) || 1;
+  var barsEl = document.getElementById('benchmark-bars');
+  if (!barsEl) return;
+  barsEl.innerHTML = benchmarks.map(function(b) {
+    var w = Math.min(100,(b.value/maxVal*100)).toFixed(0);
+    var isYours = b.label === 'محفظتك';
+    return '<div style="display:flex;flex-direction:column;gap:4px' + (isYours?';padding:8px;background:rgba(201,168,76,0.06);border-radius:10px;border:1px solid rgba(201,168,76,0.15)':'') + '">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px">' +
+        '<span>' + b.icon + ' ' + b.label + '</span>' +
+        '<span style="font-family:monospace;font-weight:700;color:' + b.color + '">' + b.value.toFixed(2) + '%</span>' +
+      '</div>' +
+      '<div style="height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden">' +
+        '<div style="height:100%;width:' + w + '%;background:' + b.color + ';border-radius:4px;transition:width .8s ease"></div>' +
+      '</div>' +
+      '<div style="font-size:10px;color:var(--muted)">' + b.note + '</div>' +
+    '</div>';
+  }).join('');
 }
 
 
