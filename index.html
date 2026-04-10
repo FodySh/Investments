@@ -5675,6 +5675,109 @@ function switchOppsTab(tab) {
 }
 
 
+// ══════════════════════════════════════════════
+// STOCKS RENDER — الأسهم السعودية
+// ══════════════════════════════════════════════
+function renderStocks() {
+  var inv = window.__investments || investments;
+  var stockData = inv.filter(function(x){ return x.type === 'سهم' && x.market !== 'us'; });
+
+  // Update count badge
+  var countBadge = document.getElementById('stocks-count-badge');
+  if (countBadge) countBadge.textContent = stockData.length + ' سهم';
+
+  // Update total badge
+  var totalAmt = stockData.reduce(function(s,x){ return s+(x.amount||0); }, 0);
+  var badge = document.getElementById('stocks-total-badge');
+  if (badge) badge.textContent = totalAmt.toLocaleString('en-US',{maximumFractionDigits:0}) + ' ر.س';
+
+  // Collect tickers for price fetching
+  stockData.forEach(function(x) {
+    if (x.ticker && !STOCK_PRICES[x.ticker]) {
+      STOCK_PRICES[x.ticker] = { price: null, chg: null, color: '' };
+    }
+  });
+
+  var tbody = document.getElementById('stocks-tbody');
+  if (!tbody) return;
+
+  if (!stockData.length) {
+    tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:32px;color:var(--muted)">لا توجد أسهم سعودية — أضف سهماً جديداً</td></tr>';
+    var grid = document.getElementById('stocks-cards-grid');
+    if (grid) grid.innerHTML = '';
+    return;
+  }
+
+  tbody.innerHTML = stockData.map(function(d) {
+    var p = d.ticker ? STOCK_PRICES[d.ticker] : null;
+    var currPrice = p ? p.price : null;
+    var chgPct    = p ? p.chg  : null;
+    var buyAvg    = (d.shares && d.amount) ? (d.amount / d.shares) : null;
+    var mktVal    = (currPrice && d.shares) ? currPrice * d.shares : null;
+    var pnl       = (mktVal && d.amount) ? mktVal - d.amount : null;
+
+    var priceCell = currPrice
+      ? '<span class="mono ' + (p.color||'') + '">' + currPrice.toFixed(2) + '</span>'
+      : '<span style="color:var(--muted)">—</span>';
+
+    var chgCell = chgPct != null
+      ? '<span class="' + (chgPct >= 0 ? 'up' : 'dn') + '">' + (chgPct >= 0 ? '▲' : '▼') + ' ' + (Math.abs(chgPct)*100).toFixed(1) + '%</span>'
+      : '<span style="color:var(--muted)">—</span>';
+
+    var mktCell = mktVal
+      ? '<span class="mono">' + mktVal.toLocaleString('en-US',{minimumFractionDigits:2}) + '</span>'
+      : '<span style="color:var(--muted)">—</span>';
+
+    var pnlCell = pnl != null
+      ? '<span class="mono ' + (pnl >= 0 ? 'up' : 'dn') + '">' + (pnl >= 0 ? '+' : '') + pnl.toLocaleString('en-US',{minimumFractionDigits:2}) + '</span>'
+      : '<span style="color:var(--muted)">—</span>';
+
+    var realIdx = inv.indexOf(d);
+    return '<tr>' +
+      '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + d.name + '">' + d.name + '</td>' +
+      '<td><span style="font-family:monospace;background:rgba(201,168,76,0.12);color:#e8c97a;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700">' + (d.ticker||'—') + '</span></td>' +
+      '<td><span class="mono" style="color:#00d4ff">' + (d.shares != null ? d.shares.toLocaleString('en-US') : '<span style="color:#ff9800;font-size:11px">—</span>') + '</span></td>' +
+      '<td class="mono">' + (d.amount||0).toLocaleString('en-US',{minimumFractionDigits:2}) + '</td>' +
+      '<td class="mono" style="color:var(--gold)">' + (buyAvg ? buyAvg.toFixed(2) : '—') + '</td>' +
+      '<td>' + priceCell + '</td>' +
+      '<td>' + chgCell + '</td>' +
+      '<td>' + mktCell + '</td>' +
+      '<td>' + pnlCell + '</td>' +
+      '<td>' + platformPill(d.platform||'') + '</td>' +
+      '<td>' + riskPill(d.risk) + '</td>' +
+      '<td>' + statusPill(d.status) + '</td>' +
+      '<td><button class="loan-action-btn" onclick="openEditOpp(' + realIdx + ')">✏️</button></td>' +
+      '</tr>';
+  }).join('');
+
+  // Cards grid
+  var grid = document.getElementById('stocks-cards-grid');
+  if (grid) grid.innerHTML = stockData.map(function(d) {
+    var p = d.ticker ? STOCK_PRICES[d.ticker] : null;
+    var color = p ? p.color : '';
+    var currPrice = p ? p.price : null;
+    var buyAvg = (d.shares && d.amount) ? (d.amount / d.shares) : null;
+    var mktVal = (currPrice && d.shares) ? currPrice * d.shares : null;
+    var pnl = (mktVal && d.amount) ? mktVal - d.amount : null;
+    return '<div class="stock-card" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center">' +
+        '<div style="font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:65%">' + d.name + '</div>' +
+        (d.ticker ? '<span style="font-family:monospace;background:rgba(201,168,76,0.15);color:#e8c97a;padding:2px 8px;border-radius:6px;font-size:11px">' + d.ticker + '</span>' : '') +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px">' +
+        '<div><span style="color:var(--muted)">التكلفة</span><br><b class="mono">' + (d.amount||0).toLocaleString('en-US',{maximumFractionDigits:0}) + ' ر.س</b></div>' +
+        '<div><span style="color:var(--muted)">السعر الحالي</span><br><b class="mono ' + color + '">' + (currPrice ? currPrice.toFixed(2) : '—') + '</b></div>' +
+        '<div><span style="color:var(--muted)">متوسط الشراء</span><br><b class="mono" style="color:var(--gold)">' + (buyAvg ? buyAvg.toFixed(2) : '—') + '</b></div>' +
+        '<div><span style="color:var(--muted)">ر / خ</span><br><b class="mono ' + (pnl != null ? (pnl >= 0 ? 'up' : 'dn') : '') + '">' + (pnl != null ? (pnl >= 0 ? '+' : '') + pnl.toLocaleString('en-US',{maximumFractionDigits:0}) : '—') + '</b></div>' +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center">' +
+        riskPill(d.risk) + ' ' + statusPill(d.status) +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+
 function renderSukuk() {
   const _inv = window.__investments || investments;
   const sukukData = _inv.filter(x => x.type === 'صك' || x.type === 'مرابحة');
@@ -9933,6 +10036,8 @@ function _loadData(uid) {
     initDashboardYears();
     renderDashboard();
     if (typeof renderStocks === "function") renderStocks();
+    if (typeof renderLoans  === "function") renderLoans();
+    if (typeof renderDebts  === "function") renderDebts();
     _badge("synced");
 
     // Realtime listener
@@ -10021,10 +10126,12 @@ _auth.onAuthStateChanged(function(user) {
     _gate(true);  // Show login banner
     // Clear any stale data shown before login
     if (window.__investments) window.__investments.length = 0;
-    if (window.loansData)     window.loansData.length    = 0;
-    if (window.debtsData)     window.debtsData.length    = 0;
-    if (typeof renderAll      === 'function') renderAll();
-    if (typeof renderDashboard=== 'function') renderDashboard();
+    window.loansData = []; if (typeof loansData !== 'undefined') loansData = [];
+    window.debtsData = []; if (typeof debtsData !== 'undefined') debtsData = [];
+    if (typeof renderAll       === 'function') renderAll();
+    if (typeof renderDashboard === 'function') renderDashboard();
+    if (typeof renderLoans     === 'function') renderLoans();
+    if (typeof renderDebts     === 'function') renderDebts();
   }
 });
 
