@@ -6764,14 +6764,10 @@ function calcAddLoan() {
   }
 
   // حساب المتبقي الحقيقي بناءً على جدول الاستهلاك
-  var remaining = principal;
-  var pct = 0;
-  if (rate > 0 && months > 0 && paid > 0) {
-    // paid هو المبلغ المسدد فعلاً — نحسب كم قسط سُدِّد
-      // المتبقي الصحيح = (الأصل + إجمالي الفائدة) - المبلغ المسدد
+  // المتبقي = (الأصل + الفائدة) - المبلغ المسدد
   var remaining = Math.max(0, totalAmt - paid);
   var pct = totalAmt > 0 ? Math.min(100, (paid / totalAmt * 100)) : 0;
-  
+
   set('al-c-pmt', pmt > 0 ? fmt(pmt) : '—');
   set('al-c-interest', totalInt > 0 ? fmt(totalInt) : '—');
   set('al-c-total', totalAmt > 0 ? fmt(totalAmt) : '—');
