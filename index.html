@@ -1883,7 +1883,7 @@
               <thead><tr>
                 <th>اسم الصك</th><th>المنصة</th><th>المبلغ</th>
                 <th>العائد %</th><th>العائد ر.س</th>
-                <th>تاريخ الدخول</th><th>المخاطرة</th><th>الحالة</th><th></th>
+                <th>تاريخ الخروج</th><th>المخاطرة</th><th>الحالة</th><th></th>
               </tr></thead>
               <tbody id="sukuk-tbody"></tbody>
             </table>
@@ -1911,7 +1911,7 @@
               <thead><tr>
                 <th>اسم الصندوق</th><th>المنصة</th><th>المبلغ</th>
                 <th>العائد %</th><th>العائد ر.س</th>
-                <th>تاريخ الدخول</th><th>المخاطرة</th><th>الحالة</th><th></th>
+                <th>المجموع المتوقع</th><th>المخاطرة</th><th>الحالة</th><th></th>
               </tr></thead>
               <tbody id="funds-tbody"></tbody>
             </table>
@@ -2312,7 +2312,7 @@
           <div class="step-num">2</div> البيانات المالية
         </div>
         <div class="step" id="step-3" onclick="goStep(3)">
-          <div class="step-num">3</div> التوزيعات
+          <div class="step-num">3</div> العوائد والتوزيعات
         </div>
         <div class="step" id="step-4" onclick="goStep(4)">
           <div class="step-num">4</div> التوقيت والمدة
@@ -2429,27 +2429,35 @@
         <div class="form-step" id="fstep-2" style="display:none">
           <div class="form-section">
             <div class="form-section-title">💰 البيانات المالية الأساسية</div>
-
-            <!-- المبلغ + العملة في صف واحد -->
             <div class="form-grid">
-              <div class="field-group" style="grid-column:span 2">
-                <label class="field-label">المبلغ المستثمر <span class="req">*</span></label>
-                <div style="display:flex;gap:8px;align-items:center">
-                  <select class="f-select" id="f-currency" style="width:140px;flex-shrink:0">
-                    <option value="ر.س" selected>🇸🇦 ر.س</option>
-                    <option value="USD">🇺🇸 USD</option>
-                    <option value="EUR">🇪🇺 EUR</option>
-                    <option value="GBP">🇬🇧 GBP</option>
-                    <option value="AED">🇦🇪 AED</option>
-                    <option value="KWD">🇰🇼 KWD</option>
-                  </select>
-                  <input class="f-input" id="f-amount" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAuto()" style="flex:1" />
-                </div>
+              <div class="field-group">
+                <label class="field-label">المبلغ المستثمر (ر.س) <span class="req">*</span></label>
+                <input class="f-input" id="f-amount" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAuto()" />
                 <div class="field-error" id="err-amount">يرجى إدخال المبلغ المستثمر</div>
               </div>
-
               <div class="field-group">
-                <label class="field-label">القيمة السوقية الحالية <span class="hint">— إن وُجدت</span></label>
+                <label class="field-label">العملة</label>
+                <select class="f-select" id="f-currency">
+                  <option value="ر.س" selected>🇸🇦 ريال سعودي (ر.س)</option>
+                  <option value="USD">🇺🇸 دولار أمريكي (USD)</option>
+                  <option value="EUR">🇪🇺 يورو (EUR)</option>
+                  <option value="GBP">🇬🇧 جنيه إسترليني (GBP)</option>
+                  <option value="AED">🇦🇪 درهم إماراتي (AED)</option>
+                  <option value="KWD">🇰🇼 دينار كويتي (KWD)</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label class="field-label">رسوم الاشتراك (ر.س)</label>
+                <input class="f-input" id="f-fees" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAuto()" />
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="field-group">
+                <label class="field-label">ضرائب ورسوم أخرى (ر.س)</label>
+                <input class="f-input" id="f-tax" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAuto()" />
+              </div>
+              <div class="field-group">
+                <label class="field-label">القيمة السوقية الحالية (ر.س) <span class="hint">— إن وُجدت</span></label>
                 <input class="f-input" id="f-market-val" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAuto()" />
               </div>
               <div class="field-group">
@@ -2457,70 +2465,44 @@
                 <input class="f-input" id="f-ownership" type="number" step="0.01" min="0" max="100" placeholder="مثال: 5.5" />
               </div>
             </div>
-
-            <!-- العوائد — منقولة من Step 3 -->
-            <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
-              <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">📈 العوائد</div>
-              <div class="form-grid">
-                <div class="field-group">
-                  <label class="field-label">نسبة العائد %</label>
-                  <input class="f-input" id="f-ret-pct" type="number" step="0.01" placeholder="مثال: 10.5" oninput="calcAuto()" />
-                </div>
-              </div>
-              <div class="form-grid">
-                <div class="field-group">
-                  <label class="field-label">قيمة العائد الإجمالي <span class="hint">— أو يُحسب تلقائياً</span></label>
-                  <input class="f-input" id="f-ret-val" type="number" step="0.01" placeholder="0.00" oninput="calcAuto()" />
-                </div>
-                <div class="field-group">
-                  <label class="field-label">رسوم الوكالة / الاشتراك</label>
-                  <input class="f-input" id="f-fees" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAuto()" />
-                </div>
-                <div class="field-group">
-                  <label class="field-label">الضريبة</label>
-                  <input class="f-input" id="f-tax" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAuto()" />
-                </div>
-              </div>
-            </div>
           </div>
 
           <!-- LIVE CALC PREVIEW -->
           <div class="calc-box" id="calc-preview">
             <div class="calc-item">
-              <div class="calc-label">صافي المبلغ بعد الرسوم والضريبة</div>
+              <div class="calc-label">صافي المبلغ بعد الرسوم</div>
               <div class="calc-val" id="c-net">—</div>
             </div>
             <div class="calc-item">
-              <div class="calc-label">قيمة العائد</div>
-              <div class="calc-val" id="c-ret2">—</div>
-            </div>
-            <div class="calc-item">
-              <div class="calc-label">المجموع المتوقع (أصل + عائد)</div>
-              <div class="calc-val" id="c-total2" style="color:var(--gold)">—</div>
-            </div>
-            <div class="calc-item">
-              <div class="calc-label">ر/خ غير محققة</div>
+              <div class="calc-label">الربح / الخسارة غير المحققة</div>
               <div class="calc-val" id="c-unrealized">—</div>
             </div>
           </div>
 
-          <!-- hidden field for compatibility -->
-          <input type="hidden" id="f-total" />
-
           <div style="display:flex;justify-content:flex-start;gap:12px">
-            <button class="btn-submit" onclick="nextStep(2)">التالي ← التوزيعات</button>
+            <button class="btn-submit" onclick="nextStep(2)">التالي ← العوائد والتوزيعات</button>
             <button class="btn-reset" onclick="prevStep(2)">← رجوع</button>
           </div>
         </div>
 
-        <!-- ══ STEP 3: التوزيعات ══ -->
+        <!-- ══ STEP 3: العوائد والتوزيعات ══ -->
         <div class="form-step" id="fstep-3" style="display:none">
           <div class="form-section">
-            <div class="form-section-title">📈 التوزيعات</div>
+            <div class="form-section-title">📈 العوائد والتوزيعات</div>
             <div class="form-grid">
-              <div class="field-group" style="display:none">
-                <input class="f-input" id="f-ret-pct-step3-sync" type="number" style="display:none" />
+              <div class="field-group">
+                <label class="field-label">نسبة العائد السنوي %</label>
+                <input class="f-input" id="f-ret-pct" type="number" step="0.01" placeholder="مثال: 10.5" oninput="calcAuto()" />
               </div>
+              <div class="field-group">
+                <label class="field-label">قيمة العائد الإجمالي (ر.س) <span class="hint">— أو تُحسب تلقائياً</span></label>
+                <input class="f-input" id="f-ret-val" type="number" step="0.01" placeholder="0.00" oninput="calcAuto()" />
+              </div>
+              <div class="field-group">
+                <label class="field-label">المجموع المتوقع (أصل + عائد)</label>
+                <input class="f-input" id="f-total" type="number" step="0.01" placeholder="يُحسب تلقائياً" style="color:var(--gold)" readonly />
+              </div>
+            </div>
             <div class="form-grid">
               <div class="field-group">
                 <label class="field-label">نوع التوزيعات</label>
@@ -4456,54 +4438,6 @@
         </div>
       </div>
 
-      <!-- جدول الاستهلاك -->
-      <div id="amort-section" style="display:none;margin-top:28px">
-        <div class="section-card">
-          <div class="section-head" style="cursor:pointer" onclick="toggleAmortTable()">
-            <span class="section-title">📅 جدول الدفعات والاستهلاك</span>
-            <div style="display:flex;align-items:center;gap:10px">
-              <span id="amort-toggle-icon" style="font-size:12px;color:var(--muted)">▼ إخفاء</span>
-              <span class="section-count" id="amort-count">—</span>
-            </div>
-          </div>
-          <div id="amort-table-wrap">
-            <!-- ملخص سريع -->
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border)">
-              <div style="text-align:center">
-                <div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي المدفوعات</div>
-                <div id="amort-total-pay" style="font-size:16px;font-weight:800;font-family:monospace;color:var(--white)">—</div>
-              </div>
-              <div style="text-align:center">
-                <div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي الأصل</div>
-                <div id="amort-total-principal" style="font-size:16px;font-weight:800;font-family:monospace;color:var(--cyan)">—</div>
-              </div>
-              <div style="text-align:center">
-                <div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي الفوائد</div>
-                <div id="amort-total-interest" style="font-size:16px;font-weight:800;font-family:monospace;color:var(--red)">—</div>
-              </div>
-              <div style="text-align:center">
-                <div style="font-size:10px;color:var(--muted);margin-bottom:4px">تكلفة الفائدة</div>
-                <div id="amort-cost-pct" style="font-size:16px;font-weight:800;font-family:monospace;color:var(--orange)">—</div>
-              </div>
-            </div>
-            <div class="table-wrap" style="max-height:420px;overflow-y:auto">
-              <table class="data-table" style="font-size:12px">
-                <thead style="position:sticky;top:0;z-index:2;background:var(--card)"><tr>
-                  <th>#</th>
-                  <th>تاريخ الدفعة</th>
-                  <th>القسط الشهري</th>
-                  <th>الأصل المسدَّد</th>
-                  <th>الفائدة</th>
-                  <th>الرصيد المتبقي</th>
-                  <th>نسبة الفائدة من القسط</th>
-                </tr></thead>
-                <tbody id="amort-tbody"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <style>@media(max-width:768px){.add-form-grid{grid-template-columns:1fr !important}#add-loan-summary{position:static !important}}</style>
     </div>
 
@@ -5138,7 +5072,7 @@ const sukukData = investments.filter(x=>x.type==='صك');
 document.getElementById('sukuk-tbody').innerHTML = sukukData.map((d,i)=>`
   <tr>
     <td>${d.name}</td>
-    <td>${platformPill(d.platform||"")}</td>
+    <td style="color:#8899bb">${d.platform}</td>
     <td class="mono">${fmtNum(d.amount)}</td>
     <td>${fmtPct(d.ret_pct)}</td>
     <td class="mono ${d.ret_val>=0?'up':'dn'}">${fmtNum(d.ret_val,2)}</td>
@@ -5152,7 +5086,7 @@ const fundsData = investments.filter(x=>x.type==='صندوق');
 document.getElementById('funds-tbody').innerHTML = fundsData.map((d,i)=>`
   <tr>
     <td>${d.name}</td>
-    <td>${platformPill(d.platform||"")}</td>
+    <td style="color:#8899bb">${d.platform}</td>
     <td class="mono">${fmtNum(d.amount)}</td>
     <td>${fmtPct(d.ret_pct)}</td>
     <td class="mono ${d.ret_val>=0?'up':'dn'}">${fmtNum(d.ret_val,2)}</td>
@@ -5189,7 +5123,7 @@ function renderAll(){
       <td style="color:#8899bb">${i+1}</td>
       <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${d.name}">${d.name}</td>
       <td>${typePill(d.type)}</td>
-      <td>${platformPill(d.platform||"")}</td>
+      <td style="color:#8899bb">${d.platform}</td>
       <td class="mono">${fmtNum(d.amount,2)}</td>
       <td>${fmtPct(d.ret_pct)}</td>
       <td class="mono ${(d.ret_val||0)>=0?'up':'dn'}">${fmtNum(d.ret_val,2)}</td>
@@ -5944,7 +5878,7 @@ function renderStocks() {
         <td>${chgCell}</td>
         <td>${mktCell}</td>
         <td>${pnlCell}</td>
-        <td>${platformPill(d.platform||'')}</td>
+        <td style="color:#8899bb">${d.platform||'—'}</td>
         <td>${riskPill(d.risk)}</td>
         <td>${statusPill(d.status)}</td>
       </tr>`;
@@ -6150,9 +6084,8 @@ function gf(id) { return parseFloat(g(id)) || 0; }
 // Auto-calculate financial values
 function calcAuto() {
   const amount = gf('f-amount');
-  const fees   = gf('f-fees');
-  const tax    = gf('f-tax');
-  const retPctMin = gf('f-ret-pct-min');
+  const fees = gf('f-fees');
+  const tax = gf('f-tax');
   const marketVal = gf('f-market-val');
   const retPct = gf('f-ret-pct');
   let retVal = gf('f-ret-val');
@@ -7076,26 +7009,6 @@ function initOppsYearFilter() {
   sel.innerHTML = opts;
 }
 
-// ── ألوان المنصات ────────────────────────────────────────────────────────────
-function platformPill(name) {
-  if (!name) return '<span style="color:var(--muted)">—</span>';
-  var map = {
-    'ترميز':             { bg: 'rgba(99,102,241,0.15)',  border: 'rgba(99,102,241,0.35)',  color: '#818cf8' },
-    'منافع':             { bg: 'rgba(16,185,129,0.15)',  border: 'rgba(16,185,129,0.35)',  color: '#34d399' },
-    'دراية':             { bg: 'rgba(245,158,11,0.15)',  border: 'rgba(245,158,11,0.35)',  color: '#fbbf24' },
-    'ابيان':             { bg: 'rgba(239,68,68,0.15)',   border: 'rgba(239,68,68,0.35)',   color: '#f87171' },
-    'عوائد':             { bg: 'rgba(6,182,212,0.15)',   border: 'rgba(6,182,212,0.35)',   color: '#22d3ee' },
-    'منصة الأهلي':       { bg: 'rgba(34,197,94,0.15)',  border: 'rgba(34,197,94,0.35)',   color: '#4ade80' },
-    'رياض المالية':      { bg: 'rgba(168,85,247,0.15)', border: 'rgba(168,85,247,0.35)',  color: '#c084fc' },
-    'الراجحي المالية':   { bg: 'rgba(251,146,60,0.15)', border: 'rgba(251,146,60,0.35)',  color: '#fb923c' },
-    'بنك البلاد':        { bg: 'rgba(20,184,166,0.15)', border: 'rgba(20,184,166,0.35)',  color: '#2dd4bf' },
-    'إتقان':             { bg: 'rgba(217,70,239,0.15)', border: 'rgba(217,70,239,0.35)',  color: '#e879f9' },
-    'Interactive Brokers': { bg: 'rgba(59,130,246,0.15)', border: 'rgba(59,130,246,0.35)', color: '#60a5fa' },
-  };
-  var s = map[name] || { bg: 'rgba(136,153,187,0.12)', border: 'rgba(136,153,187,0.25)', color: '#8899bb' };
-  return '<span style="background:' + s.bg + ';border:1px solid ' + s.border + ';color:' + s.color + ';border-radius:8px;padding:2px 9px;font-size:11px;font-weight:600;white-space:nowrap">' + name + '</span>';
-}
-
 function renderOppsFiltered() {
   var year   = (document.getElementById('opps-filter-year')   || {}).value   || '';
   var status = (document.getElementById('opps-filter-status') || {}).value   || '';
@@ -7137,11 +7050,11 @@ function renderOppsFiltered() {
       var realIdx = inv.indexOf(d);
       return '<tr>' +
         '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + d.name + '</td>' +
-        '<td>' + platformPill(d.platform) + '</td>' +
+        '<td style="color:#8899bb">' + d.platform + '</td>' +
         '<td class="mono">' + fmtNum(d.amount) + '</td>' +
         '<td>' + fmtPct(d.ret_pct) + '</td>' +
         '<td class="mono ' + (d.ret_val >= 0 ? 'up' : 'dn') + '">' + fmtNum(d.ret_val, 2) + '</td>' +
-        '<td style="color:var(--muted);font-size:11px">' + (d.date_in || '—') + '</td>' +
+        '<td style="color:#8899bb;font-size:11px">' + (d.date_out || '—') + '</td>' +
         '<td>' + riskPill(d.risk) + '</td>' +
         '<td>' + statusPill(d.status) + '</td>' +
         '<td><button class="loan-action-btn" onclick="openEditOpp(' + realIdx + ')">✏️</button></td>' +
@@ -7152,11 +7065,11 @@ function renderOppsFiltered() {
       var realIdx = inv.indexOf(d);
       return '<tr>' +
         '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + d.name + '</td>' +
-        '<td>' + platformPill(d.platform) + '</td>' +
+        '<td style="color:#8899bb">' + d.platform + '</td>' +
         '<td class="mono">' + fmtNum(d.amount) + '</td>' +
         '<td>' + fmtPct(d.ret_pct) + '</td>' +
         '<td class="mono ' + (d.ret_val >= 0 ? 'up' : 'dn') + '">' + fmtNum(d.ret_val, 2) + '</td>' +
-        '<td style="color:var(--muted);font-size:11px">' + (d.date_in || '—') + '</td>' +
+        '<td class="mono" style="color:var(--gold)">' + fmtNum(d.total, 2) + '</td>' +
         '<td>' + riskPill(d.risk) + '</td>' +
         '<td>' + statusPill(d.status) + '</td>' +
         '<td><button class="loan-action-btn" onclick="openEditOpp(' + realIdx + ')">✏️</button></td>' +
@@ -7592,25 +7505,8 @@ function calcAddLoan() {
     totalInt = 0;
   }
 
-  // حساب المتبقي الحقيقي بناءً على جدول الاستهلاك
-  var remaining = principal;
-  var pct = 0;
-  if (rate > 0 && months > 0 && paid > 0) {
-    // paid هو المبلغ المسدد فعلاً — نحسب كم قسط سُدِّد
-    var instPaid = Math.round(paid / pmt);
-    var bal = principal;
-    var rr = (rate/100)/12;
-    for (var qi=0; qi < instPaid && qi < months; qi++) {
-      var intQ = bal * rr;
-      bal -= (pmt - intQ);
-      if (bal < 0) bal = 0;
-    }
-    remaining = Math.max(0, bal);
-    pct = principal > 0 ? Math.min(100, ((principal - remaining) / principal * 100)) : 0;
-  } else if (months > 0) {
-    remaining = Math.max(0, principal - paid);
-    pct = principal > 0 ? Math.min(100,(paid/principal)*100) : 0;
-  }
+  var remaining = Math.max(0, principal - paid);
+  var pct = principal > 0 ? Math.min(100,(paid/principal)*100) : 0;
 
   set('al-c-pmt', pmt > 0 ? fmt(pmt) : '—');
   set('al-c-interest', totalInt > 0 ? fmt(totalInt) : '—');
@@ -7623,6 +7519,7 @@ function calcAddLoan() {
     var endDate = new Date(startVal);
     endDate.setMonth(endDate.getMonth() + months);
     set('al-d-end-date', endDate.toLocaleDateString('ar-SA-u-nu-latn',{year:'numeric',month:'long'}));
+    // update end date field if visible
     var endFld = document.getElementById('al-end');
     if (endFld) endFld.value = endDate.toISOString().split('T')[0];
   } else { set('al-d-end-date','—'); }
@@ -7631,11 +7528,6 @@ function calcAddLoan() {
   var pctEl = document.getElementById('al-progress-pct');
   if (bar) bar.style.width = pct.toFixed(0) + '%';
   if (pctEl) pctEl.textContent = pct.toFixed(0) + '%';
-
-  // بناء جدول الاستهلاك
-  if (typeof buildAmortizationTable === 'function') {
-    buildAmortizationTable(principal, rate, months, startVal);
-  }
 }
 
 function saveAddLoan() {
@@ -9560,104 +9452,6 @@ function _parseCSVLine(line) {
   }
   result.push(cur);
   return result;
-}
-
-
-// ══════════════════════════════════════════════════════
-// جدول الاستهلاك — Amortization Schedule
-// ══════════════════════════════════════════════════════
-
-var _amortVisible = true;
-
-function toggleAmortTable() {
-  _amortVisible = !_amortVisible;
-  var wrap = document.getElementById('amort-table-wrap');
-  var icon = document.getElementById('amort-toggle-icon');
-  if (wrap) wrap.style.display = _amortVisible ? '' : 'none';
-  if (icon) icon.textContent = _amortVisible ? '▼ إخفاء' : '▶ عرض';
-}
-
-function buildAmortizationTable(principal, annualRate, months, startDate) {
-  var section  = document.getElementById('amort-section');
-  var tbody    = document.getElementById('amort-tbody');
-  var countEl  = document.getElementById('amort-count');
-  if (!section || !tbody) return;
-
-  if (!principal || !months || months <= 0) {
-    section.style.display = 'none';
-    return;
-  }
-
-  section.style.display = 'block';
-
-  var r         = annualRate > 0 ? (annualRate / 100) / 12 : 0;
-  var pmt       = r > 0
-    ? principal * (r * Math.pow(1+r,months)) / (Math.pow(1+r,months) - 1)
-    : principal / months;
-
-  var balance   = principal;
-  var rows      = [];
-  var totalPay  = 0, totalPrinc = 0, totalInt = 0;
-  var fmt = function(n){ return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); };
-
-  var start = startDate ? new Date(startDate) : new Date();
-
-  for (var i = 1; i <= months; i++) {
-    var interest  = balance * r;
-    var princPart = pmt - interest;
-    if (i === months) princPart = balance; // آخر قسط: سداد الرصيد كاملاً
-    balance -= princPart;
-    if (balance < 0.01) balance = 0;
-
-    totalPay   += pmt;
-    totalPrinc += princPart;
-    totalInt   += interest;
-
-    // تاريخ الدفعة
-    var dDate = new Date(start);
-    dDate.setMonth(dDate.getMonth() + i);
-    var dateStr = dDate.toLocaleDateString('ar-SA-u-nu-latn',{year:'numeric',month:'short'});
-
-    rows.push({
-      num:       i,
-      date:      dateStr,
-      pmt:       pmt,
-      princPart: princPart,
-      interest:  interest,
-      balance:   balance,
-      intPct:    pmt > 0 ? (interest / pmt * 100) : 0
-    });
-  }
-
-  // تحديث ملخص
-  var set = function(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; };
-  set('amort-total-pay',       fmt(totalPay)   + ' ر.س');
-  set('amort-total-principal', fmt(totalPrinc) + ' ر.س');
-  set('amort-total-interest',  fmt(totalInt)   + ' ر.س');
-  set('amort-cost-pct',        (totalInt/principal*100).toFixed(2) + '%');
-  if (countEl) countEl.textContent = months + ' قسط';
-
-  // بناء الجدول
-  tbody.innerHTML = rows.map(function(r) {
-    var intColor = r.intPct > 50 ? 'var(--red)' : r.intPct > 25 ? 'var(--orange)' : 'var(--green)';
-    var isLast   = r.num === months;
-    return '<tr style="' + (isLast ? 'background:rgba(201,168,76,0.06)' : '') + '">' +
-      '<td style="color:var(--muted);font-size:11px">' + r.num + '</td>' +
-      '<td style="font-size:11px;color:var(--muted)">' + r.date + '</td>' +
-      '<td class="mono" style="color:var(--gold);font-weight:700">' + fmt(r.pmt) + '</td>' +
-      '<td class="mono" style="color:var(--cyan)">' + fmt(r.princPart) + '</td>' +
-      '<td class="mono" style="color:var(--red)">' + fmt(r.interest) + '</td>' +
-      '<td class="mono" style="color:var(--white);font-weight:700">' + (r.balance > 0 ? fmt(r.balance) : '<span style="color:var(--green)">✅ مسدَّد</span>') + '</td>' +
-      '<td>' +
-        '<div style="display:flex;align-items:center;gap:6px">' +
-          '<div style="height:6px;width:60px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden">' +
-            '<div style="height:100%;width:' + r.intPct.toFixed(0) + '%;background:' + intColor + ';border-radius:3px"></div>' +
-          '</div>' +
-          '<span style="font-size:10px;color:' + intColor + '">' + r.intPct.toFixed(1) + '%</span>' +
-        '</div>' +
-      '</td>' +
-      '</tr>';
-  }).join('');
 }
 
 
