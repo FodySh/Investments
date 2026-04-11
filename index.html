@@ -1595,7 +1595,7 @@
             <span class="section-title">🇸🇦 الأسهم السعودية</span>
             <div style="display:flex;align-items:center;gap:6px">
               <span class="section-count" id="stocks-count-badge">—</span>
-              <button onclick="exportStocksCSV('sa')" title="تصدير CSV" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--green);cursor:pointer;font-family:inherit;white-space:nowrap">⬇️ CSV</button>
+              <button onclick="exportStocksExcel('sa')" title="تصدير Excel" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--green);cursor:pointer;font-family:inherit;white-space:nowrap">⬇️ Excel</button>
               <label title="استيراد Excel" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--cyan);cursor:pointer;white-space:nowrap">⬆️ Excel<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importStocksExcel(event,'sa')"></label>
             </div>
           </div>
@@ -1628,7 +1628,7 @@
             <span class="section-title">🇺🇸 الأسهم الأمريكية</span>
             <div style="display:flex;align-items:center;gap:6px">
               <span class="section-count" id="us-stocks-count-badge">—</span>
-              <button onclick="exportStocksCSV('us')" title="تصدير CSV" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--green);cursor:pointer;font-family:inherit;white-space:nowrap">⬇️ CSV</button>
+              <button onclick="exportStocksExcel('us')" title="تصدير Excel" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--green);cursor:pointer;font-family:inherit;white-space:nowrap">⬇️ Excel</button>
               <label title="استيراد Excel" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--cyan);cursor:pointer;white-space:nowrap">⬆️ Excel<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importStocksExcel(event,'us')"></label>
             </div>
           </div>
@@ -1725,8 +1725,8 @@
             <span class="section-title">📜 سجل الصكوك والمرابحات</span>
             <div style="display:flex;align-items:center;gap:6px">
               <span class="section-count" id="sukuk-count-badge">—</span>
-              <button onclick="exportOppsCSV('sukuk')" title="تصدير CSV" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--green);cursor:pointer;font-family:inherit;white-space:nowrap">⬇️ CSV</button>
-              <label title="استيراد CSV" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--cyan);cursor:pointer;white-space:nowrap">⬆️ CSV<input type="file" accept=".csv" style="display:none" onchange="importOppsCSV(event,'sukuk')"></label>
+              <button onclick="exportOppsExcel('sukuk')" title="تصدير Excel" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--green);cursor:pointer;font-family:inherit;white-space:nowrap">⬇️ Excel</button>
+              <label title="استيراد Excel" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--cyan);cursor:pointer;white-space:nowrap">⬆️ Excel<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importOppsExcel(event,'sukuk')"></label>
             </div>
           </div>
           <div class="table-wrap">
@@ -1753,8 +1753,8 @@
             <span class="section-title">💼 سجل الصناديق الاستثمارية</span>
             <div style="display:flex;align-items:center;gap:6px">
               <span class="section-count" id="funds-count-badge2">—</span>
-              <button onclick="exportOppsCSV('funds')" title="تصدير CSV" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--green);cursor:pointer;font-family:inherit;white-space:nowrap">⬇️ CSV</button>
-              <label title="استيراد CSV" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--cyan);cursor:pointer;white-space:nowrap">⬆️ CSV<input type="file" accept=".csv" style="display:none" onchange="importOppsCSV(event,'funds')"></label>
+              <button onclick="exportOppsExcel('funds')" title="تصدير Excel" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--green);cursor:pointer;font-family:inherit;white-space:nowrap">⬇️ Excel</button>
+              <label title="استيراد Excel" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--cyan);cursor:pointer;white-space:nowrap">⬆️ Excel<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importOppsExcel(event,'funds')"></label>
             </div>
           </div>
           <div class="table-wrap">
@@ -7183,7 +7183,7 @@ function saveAddStock() {
   var pnl       = mktVal > 0 ? mktVal - cost : 0;
 
   var newStock = {
-    name:     shares + ' سهم في ' + name,
+    name:     name,
     type:     'سهم',
     platform: platform,
     ticker:   ticker,
@@ -7215,6 +7215,13 @@ function saveAddStock() {
     showToast('✅ تم تحديث السهم: ' + name);
   } else {
     window.__investments.push(newStock);
+    // أضف السعر الحالي لـ STOCK_PRICES فوراً حتى يظهر في الجدول
+    if (ticker && currPrice > 0) {
+      if (!STOCK_PRICES[ticker]) STOCK_PRICES[ticker] = {};
+      STOCK_PRICES[ticker].price = currPrice;
+      STOCK_PRICES[ticker].chg   = 0;
+      STOCK_PRICES[ticker].color = '';
+    }
     showToast('✅ تم حفظ السهم: ' + name);
   }
 
@@ -9479,6 +9486,157 @@ function filterStocks(market, status) {
   // إعادة رسم الجدول
   if (market === 'sa') renderStocks();
   else                 renderUsStocksTable();
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+// تصدير الأسهم والصكوك والصناديق بصيغة Excel
+// ══════════════════════════════════════════════════════════════════
+
+function _ensureXLSX(callback) {
+  if (typeof XLSX !== 'undefined') { callback(); return; }
+  var s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+  s.onload  = callback;
+  s.onerror = function() { showToast('❌ فشل تحميل مكتبة Excel'); };
+  document.head.appendChild(s);
+}
+
+function _downloadXLSX(filename, data, headers) {
+  _ensureXLSX(function() {
+    var ws  = XLSX.utils.json_to_sheet(data, { header: headers });
+    var wb  = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'البيانات');
+    XLSX.writeFile(wb, filename);
+  });
+}
+
+function exportStocksExcel(market) {
+  var inv = window.__investments || investments;
+  var data = inv.filter(function(x) {
+    return x.type === 'سهم' && (market === 'us' ? x.market === 'us' : x.market !== 'us');
+  });
+  if (!data.length) { showToast('لا توجد أسهم للتصدير'); return; }
+
+  var rows = data.map(function(d) {
+    return {
+      'الاسم':           d.name || '',
+      'الرمز':           d.ticker || '',
+      'عدد الأسهم':     d.shares || '',
+      'التكلفة (ر.س)':  d.amount || 0,
+      'متوسط سعر الشراء': (d.shares && d.amount) ? (d.amount/d.shares).toFixed(2) : '',
+      'المنصة':          d.platform || '',
+      'المخاطرة':        d.risk || '',
+      'الحالة':          d.status || '',
+      'تاريخ الشراء':   d.date_in || '',
+      'تاريخ الخروج':   d.date_out || '',
+      'السوق':           market === 'us' ? 'أمريكي' : 'سعودي',
+    };
+  });
+
+  var fname = (market === 'us' ? 'أسهم_أمريكية' : 'أسهم_سعودية') + '_' + new Date().toISOString().slice(0,10) + '.xlsx';
+  _downloadXLSX(fname, rows);
+  showToast('✅ تم تصدير ' + data.length + ' سهم');
+}
+
+function exportOppsExcel(type) {
+  var inv = window.__investments || investments;
+  var typeMap = { sukuk: ['صك','مرابحة','سند','وديعة'], funds: ['صندوق'] };
+  var types = typeMap[type] || [];
+  var data  = inv.filter(function(x){ return types.includes(x.type); });
+  if (!data.length) { showToast('لا توجد بيانات للتصدير'); return; }
+
+  var rows = data.map(function(d) {
+    return {
+      'الاسم':            d.name || '',
+      'النوع':            d.type || '',
+      'المنصة':           d.platform || '',
+      'المبلغ (ر.س)':    d.amount || 0,
+      'مصدر رأس المال':  d.capital_src || '',
+      'العائد %':         d.ret_pct ? (d.ret_pct*100).toFixed(2) : '',
+      'العائد ر.س':      d.ret_val || '',
+      'المجموع المتوقع': d.total || '',
+      'المدة':            d.duration || '',
+      'تاريخ الدخول':    d.date_in || '',
+      'تاريخ الخروج':    d.date_out || '',
+      'التوزيع':          d.dist || '',
+      'المخاطرة':         d.risk || '',
+      'الحالة':           d.status || '',
+    };
+  });
+
+  var label = type === 'sukuk' ? 'صكوك' : 'صناديق';
+  var fname = label + '_' + new Date().toISOString().slice(0,10) + '.xlsx';
+  _downloadXLSX(fname, rows);
+  showToast('✅ تم تصدير ' + data.length + ' ' + label);
+}
+
+// ══ استيراد الصكوك والصناديق من Excel ════════════════════════════════════
+function importOppsExcel(event, type) {
+  var file = event.target.files[0];
+  if (!file) return;
+
+  _ensureXLSX(function() {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var data     = new Uint8Array(e.target.result);
+        var workbook = XLSX.read(data, { type: 'array' });
+        var sheet    = workbook.Sheets[workbook.SheetNames[0]];
+        var rows     = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+        if (!rows.length) { showToast('❌ الملف فارغ'); return; }
+
+        var inv      = window.__investments || investments;
+        var imported = 0, skipped = 0;
+        var defaultType = type === 'sukuk' ? 'صك' : 'صندوق';
+
+        var parseNum = function(v) {
+          if (!v) return 0;
+          return parseFloat(v.toString().replace(/[,،\s%]/g,'')) || 0;
+        };
+
+        rows.forEach(function(row) {
+          var name = (row['الاسم'] || row['name'] || '').toString().trim();
+          if (!name) return;
+          if (inv.some(function(x){ return x.name === name; })) { skipped++; return; }
+
+          inv.push({
+            name:        name,
+            type:        (row['النوع'] || defaultType).toString().trim(),
+            platform:    (row['المنصة'] || row['platform'] || '').toString().trim(),
+            amount:      parseNum(row['المبلغ (ر.س)'] || row['المبلغ'] || row['amount']),
+            capital_src: (row['مصدر رأس المال'] || '').toString().trim(),
+            ret_pct:     parseNum(row['العائد %']) / 100,
+            ret_val:     parseNum(row['العائد ر.س'] || row['ret_val']),
+            total:       parseNum(row['المجموع المتوقع'] || row['total']),
+            duration:    (row['المدة'] || '').toString().trim(),
+            date_in:     (row['تاريخ الدخول'] || row['date_in'] || '').toString().trim(),
+            date_out:    (row['تاريخ الخروج'] || row['date_out'] || null),
+            dist:        (row['التوزيع'] || 'عند الاستحقاق').toString().trim(),
+            risk:        (row['المخاطرة'] || 'منخفض').toString().trim(),
+            status:      (row['الحالة'] || 'نشطة').toString().trim(),
+          });
+          imported++;
+        });
+
+        if (imported > 0) {
+          triggerSync('investments');
+          if (type === 'sukuk') renderSukuk(); else renderFunds();
+          renderAll();
+          showToast('✅ تم استيراد ' + imported + ' سجل' + (skipped ? ' (تجاهل '+skipped+' مكرر)' : ''));
+        } else if (skipped > 0) {
+          showToast('⚠️ كل البيانات موجودة مسبقاً في المحفظة');
+        } else {
+          showToast('⚠️ لم يُضف شيء — تحقق من أسماء الأعمدة');
+        }
+      } catch(err) {
+        showToast('❌ خطأ: ' + err.message);
+      }
+      event.target.value = '';
+    };
+    reader.readAsArrayBuffer(file);
+  });
 }
 
 
