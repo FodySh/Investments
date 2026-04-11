@@ -9355,17 +9355,16 @@ function renderLoans() {
   const emptyEl     = document.getElementById('loans-empty');
   const cardsEl     = document.getElementById('loans-cards');
 
-  const _ld    = window.loansData || loansData || [];
-  const total    = _ld.reduce((s,l) => s + (l.total_amount || l.principal || 0), 0);
-  const rem      = _ld.reduce((s,l) => s + (l.remaining || 0), 0);
-  const paid     = _ld.reduce((s,l) => s + (l.paid_amount || 0), 0);
-  const monthly  = _ld.reduce((s,l) => l.status === 'نشط' ? s + (l.installment || 0) : s, 0);
+  const total    = loansData.reduce((s,l) => s + (l.total_amount || l.principal || 0), 0);
+  const rem      = loansData.reduce((s,l) => s + (l.remaining || 0), 0);
+  const paid     = loansData.reduce((s,l) => s + (l.paid_amount || 0), 0);
+  const monthly  = loansData.reduce((s,l) => l.status === 'نشط' ? s + (l.installment || 0) : s, 0);
 
   if (kpiTotal)   kpiTotal.textContent   = total.toLocaleString('en-US', {maximumFractionDigits:0});
   if (kpiRem)     kpiRem.textContent     = rem.toLocaleString('en-US', {maximumFractionDigits:0});
   if (kpiPaid)    kpiPaid.textContent    = paid.toLocaleString('en-US', {maximumFractionDigits:0});
   if (kpiMonthly) kpiMonthly.textContent = monthly.toLocaleString('en-US', {maximumFractionDigits:0});
-  if (countEl)    countEl.textContent    = _ld.length + ' قرض';
+  if (countEl)    countEl.textContent    = loansData.length + ' قرض';
 
   if (!cardsEl) return;
   if (loansData.length === 0) {
@@ -9377,7 +9376,7 @@ function renderLoans() {
 
   const statusColor = { 'نشط':'rgba(76,175,130,0.15);color:var(--green)', 'مسدَّد':'rgba(136,153,187,0.15);color:var(--muted)', 'متأخر':'rgba(255,77,77,0.15);color:var(--red)', 'مجمَّد':'rgba(255,152,0,0.15);color:var(--orange)' };
 
-  cardsEl.innerHTML = _ld.map((l, i) => {
+  cardsEl.innerHTML = loansData.map((l, i) => {
     const pct = l.total_amount > 0 ? Math.min(100, (l.paid_amount || 0) / l.total_amount * 100) : 0;
     const sc = statusColor[l.status] || statusColor['نشط'];
     return `<div class="loan-card">
@@ -9644,9 +9643,8 @@ function setDebtFilter(f, btn) {
 }
 
 function renderDebts() {
-  const _dd = window.debtsData || debtsData || [];
-  const oweTotal    = _dd.filter(d=>d.direction==='owe'&&d.status!=='مسوَّى').reduce((s,d)=>s+(d.remaining||d.amount||0),0);
-  const lendTotal   = _dd.filter(d=>d.direction==='lend'&&d.status!=='مسوَّى').reduce((s,d)=>s+(d.remaining||d.amount||0),0);
+  const oweTotal    = debtsData.filter(d=>d.direction==='owe'&&d.status!=='مسوَّى').reduce((s,d)=>s+(d.remaining||d.amount||0),0);
+  const lendTotal   = debtsData.filter(d=>d.direction==='lend'&&d.status!=='مسوَّى').reduce((s,d)=>s+(d.remaining||d.amount||0),0);
   const net         = lendTotal - oweTotal;
 
   const eOwe  = document.getElementById('debts-owe');
@@ -9662,9 +9660,9 @@ function renderDebts() {
   if(eLend) eLend.textContent = lendTotal.toLocaleString('en-US',{maximumFractionDigits:0});
   if(eNet)  { eNet.textContent = Math.abs(net).toLocaleString('en-US',{maximumFractionDigits:0}); eNet.style.color = net >= 0 ? 'var(--green)' : 'var(--red)'; }
   if(eNetL) eNetL.textContent = net >= 0 ? '✅ رصيدك إيجابي' : '⚠️ رصيدك سلبي';
-  if(eCnt)  eCnt.textContent  = _dd.length;
+  if(eCnt)  eCnt.textContent  = debtsData.length;
 
-  let filtered = _dd.map((d,i) => ({...d,_idx:i}));
+  let filtered = debtsData.map((d,i) => ({...d,_idx:i}));
   if (currentDebtFilter === 'owe')     filtered = filtered.filter(d => d.direction === 'owe' && d.status !== 'مسوَّى');
   if (currentDebtFilter === 'lend')    filtered = filtered.filter(d => d.direction === 'lend' && d.status !== 'مسوَّى');
   if (currentDebtFilter === 'settled') filtered = filtered.filter(d => d.status === 'مسوَّى');
@@ -9672,7 +9670,7 @@ function renderDebts() {
   if(eLstC) eLstC.textContent = filtered.length + ' معاملة';
   if(!cardsEl) return;
 
-  if (_dd.length === 0) {
+  if (debtsData.length === 0) {
     if(emptyEl) emptyEl.style.display = 'block';
     cardsEl.innerHTML = '';
     return;
@@ -10015,24 +10013,20 @@ function _loadData(uid) {
     }
     return _read(uid, "loans");
   }).then(function(loans) {
-    if (loans) {
-      if (!Array.isArray(window.loansData)) window.loansData = [];
-      window.loansData.length = 0;
-      loans.forEach(function(r){ window.loansData.push(r); });
-      loansData = window.loansData;
+    if (loans && loans.length > 0) {
+      loansData.length = 0;
+      loans.forEach(function(r){ loansData.push(r); });
     } else if (isNewUser) {
-      window.loansData = []; loansData = [];
+      loansData.length = 0;
       _write(uid, "loans", []);
     }
     return _read(uid, "debts");
   }).then(function(debts) {
-    if (debts) {
-      if (!Array.isArray(window.debtsData)) window.debtsData = [];
-      window.debtsData.length = 0;
-      debts.forEach(function(r){ window.debtsData.push(r); });
-      debtsData = window.debtsData;
+    if (debts && debts.length > 0) {
+      debtsData.length = 0;
+      debts.forEach(function(r){ debtsData.push(r); });
     } else if (isNewUser) {
-      window.debtsData = []; debtsData = [];
+      debtsData.length = 0;
       _write(uid, "debts", []);
     }
     return _read(uid, "dividends");
