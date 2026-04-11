@@ -5968,9 +5968,9 @@ function showPage(id, navEl, mobileTitle, noScroll){
   if (id === 'add-loan')  { calcAddLoan(); }
   if (id === 'add')       { setTimeout(function(){ populateCapitalSrcSelect(); populatePlatformSelects(); }, 100); }
   if (id === 'add-debt')  { updateDebtDirectionLabel(); calcAddDebt(); }
-  if (id === 'loans') setTimeout(function(){ renderLoans(); }, 50);
-  if (id === 'debts') setTimeout(function(){ renderDebts(); if(typeof renderJamaa==='function') renderJamaa(); }, 50);
-  if (id === 'db')    setTimeout(function(){ dbRender(); }, 50);
+  if (id === 'loans') setTimeout(function(){ renderLoans(); }, 300);
+  if (id === 'debts') setTimeout(function(){ renderDebts(); if(typeof renderJamaa==='function') renderJamaa(); }, 300);
+  if (id === 'db')    setTimeout(function(){ dbRender(); }, 300);
   if (id === 'dashboard') { initDashboardYears(); renderDashboard(); }
 }
 
@@ -10049,6 +10049,8 @@ function _loadData(uid) {
     if (typeof renderStocks === "function") renderStocks();
     if (typeof renderLoans  === "function") renderLoans();
     if (typeof renderDebts  === "function") renderDebts();
+    // إذا كانت قاعدة البيانات مفتوحة، أعد رسمها
+    if (window.__currentPage === 'db' && typeof dbRender === 'function') dbRender();
     _badge("synced");
 
     // Realtime listener
