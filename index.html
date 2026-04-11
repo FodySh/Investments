@@ -9890,9 +9890,10 @@ function _write(uid, col, data) {
 
 function _read(uid, col) {
   return _ref(uid, col).get().then(function(snap) {
-    if (!snap.exists) return null;
+    if (!snap.exists) { console.log('[_read]', col, '= null (not found)'); return null; }
     var d = snap.data();
-    if (d.uid && d.uid !== uid) return null;
+    console.log('[_read]', col, 'raw keys:', Object.keys(d), 'data length:', Array.isArray(d.data)?d.data.length:'not array');
+    if (d.uid && d.uid !== uid) { console.warn('[_read]', col, 'uid mismatch'); return null; }
     return d.data || null;
   }).catch(function(e) { console.warn("read:", e.message); return null; });
 }
