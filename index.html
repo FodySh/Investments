@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -5908,7 +5909,15 @@ function showPage(id, navEl, mobileTitle, noScroll){
   if (id === 'funds') { id = 'sukuk'; window.__currentPage = 'sukuk'; }
   else { window.__currentPage = id; }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
+  var _pg = document.getElementById('page-'+id);
+  if (!_pg) {
+    console.warn('showPage: page not found for id:', id);
+    // fallback: show dashboard
+    var dash = document.getElementById('page-dashboard');
+    if (dash) dash.classList.add('active');
+    return;
+  }
+  _pg.classList.add('active');
 
   // Desktop sidebar
   document.querySelectorAll('.sidebar .nav-item').forEach(n=>n.classList.remove('active'));
@@ -5952,7 +5961,6 @@ function showPage(id, navEl, mobileTitle, noScroll){
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
   }
-  if (id === 'db') dbRender();
   if (id === 'stocks') { renderStocks(); renderUsStocksTable(); }
   if (id === 'sukuk')  { renderSukuk(); renderFunds(); }
   if (id === 'funds')  { renderSukuk(); renderFunds(); setTimeout(function(){ switchOppsTab('funds'); }, 50); }
@@ -5960,8 +5968,9 @@ function showPage(id, navEl, mobileTitle, noScroll){
   if (id === 'add-loan')  { calcAddLoan(); }
   if (id === 'add')       { setTimeout(function(){ populateCapitalSrcSelect(); populatePlatformSelects(); }, 100); }
   if (id === 'add-debt')  { updateDebtDirectionLabel(); calcAddDebt(); }
-  if (id === 'loans') renderLoans();
-  if (id === 'debts') renderDebts();
+  if (id === 'loans') setTimeout(function(){ renderLoans(); }, 50);
+  if (id === 'debts') setTimeout(function(){ renderDebts(); if(typeof renderJamaa==='function') renderJamaa(); }, 50);
+  if (id === 'db')    setTimeout(function(){ dbRender(); }, 50);
   if (id === 'dashboard') { initDashboardYears(); renderDashboard(); }
 }
 
