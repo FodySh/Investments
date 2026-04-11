@@ -5911,13 +5911,13 @@ function showPage(id, navEl, mobileTitle, noScroll){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   var _pg = document.getElementById('page-'+id);
   if (!_pg) {
-    console.warn('showPage: page not found for id:', id);
-    // fallback: show dashboard
+    console.warn('[showPage] page-'+id+' NOT FOUND in DOM');
     var dash = document.getElementById('page-dashboard');
     if (dash) dash.classList.add('active');
     return;
   }
   _pg.classList.add('active');
+  console.log('[showPage] page-'+id+' className:', _pg.className, 'display:', window.getComputedStyle(_pg).display);
 
   // Desktop sidebar
   document.querySelectorAll('.sidebar .nav-item').forEach(n=>n.classList.remove('active'));
@@ -5968,9 +5968,9 @@ function showPage(id, navEl, mobileTitle, noScroll){
   if (id === 'add-loan')  { calcAddLoan(); }
   if (id === 'add')       { setTimeout(function(){ populateCapitalSrcSelect(); populatePlatformSelects(); }, 100); }
   if (id === 'add-debt')  { updateDebtDirectionLabel(); calcAddDebt(); }
-  if (id === 'loans') setTimeout(function(){ renderLoans(); }, 300);
-  if (id === 'debts') setTimeout(function(){ renderDebts(); if(typeof renderJamaa==='function') renderJamaa(); }, 300);
-  if (id === 'db')    setTimeout(function(){ dbRender(); }, 300);
+  if (id === 'loans') { renderLoans(); }
+  if (id === 'debts') { renderDebts(); if(typeof renderJamaa==='function') renderJamaa(); }
+  if (id === 'db')    { dbRender(); }
   if (id === 'dashboard') { initDashboardYears(); renderDashboard(); }
 }
 
@@ -9890,10 +9890,9 @@ function _write(uid, col, data) {
 
 function _read(uid, col) {
   return _ref(uid, col).get().then(function(snap) {
-    if (!snap.exists) { console.log('[_read]', col, '= null (not found)'); return null; }
+    if (!snap.exists) return null;
     var d = snap.data();
-    console.log('[_read]', col, 'raw keys:', Object.keys(d), 'data length:', Array.isArray(d.data)?d.data.length:'not array');
-    if (d.uid && d.uid !== uid) { console.warn('[_read]', col, 'uid mismatch'); return null; }
+    if (d.uid && d.uid !== uid) return null;
     return d.data || null;
   }).catch(function(e) { console.warn("read:", e.message); return null; });
 }
@@ -10050,8 +10049,12 @@ function _loadData(uid) {
     if (typeof renderStocks === "function") renderStocks();
     if (typeof renderLoans  === "function") renderLoans();
     if (typeof renderDebts  === "function") renderDebts();
-    // إذا كانت قاعدة البيانات مفتوحة، أعد رسمها
-    if (window.__currentPage === 'db' && typeof dbRender === 'function') dbRender();
+    if (typeof dbRender     === "function") dbRender();
+    // إذا المستخدم على صفحة معينة، أعد رسمها
+    var cp = window.__currentPage;
+    if (cp === 'loans'  && typeof renderLoans === "function") renderLoans();
+    if (cp === 'debts'  && typeof renderDebts === "function") { renderDebts(); if(typeof renderJamaa==='function') renderJamaa(); }
+    if (cp === 'db'     && typeof dbRender    === "function") dbRender();
     _badge("synced");
 
     // Realtime listener
