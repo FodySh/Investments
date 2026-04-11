@@ -5917,7 +5917,6 @@ function showPage(id, navEl, mobileTitle, noScroll){
     return;
   }
   _pg.classList.add('active');
-  console.log('[showPage] page-'+id+' className:', _pg.className, 'display:', window.getComputedStyle(_pg).display);
 
   // Desktop sidebar
   document.querySelectorAll('.sidebar .nav-item').forEach(n=>n.classList.remove('active'));
@@ -10052,9 +10051,15 @@ function _loadData(uid) {
     if (typeof dbRender     === "function") dbRender();
     // إذا المستخدم على صفحة معينة، أعد رسمها
     var cp = window.__currentPage;
-    if (cp === 'loans'  && typeof renderLoans === "function") renderLoans();
-    if (cp === 'debts'  && typeof renderDebts === "function") { renderDebts(); if(typeof renderJamaa==='function') renderJamaa(); }
-    if (cp === 'db'     && typeof dbRender    === "function") dbRender();
+    // أعد رسم الصفحة الحالية بعد اكتمال تحميل البيانات
+    setTimeout(function() {
+      var cp2 = window.__currentPage;
+      if (cp2 === 'loans')  { if(typeof renderLoans==='function') renderLoans(); }
+      if (cp2 === 'debts')  { if(typeof renderDebts==='function') renderDebts(); if(typeof renderJamaa==='function') renderJamaa(); }
+      if (cp2 === 'db')     { if(typeof dbRender==='function') dbRender(); }
+      if (cp2 === 'dashboard') { if(typeof renderDashboard==='function') renderDashboard(); }
+      if (cp2 === 'stocks') { if(typeof renderStocks==='function') renderStocks(); }
+    }, 100);
     _badge("synced");
 
     // Realtime listener
