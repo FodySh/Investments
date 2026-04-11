@@ -9189,10 +9189,14 @@ function importStocksExcel(event, market) {
   var file = event.target.files[0];
   if (!file) return;
 
-  // تحقق من وجود SheetJS
+  // تحميل SheetJS ديناميكياً إذا لم يكن محملاً
   if (typeof XLSX === 'undefined') {
-    showToast('❌ مكتبة Excel غير محملة — جرّب مجدداً بعد لحظة');
-    event.target.value = '';
+    showToast('⏳ جاري تحميل مكتبة Excel...');
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+    s.onload = function() { importStocksExcel(event, market); };
+    s.onerror = function() { showToast('❌ فشل تحميل المكتبة — تحقق من الإنترنت'); };
+    document.head.appendChild(s);
     return;
   }
 
