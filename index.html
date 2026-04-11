@@ -4210,7 +4210,7 @@
                   <label class="field-label">الاتجاه <span class="req">*</span></label>
                   <select class="f-select" id="ad-direction" onchange="updateDebtDirectionLabel()">
                     <option value="owe">👆 عليّ (أنا المدين)</option>
-                    <option value="owed">👇 له عندي (هو المدين)</option>
+                    <option value="lend">👇 له عندي (هو المدين)</option>
                   </select>
                 </div>
                 <div class="field-group">
@@ -10309,7 +10309,7 @@ function setDebtFilter(f, btn) {
 function renderDebts() {
   const _dd = window.debtsData || debtsData || [];
   const oweTotal    = _dd.filter(d=>d.direction==='owe'&&d.status!=='مسوَّى').reduce((s,d)=>s+(d.remaining||d.amount||0),0);
-  const lendTotal   = _dd.filter(d=>d.direction==='lend'&&d.status!=='مسوَّى').reduce((s,d)=>s+(d.remaining||d.amount||0),0);
+  const lendTotal   = _dd.filter(d=>(d.direction==='lend'||d.direction==='owed')&&d.status!=='مسوَّى').reduce((s,d)=>s+(d.remaining||d.amount||0),0);
   const net         = lendTotal - oweTotal;
 
   const eOwe  = document.getElementById('debts-owe');
@@ -10329,7 +10329,7 @@ function renderDebts() {
 
   let filtered = _dd.map((d,i) => ({...d,_idx:i}));
   if (currentDebtFilter === 'owe')     filtered = filtered.filter(d => d.direction === 'owe' && d.status !== 'مسوَّى');
-  if (currentDebtFilter === 'lend')    filtered = filtered.filter(d => d.direction === 'lend' && d.status !== 'مسوَّى');
+  if (currentDebtFilter === 'lend')    filtered = filtered.filter(d => (d.direction === 'lend' || d.direction === 'owed') && d.status !== 'مسوَّى');
   if (currentDebtFilter === 'settled') filtered = filtered.filter(d => d.status === 'مسوَّى');
 
   if(eLstC) eLstC.textContent = filtered.length + ' معاملة';
