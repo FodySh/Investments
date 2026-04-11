@@ -4289,7 +4289,7 @@
         <button onclick="showPage('loans',document.querySelector('.nav-loans')||document.getElementById('mnav-loans'),'🏦 القروض البنكية')" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:9px 18px;color:var(--muted);font-size:13px;cursor:pointer;font-family:inherit">← رجوع</button>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" class="add-form-grid">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:100%" class="add-form-grid">
 
         <!-- يمين: حقول الإدخال -->
         <div style="display:flex;flex-direction:column;gap:16px">
@@ -4438,57 +4438,57 @@
         </div>
       </div>
 
-      <!-- جدول الاستهلاك -->
-      <div id="amort-section" style="display:none;margin-top:24px">
-        <div class="section-card">
-          <div class="section-head" onclick="toggleAmortTable()" style="cursor:pointer">
-            <span class="section-title">📅 جدول السداد الشهري</span>
-            <div style="display:flex;align-items:center;gap:10px">
-              <span id="amort-toggle-icon" style="font-size:12px;color:var(--muted)">▼ إخفاء</span>
-              <span class="section-count" id="amort-count">—</span>
+      <style>@media(max-width:768px){.add-form-grid{grid-template-columns:1fr !important}#add-loan-summary{position:static !important}}</style>
+    </div>
+
+    <!-- جدول السداد — خارج الـ grid بعرض كامل -->
+    <div id="new-amort-section" style="display:none;margin-top:24px">
+      <div class="section-card">
+        <div class="section-head" onclick="toggleNewAmortTable()" style="cursor:pointer">
+          <span class="section-title">📅 جدول السداد الشهري</span>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span id="namort-toggle-icon" style="font-size:12px;color:var(--muted)">▼ إخفاء</span>
+            <span class="section-count" id="namort-count">—</span>
+          </div>
+        </div>
+        <div id="namort-table-wrap">
+          <!-- ملخص سريع -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border)">
+            <div style="text-align:center">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي المدفوعات</div>
+              <div id="namort-total-pay" style="font-size:16px;font-weight:800;font-family:monospace;color:var(--white)">—</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي الأصل</div>
+              <div id="namort-total-principal" style="font-size:16px;font-weight:800;font-family:monospace;color:var(--cyan)">—</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي الفوائد</div>
+              <div id="namort-total-interest" style="font-size:16px;font-weight:800;font-family:monospace;color:var(--red)">—</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:4px">تكلفة الفائدة</div>
+              <div id="namort-cost-pct" style="font-size:16px;font-weight:800;font-family:monospace;color:var(--orange)">—</div>
             </div>
           </div>
-          <div id="amort-table-wrap">
-            <!-- ملخص سريع -->
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border)">
-              <div style="text-align:center">
-                <div style="font-size:10px;color:var(--muted);margin-bottom:3px">إجمالي المدفوعات</div>
-                <div id="amort-total-pay" style="font-size:15px;font-weight:800;font-family:monospace;color:var(--white)">—</div>
-              </div>
-              <div style="text-align:center">
-                <div style="font-size:10px;color:var(--muted);margin-bottom:3px">إجمالي الأصل</div>
-                <div id="amort-total-principal" style="font-size:15px;font-weight:800;font-family:monospace;color:var(--cyan)">—</div>
-              </div>
-              <div style="text-align:center">
-                <div style="font-size:10px;color:var(--muted);margin-bottom:3px">إجمالي الفوائد</div>
-                <div id="amort-total-interest" style="font-size:15px;font-weight:800;font-family:monospace;color:var(--red)">—</div>
-              </div>
-              <div style="text-align:center">
-                <div style="font-size:10px;color:var(--muted);margin-bottom:3px">تكلفة الفائدة</div>
-                <div id="amort-cost-pct" style="font-size:15px;font-weight:800;font-family:monospace;color:var(--orange)">—</div>
-              </div>
-            </div>
-            <div class="table-wrap" style="max-height:400px;overflow-y:auto">
-              <table class="data-table" style="font-size:12px">
-                <thead style="position:sticky;top:0;z-index:2;background:var(--card)">
-                  <tr>
-                    <th>#</th>
-                    <th>تاريخ الدفعة</th>
-                    <th style="color:var(--gold)">القسط</th>
-                    <th style="color:var(--cyan)">الأصل</th>
-                    <th style="color:var(--red)">الفائدة</th>
-                    <th>الرصيد المتبقي</th>
-                    <th>نسبة الفائدة</th>
-                  </tr>
-                </thead>
-                <tbody id="amort-tbody"></tbody>
-              </table>
-            </div>
+          <div class="table-wrap" style="max-height:420px;overflow-y:auto">
+            <table class="data-table" style="font-size:12px">
+              <thead style="position:sticky;top:0;z-index:2;background:var(--card)">
+                <tr>
+                  <th>#</th>
+                  <th>تاريخ الدفعة</th>
+                  <th style="color:var(--gold)">القسط الشهري</th>
+                  <th style="color:var(--cyan)">الأصل</th>
+                  <th style="color:var(--red)">الفائدة</th>
+                  <th>الرصيد المتبقي</th>
+                  <th>نسبة الفائدة</th>
+                </tr>
+              </thead>
+              <tbody id="namort-tbody"></tbody>
+            </table>
           </div>
         </div>
       </div>
-
-      <style>@media(max-width:768px){.add-form-grid{grid-template-columns:1fr !important}#add-loan-summary{position:static !important}}</style>
     </div>
 
     <!-- ═══════════════════════════════════════ -->
@@ -7590,17 +7590,17 @@ function calcAddLoan() {
 // ══════════════════════════════════════════════════════
 var _amortVisible = true;
 
-function toggleAmortTable() {
+function toggleNewAmortTable() {
   _amortVisible = !_amortVisible;
-  var wrap = document.getElementById('amort-table-wrap');
-  var icon = document.getElementById('amort-toggle-icon');
+  var wrap = document.getElementById('namort-table-wrap');
+  var icon = document.getElementById('namort-toggle-icon');
   if (wrap) wrap.style.display = _amortVisible ? '' : 'none';
   if (icon) icon.textContent  = _amortVisible ? '▼ إخفاء' : '▶ عرض';
 }
 
 function buildAmortTable(principal, annualRate, months, startDate) {
-  var section = document.getElementById('amort-section');
-  var tbody   = document.getElementById('amort-tbody');
+  var section = document.getElementById('new-amort-section');
+  var tbody   = document.getElementById('namort-tbody');
   if (!section || !tbody) return;
   if (!principal || !months || months <= 0) { section.style.display = 'none'; return; }
 
@@ -7631,11 +7631,11 @@ function buildAmortTable(principal, annualRate, months, startDate) {
 
   // ملخص
   var setEl = function(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; };
-  setEl('amort-total-pay',       fmt2(totalPay)   + ' ر.س');
-  setEl('amort-total-principal', fmt2(totalPrinc) + ' ر.س');
-  setEl('amort-total-interest',  fmt2(totalInt)   + ' ر.س');
-  setEl('amort-cost-pct',        (totalInt/principal*100).toFixed(2) + '%');
-  setEl('amort-count', months + ' قسط');
+  setEl('namort-total-pay',       fmt2(totalPay)   + ' ر.س');
+  setEl('namort-total-principal', fmt2(totalPrinc) + ' ر.س');
+  setEl('namort-total-interest',  fmt2(totalInt)   + ' ر.س');
+  setEl('namort-cost-pct',        (totalInt/principal*100).toFixed(2) + '%');
+  setEl('namort-count', months + ' قسط');
 
   // جدول
   tbody.innerHTML = rows.map(function(row) {
