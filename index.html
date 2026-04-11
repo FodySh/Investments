@@ -5682,6 +5682,7 @@ function renderStocks() {
         ? `<span class="mono ${pnl >= 0 ? 'up' : 'dn'}">${pnl >= 0 ? '+' : ''}${pnl.toLocaleString('en-US',{minimumFractionDigits:2})}</span>`
         : `<span style="color:#8899bb">—</span>`;
 
+      const realIdx = inv.indexOf(d);
       return `<tr>
         <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${d.name}">${d.name}</td>
         <td><span style="font-family:'JetBrains Mono',monospace;background:rgba(201,168,76,0.12);color:#e8c97a;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700">${d.ticker || '—'}</span></td>
@@ -5695,6 +5696,10 @@ function renderStocks() {
         <td style="color:#8899bb">${d.platform||'—'}</td>
         <td>${riskPill(d.risk)}</td>
         <td>${statusPill(d.status)}</td>
+        <td style="white-space:nowrap">
+          <button class="loan-action-btn" onclick="openEditOpp(${realIdx})">✏️</button>
+          ${d.ticker ? `<button class="loan-action-btn" onclick="fetchTickerPrice('${d.ticker}','sa')" style="color:var(--cyan);border-color:rgba(0,212,255,0.25)" title="جلب السعر">⟳</button>` : `<button class="loan-action-btn" onclick="openEditOpp(${realIdx})" style="color:var(--orange);border-color:rgba(255,152,0,0.25)" title="أضف الرمز">❗</button>`}
+        </td>
       </tr>`;
     }).join('');
   }
@@ -6875,9 +6880,8 @@ function renderOppsFiltered() {
         '<td style="color:#8899bb;font-size:11px">' + (d.date_out || '—') + '</td>' +
         '<td>' + riskPill(d.risk) + '</td>' +
         '<td>' + statusPill(d.status) + '</td>' +
-        '<td style="white-space:nowrap">' +
+        '<td>' +
           '<button class="loan-action-btn" onclick="openEditOpp(' + realIdx + ')">✏️</button>' +
-          _stockActionBtn(d, realIdx) +
         '</td>' +
         '</tr>';
     }).join('');
@@ -6893,9 +6897,8 @@ function renderOppsFiltered() {
         '<td class="mono" style="color:var(--gold)">' + fmtNum(d.total, 2) + '</td>' +
         '<td>' + riskPill(d.risk) + '</td>' +
         '<td>' + statusPill(d.status) + '</td>' +
-        '<td style="white-space:nowrap">' +
+        '<td>' +
           '<button class="loan-action-btn" onclick="openEditOpp(' + realIdx + ')">✏️</button>' +
-          _stockActionBtn(d, realIdx) +
         '</td>' +
         '</tr>';
     }).join('');
@@ -9687,6 +9690,16 @@ async function fetchTickerPrice(ticker, market) {
     if (!q || !q.price) { showToast('⚠️ لا يوجد سعر لـ ' + ticker + ' — تحقق من الرمز'); return; }
     if (!STOCK_PRICES[ticker]) STOCK_PRICES[ticker] = {};
     STOCK_PRICES[ticker] = { price: q.price, chg: (q.changePercent||0)/100, color: (q.changePercent||0)>=0?'up':'dn' };
+    // تحديث الاسم العربي إذا كان متاحاً (للأسهم السعودية)
+    if (market !== 'us' && q.longName) {
+      var inv = window.__investments || investments;
+      var stock = inv.find(function(x){ return x.ticker === ticker; });
+      if (stock && q.longName) {
+        var arabicName = q.longName.replace(/ Co| Company| Corp/gi,'').trim();
+        // نتحقق أن الاسم يحتوي عربي
+        if (/[؀-ۿ]/.test(arabicName)) stock.name = arabicName;
+      }
+    }
     showToast('✅ ' + ticker + ' ← ' + q.price.toFixed(2) + ' ر.س');
     if (market === 'us') renderUsStocksTable(); else renderStocks();
   } catch(e) {
