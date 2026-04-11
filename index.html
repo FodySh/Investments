@@ -1574,9 +1574,10 @@
       </div>
 
       <!-- تبويبات السوق -->
-      <div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0">
-        <button id="tab-sa" onclick="switchStocksTab('sa')" style="padding:10px 20px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer">🇸🇦 السوق السعودي</button>
-        <button id="tab-us" onclick="switchStocksTab('us')" style="padding:10px 20px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer">🇺🇸 السوق الأمريكي</button>
+      <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0">
+        <button id="tab-sa"  onclick="switchStocksTab('sa')"  style="padding:10px 20px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:all .2s">🇸🇦 السعودي</button>
+        <button id="tab-us"  onclick="switchStocksTab('us')"  style="padding:10px 20px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s">🇺🇸 الأمريكي</button>
+        <button id="tab-div" onclick="switchStocksTab('div')" style="padding:10px 20px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s">💰 التوزيعات</button>
       </div>
 
       <!-- السوق السعودي -->
@@ -1635,6 +1636,11 @@
           </div>
         </div>
         <div class="stocks-grid fade-up delay-2" id="us-stocks-cards-grid" style="margin-top:20px"></div>
+      </div>
+
+      <!-- تبويبة التوزيعات -->
+      <div id="stocks-tab-div" style="display:none">
+        <div id="stocks-div-content"></div>
       </div>
     </div>
 
@@ -4126,13 +4132,13 @@
                     <option>البنك الأهلي السعودي</option>
                     <option>بنك الراجحي</option>
                     <option>بنك الرياض</option>
-                    <option>بنك الخليج الدولي (ميم)</option>
                     <option>البنك السعودي الفرنسي</option>
                     <option>بنك البلاد</option>
                     <option>بنك الجزيرة</option>
                     <option>البنك السعودي للاستثمار</option>
                     <option>بنك الإمارات دبي الوطني</option>
                     <option>بنك الإنماء</option>
+                    <option>بنك الخليج الدولي (ميم)</option>
                     <option>أخرى</option>
                   </select>
                 </div>
@@ -4852,6 +4858,7 @@ function toggleAnalystAuto() {
     if (tog)   tog.style.background = 'rgba(201,168,76,0.2)';
     if (label) label.textContent = 'تشغيل';
     runAIAnalysis();
+    if (_analystAutoInterval) clearInterval(_analystAutoInterval);
     _analystAutoInterval = setInterval(runAIAnalysis, 30 * 60 * 1000);
   } else {
     if (knob)  { knob.style.right = 'calc(100% - 19px)'; knob.style.background = 'var(--muted)'; }
@@ -4865,27 +4872,59 @@ function toggleAnalystAuto() {
 var _analysisUsed = false;
 
 function runAIAnalysisOnce() {
-  if (_analysisUsed) {
-    showToast('تم استخدام التحليل مرة واحدة في هذه الجلسة — أعد تحميل الصفحة لتحليل جديد');
+  // تحقق: هل استُخدم التحليل اليوم؟
+  var today  = new Date().toDateString();
+  var stored = localStorage.getItem('analyst_last_date');
+  if (stored === today) {
+    var lastTime = localStorage.getItem('analyst_last_time') || '';
+    showToast('تم التحليل اليوم في ' + lastTime + ' — يمكنك التحليل مجدداً غداً');
     return;
   }
-  _analysisUsed = true;
 
-  // Lock the button permanently for this session
+  // حفظ التاريخ والوقت
+  var now     = new Date();
+  var timeStr = now.toLocaleTimeString('ar-SA-u-nu-latn', {hour:'2-digit', minute:'2-digit'});
+  var dateStr = now.toLocaleDateString('ar-SA-u-nu-latn', {day:'numeric', month:'long', year:'numeric'});
+  localStorage.setItem('analyst_last_date', today);
+  localStorage.setItem('analyst_last_time', timeStr);
+
+  // تحديث واجهة آخر تحليل
+  var lastUpd = document.getElementById('analyst-last-update');
+  if (lastUpd) lastUpd.textContent = 'آخر تحليل: ' + dateStr + ' — ' + timeStr;
+
+  // تعطيل الزر لبقية اليوم
   var btn = document.getElementById('analyst-run-btn');
   if (btn) {
     btn.disabled = true;
     btn.style.opacity = '0.45';
-    btn.style.cursor = 'not-allowed';
-    btn.style.boxShadow = 'none';
-    btn.onmouseover = null;
-    btn.onmouseout  = null;
+    btn.style.cursor  = 'not-allowed';
   }
   var lbl = document.getElementById('analyst-btn-label');
-  if (lbl) lbl.textContent = 'تم التحليل ✅';
+  if (lbl) lbl.textContent = 'تم التحليل ✅ (' + timeStr + ')';
 
   runAIAnalysis();
 }
+
+// تحقق عند تحميل الصفحة: هل حُلِّل اليوم؟
+(function() {
+  var today  = new Date().toDateString();
+  var stored = localStorage.getItem('analyst_last_date');
+  if (stored === today) {
+    var lastTime = localStorage.getItem('analyst_last_time') || '';
+    // تعطيل الزر
+    var checkBtn = function() {
+      var btn = document.getElementById('analyst-run-btn');
+      var lbl = document.getElementById('analyst-btn-label');
+      var lastUpd = document.getElementById('analyst-last-update');
+      if (btn) { btn.disabled=true; btn.style.opacity='0.45'; btn.style.cursor='not-allowed'; }
+      if (lbl) lbl.textContent = 'تم التحليل ✅ (' + lastTime + ')';
+      var now = new Date();
+      var dateStr = now.toLocaleDateString('ar-SA-u-nu-latn', {day:'numeric', month:'long', year:'numeric'});
+      if (lastUpd) lastUpd.textContent = 'آخر تحليل: ' + dateStr + ' — ' + lastTime;
+    };
+    setTimeout(checkBtn, 1000);
+  }
+})();
 
 async function runAIAnalysis() {
   var btn       = document.getElementById('analyst-run-btn');
@@ -7829,23 +7868,33 @@ var _tickerFetchTimer = null;
 // ── تبديل تبويب الأسهم SA/US ─────────────────────────────────────────────────
 function switchStocksTab(tab) {
   _currentStocksTab = tab;
-  var sa = document.getElementById('stocks-tab-sa');
-  var us = document.getElementById('stocks-tab-us');
-  var btnSa = document.getElementById('tab-sa');
-  var btnUs = document.getElementById('tab-us');
-  if (tab === 'sa') {
-    if (sa) sa.style.display = 'block';
-    if (us) us.style.display = 'none';
-    if (btnSa) { btnSa.style.borderBottomColor = 'var(--gold)'; btnSa.style.color = 'var(--gold)'; }
-    if (btnUs) { btnUs.style.borderBottomColor = 'transparent'; btnUs.style.color = 'var(--muted)'; }
-  } else {
-    if (sa) sa.style.display = 'none';
-    if (us) us.style.display = 'block';
-    if (btnUs) { btnUs.style.borderBottomColor = 'var(--gold)'; btnUs.style.color = 'var(--gold)'; }
-    if (btnSa) { btnSa.style.borderBottomColor = 'transparent'; btnSa.style.color = 'var(--muted)'; }
+  // ألوان كل تبويبة
+  var colors = { sa: 'var(--gold)', us: '#60a5fa', div: 'var(--green)' };
+  var tabs   = ['sa', 'us', 'div'];
+  tabs.forEach(function(t) {
+    var panel = document.getElementById('stocks-tab-' + t);
+    var btn   = document.getElementById('tab-' + t);
+    if (panel) panel.style.display = t === tab ? 'block' : 'none';
+    if (btn) {
+      btn.style.borderBottomColor = t === tab ? colors[t] : 'transparent';
+      btn.style.color             = t === tab ? colors[t] : 'var(--muted)';
+    }
+  });
+  if (tab === 'us') {
     renderUsStocksTable();
     fetchUsStockPrices();
   }
+  if (tab === 'div') {
+    renderDividendsInStocks();
+  }
+}
+
+function renderDividendsInStocks() {
+  var src  = document.getElementById('rtab-panel-dividends');
+  var dest = document.getElementById('stocks-div-content');
+  if (!dest) return;
+  if (typeof renderDividendsTab === 'function') renderDividendsTab();
+  if (src) dest.innerHTML = src.innerHTML;
 }
 
 // ── تبديل سوق في فورم الإضافة ─────────────────────────────────────────────────
