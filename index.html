@@ -1596,7 +1596,7 @@
             <div style="display:flex;align-items:center;gap:6px">
               <span class="section-count" id="stocks-count-badge">—</span>
               <button onclick="exportStocksCSV('sa')" title="تصدير CSV" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--green);cursor:pointer;font-family:inherit;white-space:nowrap">⬇️ CSV</button>
-              <label title="استيراد CSV" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--cyan);cursor:pointer;white-space:nowrap">⬆️ CSV<input type="file" accept=".csv" style="display:none" onchange="importStocksCSV(event,'sa')"></label>
+              <label title="استيراد Excel" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--cyan);cursor:pointer;white-space:nowrap">⬆️ Excel<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importStocksExcel(event,'sa')"></label>
             </div>
           </div>
           <div class="table-wrap">
@@ -1629,7 +1629,7 @@
             <div style="display:flex;align-items:center;gap:6px">
               <span class="section-count" id="us-stocks-count-badge">—</span>
               <button onclick="exportStocksCSV('us')" title="تصدير CSV" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--green);cursor:pointer;font-family:inherit;white-space:nowrap">⬇️ CSV</button>
-              <label title="استيراد CSV" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--cyan);cursor:pointer;white-space:nowrap">⬆️ CSV<input type="file" accept=".csv" style="display:none" onchange="importStocksCSV(event,'us')"></label>
+              <label title="استيراد Excel" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--cyan);cursor:pointer;white-space:nowrap">⬆️ Excel<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importStocksExcel(event,'us')"></label>
             </div>
           </div>
           <div class="table-wrap">
@@ -9182,6 +9182,91 @@ function exportStocksCSV(market) {
 }
 
 // ── استيراد الأسهم ───────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// استيراد الأسهم من Excel (SheetJS)
+// ══════════════════════════════════════════════════════════════════
+function importStocksExcel(event, market) {
+  var file = event.target.files[0];
+  if (!file) return;
+
+  // تحقق من وجود SheetJS
+  if (typeof XLSX === 'undefined') {
+    showToast('❌ مكتبة Excel غير محملة — جرّب مجدداً بعد لحظة');
+    event.target.value = '';
+    return;
+  }
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data     = new Uint8Array(e.target.result);
+      var workbook = XLSX.read(data, { type: 'array' });
+      var sheet    = workbook.Sheets[workbook.SheetNames[0]];
+      var rows     = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+      if (!rows.length) { showToast('❌ الملف فارغ'); event.target.value=''; return; }
+      console.log('[importStocksExcel] First row keys:', Object.keys(rows[0]));
+
+      var inv      = window.__investments || investments;
+      var imported = 0, skipped = 0;
+
+      rows.forEach(function(row) {
+        var name   = (row['الاسم'] || row['name'] || row['الإسم'] || '').toString().trim();
+        var ticker = (row['الرمز'] || row['ticker'] || row['Symbol'] || '').toString().trim();
+        if (!name) return;
+
+        // تحقق التكرار بالاسم
+        if (inv.some(function(x){ return x.name === name; })) { skipped++; return; }
+
+        var statusVal = (row['الحالة'] || row['status'] || 'نشطة').toString().trim();
+        if (statusVal === 'مستلمة') statusVal = 'مغلقة';
+
+        var parseNum = function(v) {
+          if (!v) return 0;
+          return parseFloat(v.toString().replace(/[,،\s]/g,'')) || 0;
+        };
+
+        inv.push({
+          name:     name,
+          type:     'سهم',
+          ticker:   ticker,
+          shares:   parseNum(row['عدد الأسهم'] || row['shares'] || row['Shares']) || null,
+          amount:   parseNum(row['التكلفة (ر.س)'] || row['التكلفة'] || row['amount'] || row['Cost']),
+          platform: (row['المنصة'] || row['platform'] || row['Platform'] || '').toString().trim(),
+          risk:     (row['المخاطرة'] || row['risk'] || 'متوسط').toString().trim(),
+          status:   statusVal,
+          date_in:  (row['تاريخ الشراء'] || row['date_in'] || '').toString().trim(),
+          date_out: (row['تاريخ الخروج'] || row['date_out'] || null),
+          market:   market === 'us' ? 'us' : '',
+          ret_pct:  parseNum(row['ret_pct']) / 100 || 0,
+          ret_val:  parseNum(row['ret_val'] || row['العائد ر.س']),
+          total:    parseNum(row['total'] || row['المجموع']),
+          dist:     (row['dist'] || 'لا يوجد').toString().trim(),
+        });
+        imported++;
+      });
+
+      console.log('[importStocksExcel] imported:', imported, 'skipped:', skipped);
+
+      if (imported > 0) {
+        triggerSync('investments');
+        renderStocks(); renderAll();
+        showToast('✅ تم استيراد ' + imported + ' سهم' + (skipped ? ' (تجاهل ' + skipped + ' مكرر)' : ''));
+      } else if (skipped > 0) {
+        showToast('⚠️ كل البيانات (' + skipped + ') موجودة مسبقاً في المحفظة');
+      } else {
+        showToast('⚠️ لم يُضف شيء — تحقق من أسماء الأعمدة في الملف');
+      }
+    } catch(err) {
+      console.error('[importStocksExcel]', err);
+      showToast('❌ خطأ في قراءة الملف: ' + err.message);
+    }
+    event.target.value = '';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+
 function importStocksCSV(event, market) {
   var file = event.target.files[0];
   if (!file) return;
