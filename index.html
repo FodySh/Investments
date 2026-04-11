@@ -5641,6 +5641,12 @@ function renderStocks() {
     if (_sfSa !== 'all' && x.status !== _sfSa && !(_sfSa==='مغلقة' && x.status==='مستلمة')) return false;
     return true;
   });
+  // تأكد أن كل سهم مسجّل في STOCK_PRICES
+  stockData.forEach(function(x) {
+    if (x.ticker && !STOCK_PRICES[x.ticker]) {
+      STOCK_PRICES[x.ticker] = {price:null, chg:null, color:''};
+    }
+  });
 
   // Update header badges
   const totalInvested = stockData.reduce((s, r) => s + (r.amount || 0), 0);
