@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏦</text></svg>">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>محفظتي المالية</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -5590,7 +5591,8 @@ function exportPDF() {
     '</tr>';
   }).join('') : '';
 
-  var html = '<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">'+
+  var html = '<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏦</text></svg>">'+
     '<title>تقرير المحفظة الاستثمارية</title>'+
     '<style>body{font-family:Arial,sans-serif;color:#111;margin:40px;direction:rtl} '+
     'table{width:100%;border-collapse:collapse;margin-top:16px} '+
@@ -9941,18 +9943,54 @@ function removePmtRow(idx) {
 function renderPmtRows() {
   var container = document.getElementById('pmt-rows');
   if (!container) return;
-  container.innerHTML = _pmtRows.map(function(row, i) {
-    return '<div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center">'
-      + '<input class="f-input" type="number" step="0.01" min="0" placeholder="القسط (ر.س)" value="' + (row.pmt||'') + '"'
-      + ' oninput="_pmtRows['+i+'].pmt=parseFloat(this.value)||0;calcPmtTotal()"'
-      + ' style="color:var(--gold);font-weight:700;font-size:13px"/>'
-      + '<input class="f-input" type="number" step="1" min="0" placeholder="عدد الأشهر" value="' + (row.months||'') + '"'
-      + ' oninput="_pmtRows['+i+'].months=parseFloat(this.value)||0;calcPmtTotal()"'
-      + ' style="font-size:13px"/>'
-      + '<button type="button" onclick="removePmtRow('+i+')" style="background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.2);border-radius:8px;padding:6px 10px;color:var(--red);cursor:pointer;font-size:14px;flex-shrink:0"'
-      + (_pmtRows.length===1?' disabled style="opacity:0.3;cursor:default"':'') + '>🗑</button>'
-      + '</div>';
-  }).join('');
+  // نحفظ القيم الحالية أولاً من الـ inputs
+  container.querySelectorAll('.pmt-row').forEach(function(row, i) {
+    var pmtInp = row.querySelector('.pmt-inp');
+    var mthInp = row.querySelector('.mth-inp');
+    if (pmtInp && _pmtRows[i]) _pmtRows[i].pmt = parseFloat(pmtInp.value) || 0;
+    if (mthInp && _pmtRows[i]) _pmtRows[i].months = parseFloat(mthInp.value) || 0;
+  });
+  // نعيد البناء
+  container.innerHTML = '';
+  _pmtRows.forEach(function(row, i) {
+    var div = document.createElement('div');
+    div.className = 'pmt-row';
+    div.style.cssText = 'display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center';
+
+    var pmtInp = document.createElement('input');
+    pmtInp.className = 'f-input pmt-inp';
+    pmtInp.type = 'number'; pmtInp.step = '0.01'; pmtInp.min = '0';
+    pmtInp.placeholder = 'القسط (ر.س)';
+    pmtInp.value = row.pmt || '';
+    pmtInp.style.cssText = 'color:var(--gold);font-weight:700;font-size:13px';
+    pmtInp.addEventListener('input', function() {
+      _pmtRows[i].pmt = parseFloat(this.value) || 0;
+      calcPmtTotal();
+    });
+
+    var mthInp = document.createElement('input');
+    mthInp.className = 'f-input mth-inp';
+    mthInp.type = 'number'; mthInp.step = '1'; mthInp.min = '0';
+    mthInp.placeholder = 'عدد الأشهر';
+    mthInp.value = row.months || '';
+    mthInp.style.fontSize = '13px';
+    mthInp.addEventListener('input', function() {
+      _pmtRows[i].months = parseFloat(this.value) || 0;
+      calcPmtTotal();
+    });
+
+    var delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.textContent = '🗑';
+    delBtn.style.cssText = 'background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.2);border-radius:8px;padding:6px 10px;color:var(--red);cursor:pointer;font-size:14px;flex-shrink:0';
+    if (_pmtRows.length === 1) { delBtn.disabled = true; delBtn.style.opacity = '0.3'; }
+    delBtn.addEventListener('click', function() { removePmtRow(i); });
+
+    div.appendChild(pmtInp);
+    div.appendChild(mthInp);
+    div.appendChild(delBtn);
+    container.appendChild(div);
+  });
   calcPmtTotal();
 }
 
@@ -10547,7 +10585,8 @@ function generatePromissoryNote(idx) {
   + '<div class="legal">هذا السند ورقة تجارية وفقاً لنظام الاوراق التجارية الصادر بالمرسوم الملكي رقم م/37 وتاريخ 11/10/1383هـ.<br>يعد سنداً تنفيذياً وفقاً للمادة 29 من نظام التنفيذ السعودي.</div>'
   + '</div>';
 
-  var html = '<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>سند لامر</title>' + css + '</head><body>' + body + '</body></html>';
+  var html = '<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏦</text></svg>"><title>سند لامر</title>' + css + '</head><body>' + body + '</body></html>';
   var win = window.open('', '_blank', 'width=920,height=720');
   if (win) { win.document.write(html); win.document.close(); }
   else if (typeof showToast === 'function') showToast('يرجى السماح بفتح النوافذ المنبثقة');
