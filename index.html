@@ -6501,7 +6501,7 @@ function showPage(id, navEl, mobileTitle, noScroll){
   if (id === 'funds')  { renderSukuk(); renderFunds(); setTimeout(function(){ switchOppsTab('funds'); }, 50); }
   if (id === 'add-stock') { resetAddStock(); calcAddStock(); setTimeout(function(){ msInit('scap',getCapitalSources(),[]); populatePlatformSelects(); },100); }
   if (id === 'add-loan')  { calcAddLoan(); if(typeof populateBankSelect==='function') populateBankSelect(); }
-  if (id === 'add')       { setTimeout(function(){ populateCapitalSrcSelect(); populatePlatformSelects(); }, 100); }
+  if (id === 'add')       { setTimeout(function(){ populateCapitalSrcSelect(); populatePlatformSelects(); populateTypeSelect(); }, 100); }
   if (id === 'add-debt')  { updateDebtDirectionLabel(); calcAddDebt(); }
   if (id === 'loans') renderLoans();
   if (id === 'debts') renderDebts();
@@ -9078,6 +9078,23 @@ function getPlatforms() {
   return (s.platforms && s.platforms.length) ? s.platforms : _defaultPlatforms.slice();
 }
 
+function populateTypeSelect() {
+  if (!window._settingsTypes || !window._settingsTypes.length) return;
+  var sel = document.getElementById('f-type');
+  if (!sel) return;
+  var curr = sel.value;
+  // نحتفظ بأول option فارغة
+  var firstOpt = sel.options[0];
+  sel.innerHTML = '';
+  sel.appendChild(firstOpt);
+  window._settingsTypes.forEach(function(t) {
+    var o = document.createElement('option');
+    o.value = o.textContent = t;
+    sel.appendChild(o);
+  });
+  if (curr) sel.value = curr;
+}
+
 function getBanks() {
   if (window._settingsBanks && window._settingsBanks.length) return window._settingsBanks.slice();
   return ['البنك الأهلي السعودي','بنك الراجحي','بنك الرياض','البنك السعودي الفرنسي','بنك البلاد','بنك الجزيرة','البنك السعودي للاستثمار','بنك الإمارات دبي الوطني','بنك الإنماء','بنك الخليج الدولي (ميم)','أخرى'];
@@ -10941,6 +10958,7 @@ function _loadData(uid) {
         if(L.platforms&&L.platforms.length){window._settingsPlatforms=L.platforms;if(typeof populatePlatformSelects==='function')populatePlatformSelects();}
         if(L.banks&&L.banks.length){window._settingsBanks=L.banks;if(typeof populateBankSelect==='function')populateBankSelect();}
         if(L.capital&&L.capital.length){window._settingsCapital=L.capital;if(typeof populateCapitalSrcSelect==='function')populateCapitalSrcSelect();}
+        if(L.types&&L.types.length){window._settingsTypes=L.types;if(typeof populateTypeSelect==='function')populateTypeSelect();}
       }
     }).catch(function(){});
     _rerender();
