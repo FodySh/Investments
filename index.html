@@ -6499,8 +6499,8 @@ function showPage(id, navEl, mobileTitle, noScroll){
   if (id === 'stocks') { renderStocks(); renderUsStocksTable(); }
   if (id === 'sukuk')  { renderSukuk(); renderFunds(); }
   if (id === 'funds')  { renderSukuk(); renderFunds(); setTimeout(function(){ switchOppsTab('funds'); }, 50); }
-  if (id === 'add-stock') { resetAddStock(); calcAddStock(); setTimeout(function(){ msInit('scap',getCapitalSources(),[]); },100); }
-  if (id === 'add-loan')  { calcAddLoan(); }
+  if (id === 'add-stock') { resetAddStock(); calcAddStock(); setTimeout(function(){ msInit('scap',getCapitalSources(),[]); populatePlatformSelects(); },100); }
+  if (id === 'add-loan')  { calcAddLoan(); if(typeof populateBankSelect==='function') populateBankSelect(); }
   if (id === 'add')       { setTimeout(function(){ populateCapitalSrcSelect(); populatePlatformSelects(); }, 100); }
   if (id === 'add-debt')  { updateDebtDirectionLabel(); calcAddDebt(); }
   if (id === 'loans') renderLoans();
@@ -9073,8 +9073,14 @@ function getCapitalSources() {
   return (s.capitalSources && s.capitalSources.length) ? s.capitalSources : _defaultCapitalSources.slice();
 }
 function getPlatforms() {
+  if (window._settingsPlatforms && window._settingsPlatforms.length) return window._settingsPlatforms.slice();
   var s = _getSettings();
   return (s.platforms && s.platforms.length) ? s.platforms : _defaultPlatforms.slice();
+}
+
+function getBanks() {
+  if (window._settingsBanks && window._settingsBanks.length) return window._settingsBanks.slice();
+  return ['البنك الأهلي السعودي','بنك الراجحي','بنك الرياض','البنك السعودي الفرنسي','بنك البلاد','بنك الجزيرة','البنك السعودي للاستثمار','بنك الإمارات دبي الوطني','بنك الإنماء','بنك الخليج الدولي (ميم)','أخرى'];
 }
 function getDisplayName() {
   var s = _getSettings();
@@ -9083,6 +9089,16 @@ function getDisplayName() {
 
 // ── تعبئة القوائم المنسدلة ───────────────────────────────────────────────────
 // populateCapitalSrcSelect moved to multi-select section
+
+function populateBankSelect() {
+  var banks = getBanks();
+  var sel = document.getElementById('al-bank');
+  if (!sel) return;
+  var curr = sel.value;
+  sel.innerHTML = '<option value="">— اختر —</option>'
+    + banks.map(function(b){ return '<option value="'+b+'">'+b+'</option>'; }).join('');
+  if (curr) sel.value = curr;
+}
 
 function populatePlatformSelects() {
   var platforms = getPlatforms();
