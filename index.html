@@ -1399,11 +1399,11 @@
             <div class="auth-user-name" id="auth-user-name" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</div>
           </div>
           <!-- زر الإعدادات -->
-          <button onclick="window.open('settings.html','_blank')" title="الإعدادات" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:7px;padding:4px 7px;cursor:pointer;font-size:13px;color:var(--gold);flex-shrink:0;line-height:1">⚙️</button>
+          <button onclick="window.open('https://fodysh.github.io/Investments/settings.html','_blank')" title="الإعدادات" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:7px;padding:4px 7px;cursor:pointer;font-size:13px;color:var(--gold);flex-shrink:0;line-height:1">⚙️</button>
           <!-- Desktop user dropdown -->
           <div id="desktop-user-menu" style="display:none;position:fixed;top:60px;left:8px;background:var(--sidebar-bg);border:1px solid var(--border);border-radius:12px;padding:8px;z-index:500;box-shadow:0 8px 32px rgba(0,0,0,0.4);backdrop-filter:blur(20px);min-width:200px">
             <div id="desktop-menu-email" style="padding:8px 12px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border);margin-bottom:4px"></div>
-            <button onclick="window.open('settings.html','_blank');toggleDesktopUserMenu()" style="width:100%;display:flex;align-items:center;gap:10px;background:rgba(201,168,76,0.08);border:none;padding:9px 12px;color:var(--gold);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;border-radius:8px;text-align:right;margin-bottom:4px">
+            <button onclick="window.open('https://fodysh.github.io/Investments/settings.html','_blank');toggleDesktopUserMenu()" style="width:100%;display:flex;align-items:center;gap:10px;background:rgba(201,168,76,0.08);border:none;padding:9px 12px;color:var(--gold);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;border-radius:8px;text-align:right;margin-bottom:4px">
               ⚙️ الإعدادات
             </button>
             <button onclick="googleSignOut();toggleDesktopUserMenu()" style="width:100%;display:flex;align-items:center;gap:10px;background:rgba(255,77,77,0.08);border:none;padding:9px 12px;color:var(--red);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;border-radius:8px;text-align:right">
@@ -9080,6 +9080,23 @@ function populateCapitalSrcSelect() {
 }
 
 function populatePlatformSelects() {
+  // استخدام إعدادات المستخدم إن وُجدت
+  if (window._settingsPlatforms && window._settingsPlatforms.length) {
+    var customPlats = window._settingsPlatforms;
+    ['f-platform', 'as-platform'].forEach(function(id) {
+      var sel = document.getElementById(id);
+      if (!sel) return;
+      var curr = sel.value;
+      sel.innerHTML = '<option value="">— اختر المنصة —</option>';
+      customPlats.forEach(function(p) {
+        var o = document.createElement('option');
+        o.value = o.textContent = p;
+        sel.appendChild(o);
+      });
+      sel.value = curr;
+    });
+    return;
+  }
   var platforms = getPlatforms();
   var opts = '<option value="">— اختر المنصة —</option>'
     + platforms.map(function(p){ return '<option>' + p + '</option>'; }).join('');
@@ -9091,7 +9108,23 @@ function populatePlatformSelects() {
     var cur = sel.value;
     // f-platform لها optgroups — نبقيها كما هي
     if (id === 'f-platform') return;
-    if (id === 'al-bank') return; // للقروض لها قائمة خاصة
+    if (id === 'al-bank') {
+    // استخدام إعدادات المستخدم للبنوك
+    if (window._settingsBanks && window._settingsBanks.length) {
+      var sel = document.getElementById('al-bank');
+      if (sel) {
+        var curr = sel.value;
+        sel.innerHTML = '<option value="">— اختر —</option>';
+        window._settingsBanks.forEach(function(b) {
+          var o = document.createElement('option');
+          o.value = o.textContent = b;
+          sel.appendChild(o);
+        });
+        sel.value = curr;
+      }
+    }
+    return;
+  }
     // as-platform: نحدّث optgroups
     if (id === 'as-platform') {
       var saOpts = platforms.filter(function(p){ return !['Interactive Brokers','Alpaca','Robinhood','TD Ameritrade','Charles Schwab'].includes(p); })
@@ -10809,6 +10842,15 @@ function _loadData(uid) {
       divs.forEach(function(r){ dividendsData.push(r); });
       window.dividendsData = dividendsData;
     }
+    // قراءة إعدادات المستخدم
+    _ref(uid, 'settings').get().then(function(snap) {
+      if (snap.exists) {
+        var L = snap.data().lists || {};
+        if (L.platforms && L.platforms.length) { window._settingsPlatforms = L.platforms; if(typeof populatePlatformSelects==='function') populatePlatformSelects(); }
+        if (L.banks    && L.banks.length)     { window._settingsBanks     = L.banks;     if(typeof populateBankSelect==='function') populateBankSelect(); }
+        if (L.capital  && L.capital.length)   { window._settingsCapital   = L.capital;   if(typeof populateCapitalSrcSelect==='function') populateCapitalSrcSelect(); }
+      }
+    }).catch(function(){});
     _rerender();
     initDashboardYears();
     renderDashboard();
