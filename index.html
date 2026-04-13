@@ -1573,6 +1573,25 @@
         </div>
       </div>
 
+      <!-- ملخص الأسهم -->
+      <div id="stocks-summary-bar" class="fade-up" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 18px;text-align:center">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;letter-spacing:.5px">💰 المبلغ المستثمر</div>
+          <div id="stocks-sum-invested" style="font-size:20px;font-weight:800;font-family:monospace;color:var(--white)">—</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">ر.س</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 18px;text-align:center" id="stocks-sum-pnl-card">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;letter-spacing:.5px">📊 الأرباح / الخسائر</div>
+          <div id="stocks-sum-pnl" style="font-size:20px;font-weight:800;font-family:monospace;color:var(--white)">—</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">ر.س</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 18px;text-align:center">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;letter-spacing:.5px">📈 المجموع الكلي</div>
+          <div id="stocks-sum-total" style="font-size:20px;font-weight:800;font-family:monospace;color:var(--cyan)">—</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">ر.س</div>
+        </div>
+      </div>
+
       <!-- تبويبات السوق -->
       <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0">
         <button id="tab-sa"  onclick="switchStocksTab('sa')"  style="padding:10px 20px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:all .2s">🇸🇦 السعودي</button>
@@ -3593,13 +3612,6 @@
             </div>
           </div>
         </div>
-        <!-- Auto-refresh disabled notice -->
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px 18px;opacity:0.5;pointer-events:none">
-          <div style="flex:1"><div style="font-size:13px;color:var(--muted)">التحديث التلقائي كل 30 دقيقة</div><div style="font-size:11px;color:rgba(255,152,0,0.8);margin-top:3px">⚠️ معطّل — يستهلك رصيداً من Claude API</div></div>
-          <div style="width:44px;height:24px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);position:relative"><div style="position:absolute;top:3px;right:3px;width:16px;height:16px;border-radius:50%;background:rgba(136,153,187,0.4)"></div></div>
-          <span style="font-size:11px;color:var(--muted)">معطّل</span>
-        </div>
-
       <!-- Auto-refresh toggle — DISABLED -->
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;
                   background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);
@@ -5672,6 +5684,29 @@ function renderStocks() {
   if (badge) badge.textContent = 'إجمالي مستثمر: ' + totalInvested.toLocaleString('en-US', {maximumFractionDigits:0}) + ' ر.س';
   const countBadge = document.getElementById('stocks-count-badge');
   if (countBadge) countBadge.textContent = stockData.length + ' سهم';
+
+  // ══ تحديث ملخص الأسهم ══
+  var allStocks = inv.filter(function(x){ return x.type === 'سهم'; });
+  var sumInvested = allStocks.reduce(function(s,x){ return s+(x.amount||0); }, 0);
+  var sumPnl = allStocks.reduce(function(s,x){
+    var p = x.ticker ? STOCK_PRICES[x.ticker] : null;
+    var currPrice = p && p.price;
+    var mktVal = currPrice && x.shares ? currPrice * x.shares : null;
+    var pnl = mktVal ? mktVal - (x.amount||0) : (x.ret_val||0);
+    return s + pnl;
+  }, 0);
+  var sumTotal = sumInvested + sumPnl;
+  var fmt2 = function(n){ return n.toLocaleString('en-US',{maximumFractionDigits:0}); };
+  var setEl = function(id, v){ var e=document.getElementById(id); if(e) e.textContent=v; };
+  setEl('stocks-sum-invested', fmt2(sumInvested));
+  setEl('stocks-sum-total',    fmt2(sumTotal));
+  var pnlEl = document.getElementById('stocks-sum-pnl');
+  var pnlCard = document.getElementById('stocks-sum-pnl-card');
+  if (pnlEl) {
+    pnlEl.textContent = (sumPnl >= 0 ? '+' : '') + fmt2(sumPnl);
+    pnlEl.style.color = sumPnl >= 0 ? 'var(--green)' : 'var(--red)';
+  }
+  if (pnlCard) pnlCard.style.borderColor = sumPnl >= 0 ? 'rgba(0,230,118,0.2)' : 'rgba(255,77,77,0.2)';
 
   //  TABLE 
   const tbody = document.getElementById('stocks-tbody');
