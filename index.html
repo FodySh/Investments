@@ -1322,18 +1322,19 @@
   .step.done .step-num { background: rgba(0,230,118,0.3); color: var(--green); }
 
 
-  .multi-select-wrap { display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;cursor:pointer;min-height:42px;align-items:center;position:relative; }
-  .multi-select-wrap:focus-within,.multi-select-wrap.ms-open { border-color:var(--gold); }
-  .ms-chip { background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);border-radius:20px;padding:3px 8px;font-size:11px;color:var(--gold);display:flex;align-items:center;gap:4px;white-space:nowrap; }
-  .ms-chip-x { background:none;border:none;color:rgba(201,168,76,0.6);cursor:pointer;font-size:13px;padding:0;line-height:1; }
+  .ms-wrap { display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;cursor:pointer;min-height:42px;align-items:center;position:relative;z-index:50; }
+  .ms-wrap:focus-within,.ms-wrap.open { border-color:var(--gold); }
+  .ms-chip { background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);border-radius:20px;padding:3px 8px;font-size:12px;color:var(--gold);display:flex;align-items:center;gap:4px; }
+  .ms-chip-x { background:none;border:none;color:rgba(201,168,76,0.5);cursor:pointer;font-size:14px;padding:0;line-height:1; }
   .ms-chip-x:hover { color:var(--red); }
-  .ms-placeholder { font-size:13px;color:var(--muted); }
-  .ms-dropdown { position:fixed;background:#0d2118;border:1px solid rgba(255,255,255,0.15);border-radius:10px;z-index:99999;max-height:220px;overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,0.8);display:none;min-width:200px;backdrop-filter:blur(10px); }
-  .ms-dropdown.open { display:block; }
+  .ms-ph { font-size:13px;color:var(--muted); }
+  .ms-dd { position:fixed;background:#0a1a12;border:1px solid rgba(201,168,76,0.25);border-radius:10px;z-index:99999;max-height:200px;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,0.7);display:none; }
+  .ms-dd.open { display:block; }
   .ms-opt { padding:10px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px; }
   .ms-opt:hover { background:rgba(201,168,76,0.08); }
-  .ms-opt.sel::before { content:'✓';color:var(--gold);font-weight:700;width:14px;display:inline-block; }
-  .ms-opt:not(.sel)::before { content:'';width:14px;display:inline-block; }
+  .ms-opt.sel { color:var(--gold); }
+  .ms-opt::before { content:'';display:inline-block;width:14px;font-size:12px; }
+  .ms-opt.sel::before { content:'✓';color:var(--gold);font-weight:700; }
 </style>
 </head>
 <body>
@@ -2302,9 +2303,9 @@
               </div>
               <div class="field-group">
                 <label class="field-label">مصدر رأس المال</label>
-                <div id="ms-capital-wrap" class="multi-select-wrap" onclick="msToggle('capital')">
-                  <span id="ms-capital-ph" class="ms-placeholder">— اختر مصدراً أو أكثر —</span>
-                  <div id="ms-capital-dd" class="ms-dropdown"></div>
+                <div id="ms-cap-w" class="ms-wrap" onclick="msToggle('cap')">
+                  <span id="ms-cap-ph" class="ms-ph">— اختر مصدراً أو أكثر —</span>
+                  <div id="ms-cap-dd" class="ms-dd"></div>
                 </div>
                 <input type="hidden" id="f-capital-src"/>
               </div>
@@ -3768,11 +3769,11 @@
                   <input class="f-input" id="as-fees" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAddStock()" />
                 </div>
               </div>
-              <div class="field-group" style="margin-top:4px">
+              <div class="field-group">
                 <label class="field-label">مصدر رأس المال</label>
-                <div id="ms-stock-capital-wrap" class="multi-select-wrap" onclick="msToggle('stock-capital')">
-                  <span id="ms-stock-capital-ph" class="ms-placeholder">— اختر مصدراً أو أكثر —</span>
-                  <div id="ms-stock-capital-dd" class="ms-dropdown"></div>
+                <div id="ms-scap-w" class="ms-wrap" onclick="msToggle('scap')">
+                  <span id="ms-scap-ph" class="ms-ph">— اختر مصدراً أو أكثر —</span>
+                  <div id="ms-scap-dd" class="ms-dd"></div>
                 </div>
                 <input type="hidden" id="as-capital-src"/>
               </div>
@@ -6498,7 +6499,7 @@ function showPage(id, navEl, mobileTitle, noScroll){
   if (id === 'stocks') { renderStocks(); renderUsStocksTable(); }
   if (id === 'sukuk')  { renderSukuk(); renderFunds(); }
   if (id === 'funds')  { renderSukuk(); renderFunds(); setTimeout(function(){ switchOppsTab('funds'); }, 50); }
-  if (id === 'add-stock') { resetAddStock(); calcAddStock(); setTimeout(function(){ msInit('stock-capital', getCapitalSources(), []); }, 100); }
+  if (id === 'add-stock') { resetAddStock(); calcAddStock(); setTimeout(function(){ msInit('scap',getCapitalSources(),[]); },100); }
   if (id === 'add-loan')  { calcAddLoan(); }
   if (id === 'add')       { setTimeout(function(){ populateCapitalSrcSelect(); populatePlatformSelects(); }, 100); }
   if (id === 'add-debt')  { updateDebtDirectionLabel(); calcAddDebt(); }
@@ -7277,7 +7278,7 @@ function saveAddStock() {
     total:    mktVal > 0 ? mktVal : cost,
     status:   (document.getElementById('as-status')||{}).value || 'نشطة',
     risk:     (document.getElementById('as-risk')||{}).value || 'متوسط',
-    capital_src: msGet('stock-capital'),
+    capital_src: msGet('scap'),
     date_in:  (document.getElementById('as-buy-date')||{}).value || new Date().toISOString().split('T')[0],
     date_out: null,
     sector:   (document.getElementById('as-sector')||{}).value || '',
@@ -8976,13 +8977,7 @@ function saveCapitalSources(list) {
   localStorage.setItem('capitalSources', JSON.stringify(list));
 }
 
-function populateCapitalSrcSelect() {
-  var sources = getCapitalSources();
-  if (document.getElementById('ms-capital-dd'))
-    msInit('capital', sources, _msState['capital'] || []);
-  if (document.getElementById('ms-stock-capital-dd'))
-    msInit('stock-capital', sources, _msState['stock-capital'] || []);
-}
+// populateCapitalSrcSelect moved to multi-select section
 
 function showCapitalSrcSettings() {
   document.getElementById('capital-src-modal').style.display = 'flex';
@@ -9087,16 +9082,7 @@ function getDisplayName() {
 }
 
 // ── تعبئة القوائم المنسدلة ───────────────────────────────────────────────────
-function populateCapitalSrcSelect() {
-  var sel = document.getElementById('f-capital-src');
-  if (!sel) return;
-  var current = sel.value;
-  var sources = getCapitalSources();
-  sel.innerHTML = '<option value="">— اختر المصدر —</option>'
-    + sources.map(function(s) {
-        return '<option value="' + s + '"' + (s === current ? ' selected' : '') + '>' + s + '</option>';
-      }).join('');
-}
+// populateCapitalSrcSelect moved to multi-select section
 
 function populatePlatformSelects() {
   var platforms = getPlatforms();
@@ -9124,7 +9110,21 @@ function populatePlatformSelects() {
 
 // ── فتح/إغلاق الـ Modal ──────────────────────────────────────────────────────
 function openSettingsModal() {
-  window.open('https://fodysh.github.io/Investments/settings.html', '_blank');
+  var modal = document.getElementById('settings-modal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+
+  var s = _getSettings();
+
+  // تعبئة الاسم
+  var nameInp = document.getElementById('settings-display-name');
+  if (nameInp) nameInp.value = s.displayName || (window.__firebaseUser && window.__firebaseUser.displayName) || '';
+
+  // تعبئة مصادر رأس المال
+  renderSettingsList('capital', getCapitalSources());
+
+  // تعبئة المنصات
+  renderSettingsList('platforms', getPlatforms());
 }
 
 function closeSettingsModal() {
@@ -9757,146 +9757,111 @@ async function fetchTickerPrice(ticker, market) {
 }
 
 
-// ══════════════════════════════════════════════════════
-// Multi-Select Component
-// ══════════════════════════════════════════════════════
-var _msState = {};
-
-function msInit(key, options, selected) {
-  _msState[key] = Array.isArray(selected) ? selected.slice() : [];
-  var dd = document.getElementById('ms-' + key + '-dd');
+// ══ Multi-Select ═══════════════════════════════════════════
+var _ms = {};
+function msInit(key, opts, sel) {
+  _ms[key] = Array.isArray(sel) ? sel.slice() : [];
+  var dd = document.getElementById('ms-'+key+'-dd');
   if (!dd) return;
   dd.innerHTML = '';
-  options.forEach(function(opt) {
-    var div = document.createElement('div');
-    div.className = 'ms-opt' + (_msState[key].indexOf(opt) !== -1 ? ' sel' : '');
-    div.textContent = opt;
-    div.addEventListener('click', function(e) {
+  opts.forEach(function(o) {
+    var d = document.createElement('div');
+    d.className = 'ms-opt' + (_ms[key].indexOf(o)!==-1?' sel':'');
+    d.textContent = o;
+    d.addEventListener('click', function(e) {
       e.stopPropagation();
-      var i = _msState[key].indexOf(opt);
-      if (i === -1) _msState[key].push(opt);
-      else _msState[key].splice(i, 1);
-      div.classList.toggle('sel', _msState[key].indexOf(opt) !== -1);
+      var i = _ms[key].indexOf(o);
+      if (i===-1) _ms[key].push(o); else _ms[key].splice(i,1);
+      d.classList.toggle('sel', _ms[key].indexOf(o)!==-1);
       msRender(key);
-      msSync(key);
-      if (key === 'capital' || key === 'stock-capital') addCapitalToSettings(opt);
+      var h1=document.getElementById('f-capital-src');
+      var h2=document.getElementById('as-capital-src');
+      if (key==='cap' && h1) h1.value=_ms[key].join('،');
+      if (key==='scap' && h2) h2.value=_ms[key].join('،');
+      if (key==='cap'||key==='scap') addCapSrc(o);
     });
-    dd.appendChild(div);
+    dd.appendChild(d);
   });
   msRender(key);
 }
-
 function msToggle(key) {
-  var dd   = document.getElementById('ms-' + key + '-dd');
-  var wrap = document.getElementById('ms-' + key + '-wrap');
-  if (!dd || !wrap) return;
-  var isOpen = dd.classList.contains('open');
-  document.querySelectorAll('.ms-dropdown.open').forEach(function(d) { d.classList.remove('open'); });
-  if (isOpen) return;
-
-  // نقل الـ dropdown إلى portal في أسفل الـ body
-  var portal = document.getElementById('ms-portal');
-  if (!portal) {
-    portal = document.createElement('div');
-    portal.id = 'ms-portal';
-    portal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:0;z-index:99999;pointer-events:none;';
-    document.body.appendChild(portal);
-  }
-  portal.appendChild(dd);
-  dd.style.pointerEvents = 'all';
-
-  var rect = wrap.getBoundingClientRect();
-  dd.style.position = 'fixed';
-  dd.style.width    = rect.width + 'px';
-  dd.style.left     = rect.left + 'px';
-  dd.style.zIndex   = '99999';
-  dd.style.display  = 'block';
-
-  var ddH = Math.min(220, dd.scrollHeight + 20);
-  if (window.innerHeight - rect.bottom >= ddH) {
-    dd.style.top    = (rect.bottom + 4) + 'px';
+  var w = document.getElementById('ms-'+key+'-w');
+  var dd= document.getElementById('ms-'+key+'-dd');
+  if (!w||!dd) return;
+  var open = dd.classList.contains('open');
+  document.querySelectorAll('.ms-dd.open').forEach(function(d){d.classList.remove('open');});
+  if (open) { w.classList.remove('open'); return; }
+  // نقل dd لـ body ووضعها بـ fixed positioning
+  if (dd.parentElement !== document.body) document.body.appendChild(dd);
+  var r = w.getBoundingClientRect();
+  dd.style.width = r.width + 'px';
+  dd.style.left  = r.left + 'px';
+  dd.style.right = 'auto';
+  if (window.innerHeight - r.bottom > 200) {
+    dd.style.top    = (r.bottom + 2) + 'px';
     dd.style.bottom = 'auto';
   } else {
-    dd.style.top    = (rect.top - ddH - 4) + 'px';
-    dd.style.bottom = 'auto';
+    dd.style.bottom = (window.innerHeight - r.top + 2) + 'px';
+    dd.style.top    = 'auto';
   }
   dd.classList.add('open');
-
-  setTimeout(function() {
-    function close(e) {
-      if (!wrap.contains(e.target) && !dd.contains(e.target)) {
-        dd.classList.remove('open');
-        dd.style.display = 'none';
-        document.removeEventListener('click', close);
-      }
-    }
-    document.addEventListener('click', close);
-  }, 10);
+  w.classList.add('open');
+  setTimeout(function(){
+    function cls(e){ if(!w.contains(e.target)&&!dd.contains(e.target)){dd.classList.remove('open');w.classList.remove('open');document.removeEventListener('click',cls);} }
+    document.addEventListener('click',cls);
+  },10);
 }
-
-
 function msRender(key) {
-  var wrap = document.getElementById('ms-' + key + '-wrap');
-  var ph   = document.getElementById('ms-' + key + '-ph');
-  if (!wrap || !ph) return;
-  var dd = document.getElementById('ms-' + key + '-dd');
-  wrap.querySelectorAll('.ms-chip').forEach(function(ch) { ch.remove(); });
-  var sel = _msState[key] || [];
-  ph.style.display = sel.length ? 'none' : '';
-  sel.forEach(function(v) {
-    var chip = document.createElement('div');
-    chip.className = 'ms-chip';
-    var span = document.createElement('span');
-    span.textContent = v;
-    var btn = document.createElement('button');
-    btn.className = 'ms-chip-x';
-    btn.textContent = '×';
-    btn.addEventListener('click', function(e) {
+  var w = document.getElementById('ms-'+key+'-w');
+  var ph= document.getElementById('ms-'+key+'-ph');
+  if (!w) return;
+  // احذف chips فقط من الـ chips container
+  var container = document.getElementById('ms-'+key+'-chips');
+  if (!container) {
+    // أنشئ chips container إن لم يكن موجوداً
+    container = document.createElement('div');
+    container.id = 'ms-'+key+'-chips';
+    container.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;align-items:center;flex:1;';
+    var dd = document.getElementById('ms-'+key+'-dd');
+    w.insertBefore(container, dd || w.firstChild);
+  }
+  container.innerHTML = '';
+  var sel = _ms[key]||[];
+  if (ph) ph.style.display = sel.length ? 'none' : '';
+  var dd = document.getElementById('ms-'+key+'-dd');
+  sel.forEach(function(v){
+    var chip=document.createElement('div'); chip.className='ms-chip';
+    var sp=document.createElement('span'); sp.textContent=v;
+    var btn=document.createElement('button'); btn.className='ms-chip-x'; btn.textContent='×';
+    btn.addEventListener('click',function(e){
       e.stopPropagation();
-      var i = _msState[key].indexOf(v);
-      if (i !== -1) _msState[key].splice(i, 1);
-      wrap.querySelectorAll('.ms-opt').forEach(function(o) {
-        if (o.textContent === v) o.classList.remove('sel');
-      });
+      var i=_ms[key].indexOf(v); if(i!==-1)_ms[key].splice(i,1);
+      if(dd) dd.querySelectorAll('.ms-opt').forEach(function(o){if(o.textContent.trim()===v)o.classList.remove('sel');});
       msRender(key);
-      msSync(key);
+      var h1=document.getElementById('f-capital-src'); if(key==='cap'&&h1)h1.value=_ms[key].join('،');
+      var h2=document.getElementById('as-capital-src'); if(key==='scap'&&h2)h2.value=_ms[key].join('،');
     });
-    chip.appendChild(span);
-    chip.appendChild(btn);
-    wrap.insertBefore(chip, dd);
+    chip.appendChild(sp); chip.appendChild(btn);
+    container.appendChild(chip);
   });
 }
-
-function msSync(key) {
-  var inp = document.getElementById('f-capital-src');
-  if (key === 'capital' && inp) inp.value = (_msState[key] || []).join('،');
-  var inp2 = document.getElementById('as-capital-src');
-  if (key === 'stock-capital' && inp2) inp2.value = (_msState[key] || []).join('،');
+function msGet(key){ return (_ms[key]||[]).join('،'); }
+function addCapSrc(val){
+  if(!val||!window.__firebaseUser) return;
+  var cur=window._settingsCapital||getCapitalSources();
+  if(cur.indexOf(val)!==-1) return;
+  cur.push(val); window._settingsCapital=cur;
+  try{ _ref(window.__firebaseUser.uid,'settings').get().then(function(s){
+    var L=s.exists?(s.data().lists||{}):{};
+    L.capital=cur;
+    _ref(window.__firebaseUser.uid,'settings').set({lists:L,updatedAt:new Date().toISOString()},{merge:true});
+  }); }catch(e){}
 }
-
-function msGet(key) { return (_msState[key] || []).join('،'); }
-
-function msSet(key, str) {
-  _msState[key] = str ? str.split(/[,،]/).map(function(s) { return s.trim(); }).filter(Boolean) : [];
+function populateCapitalSrcSelect(){
+  var src=getCapitalSources();
+  if(document.getElementById('ms-cap-dd')) msInit('cap',src,_ms['cap']||[]);
+  if(document.getElementById('ms-scap-dd')) msInit('scap',src,_ms['scap']||[]);
 }
-
-function addCapitalToSettings(val) {
-  if (!val || !window.__firebaseUser) return;
-  var uid = window.__firebaseUser.uid;
-  if (!uid) return;
-  var cur = window._settingsCapital || getCapitalSources();
-  if (cur.indexOf(val) !== -1) return;
-  cur.push(val);
-  window._settingsCapital = cur;
-  try {
-    _ref(uid, 'settings').get().then(function(snap) {
-      var lists = snap.exists ? (snap.data().lists || {}) : {};
-      lists.capital = cur;
-      _ref(uid, 'settings').set({ lists: lists, updatedAt: new Date().toISOString() }, { merge: true });
-    });
-  } catch(e) {}
-}
-
 
 function saveLoansToStorage() {
   var data = window.loansData || loansData || [];
@@ -10955,13 +10920,11 @@ function _loadData(uid) {
       divs.forEach(function(r){ dividendsData.push(r); });
       window.dividendsData = dividendsData;
     }
-    // قراءة إعدادات المستخدم (منصات، بنوك، مصادر رأس المال)
-    _ref(uid, 'settings').get().then(function(snap) {
-      if (snap.exists) {
-        var L = snap.data().lists || {};
-        if (L.platforms && L.platforms.length) { window._settingsPlatforms = L.platforms; if(typeof populatePlatformSelects==='function') populatePlatformSelects(); }
-        if (L.banks    && L.banks.length)     { window._settingsBanks     = L.banks;     if(typeof populateBankSelect==='function') populateBankSelect(); }
-        if (L.capital  && L.capital.length)   { window._settingsCapital   = L.capital;   if(typeof populateCapitalSrcSelect==='function') populateCapitalSrcSelect(); }
+    _ref(uid,'settings').get().then(function(snap){
+      if(snap.exists){var L=snap.data().lists||{};
+        if(L.platforms&&L.platforms.length){window._settingsPlatforms=L.platforms;if(typeof populatePlatformSelects==='function')populatePlatformSelects();}
+        if(L.banks&&L.banks.length){window._settingsBanks=L.banks;if(typeof populateBankSelect==='function')populateBankSelect();}
+        if(L.capital&&L.capital.length){window._settingsCapital=L.capital;if(typeof populateCapitalSrcSelect==='function')populateCapitalSrcSelect();}
       }
     }).catch(function(){});
     _rerender();
