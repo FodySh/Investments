@@ -1399,12 +1399,12 @@
             <div class="auth-user-name" id="auth-user-name" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</div>
           </div>
           <!-- زر الإعدادات -->
-          <button onclick="openSettingsModal()" title="الإعدادات" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:7px;padding:4px 7px;cursor:pointer;font-size:13px;color:var(--gold);flex-shrink:0;line-height:1">⚙️</button>
+          <a href="settings.html" title="الإعدادات" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:7px;padding:4px 7px;cursor:pointer;font-size:13px;color:var(--gold);flex-shrink:0;line-height:1;text-decoration:none">⚙️</a>
           <!-- Desktop user dropdown -->
           <div id="desktop-user-menu" style="display:none;position:fixed;top:60px;left:8px;background:var(--sidebar-bg);border:1px solid var(--border);border-radius:12px;padding:8px;z-index:500;box-shadow:0 8px 32px rgba(0,0,0,0.4);backdrop-filter:blur(20px);min-width:200px">
             <div id="desktop-menu-email" style="padding:8px 12px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border);margin-bottom:4px"></div>
-            <button onclick="openSettingsModal();toggleDesktopUserMenu()" style="width:100%;display:flex;align-items:center;gap:10px;background:rgba(201,168,76,0.08);border:none;padding:9px 12px;color:var(--gold);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;border-radius:8px;text-align:right;margin-bottom:4px">
-              ⚙️ الإعدادات
+            <a href="settings.html" style="width:100%;display:flex;align-items:center;gap:10px;background:rgba(201,168,76,0.08);padding:9px 12px;color:var(--gold);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;border-radius:8px;text-align:right;margin-bottom:4px;text-decoration:none">
+              ⚙️ الإعدادات &nbsp;↗
             </button>
             <button onclick="googleSignOut();toggleDesktopUserMenu()" style="width:100%;display:flex;align-items:center;gap:10px;background:rgba(255,77,77,0.08);border:none;padding:9px 12px;color:var(--red);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;border-radius:8px;text-align:right">
               🚪 تسجيل الخروج
@@ -1458,7 +1458,7 @@
             <span style="font-size:9px;color:var(--muted)">▾</span>
           </div>
           <!-- زر الإعدادات -->
-          <button onclick="openSettingsModal()" title="الإعدادات" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:7px;padding:5px 7px;cursor:pointer;font-size:14px;color:var(--gold);line-height:1;flex-shrink:0">⚙️</button>
+          <a href="settings.html" title="الإعدادات" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:7px;padding:5px 7px;cursor:pointer;font-size:14px;color:var(--gold);line-height:1;flex-shrink:0;text-decoration:none">⚙️</a>
         </div>
       </div>
     </div>
@@ -1474,7 +1474,7 @@
     ">
       <div id="mob-menu-email" style="padding:8px 12px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border);margin-bottom:4px"></div>
       <div id="mob-sync-status" style="padding:6px 12px;font-size:11px;color:var(--green)">☁️ مزامن</div>
-      <button onclick="openSettingsModal();closeMobUserMenu()" style="
+      <a href="settings.html" onclick="closeMobUserMenu()" style="
         width:100%;display:flex;align-items:center;gap:10px;
         background:rgba(201,168,76,0.08);border:none;
         padding:9px 12px;color:var(--gold);
@@ -6479,7 +6479,7 @@ function showPage(id, navEl, mobileTitle, noScroll){
   if (id === 'sukuk')  { renderSukuk(); renderFunds(); }
   if (id === 'funds')  { renderSukuk(); renderFunds(); setTimeout(function(){ switchOppsTab('funds'); }, 50); }
   if (id === 'add-stock') { resetAddStock(); calcAddStock(); }
-  if (id === 'add-loan')  { calcAddLoan(); }
+  if (id === 'add-loan')  { if(typeof populateBankSelect==='function') populateBankSelect(); calcAddLoan(); }
   if (id === 'add')       { setTimeout(function(){ populateCapitalSrcSelect(); populatePlatformSelects(); }, 100); }
   if (id === 'add-debt')  { updateDebtDirectionLabel(); calcAddDebt(); }
   if (id === 'loans') renderLoans();
@@ -8954,6 +8954,22 @@ function saveCapitalSources(list) {
   localStorage.setItem('capitalSources', JSON.stringify(list));
 }
 
+function populateBankSelect() {
+  var sel = document.getElementById('al-bank');
+  if (!sel) return;
+  var cur = sel.value;
+  var s = _getSettings();
+  var banks = s.banks && s.banks.length ? s.banks : [
+    'البنك الأهلي السعودي','بنك الراجحي','بنك الرياض',
+    'البنك السعودي الفرنسي','بنك البلاد','بنك الجزيرة',
+    'البنك السعودي للاستثمار','بنك الإمارات دبي الوطني',
+    'بنك الإنماء','بنك الخليج الدولي (ميم)','أخرى'
+  ];
+  sel.innerHTML = '<option value="">— اختر —</option>'
+    + banks.map(function(b){ return '<option' + (b===cur?' selected':'') + '>' + b + '</option>'; }).join('');
+}
+
+
 function populateCapitalSrcSelect() {
   var sel = document.getElementById('f-capital-src');
   if (!sel) return;
@@ -10813,6 +10829,21 @@ function _loadData(uid) {
     initDashboardYears();
     renderDashboard();
     if (typeof renderStocks === "function") renderStocks();
+    // قراءة إعدادات القوائم من Firebase (settings.html)
+    _db.collection("users").doc(uid).collection("portfolio").doc("settings")
+      .get().then(function(snap) {
+        if (!snap.exists) return;
+        var s = snap.data();
+        var cur = _getSettings();
+        if (s.platforms && s.platforms.length) cur.platforms = s.platforms;
+        if (s.capital   && s.capital.length)   cur.capitalSources = s.capital;
+        if (s.banks     && s.banks.length)      cur.banks = s.banks;
+        if (s.types     && s.types.length)      cur.investmentTypes = s.types;
+        _saveSettings(cur);
+        populatePlatformSelects();
+        populateCapitalSrcSelect();
+        populateBankSelect();
+      }).catch(function(){});
     _badge("synced");
 
     // Realtime listener
