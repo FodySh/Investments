@@ -1328,7 +1328,7 @@
   .ms-chip-x { background:none;border:none;color:rgba(201,168,76,0.6);cursor:pointer;font-size:13px;padding:0;line-height:1; }
   .ms-chip-x:hover { color:var(--red); }
   .ms-placeholder { font-size:13px;color:var(--muted); }
-  .ms-dropdown { position:fixed;background:var(--navy2,#0d2118);border:1px solid var(--border);border-radius:10px;z-index:9999;max-height:220px;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.6);display:none;min-width:200px; }
+  .ms-dropdown { position:fixed;background:#0d2118;border:1px solid rgba(255,255,255,0.15);border-radius:10px;z-index:99999;max-height:220px;overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,0.8);display:none;min-width:200px;backdrop-filter:blur(10px); }
   .ms-dropdown.open { display:block; }
   .ms-opt { padding:10px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px; }
   .ms-opt:hover { background:rgba(201,168,76,0.08); }
@@ -1487,7 +1487,7 @@
     ">
       <div id="mob-menu-email" style="padding:8px 12px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border);margin-bottom:4px"></div>
       <div id="mob-sync-status" style="padding:6px 12px;font-size:11px;color:var(--green)">☁️ مزامن</div>
-      <button onclick="openSettingsModal();closeMobUserMenu()" style="
+      <button onclick="window.open('https://fodysh.github.io/Investments/settings.html','_blank');closeMobUserMenu()" style="
         width:100%;display:flex;align-items:center;gap:10px;
         background:rgba(201,168,76,0.08);border:none;
         padding:9px 12px;color:var(--gold);
@@ -9124,21 +9124,7 @@ function populatePlatformSelects() {
 
 // ── فتح/إغلاق الـ Modal ──────────────────────────────────────────────────────
 function openSettingsModal() {
-  var modal = document.getElementById('settings-modal');
-  if (!modal) return;
-  modal.style.display = 'flex';
-
-  var s = _getSettings();
-
-  // تعبئة الاسم
-  var nameInp = document.getElementById('settings-display-name');
-  if (nameInp) nameInp.value = s.displayName || (window.__firebaseUser && window.__firebaseUser.displayName) || '';
-
-  // تعبئة مصادر رأس المال
-  renderSettingsList('capital', getCapitalSources());
-
-  // تعبئة المنصات
-  renderSettingsList('platforms', getPlatforms());
+  window.open('https://fodysh.github.io/Investments/settings.html', '_blank');
 }
 
 function closeSettingsModal() {
@@ -9805,35 +9791,49 @@ function msToggle(key) {
   var wrap = document.getElementById('ms-' + key + '-wrap');
   if (!dd || !wrap) return;
   var isOpen = dd.classList.contains('open');
-  // أغلق كل القوائم المفتوحة
   document.querySelectorAll('.ms-dropdown.open').forEach(function(d) { d.classList.remove('open'); });
-  if (!isOpen) {
-    // انقل الـ dropdown إلى body لتجاوز overflow:hidden
-    if (dd.parentElement !== document.body) document.body.appendChild(dd);
-    var rect = wrap.getBoundingClientRect();
-    var ddH  = 220;
-    dd.style.width  = rect.width + 'px';
-    dd.style.left   = rect.left + window.scrollX + 'px';
-    dd.style.zIndex = '99999';
-    if (window.innerHeight - rect.bottom > ddH) {
-      dd.style.top    = (rect.bottom + window.scrollY + 4) + 'px';
-      dd.style.bottom = '';
-    } else {
-      dd.style.top    = '';
-      dd.style.bottom = (window.innerHeight - rect.top - window.scrollY + 4) + 'px';
-    }
-    dd.classList.add('open');
-    setTimeout(function() {
-      function close(e) {
-        if (!wrap.contains(e.target) && !dd.contains(e.target)) {
-          dd.classList.remove('open');
-          document.removeEventListener('click', close);
-        }
-      }
-      document.addEventListener('click', close);
-    }, 10);
+  if (isOpen) return;
+
+  // نقل الـ dropdown إلى portal في أسفل الـ body
+  var portal = document.getElementById('ms-portal');
+  if (!portal) {
+    portal = document.createElement('div');
+    portal.id = 'ms-portal';
+    portal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:0;z-index:99999;pointer-events:none;';
+    document.body.appendChild(portal);
   }
+  portal.appendChild(dd);
+  dd.style.pointerEvents = 'all';
+
+  var rect = wrap.getBoundingClientRect();
+  dd.style.position = 'fixed';
+  dd.style.width    = rect.width + 'px';
+  dd.style.left     = rect.left + 'px';
+  dd.style.zIndex   = '99999';
+  dd.style.display  = 'block';
+
+  var ddH = Math.min(220, dd.scrollHeight + 20);
+  if (window.innerHeight - rect.bottom >= ddH) {
+    dd.style.top    = (rect.bottom + 4) + 'px';
+    dd.style.bottom = 'auto';
+  } else {
+    dd.style.top    = (rect.top - ddH - 4) + 'px';
+    dd.style.bottom = 'auto';
+  }
+  dd.classList.add('open');
+
+  setTimeout(function() {
+    function close(e) {
+      if (!wrap.contains(e.target) && !dd.contains(e.target)) {
+        dd.classList.remove('open');
+        dd.style.display = 'none';
+        document.removeEventListener('click', close);
+      }
+    }
+    document.addEventListener('click', close);
+  }, 10);
 }
+
 
 function msRender(key) {
   var wrap = document.getElementById('ms-' + key + '-wrap');
