@@ -1322,20 +1322,18 @@
   .step.done .step-num { background: rgba(0,230,118,0.3); color: var(--green); }
 
 
-  /* Multi-select chips */
   .multi-select-wrap { display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;cursor:pointer;min-height:42px;align-items:center;position:relative; }
-  .multi-select-wrap:focus-within { border-color:var(--gold); }
-  .ms-chip { background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);border-radius:20px;padding:2px 8px 2px 6px;font-size:11px;color:var(--gold);display:flex;align-items:center;gap:4px;white-space:nowrap; }
+  .multi-select-wrap:focus-within,.multi-select-wrap.ms-open { border-color:var(--gold); }
+  .ms-chip { background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);border-radius:20px;padding:3px 8px;font-size:11px;color:var(--gold);display:flex;align-items:center;gap:4px;white-space:nowrap; }
   .ms-chip-x { background:none;border:none;color:rgba(201,168,76,0.6);cursor:pointer;font-size:13px;padding:0;line-height:1; }
   .ms-chip-x:hover { color:var(--red); }
   .ms-placeholder { font-size:13px;color:var(--muted); }
-  .ms-dropdown { position:absolute;top:100%;right:0;left:0;background:var(--navy2);border:1px solid var(--border);border-radius:10px;z-index:50;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.4);margin-top:4px;display:none; }
+  .ms-dropdown { position:absolute;top:calc(100% + 4px);right:0;left:0;background:var(--navy2,#0d2118);border:1px solid var(--border);border-radius:10px;z-index:999;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.4);display:none; }
   .ms-dropdown.open { display:block; }
-  .ms-option { padding:10px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px; }
-  .ms-option:hover { background:rgba(201,168,76,0.08); }
-  .ms-option.selected { color:var(--gold); }
-  .ms-option.selected::before { content:'✓';color:var(--gold);font-weight:700; }
-  .ms-option:not(.selected)::before { content:'';display:inline-block;width:12px; }
+  .ms-opt { padding:10px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px; }
+  .ms-opt:hover { background:rgba(201,168,76,0.08); }
+  .ms-opt.sel::before { content:'✓';color:var(--gold);font-weight:700;width:14px;display:inline-block; }
+  .ms-opt:not(.sel)::before { content:'';width:14px;display:inline-block; }
 </style>
 </head>
 <body>
@@ -1414,11 +1412,11 @@
             <div class="auth-user-name" id="auth-user-name" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</div>
           </div>
           <!-- زر الإعدادات -->
-          <button onclick="window.open('https://fodysh.github.io/Investments/settings.html','_blank')" title="الإعدادات" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:7px;padding:4px 7px;cursor:pointer;font-size:13px;color:var(--gold);flex-shrink:0;line-height:1">⚙️</button>
+          <button onclick="openSettingsModal()" title="الإعدادات" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:7px;padding:4px 7px;cursor:pointer;font-size:13px;color:var(--gold);flex-shrink:0;line-height:1">⚙️</button>
           <!-- Desktop user dropdown -->
           <div id="desktop-user-menu" style="display:none;position:fixed;top:60px;left:8px;background:var(--sidebar-bg);border:1px solid var(--border);border-radius:12px;padding:8px;z-index:500;box-shadow:0 8px 32px rgba(0,0,0,0.4);backdrop-filter:blur(20px);min-width:200px">
             <div id="desktop-menu-email" style="padding:8px 12px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border);margin-bottom:4px"></div>
-            <button onclick="window.open('https://fodysh.github.io/Investments/settings.html','_blank');toggleDesktopUserMenu()" style="width:100%;display:flex;align-items:center;gap:10px;background:rgba(201,168,76,0.08);border:none;padding:9px 12px;color:var(--gold);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;border-radius:8px;text-align:right;margin-bottom:4px">
+            <button onclick="openSettingsModal();toggleDesktopUserMenu()" style="width:100%;display:flex;align-items:center;gap:10px;background:rgba(201,168,76,0.08);border:none;padding:9px 12px;color:var(--gold);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;border-radius:8px;text-align:right;margin-bottom:4px">
               ⚙️ الإعدادات
             </button>
             <button onclick="googleSignOut();toggleDesktopUserMenu()" style="width:100%;display:flex;align-items:center;gap:10px;background:rgba(255,77,77,0.08);border:none;padding:9px 12px;color:var(--red);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;border-radius:8px;text-align:right">
@@ -2304,11 +2302,11 @@
               </div>
               <div class="field-group">
                 <label class="field-label">مصدر رأس المال</label>
-                <div id="ms-capital-wrap" class="multi-select-wrap" onclick="msToggle('capital')" style="position:relative">
-                  <span id="ms-capital-placeholder" class="ms-placeholder">— اختر مصدر أو أكثر —</span>
-                  <div id="ms-capital-dropdown" class="ms-dropdown"></div>
+                <div id="ms-capital-wrap" class="multi-select-wrap" onclick="msToggle('capital')">
+                  <span id="ms-capital-ph" class="ms-placeholder">— اختر مصدراً أو أكثر —</span>
+                  <div id="ms-capital-dd" class="ms-dropdown"></div>
                 </div>
-                <input type="hidden" id="f-capital-src" />
+                <input type="hidden" id="f-capital-src"/>
               </div>
             </div>
           </div>
@@ -3769,14 +3767,14 @@
                   <label class="field-label">الرسوم والعمولات (ر.س)</label>
                   <input class="f-input" id="as-fees" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAddStock()" />
                 </div>
-                <div class="field-group" style="grid-column:span 2">
-                  <label class="field-label">مصدر رأس المال</label>
-                  <div id="ms-stock-capital-wrap" class="multi-select-wrap" onclick="msToggle('stock-capital')" style="position:relative">
-                    <span id="ms-stock-capital-placeholder" class="ms-placeholder">— اختر مصدر أو أكثر —</span>
-                    <div id="ms-stock-capital-dropdown" class="ms-dropdown"></div>
-                  </div>
-                  <input type="hidden" id="as-capital-src" />
+              </div>
+              <div class="field-group" style="margin-top:4px">
+                <label class="field-label">مصدر رأس المال</label>
+                <div id="ms-stock-capital-wrap" class="multi-select-wrap" onclick="msToggle('stock-capital')">
+                  <span id="ms-stock-capital-ph" class="ms-placeholder">— اختر مصدراً أو أكثر —</span>
+                  <div id="ms-stock-capital-dd" class="ms-dropdown"></div>
                 </div>
+                <input type="hidden" id="as-capital-src"/>
               </div>
             </div>
           </div>
@@ -6501,8 +6499,8 @@ function showPage(id, navEl, mobileTitle, noScroll){
   if (id === 'sukuk')  { renderSukuk(); renderFunds(); }
   if (id === 'funds')  { renderSukuk(); renderFunds(); setTimeout(function(){ switchOppsTab('funds'); }, 50); }
   if (id === 'add-stock') { resetAddStock(); calcAddStock(); setTimeout(function(){ msInit('stock-capital', getCapitalSources(), []); }, 100); }
-  if (id === 'add-loan')  { calcAddLoan(); if(typeof populateBankSelect==='function') populateBankSelect(); }
-  if (id === 'add')       { setTimeout(function(){ populateCapitalSrcSelect(); populatePlatformSelects(); msInit('capital', getCapitalSources(), []); }, 100); }
+  if (id === 'add-loan')  { calcAddLoan(); }
+  if (id === 'add')       { setTimeout(function(){ populateCapitalSrcSelect(); populatePlatformSelects(); }, 100); }
   if (id === 'add-debt')  { updateDebtDirectionLabel(); calcAddDebt(); }
   if (id === 'loans') renderLoans();
   if (id === 'debts') renderDebts();
@@ -7279,7 +7277,7 @@ function saveAddStock() {
     total:    mktVal > 0 ? mktVal : cost,
     status:   (document.getElementById('as-status')||{}).value || 'نشطة',
     risk:     (document.getElementById('as-risk')||{}).value || 'متوسط',
-    capital_src: msGetValues('stock-capital'),
+    capital_src: msGet('stock-capital'),
     date_in:  (document.getElementById('as-buy-date')||{}).value || new Date().toISOString().split('T')[0],
     date_out: null,
     sector:   (document.getElementById('as-sector')||{}).value || '',
@@ -8966,19 +8964,6 @@ resetJamaaForm = function() {
 // ══════════════════════════════════════════════════════
 var _defaultCapitalSources = ['مستحقات','Cash Flow','رصيد الإجازة','تحويشة','أرباح سابقة','ايجار عقار','مدخرات','مكافأة','قرض','أخرى'];
 
-function populateBankSelect() {
-  var sel = document.getElementById('al-bank');
-  if (!sel) return;
-  var banks = window._settingsBanks && window._settingsBanks.length
-    ? window._settingsBanks
-    : ['البنك الأهلي السعودي','بنك الراجحي','بنك الرياض','البنك السعودي الفرنسي','بنك البلاد','بنك الجزيرة','البنك السعودي للاستثمار','بنك الإمارات دبي الوطني','بنك الإنماء','بنك الخليج الدولي (ميم)','أخرى'];
-  var curr = sel.value;
-  sel.innerHTML = '<option value="">— اختر —</option>'
-    + banks.map(function(b){ return '<option value="'+b+'">'+b+'</option>'; }).join('');
-  if (curr) sel.value = curr;
-}
-
-
 function getCapitalSources() {
   try {
     var stored = JSON.parse(localStorage.getItem('capitalSources') || 'null');
@@ -8991,27 +8976,11 @@ function saveCapitalSources(list) {
 }
 
 function populateCapitalSrcSelect() {
-  // تهيئة multi-select للفرص
   var sources = getCapitalSources();
-  if (document.getElementById('ms-capital-dropdown')) {
-    var curr = _msState['capital'] || [];
-    msInit('capital', sources, curr);
-  }
-  // تهيئة multi-select للأسهم
-  if (document.getElementById('ms-stock-capital-dropdown')) {
-    var curr2 = _msState['stock-capital'] || [];
-    msInit('stock-capital', sources, curr2);
-  }
-  // إبقاء الـ hidden input متزامن
-  var sel = document.getElementById('f-capital-src');
-  if (sel && sel.tagName === 'SELECT') {
-    var current = sel.value;
-    var sources2 = getCapitalSources();
-    sel.innerHTML = '<option value="">— اختر المصدر —</option>'
-      + sources2.map(function(s) {
-          return '<option value="' + s + '"' + (s === current ? ' selected' : '') + '>' + s + '</option>';
-        }).join('');
-  }
+  if (document.getElementById('ms-capital-dd'))
+    msInit('capital', sources, _msState['capital'] || []);
+  if (document.getElementById('ms-stock-capital-dd'))
+    msInit('stock-capital', sources, _msState['stock-capital'] || []);
 }
 
 function showCapitalSrcSettings() {
@@ -9104,12 +9073,10 @@ function _getSettings() {
 function _saveSettings(s) { localStorage.setItem('appSettings', JSON.stringify(s)); }
 
 function getCapitalSources() {
-  if (window._settingsCapital && window._settingsCapital.length) return window._settingsCapital.slice();
   var s = _getSettings();
   return (s.capitalSources && s.capitalSources.length) ? s.capitalSources : _defaultCapitalSources.slice();
 }
 function getPlatforms() {
-  if (window._settingsPlatforms && window._settingsPlatforms.length) return window._settingsPlatforms.slice();
   var s = _getSettings();
   return (s.platforms && s.platforms.length) ? s.platforms : _defaultPlatforms.slice();
 }
@@ -9131,23 +9098,6 @@ function populateCapitalSrcSelect() {
 }
 
 function populatePlatformSelects() {
-  // استخدام إعدادات المستخدم إن وُجدت
-  if (window._settingsPlatforms && window._settingsPlatforms.length) {
-    var customPlats = window._settingsPlatforms;
-    ['f-platform', 'as-platform'].forEach(function(id) {
-      var sel = document.getElementById(id);
-      if (!sel) return;
-      var curr = sel.value;
-      sel.innerHTML = '<option value="">— اختر المنصة —</option>';
-      customPlats.forEach(function(p) {
-        var o = document.createElement('option');
-        o.value = o.textContent = p;
-        sel.appendChild(o);
-      });
-      sel.value = curr;
-    });
-    return;
-  }
   var platforms = getPlatforms();
   var opts = '<option value="">— اختر المنصة —</option>'
     + platforms.map(function(p){ return '<option>' + p + '</option>'; }).join('');
@@ -9159,23 +9109,7 @@ function populatePlatformSelects() {
     var cur = sel.value;
     // f-platform لها optgroups — نبقيها كما هي
     if (id === 'f-platform') return;
-    if (id === 'al-bank') {
-    // استخدام إعدادات المستخدم للبنوك
-    if (window._settingsBanks && window._settingsBanks.length) {
-      var sel = document.getElementById('al-bank');
-      if (sel) {
-        var curr = sel.value;
-        sel.innerHTML = '<option value="">— اختر —</option>';
-        window._settingsBanks.forEach(function(b) {
-          var o = document.createElement('option');
-          o.value = o.textContent = b;
-          sel.appendChild(o);
-        });
-        sel.value = curr;
-      }
-    }
-    return;
-  }
+    if (id === 'al-bank') return; // للقروض لها قائمة خاصة
     // as-platform: نحدّث optgroups
     if (id === 'as-platform') {
       var saOpts = platforms.filter(function(p){ return !['Interactive Brokers','Alpaca','Robinhood','TD Ameritrade','Charles Schwab'].includes(p); })
@@ -9836,113 +9770,114 @@ async function fetchTickerPrice(ticker, market) {
 }
 
 
-// ══════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 // Multi-Select Component
-// ══════════════════════════════════════════════════════════════════
-var _msState = {};  // { key: [selected values] }
+// ══════════════════════════════════════════════════════
+var _msState = {};
 
 function msInit(key, options, selected) {
-  _msState[key] = selected ? selected.slice() : [];
-  var dd = document.getElementById('ms-' + key + '-dropdown');
+  _msState[key] = Array.isArray(selected) ? selected.slice() : [];
+  var dd = document.getElementById('ms-' + key + '-dd');
   if (!dd) return;
-
-
-function msToggle(key) {
-  var dd = document.getElementById('ms-' + key + '-dropdown');
-  if (!dd) return;
-  var isOpen = dd.classList.contains('open');
-  // أغلق كل dropdowns
-  document.querySelectorAll('.ms-dropdown').forEach(function(d){ d.classList.remove('open'); });
-  if (!isOpen) {
-    dd.classList.add('open');
-    // أغلق عند الضغط خارجاً
-    setTimeout(function(){
-      document.addEventListener('click', function closeMs(e){
-        if (!e.target.closest('#ms-' + key + '-wrap')) { dd.classList.remove('open'); document.removeEventListener('click', closeMs); }
-      });
-    }, 0);
-  }
+  dd.innerHTML = '';
+  options.forEach(function(opt) {
+    var div = document.createElement('div');
+    div.className = 'ms-opt' + (_msState[key].indexOf(opt) !== -1 ? ' sel' : '');
+    div.textContent = opt;
+    div.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var i = _msState[key].indexOf(opt);
+      if (i === -1) _msState[key].push(opt);
+      else _msState[key].splice(i, 1);
+      div.classList.toggle('sel', _msState[key].indexOf(opt) !== -1);
+      msRender(key);
+      msSync(key);
+      if (key === 'capital' || key === 'stock-capital') addCapitalToSettings(opt);
+    });
+    dd.appendChild(div);
+  });
+  msRender(key);
 }
 
-function msPick(key, val) {
-  if (!_msState[key]) _msState[key] = [];
-  var idx = _msState[key].indexOf(val);
-  if (idx === -1) _msState[key].push(val);
-  else _msState[key].splice(idx, 1);
-  msRender(key);
-  // تحديث الـ hidden input
-  var inp = document.getElementById('f-capital-src');
-  if (key === 'capital' && inp) inp.value = _msState[key].join('،');
-  var inp2 = document.getElementById('as-capital-src');
-  if (key === 'stock-capital' && inp2) inp2.value = _msState[key].join('،');
-  // تحديث الـ dropdown options
-  var dd = document.getElementById('ms-' + key + '-dropdown');
-  if (dd) dd.querySelectorAll('.ms-option').forEach(function(opt) {
-    var isNowSel = _msState[key].indexOf(opt.textContent.trim()) !== -1;
-    opt.classList.toggle('selected', isNowSel);
-  });
-  // حفظ في إعدادات Firebase إذا مصدر جديد
-  if ((key === 'capital' || key === 'stock-capital') && val) {
-    addCapitalSrcToSettings(val);
+function msToggle(key) {
+  var dd = document.getElementById('ms-' + key + '-dd');
+  if (!dd) return;
+  var isOpen = dd.classList.contains('open');
+  document.querySelectorAll('.ms-dropdown').forEach(function(d) { d.classList.remove('open'); });
+  if (!isOpen) {
+    dd.classList.add('open');
+    setTimeout(function() {
+      function close(e) {
+        if (!e.target.closest('#ms-' + key + '-wrap')) {
+          dd.classList.remove('open');
+          document.removeEventListener('click', close);
+        }
+      }
+      document.addEventListener('click', close);
+    }, 10);
   }
 }
 
 function msRender(key) {
   var wrap = document.getElementById('ms-' + key + '-wrap');
-  var ph   = document.getElementById('ms-' + key + '-placeholder');
+  var ph   = document.getElementById('ms-' + key + '-ph');
   if (!wrap || !ph) return;
+  var dd = document.getElementById('ms-' + key + '-dd');
+  wrap.querySelectorAll('.ms-chip').forEach(function(ch) { ch.remove(); });
   var sel = _msState[key] || [];
-  // أزل الـ chips القديمة
-  wrap.querySelectorAll('.ms-chip').forEach(function(ch){ ch.remove(); });
-  if (sel.length === 0) {
-    ph.style.display = 'inline';
-  } else {
-    ph.style.display = 'none';
-    var dd = document.getElementById('ms-' + key + '-dropdown');
-    sel.forEach(function(v) {
-      var chip = document.createElement('div');
-      chip.className = 'ms-chip';
-            chip.dataset.key = key; chip.dataset.val = v;
-      chip.innerHTML = '<span>' + v + '</span><button class="ms-chip-x">×</button>';
-      chip.querySelector('.ms-chip-x').addEventListener('click', function(e){ e.stopPropagation(); msPick(chip.dataset.key, chip.dataset.val); });
-      wrap.insertBefore(chip, dd);
+  ph.style.display = sel.length ? 'none' : '';
+  sel.forEach(function(v) {
+    var chip = document.createElement('div');
+    chip.className = 'ms-chip';
+    var span = document.createElement('span');
+    span.textContent = v;
+    var btn = document.createElement('button');
+    btn.className = 'ms-chip-x';
+    btn.textContent = '×';
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var i = _msState[key].indexOf(v);
+      if (i !== -1) _msState[key].splice(i, 1);
+      wrap.querySelectorAll('.ms-opt').forEach(function(o) {
+        if (o.textContent === v) o.classList.remove('sel');
+      });
+      msRender(key);
+      msSync(key);
     });
-  }
+    chip.appendChild(span);
+    chip.appendChild(btn);
+    wrap.insertBefore(chip, dd);
+  });
 }
 
-function msGetValues(key) {
-  return (_msState[key] || []).join('،');
+function msSync(key) {
+  var inp = document.getElementById('f-capital-src');
+  if (key === 'capital' && inp) inp.value = (_msState[key] || []).join('،');
+  var inp2 = document.getElementById('as-capital-src');
+  if (key === 'stock-capital' && inp2) inp2.value = (_msState[key] || []).join('،');
 }
 
-function msSetValues(key, str) {
-  var vals = str ? str.split(/[,،]/).map(function(s){ return s.trim(); }).filter(Boolean) : [];
-  _msState[key] = vals;
-  msRender(key);
+function msGet(key) { return (_msState[key] || []).join('،'); }
+
+function msSet(key, str) {
+  _msState[key] = str ? str.split(/[,،]/).map(function(s) { return s.trim(); }).filter(Boolean) : [];
 }
 
-// ── حفظ مصدر رأس المال الجديد في Firebase ────────────────────────
-function addCapitalSrcToSettings(val) {
+function addCapitalToSettings(val) {
   if (!val || !window.__firebaseUser) return;
   var uid = window.__firebaseUser.uid;
   if (!uid) return;
-  var current = window._settingsCapital || getCapitalSources();
-  if (current.indexOf(val) !== -1) return;  // موجود مسبقاً
-  current.push(val);
-  window._settingsCapital = current;
-  // حفظ في Firestore
+  var cur = window._settingsCapital || getCapitalSources();
+  if (cur.indexOf(val) !== -1) return;
+  cur.push(val);
+  window._settingsCapital = cur;
   try {
     _ref(uid, 'settings').get().then(function(snap) {
       var lists = snap.exists ? (snap.data().lists || {}) : {};
-      lists.capital = current;
+      lists.capital = cur;
       _ref(uid, 'settings').set({ lists: lists, updatedAt: new Date().toISOString() }, { merge: true });
     });
   } catch(e) {}
-}
-
-// ── تهيئة multi-selects عند فتح الصفحات ─────────────────────────
-function initCapitalMultiSelect(key) {
-  var sources = getCapitalSources();
-  msInit(key, sources, []);
 }
 
 
@@ -11003,14 +10938,13 @@ function _loadData(uid) {
       divs.forEach(function(r){ dividendsData.push(r); });
       window.dividendsData = dividendsData;
     }
-    // قراءة إعدادات المستخدم
+    // قراءة إعدادات المستخدم (منصات، بنوك، مصادر رأس المال)
     _ref(uid, 'settings').get().then(function(snap) {
       if (snap.exists) {
         var L = snap.data().lists || {};
         if (L.platforms && L.platforms.length) { window._settingsPlatforms = L.platforms; if(typeof populatePlatformSelects==='function') populatePlatformSelects(); }
         if (L.banks    && L.banks.length)     { window._settingsBanks     = L.banks;     if(typeof populateBankSelect==='function') populateBankSelect(); }
         if (L.capital  && L.capital.length)   { window._settingsCapital   = L.capital;   if(typeof populateCapitalSrcSelect==='function') populateCapitalSrcSelect(); }
-        if (L.banks    && L.banks.length)     { if(typeof populateBankSelect==='function') populateBankSelect(); }
       }
     }).catch(function(){});
     _rerender();
