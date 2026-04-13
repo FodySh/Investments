@@ -3157,321 +3157,6 @@
     <!-- ═══════════════════════════════════════════════════════════════ -->
     <!-- PAGE: DEBTS — الديون الشخصية                                   -->
     <!-- ═══════════════════════════════════════════════════════════════ -->
-    <div id="page-debts" class="page">
-      <div class="page-header">
-        <div>
-          <div class="page-title">💸 ديون وجمعيات</div>
-          <div class="page-sub">الديون الشخصية وجمعيات الادخار</div>
-        </div>
-        <div style="display:flex;gap:8px" id="debts-page-actions">
-          <button class="btn-submit" onclick="showPage('add-debt',null,'💸 إضافة دين',true)" id="btn-add-debt" style="font-size:13px;padding:10px 22px">➕ إضافة دين</button>
-          <button class="btn-submit" onclick="showAddJamaaForm()" id="btn-add-jamaa" style="display:none;font-size:13px;padding:10px 22px;background:linear-gradient(135deg,#38d9a9,#20c997)">➕ إضافة جمعية</button>
-        </div>
-      </div>
-
-      <!-- تبويبات الديون والجمعيات -->
-      <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border)">
-        <button id="dt-tab-debts" onclick="switchDebtsTab('debts')" style="padding:11px 22px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:all .2s">💸 الديون الشخصية</button>
-        <button id="dt-tab-jamaa" onclick="switchDebtsTab('jamaa')" style="padding:11px 22px;font-size:13px;font-weight:700;font-family:inherit;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s">🤝 الجمعيات</button>
-      </div>
-
-      <!-- ── تبويب: الديون ── -->
-      <div id="dt-panel-debts">
-
-      <!-- KPIs -->
-      <div class="kpi-grid fade-up">
-        <div class="kpi-card" style="--accent:#f87171">
-          <div class="kpi-icon">⬇️</div>
-          <div class="kpi-label">عليّ (مديون)</div>
-          <div class="kpi-value" id="debts-owe">0</div>
-          <div class="kpi-sub">ر.س</div>
-        </div>
-        <div class="kpi-card" style="--accent:#4caf82">
-          <div class="kpi-icon">⬆️</div>
-          <div class="kpi-label">لي (دائن)</div>
-          <div class="kpi-value" id="debts-owed-to-me">0</div>
-          <div class="kpi-sub">ر.س</div>
-        </div>
-        <div class="kpi-card" style="--accent:#fbbf24">
-          <div class="kpi-icon">⚖️</div>
-          <div class="kpi-label">صافي المركز</div>
-          <div class="kpi-value" id="debts-net">0</div>
-          <div class="kpi-sub" id="debts-net-label">ر.س</div>
-        </div>
-        <div class="kpi-card" style="--accent:#38d9a9">
-          <div class="kpi-icon">📋</div>
-          <div class="kpi-label">إجمالي المعاملات</div>
-          <div class="kpi-value" id="debts-count-kpi">0</div>
-          <div class="kpi-sub">معاملة</div>
-        </div>
-      </div>
-
-      <!-- Tabs: عليّ / لي / الكل -->
-      <div style="display:flex;gap:8px;margin-bottom:16px">
-        <button class="filter-btn active" onclick="setDebtFilter('all',this)" id="dfilter-all">الكل</button>
-        <button class="filter-btn" onclick="setDebtFilter('owe',this)" style="--fc:#f87171">⬇️ عليّ</button>
-        <button class="filter-btn" onclick="setDebtFilter('lend',this)" style="--fc:#4caf82">⬆️ لي</button>
-        <button class="filter-btn" onclick="setDebtFilter('settled',this)" style="--fc:#8899bb">✅ مسوَّى</button>
-      </div>
-
-      <!-- Debts list -->
-      <div class="section-card">
-        <div class="section-head">
-          <span class="section-title">📋 سجل الديون</span>
-          <span class="section-count" id="debts-list-count">0</span>
-        </div>
-        <div id="debts-list-body" style="padding:0">
-          <div id="debts-empty" style="padding:48px;text-align:center;color:var(--muted)">
-            <div style="font-size:32px;margin-bottom:12px">💸</div>
-            <div>لا توجد ديون مسجَّلة</div>
-            <div style="font-size:12px;margin-top:6px">اضغط "إضافة دين" لتسجيل معاملة</div>
-          </div>
-          <div id="debts-cards" style="display:flex;flex-direction:column;gap:0"></div>
-        </div>
-      </div>
-
-      <!-- ADD DEBT FORM -->
-      <div id="debt-form-wrap" style="display:none;margin-top:20px">
-        <div class="section-card">
-          <div class="section-head">
-            <span class="section-title">💸 إضافة دين / مديونية</span>
-            <button onclick="hideDebtForm()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px">×</button>
-          </div>
-          <div class="section-body">
-
-            <div class="form-section">
-              <div class="form-section-title">👤 تفاصيل المعاملة</div>
-              <div class="form-grid">
-                <div class="field-group">
-                  <label class="field-label">اسم الشخص <span class="req">*</span></label>
-                  <input class="f-input" id="dt-person" type="text" placeholder="الاسم الكامل" />
-                </div>
-                <div class="field-group">
-                  <label class="field-label">نوع المعاملة <span class="req">*</span></label>
-                  <select class="f-select" id="dt-direction" onchange="updateDebtLabel()">
-                    <option value="owe">⬇️ عليّ — اقترضت منه</option>
-                    <option value="lend">⬆️ لي — أقرضته</option>
-                  </select>
-                </div>
-                <div class="field-group">
-                  <label class="field-label">المبلغ (ر.س) <span class="req">*</span></label>
-                  <input class="f-input" id="dt-amount" type="number" step="0.01" placeholder="0.00" oninput="calcDebt()" />
-                </div>
-              </div>
-              <div class="form-grid">
-                <div class="field-group">
-                  <label class="field-label">سبب / وصف المعاملة</label>
-                  <input class="f-input" id="dt-reason" type="text" placeholder="مثال: قرض لشراء جهاز، مساعدة في إيجار..." />
-                </div>
-                <div class="field-group">
-                  <label class="field-label">العلاقة بالشخص</label>
-                  <select class="f-select" id="dt-relation">
-                    <option value="صديق">صديق</option>
-                    <option value="أخ/أخت">أخ / أخت</option>
-                    <option value="والد/والدة">والد / والدة</option>
-                    <option value="ابن/ابنة">ابن / ابنة</option>
-                    <option value="قريب">قريب آخر</option>
-                    <option value="زميل">زميل عمل</option>
-                    <option value="شريك">شريك</option>
-                    <option value="أخرى">أخرى</option>
-                  </select>
-                </div>
-                <div class="field-group">
-                  <label class="field-label">رقم الجوال / طريقة التواصل</label>
-                  <input class="f-input" id="dt-contact" type="text" placeholder="+966 5xx xxx xxxx" />
-                </div>
-              </div>
-            </div>
-
-            <div class="form-section">
-              <div class="form-section-title">📅 التواريخ والسداد</div>
-              <div class="form-grid">
-                <div class="field-group">
-                  <label class="field-label">تاريخ المعاملة <span class="req">*</span></label>
-                  <input class="f-input" id="dt-date" type="date" />
-                </div>
-                <div class="field-group">
-                  <label class="field-label">تاريخ السداد المتوقع</label>
-                  <input class="f-input" id="dt-due" type="date" oninput="calcDebt()" />
-                </div>
-                <div class="field-group">
-                  <label class="field-label">المبلغ المُسدَّد حتى الآن</label>
-                  <input class="f-input" id="dt-paid" type="number" step="0.01" placeholder="0.00" oninput="calcDebt()" />
-                </div>
-              </div>
-              <div class="form-grid">
-                <div class="field-group">
-                  <label class="field-label">طريقة السداد</label>
-                  <select class="f-select" id="dt-method">
-                    <option>تحويل بنكي</option>
-                    <option>كاش</option>
-                    <option>STC Pay</option>
-                    <option>Apple Pay</option>
-                    <option>أقساط</option>
-                    <option>أخرى</option>
-                  </select>
-                </div>
-                <div class="field-group">
-                  <label class="field-label">الحالة</label>
-                  <select class="f-select" id="dt-status">
-                    <option value="قائم">🔴 قائم</option>
-                    <option value="جزئي">🟡 مسدَّد جزئياً</option>
-                    <option value="مسوَّى">✅ مسوَّى بالكامل</option>
-                    <option value="متنازع عنه">⚠️ متنازع عنه</option>
-                  </select>
-                </div>
-                <div class="field-group">
-                  <label class="field-label">هل يوجد اتفاق مكتوب؟</label>
-                  <select class="f-select" id="dt-written">
-                    <option value="لا">لا — شفهي فقط</option>
-                    <option value="نعم">نعم — موثَّق</option>
-                    <option value="رسالة">رسالة / واتساب</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <!-- Calc preview -->
-            <div class="calc-box">
-              <div class="calc-item">
-                <div class="calc-label">المتبقي</div>
-                <div class="calc-val" id="dc-remaining">—</div>
-              </div>
-              <div class="calc-item">
-                <div class="calc-label">نسبة السداد</div>
-                <div class="calc-val" id="dc-progress">—</div>
-              </div>
-              <div class="calc-item">
-                <div class="calc-label">أيام حتى الاستحقاق</div>
-                <div class="calc-val" id="dc-days">—</div>
-              </div>
-            </div>
-
-            <div class="form-section">
-              <div class="form-section-title">📝 ملاحظات</div>
-              <div class="field-group">
-                <textarea class="f-textarea" id="dt-notes" placeholder="تفاصيل إضافية، اتفاقيات، تذكيرات..."></textarea>
-              </div>
-            </div>
-
-            <div style="display:flex;gap:12px">
-              <button class="btn-submit" onclick="saveDebt()">💾 حفظ المعاملة</button>
-              <button class="btn-reset" onclick="hideDebtForm()">إلغاء</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      </div><!-- end dt-panel-debts -->
-
-      <!-- ── تبويب: الجمعيات ── -->
-      <div id="dt-panel-jamaa" style="display:none">
-
-        <!-- فورم إضافة جمعية -->
-        <div id="jamaa-add-form" style="display:none;margin-bottom:20px">
-          <div class="section-card" style="border-color:rgba(56,217,169,0.3)">
-            <div class="section-head" style="background:rgba(56,217,169,0.06)">
-              <span class="section-title" style="color:var(--green)" id="jamaa-form-title">➕ إضافة جمعية</span>
-              <button onclick="document.getElementById('jamaa-add-form').style.display='none'" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1">×</button>
-            </div>
-            <div class="section-body">
-              <div class="form-grid">
-                <div class="field-group" style="grid-column:span 2">
-                  <label class="field-label">اسم الجمعية <span class="req">*</span></label>
-                  <input class="f-input" id="j-name" type="text" placeholder="مثال: جمعية الأصدقاء 2025" />
-                </div>
-                <div class="field-group">
-                  <label class="field-label">القسط الشهري (ر.س) <span class="req">*</span></label>
-                  <input class="f-input" id="j-monthly" type="number" step="0.01" min="0" placeholder="مثال: 500" oninput="calcJamaa()" style="color:var(--gold);font-weight:700" />
-                </div>
-                <div class="field-group">
-                  <label class="field-label">عدد الأعضاء <span class="req">*</span></label>
-                  <input class="f-input" id="j-members" type="number" step="1" min="2" placeholder="مثال: 12" oninput="calcJamaa()" />
-                </div>
-                <div class="field-group">
-                  <label class="field-label">دورك (رقم الشهر الذي تأخذه)</label>
-                  <input class="f-input" id="j-turn" type="number" step="1" min="1" placeholder="مثال: 6" oninput="calcJamaa()" />
-                </div>
-                <div class="field-group">
-                  <label class="field-label">تاريخ البداية</label>
-                  <input class="f-input" id="j-start" type="date" oninput="calcJamaa()" />
-                </div>
-                <div class="field-group">
-                  <label class="field-label">حالة الجمعية</label>
-                  <select class="f-select" id="j-status">
-                    <option value="نشطة">نشطة ✅</option>
-                    <option value="منتهية">منتهية</option>
-                    <option value="معلقة">معلقة ⏸️</option>
-                  </select>
-                </div>
-                <div class="field-group">
-                  <label class="field-label">طريقة السداد</label>
-                  <select class="f-select" id="j-method">
-                    <option value="تحويل بنكي">تحويل بنكي</option>
-                    <option value="نقداً">نقداً</option>
-                    <option value="مدير الجمعية">مدير الجمعية</option>
-                  </select>
-                </div>
-                <div class="field-group">
-                  <label class="field-label">مدير / منظم الجمعية</label>
-                  <input class="f-input" id="j-manager" type="text" placeholder="اسم المدير" />
-                </div>
-                <div class="field-group">
-                  <label class="field-label">رقم التواصل</label>
-                  <input class="f-input" id="j-contact" type="tel" placeholder="05xxxxxxxx" />
-                </div>
-              </div>
-              <!-- حساب لحظي -->
-              <div id="j-calc-box" style="display:none;background:rgba(56,217,169,0.06);border:1px solid rgba(56,217,169,0.2);border-radius:12px;padding:14px;margin:12px 0">
-                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center">
-                  <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي الجمعية</div><div id="j-c-total" style="font-size:16px;font-weight:800;font-family:monospace;color:var(--gold)">—</div></div>
-                  <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">ما ستأخذه</div><div id="j-c-receive" style="font-size:16px;font-weight:800;font-family:monospace;color:var(--green)">—</div></div>
-                  <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">موعد دورك</div><div id="j-c-turn-date" style="font-size:14px;font-weight:700;color:var(--cyan)">—</div></div>
-                  <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">المدفوع حتى الآن</div><div id="j-c-paid-so-far" style="font-size:16px;font-weight:800;font-family:monospace;color:var(--orange)">—</div></div>
-                </div>
-              </div>
-              <div class="field-group" style="margin-top:8px">
-                <label class="field-label">ملاحظات</label>
-                <textarea class="f-input" id="j-notes" rows="2" style="resize:none" placeholder="شروط خاصة، اتفاقيات..."></textarea>
-              </div>
-
-              <!-- أعضاء الجمعية -->
-              <div style="margin-top:14px">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-                  <label class="field-label" style="margin:0">👥 أعضاء الجمعية</label>
-                  <button type="button" onclick="addJamaaParticipant()" style="background:rgba(56,217,169,0.1);border:1px solid rgba(56,217,169,0.25);border-radius:8px;padding:4px 12px;font-size:11px;color:var(--green);cursor:pointer;font-family:inherit">+ إضافة عضو</button>
-                </div>
-                <div id="j-participants-list" style="display:flex;flex-direction:column;gap:8px"></div>
-              </div>
-
-              <div style="display:flex;gap:10px;margin-top:14px">
-                <button onclick="saveJamaa()" style="background:linear-gradient(135deg,#38d9a9,#20c997);color:#0a1628;border:none;border-radius:10px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">💾 حفظ الجمعية</button>
-                <button onclick="resetJamaaForm()" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-size:13px;color:var(--muted);cursor:pointer;font-family:inherit">🔄 مسح</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- KPIs الجمعيات -->
-        <div class="kpi-grid" id="jamaa-kpis" style="margin-bottom:20px"></div>
-
-        <!-- قائمة الجمعيات -->
-        <div class="section-card">
-          <div class="section-head">
-            <span class="section-title">🤝 سجل الجمعيات</span>
-            <span class="section-count" id="jamaa-count-badge">0</span>
-          </div>
-          <div id="jamaa-list" style="padding:8px 0">
-            <div id="jamaa-empty" style="padding:48px;text-align:center;color:var(--muted)">
-              <div style="font-size:32px;margin-bottom:12px">🤝</div>
-              <div>لا توجد جمعيات مسجلة</div>
-              <div style="font-size:12px;margin-top:6px">اضغط "إضافة جمعية" لتسجيل جمعية</div>
-            </div>
-            <div id="jamaa-cards" style="display:flex;flex-direction:column;gap:12px"></div>
-          </div>
-        </div>
-      </div><!-- end dt-panel-jamaa -->
-
-    </div><!-- end page-debts -->
 
 </main>
 
@@ -4199,157 +3884,6 @@
     <!-- ═══════════════════════════════════════ -->
     <!-- PAGE: ADD DEBT — شاشة إضافة دين         -->
     <!-- ═══════════════════════════════════════ -->
-    <div id="page-add-debt" class="page">
-      <div class="page-header">
-        <div>
-          <div class="page-title" id="add-debt-title">💸 إضافة دين / مديونية</div>
-          <div class="page-sub">سجّل الديون بينك وبين الآخرين</div>
-        </div>
-        <button onclick="showPage('debts',document.querySelector('.nav-debts')||document.getElementById('mnav-debts'),'💸 ديون وجمعيات')" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:9px 18px;color:var(--muted);font-size:13px;cursor:pointer;font-family:inherit">← رجوع</button>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" class="add-form-grid">
-        <!-- يمين: حقول الإدخال -->
-        <div style="display:flex;flex-direction:column;gap:16px">
-
-          <div class="section-card">
-            <div class="section-head"><span class="section-title">👤 بيانات الشخص</span></div>
-            <div class="section-body">
-              <div class="form-grid">
-                <div class="field-group" style="grid-column:span 2">
-                  <label class="field-label">اسم الشخص <span class="req">*</span></label>
-                  <input class="f-input" id="ad-person" type="text" placeholder="اسم الشخص المعني بالدين" />
-                </div>
-                <div class="field-group">
-                  <label class="field-label">الاتجاه <span class="req">*</span></label>
-                  <select class="f-select" id="ad-direction" onchange="updateDebtDirectionLabel()">
-                    <option value="owe">👆 عليّ (أنا المدين)</option>
-                    <option value="lend">👇 له عندي (هو المدين)</option>
-                  </select>
-                </div>
-                <div class="field-group">
-                  <label class="field-label">طبيعة العلاقة</label>
-                  <select class="f-select" id="ad-relation">
-                    <option>صديق</option>
-                    <option>أخ / أخت</option>
-                    <option>والد / والدة</option>
-                    <option>زميل عمل</option>
-                    <option>شريك تجاري</option>
-                    <option>آخر</option>
-                  </select>
-                </div>
-                <div class="field-group">
-                  <label class="field-label">رقم التواصل (واتساب)</label>
-                  <input class="f-input" id="ad-contact" type="tel" placeholder="05xxxxxxxx" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="section-card">
-            <div class="section-head"><span class="section-title" id="ad-amount-title">💰 تفاصيل المبلغ</span></div>
-            <div class="section-body">
-              <div class="form-grid">
-                <div class="field-group">
-                  <label class="field-label">المبلغ الأصلي (ر.س) <span class="req">*</span></label>
-                  <input class="f-input" id="ad-amount" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAddDebt()" style="font-size:15px;font-weight:700;color:var(--gold)" />
-                </div>
-                <div class="field-group">
-                  <label class="field-label">المبلغ المتبقي (ر.س)</label>
-                  <input class="f-input" id="ad-remaining" type="number" step="0.01" min="0" placeholder="مساوٍ للأصلي إذا لم يُسدَّد شيء" oninput="calcAddDebt()" />
-                </div>
-                <div class="field-group">
-                  <label class="field-label">سبب الدين</label>
-                  <input class="f-input" id="ad-reason" type="text" placeholder="مثال: إقراض نقدي، شراء بضاعة..." />
-                </div>
-                <div class="field-group">
-                  <label class="field-label">طريقة السداد</label>
-                  <select class="f-select" id="ad-method">
-                    <option value="تحويل بنكي">تحويل بنكي</option>
-                    <option value="نقداً">نقداً</option>
-                    <option value="شيك">شيك</option>
-                    <option value="تقسيط">تقسيط</option>
-                  </select>
-                </div>
-                <div class="field-group">
-                  <label class="field-label">تاريخ الدين</label>
-                  <input class="f-input" id="ad-date" type="date" />
-                </div>
-                <div class="field-group">
-                  <label class="field-label">تاريخ الاستحقاق</label>
-                  <input class="f-input" id="ad-due" type="date" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="section-card">
-            <div class="section-head"><span class="section-title">📋 الحالة والتوثيق</span></div>
-            <div class="section-body">
-              <div class="form-grid">
-                <div class="field-group">
-                  <label class="field-label">حالة الدين</label>
-                  <select class="f-select" id="ad-status">
-                    <option value="قائم">قائم</option>
-                    <option value="جزئي">مسدد جزئياً</option>
-                    <option value="مسوَّى">مسوَّى ✅</option>
-                    <option value="متنازع عنه">متنازع عنه</option>
-                  </select>
-                </div>
-                <div class="field-group">
-                  <label class="field-label">موثق سنداً</label>
-                  <select class="f-select" id="ad-written">
-                    <option value="لا">لا</option>
-                    <option value="نعم">نعم — سند موقّع</option>
-                    <option value="شهود">شهود فقط</option>
-                  </select>
-                </div>
-              </div>
-              <div class="field-group" style="margin-top:12px">
-                <label class="field-label">ملاحظات</label>
-                <textarea class="f-input" id="ad-notes" rows="2" placeholder="تفاصيل إضافية، اتفاقيات..." style="resize:none"></textarea>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- يسار: ملخص -->
-        <div style="display:flex;flex-direction:column;gap:16px">
-          <div class="section-card" style="position:sticky;top:72px;border:1px solid rgba(201,168,76,0.3)">
-            <div class="section-head" style="background:rgba(201,168,76,0.06)">
-              <span class="section-title" style="color:var(--gold)">📊 ملخص الدين</span>
-            </div>
-            <div class="section-body">
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-                <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;text-align:center">
-                  <div style="font-size:10px;color:var(--muted);margin-bottom:4px" id="ad-label-total">المبلغ عليك</div>
-                  <div id="ad-c-amount" style="font-size:20px;font-weight:800;font-family:monospace;color:var(--red)">—</div>
-                  <div style="font-size:10px;color:var(--muted)">ر.س</div>
-                </div>
-                <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;text-align:center">
-                  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">المتبقي</div>
-                  <div id="ad-c-remaining" style="font-size:20px;font-weight:800;font-family:monospace;color:var(--red)">—</div>
-                  <div style="font-size:10px;color:var(--muted)">ر.س</div>
-                </div>
-              </div>
-              <div style="margin-top:6px">
-                <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px">
-                  <span>نسبة السداد</span>
-                  <span id="ad-progress-pct">0%</span>
-                </div>
-                <div style="height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden">
-                  <div id="ad-progress-bar" style="height:100%;background:linear-gradient(90deg,#f87171,#fbbf24);border-radius:4px;width:0%;transition:width .5s"></div>
-                </div>
-              </div>
-              <div id="ad-due-warning" style="display:none;margin-top:14px;padding:10px 14px;background:rgba(255,152,0,0.1);border:1px solid rgba(255,152,0,0.25);border-radius:10px;font-size:12px;color:var(--orange)"></div>
-            </div>
-          </div>
-
-          <button onclick="saveAddDebt()" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:700;cursor:pointer;width:100%;font-family:inherit;box-shadow:0 4px 20px rgba(201,168,76,0.3);transition:all .2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">💾 حفظ الدين</button>
-          <button onclick="resetAddDebt()" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:14px;padding:12px;font-size:13px;color:var(--muted);cursor:pointer;width:100%;font-family:inherit">🔄 مسح</button>
-        </div>
-      </div>
-    </div>
 
 
     <!-- ═══════════════════════════════════════════════ -->
@@ -4434,7 +3968,7 @@
       <span class="mnav-label">القروض</span>
     </div>
 
-    <div class="mnav-item" id="mnav-debts" onclick="showPage('debts',this,'💸 ديون وجمعيات')">
+    <div class="mnav-item" id="mnav-debts" onclick="window.location.href='https://fodysh.github.io/Investments/debts.html'">
       <div class="mnav-icon-wrap"><span class="mnav-icon">💸</span></div>
       <span class="mnav-label">الديون</span>
     </div>
@@ -6452,7 +5986,7 @@ function closeMobileMore() {
 const PAGE_TITLES = {
   'add-stock':  '📈 إضافة سهم',
   'add-loan':   '🏦 إضافة قرض',
-  'add-debt':   '💸 إضافة دين',
+  
   'reports':    '📊 التقارير والتحليل',
   'sukuk':      '🏦 الفرص الاستثمارية',
   'funds':      '🏦 الفرص الاستثمارية',
@@ -6489,7 +6023,7 @@ function showPage(id, navEl, mobileTitle, noScroll){
     'loans':      'mnav-loans',
     'add-loan':   'mnav-loans',
     'debts':      'mnav-debts',
-    'add-debt':   'mnav-debts',
+    
     'reports':    'mnav-reports',
     'all':        'mnav-more',
     'db':         'mnav-more',
@@ -6522,9 +6056,9 @@ function showPage(id, navEl, mobileTitle, noScroll){
   if (id === 'add-stock') { resetAddStock(); calcAddStock(); setTimeout(function(){ msInit('scap',getCapitalSources(),[]); populatePlatformSelects(); },100); }
   if (id === 'add-loan')  { calcAddLoan(); if(typeof populateBankSelect==='function') populateBankSelect(); if(typeof initPmtRows==='function') initPmtRows(); }
   if (id === 'add')       { setTimeout(function(){ populateCapitalSrcSelect(); populatePlatformSelects(); populateTypeSelect(); }, 100); }
-  if (id === 'add-debt')  { updateDebtDirectionLabel(); calcAddDebt(); }
+
   if (id === 'loans') renderLoans();
-  if (id === 'debts') renderDebts();
+
   if (id === 'dashboard') { initDashboardYears(); renderDashboard(); }
   if (id !== 'add-loan') {
     var _ns = document.getElementById('new-amort-section');
@@ -7174,7 +6708,6 @@ document.addEventListener('DOMContentLoaded', () => {
 var loansData = JSON.parse(localStorage.getItem('loansData') || '[]');
 window.loansData = loansData;
 var editingLoanIdx = null;
-var debtsData = JSON.parse(localStorage.getItem('debtsData') || '[]');
 window.debtsData = debtsData;
 
 // ══════════════════════════════════════════════
@@ -7620,101 +7153,8 @@ function openLoanEditPage(idx) {
 // ══════════════════════════════════════════════
 var _editingDebtPageIdx = null;
 
-function updateDebtDirectionLabel() {
-  var dir = (document.getElementById('ad-direction')||{}).value;
-  var lbl = document.getElementById('ad-label-total');
-  var titleEl = document.getElementById('add-debt-title');
-  var amtTitle = document.getElementById('ad-amount-title');
-  var isOwe = dir === 'owe';
-  if (lbl) lbl.textContent = isOwe ? 'المبلغ عليك' : 'المبلغ لك';
-  if (titleEl) titleEl.textContent = isOwe ? '💸 إضافة دين (عليّ)' : '💰 إضافة دين (له عندي)';
-  if (amtTitle) amtTitle.textContent = isOwe ? '💰 المبلغ المطلوب منك' : '💰 المبلغ المطلوب منه';
-  var barEl = document.getElementById('ad-progress-bar');
-  if (barEl) barEl.style.background = isOwe ? 'linear-gradient(90deg,#f87171,#fbbf24)' : 'linear-gradient(90deg,#4caf82,#38d9a9)';
-  var amtEl = document.getElementById('ad-c-amount');
-  var remEl = document.getElementById('ad-c-remaining');
-  if (amtEl) amtEl.style.color = isOwe ? 'var(--red)' : 'var(--green)';
-  if (remEl) remEl.style.color = isOwe ? 'var(--red)' : 'var(--green)';
-}
 
-function calcAddDebt() {
-  var amount    = parseFloat((document.getElementById('ad-amount')||{}).value) || 0;
-  var remaining = parseFloat((document.getElementById('ad-remaining')||{}).value);
-  if (isNaN(remaining)) remaining = amount;
 
-  var fmt = function(n) { return n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); };
-  var set = function(id, v) { var e=document.getElementById(id); if(e) e.textContent=v; };
-
-  set('ad-c-amount',    amount > 0 ? fmt(amount) : '—');
-  set('ad-c-remaining', amount > 0 ? fmt(remaining) : '—');
-
-  var pct = amount > 0 ? Math.min(100, ((amount-remaining)/amount)*100) : 0;
-  var bar = document.getElementById('ad-progress-bar');
-  var pctEl = document.getElementById('ad-progress-pct');
-  if (bar) bar.style.width = pct.toFixed(0)+'%';
-  if (pctEl) pctEl.textContent = pct.toFixed(0)+'%';
-
-  // Due date warning
-  var dueVal = (document.getElementById('ad-due')||{}).value;
-  var warning = document.getElementById('ad-due-warning');
-  if (dueVal && warning) {
-    var daysLeft = Math.ceil((new Date(dueVal)-new Date())/86400000);
-    if (daysLeft < 0) {
-      warning.style.display='block';
-      warning.textContent='⚠️ تجاوز تاريخ الاستحقاق بـ '+Math.abs(daysLeft)+' يوم';
-      warning.style.color='var(--red)';
-    } else if (daysLeft <= 14) {
-      warning.style.display='block';
-      warning.textContent='⏰ يستحق بعد '+daysLeft+' يوم';
-      warning.style.color='var(--orange)';
-    } else { warning.style.display='none'; }
-  } else if (warning) { warning.style.display='none'; }
-}
-
-function saveAddDebt() {
-  function gv(id) { var e = document.getElementById(id); return e ? e.value : ''; }
-  function gf(id) { return parseFloat(gv(id)) || 0; }
-
-  var person = gv('ad-person').trim();
-  var amount = gf('ad-amount');
-
-  if (!person) { showToast('❌ أدخل اسم الشخص'); return; }
-  if (!amount) { showToast('❌ أدخل المبلغ'); return; }
-
-  var remaining = parseFloat(gv('ad-remaining'));
-  if (isNaN(remaining)) remaining = amount;
-
-  var debt = {
-    person:    person,
-    direction: gv('ad-direction') || 'owe',
-    amount:    amount,
-    remaining: remaining,
-    reason:    gv('ad-reason'),
-    relation:  gv('ad-relation') || 'صديق',
-    contact:   gv('ad-contact'),
-    method:    gv('ad-method') || 'تحويل بنكي',
-    date:      gv('ad-date') || new Date().toISOString().split('T')[0],
-    due_date:  gv('ad-due'),
-    status:    (document.getElementById('ad-status')||{}).value || 'قائم',
-    written:   (document.getElementById('ad-written')||{}).value || 'لا',
-    notes:     (document.getElementById('ad-notes')||{}).value || '',
-    created_at: new Date().toISOString()
-  };
-
-  if (!Array.isArray(window.debtsData)) window.debtsData = [];
-  if (_editingDebtPageIdx !== null) {
-    window.debtsData[_editingDebtPageIdx] = debt;
-    showToast('✅ تم تحديث الدين: ' + person);
-  } else {
-    window.debtsData.push(debt);
-    showToast('✅ تم حفظ الدين: ' + person);
-  }
-  debtsData = window.debtsData;
-  saveDebtsToStorage();
-  renderDebts();
-  resetAddDebt();
-  showPage('debts', document.querySelector('.nav-debts')||document.getElementById('mnav-debts'), '💸 الديون الشخصية');
-}
 
 function resetAddDebt() {
   _editingDebtPageIdx = null;
@@ -8584,7 +8024,6 @@ function deleteMetal(idx) {
 // ══════════════════════════════════════════════
 // JAMAA (جمعيات الادخار)
 // ══════════════════════════════════════════════
-var jamaaData = JSON.parse(localStorage.getItem('jamaaData') || '[]');
 window.jamaaData = jamaaData;
 var _editingJamaaIdx = null;
 
@@ -8594,123 +8033,9 @@ function saveJamaaToStorage() {
   if (typeof window.fbSaveJamaa === 'function') window.fbSaveJamaa();
 }
 
-function switchDebtsTab(tab) {
-  var tabs = ['debts','jamaa'];
-  tabs.forEach(function(t) {
-    var panel = document.getElementById('dt-panel-' + t);
-    var btn   = document.getElementById('dt-tab-' + t);
-    if (panel) panel.style.display = t === tab ? 'block' : 'none';
-    if (btn) {
-      btn.style.borderBottomColor = t === tab ? 'var(--gold)' : 'transparent';
-      btn.style.color = t === tab ? 'var(--gold)' : 'var(--muted)';
-    }
-  });
-  var btnDebt  = document.getElementById('btn-add-debt');
-  var btnJamaa = document.getElementById('btn-add-jamaa');
-  if (btnDebt)  btnDebt.style.display  = tab === 'debts' ? '' : 'none';
-  if (btnJamaa) btnJamaa.style.display = tab === 'jamaa' ? '' : 'none';
-  if (tab === 'jamaa') renderJamaa();
-}
 
-function showAddJamaaForm() {
-  var form = document.getElementById('jamaa-add-form');
-  if (!form) return;
-  form.style.display = form.style.display === 'none' ? 'block' : 'none';
-  if (form.style.display !== 'none') {
-    var today = new Date().toISOString().split('T')[0];
-    var d = document.getElementById('j-start');
-    if (d && !d.value) d.value = today;
-    calcJamaa();
-  }
-}
 
-function calcJamaa() {
-  function gv(id){var e=document.getElementById(id);return e?e.value:'';}
-  function gf(id){return parseFloat(gv(id))||0;}
-  var monthly = gf('j-monthly');
-  var members = gf('j-members');
-  var turn    = gf('j-turn');
-  var startDate = gv('j-start');
-  if (!monthly || !members) { document.getElementById('j-calc-box').style.display='none'; return; }
-  var total   = monthly * members;
-  var receive = monthly * members; // total pot
-  var fmt     = function(n){return n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});};
-  var set     = function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
-  document.getElementById('j-calc-box').style.display = 'block';
-  set('j-c-total',   fmt(total)   + ' ر.س');
-  set('j-c-receive', fmt(receive) + ' ر.س');
-  // موعد الدور
-  if (turn && startDate && turn <= members) {
-    var d = new Date(startDate);
-    d.setMonth(d.getMonth() + turn - 1);
-    set('j-c-turn-date', d.toLocaleDateString('ar-SA-u-nu-latn',{year:'numeric',month:'long'}));
-  } else {
-    set('j-c-turn-date','—');
-  }
-  // المدفوع حتى الآن
-  if (startDate) {
-    var now = new Date();
-    var start = new Date(startDate);
-    var monthsPassed = Math.max(0, (now.getFullYear() - start.getFullYear())*12 + (now.getMonth()-start.getMonth()));
-    monthsPassed = Math.min(monthsPassed, members);
-    set('j-c-paid-so-far', fmt(monthly * monthsPassed) + ' ر.س (' + monthsPassed + ' شهر)');
-  } else { set('j-c-paid-so-far','—'); }
-}
 
-function saveJamaa() {
-  function gv(id){var e=document.getElementById(id);return e?e.value:'';}
-  function gf(id){return parseFloat(gv(id))||0;}
-  var name    = gv('j-name').trim();
-  var monthly = gf('j-monthly');
-  var members = gf('j-members');
-  if (!name)    { showToast('❌ أدخل اسم الجمعية'); return; }
-  if (!monthly) { showToast('❌ أدخل القسط الشهري'); return; }
-  if (!members) { showToast('❌ أدخل عدد الأعضاء'); return; }
-  var turn = gf('j-turn');
-  var startDate = gv('j-start');
-  var turnDate = '';
-  if (turn && startDate) {
-    var d = new Date(startDate);
-    d.setMonth(d.getMonth() + turn - 1);
-    turnDate = d.toISOString().split('T')[0];
-  }
-  var now = new Date();
-  var start = startDate ? new Date(startDate) : now;
-  var monthsPassed = Math.max(0, Math.min(members,
-    (now.getFullYear()-start.getFullYear())*12 + (now.getMonth()-start.getMonth())
-  ));
-  var jamaa = {
-    name:        name,
-    monthly:     monthly,
-    members:     members,
-    turn:        turn,
-    turn_date:   turnDate,
-    total_pot:   monthly * members,
-    paid_so_far: monthly * monthsPassed,
-    months_passed: monthsPassed,
-    start_date:  startDate,
-    status:      gv('j-status') || 'نشطة',
-    method:      gv('j-method'),
-    manager:     gv('j-manager'),
-    contact:     gv('j-contact'),
-    notes:       gv('j-notes'),
-    created_at:  new Date().toISOString()
-  };
-  var data = window.jamaaData || jamaaData;
-  if (!Array.isArray(data)) data = [];
-  if (_editingJamaaIdx !== null) {
-    data[_editingJamaaIdx] = jamaa;
-    showToast('✅ تم تحديث الجمعية: ' + name);
-  } else {
-    data.push(jamaa);
-    showToast('✅ تم حفظ الجمعية: ' + name);
-  }
-  jamaaData = data; window.jamaaData = data;
-  saveJamaaToStorage();
-  renderJamaa();
-  resetJamaaForm();
-  document.getElementById('jamaa-add-form').style.display = 'none';
-}
 
 function resetJamaaForm() {
   _editingJamaaIdx = null;
@@ -8720,94 +8045,8 @@ function resetJamaaForm() {
   document.getElementById('j-calc-box').style.display = 'none';
 }
 
-function renderJamaa() {
-  var data = window.jamaaData || jamaaData || [];
-  var active  = data.filter(function(x){return x.status==='نشطة';});
-  var totalPot = data.reduce(function(s,x){return s+(x.total_pot||0);},0);
-  var totalPaid = data.reduce(function(s,x){return s+(x.paid_so_far||0);},0);
-  var fmt = function(n){return n.toLocaleString('en-US',{maximumFractionDigits:0});};
 
-  // KPIs
-  var kpis = document.getElementById('jamaa-kpis');
-  if (kpis) {
-    kpis.innerHTML =
-      '<div class="kpi-card" style="--accent:var(--green)"><div class="kpi-icon">✅</div><div class="kpi-label">نشطة</div><div class="kpi-value">'+active.length+'</div><div class="kpi-sub">جمعية</div></div>' +
-      '<div class="kpi-card" style="--accent:var(--gold)"><div class="kpi-icon">🏦</div><div class="kpi-label">إجمالي الأوعية</div><div class="kpi-value">'+fmt(totalPot)+'</div><div class="kpi-sub">ر.س</div></div>' +
-      '<div class="kpi-card" style="--accent:var(--orange)"><div class="kpi-icon">💸</div><div class="kpi-label">المدفوع حتى الآن</div><div class="kpi-value">'+fmt(totalPaid)+'</div><div class="kpi-sub">ر.س</div></div>' +
-      '<div class="kpi-card" style="--accent:var(--cyan)"><div class="kpi-icon">📋</div><div class="kpi-label">إجمالي الجمعيات</div><div class="kpi-value">'+data.length+'</div><div class="kpi-sub">جمعية</div></div>';
-  }
 
-  var cnt = document.getElementById('jamaa-count-badge');
-  if (cnt) cnt.textContent = data.length + ' جمعية';
-  var empty = document.getElementById('jamaa-empty');
-  var cards = document.getElementById('jamaa-cards');
-  if (!cards) return;
-  if (!data.length) {
-    if (empty) empty.style.display = 'block';
-    cards.innerHTML = '';
-    return;
-  }
-  if (empty) empty.style.display = 'none';
-
-  cards.innerHTML = data.map(function(j, i) {
-    var pct = j.total_pot > 0 ? Math.min(100,(j.paid_so_far/j.total_pot*100)).toFixed(0) : 0;
-    var statusColor = j.status==='نشطة' ? 'var(--green)' : 'var(--muted)';
-    var statusBg    = j.status==='نشطة' ? 'rgba(0,230,118,0.1)' : 'rgba(136,153,187,0.1)';
-    return '<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:10px">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">' +
-        '<div style="display:flex;align-items:center;gap:10px">' +
-          '<span style="font-size:22px">🤝</span>' +
-          '<div><div style="font-size:15px;font-weight:700">' + j.name + '</div>' +
-          '<div style="font-size:11px;color:var(--muted)">' + (j.manager?'مدير: '+j.manager:'') + '</div></div>' +
-        '</div>' +
-        '<span style="font-size:11px;padding:3px 10px;border-radius:8px;background:'+statusBg+';color:'+statusColor+'">' + j.status + '</span>' +
-      '</div>' +
-      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font-size:12px">' +
-        '<div><div style="color:var(--muted);margin-bottom:2px">القسط/شهر</div><div style="font-family:monospace;font-weight:700;color:var(--gold)">' + fmt(j.monthly) + ' ر.س</div></div>' +
-        '<div><div style="color:var(--muted);margin-bottom:2px">الأعضاء</div><div style="font-family:monospace;font-weight:700">' + j.members + ' عضو</div></div>' +
-        '<div><div style="color:var(--muted);margin-bottom:2px">دورك</div><div style="font-family:monospace;font-weight:700;color:var(--cyan)">' + (j.turn ? 'الشهر '+j.turn : '—') + '</div></div>' +
-        '<div><div style="color:var(--muted);margin-bottom:2px">إجمالي الوعاء</div><div style="font-family:monospace;font-weight:700;color:var(--green)">' + fmt(j.total_pot) + ' ر.س</div></div>' +
-      '</div>' +
-      (j.turn_date ? '<div style="font-size:11px;color:var(--cyan)">📅 موعد دورك: ' + j.turn_date + '</div>' : '') +
-      '<div>' +
-        '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px">' +
-          '<span>تقدم السداد</span><span>' + pct + '% (' + fmt(j.paid_so_far) + ' / ' + fmt(j.total_pot) + ' ر.س)</span>' +
-        '</div>' +
-        '<div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden">' +
-          '<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--green),#38d9a9);border-radius:3px;transition:width .5s"></div>' +
-        '</div>' +
-      '</div>' +
-      '<div style="display:flex;gap:8px">' +
-        (j.contact ? '<button class="loan-action-btn" onclick="sendJamaaWhatsApp('+i+')" style="color:#25d366;border-color:rgba(37,211,102,0.3)">📲 واتساب</button>' : '') +
-        '<button class="loan-action-btn" onclick="editJamaa('+i+')" style="margin-right:auto">✏️ تعديل</button>' +
-        '<button class="loan-action-btn" style="color:var(--red)" onclick="deleteJamaa('+i+')">🗑</button>' +
-      '</div>' +
-    '</div>';
-  }).join('');
-}
-
-function editJamaa(idx) {
-  _editingJamaaIdx = idx;
-  var j = (window.jamaaData||jamaaData)[idx];
-  if (!j) return;
-  function sv(id,v){var e=document.getElementById(id);if(e)e.value=v||'';}
-  sv('j-name',j.name); sv('j-monthly',j.monthly); sv('j-members',j.members);
-  sv('j-turn',j.turn); sv('j-start',j.start_date); sv('j-status',j.status);
-  sv('j-method',j.method); sv('j-manager',j.manager);
-  sv('j-contact',j.contact); sv('j-notes',j.notes);
-  document.getElementById('jamaa-add-form').style.display = 'block';
-  var title = document.getElementById('jamaa-form-title');
-  if (title) title.textContent = '✏️ تعديل: ' + j.name;
-  calcJamaa();
-}
-
-function deleteJamaa(idx) {
-  if (!confirm('حذف هذه الجمعية؟')) return;
-  var data = window.jamaaData || jamaaData;
-  data.splice(idx, 1);
-  jamaaData = data; window.jamaaData = data;
-  saveJamaaToStorage(); renderJamaa();
-}
 
 
 // ══════════════════════════════════════════════════════
@@ -10653,13 +9892,6 @@ function saveDebt() {
   showToast('✅ تم حفظ المعاملة مع ' + person);
 }
 
-function deleteDebt(idx) {
-  if (!confirm('هل تريد حذف هذه المعاملة؟')) return;
-  debtsData.splice(idx, 1);
-  saveDebtsToStorage();
-  renderDebts();
-  showToast('🗑 تم الحذف');
-}
 
 function setDebtFilter(f, btn) {
   currentDebtFilter = f;
@@ -10668,85 +9900,6 @@ function setDebtFilter(f, btn) {
   renderDebts();
 }
 
-function renderDebts() {
-  const _dd = window.debtsData || debtsData || [];
-  const oweTotal    = _dd.filter(d=>d.direction==='owe'&&d.status!=='مسوَّى').reduce((s,d)=>s+(d.remaining||d.amount||0),0);
-  const lendTotal   = _dd.filter(d=>(d.direction==='lend'||d.direction==='owed')&&d.status!=='مسوَّى').reduce((s,d)=>s+(d.remaining||d.amount||0),0);
-  const net         = lendTotal - oweTotal;
-
-  const eOwe  = document.getElementById('debts-owe');
-  const eLend = document.getElementById('debts-owed-to-me');
-  const eNet  = document.getElementById('debts-net');
-  const eNetL = document.getElementById('debts-net-label');
-  const eCnt  = document.getElementById('debts-count-kpi');
-  const eLstC = document.getElementById('debts-list-count');
-  const emptyEl = document.getElementById('debts-empty');
-  const cardsEl = document.getElementById('debts-cards');
-
-  if(eOwe)  eOwe.textContent  = oweTotal.toLocaleString('en-US',{maximumFractionDigits:0});
-  if(eLend) eLend.textContent = lendTotal.toLocaleString('en-US',{maximumFractionDigits:0});
-  if(eNet)  { eNet.textContent = Math.abs(net).toLocaleString('en-US',{maximumFractionDigits:0}); eNet.style.color = net >= 0 ? 'var(--green)' : 'var(--red)'; }
-  if(eNetL) eNetL.textContent = net >= 0 ? '✅ رصيدك إيجابي' : '⚠️ رصيدك سلبي';
-  if(eCnt)  eCnt.textContent  = _dd.length;
-
-  let filtered = _dd.map((d,i) => ({...d,_idx:i}));
-  if (currentDebtFilter === 'owe')     filtered = filtered.filter(d => d.direction === 'owe' && d.status !== 'مسوَّى');
-  if (currentDebtFilter === 'lend')    filtered = filtered.filter(d => (d.direction === 'lend' || d.direction === 'owed') && d.status !== 'مسوَّى');
-  if (currentDebtFilter === 'settled') filtered = filtered.filter(d => d.status === 'مسوَّى');
-
-  if(eLstC) eLstC.textContent = filtered.length + ' معاملة';
-  if(!cardsEl) return;
-
-  if (_dd.length === 0) {
-    if(emptyEl) emptyEl.style.display = 'block';
-    cardsEl.innerHTML = '';
-    return;
-  }
-  if(emptyEl) emptyEl.style.display = 'none';
-
-  const statusColors = { 'قائم':'rgba(248,113,113,0.12);color:#f87171', 'جزئي':'rgba(251,191,36,0.12);color:#fbbf24', 'مسوَّى':'rgba(76,175,130,0.12);color:var(--green)', 'متنازع عنه':'rgba(255,152,0,0.12);color:var(--orange)' };
-
-  cardsEl.innerHTML = filtered.map(d => {
-    const isOwe = d.direction === 'owe';
-    const initials = d.person.charAt(0);
-    const sc = statusColors[d.status] || statusColors['قائم'];
-    const today = new Date();
-    const isOverdue = d.due_date && new Date(d.due_date) < today && d.status !== 'مسوَّى';
-    const pct = d.amount > 0 ? Math.min(100, (d.paid||0) / d.amount * 100) : 0;
-
-    return `<div class="debt-card">
-      <div class="debt-avatar ${isOwe?'owe':'lend'}">${initials}</div>
-      <div>
-        <div class="debt-card-name">${d.person} <span style="font-size:10px;color:var(--muted);font-weight:400">· ${d.relation||''}</span></div>
-        <div class="debt-card-reason">${isOwe ? '⬇️ أنت مدين' : '⬆️ يدين لك'} ${d.reason ? '· ' + d.reason : ''}</div>
-        <div class="debt-card-meta">
-          <span class="loan-tag" style="background:${sc.split(';')[0]};${sc.split(';')[1]}">${d.status}</span>
-          ${d.written !== 'لا' ? `<span class="loan-tag" style="background:rgba(56,217,169,0.1);color:var(--cyan)">📄 ${d.written}</span>` : ''}
-          <span class="loan-tag" style="background:rgba(255,255,255,0.05);color:var(--muted)">${d.date||''}</span>
-        </div>
-        ${pct > 0 && pct < 100 ? `
-        <div class="loan-progress-bar" style="margin-top:8px;width:160px">
-          <div class="loan-progress-fill" style="width:${pct}%;background:${isOwe?'linear-gradient(90deg,#f87171,#fbbf24)':'linear-gradient(90deg,#4caf82,#38d9a9)'}"></div>
-        </div>
-        <div style="font-size:9px;color:var(--muted);margin-top:2px">${pct.toFixed(0)}% سُدِّد</div>
-        ` : ''}
-        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-          <button class="loan-action-btn" onclick="openDebtEditPage(${d._idx})">✏️ تعديل</button>
-          <button class="loan-action-btn" style="color:var(--red);border-color:rgba(255,77,77,0.2)" onclick="deleteDebt(${d._idx})">🗑</button>
-          ${d.contact ? `<button class="loan-action-btn" onclick="window.open('tel:${d.contact}')" style="color:var(--cyan)">📞</button>` : ''}
-          ${d.contact ? `<button class="loan-action-btn" onclick="sendWhatsApp(${d._idx})" style="color:#25d366;border-color:rgba(37,211,102,0.3)">📲 واتساب</button>` : ''}
-          <button class="loan-action-btn" onclick="generatePromissoryNote(${d._idx})" style="color:#a78bfa;border-color:rgba(167,139,250,0.3)">📜 سند</button>
-          ${d.due_date && d.status !== 'مسوَّى' ? `<button class="loan-action-btn" onclick="addDebtToGoogleCalendar(${d._idx})" style="color:#4285f4;border-color:rgba(66,133,244,0.3)" title="إضافة للتقويم">📅 تقويم</button>` : ''}
-        </div>
-      </div>
-      <div>
-        <div class="debt-amount ${isOwe?'owe':'lend'}">${(d.remaining||d.amount||0).toLocaleString('en-US',{maximumFractionDigits:0})}</div>
-        <div style="font-size:10px;color:var(--muted);text-align:left">ر.س متبقي</div>
-        ${d.due_date ? `<div class="debt-due-label ${isOverdue?'overdue':''}" style="margin-top:4px">${isOverdue?'⚠️ متأخر':'📅'} ${d.due_date}</div>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-}
 
 // Init on page load
 renderLoans();
@@ -11021,51 +10174,57 @@ function _loadData(uid) {
     isNewUser = (lastLogin - created) < 120000;
   }
 
-  _read(uid, "investments").then(function(inv) {
+  // تحميل كل البيانات بالتوازي (بدل التسلسل)
+  Promise.all([
+    _read(uid, "investments"),
+    _read(uid, "loans"),
+    _read(uid, "debts"),
+    _read(uid, "dividends"),
+    _ref(uid, "settings").get().catch(function(){ return null; })
+  ]).then(function(results) {
+    var inv  = results[0];
+    var loans= results[1];
+    var debts= results[2];
+    var divs = results[3];
+    var settingsSnap = results[4];
+
+    // investments
     if (inv && inv.length > 0) {
-      // بيانات موجودة في Firebase → حمّلها
       window.__investments.length = 0;
       inv.forEach(function(r){ window.__investments.push(r); });
     } else if (isNewUser) {
-      // مستخدم جديد → ابدأ بمحفظة فارغة
-      window.__investments.length = 0;
-      investments.length = 0;
+      window.__investments.length = 0; investments.length = 0;
       _write(uid, "investments", []);
     } else {
-      // لا بيانات في Firebase → ابدأ بمحفظة فارغة (لا تكتب شيء)
-      window.__investments.length = 0;
-      investments.length = 0;
+      window.__investments.length = 0; investments.length = 0;
     }
-    return _read(uid, "loans");
-  }).then(function(loans) {
+
+    // loans
     if (loans) {
       if (!Array.isArray(window.loansData)) window.loansData = [];
       window.loansData.length = 0;
       loans.forEach(function(r){ window.loansData.push(r); });
       loansData = window.loansData;
-    } else if (isNewUser) {
-      window.loansData = []; loansData = [];
-      _write(uid, "loans", []);
-    }
-    return _read(uid, "debts");
-  }).then(function(debts) {
+    } else if (isNewUser) { window.loansData = []; loansData = []; _write(uid,"loans",[]); }
+
+    // debts
     if (debts) {
       if (!Array.isArray(window.debtsData)) window.debtsData = [];
       window.debtsData.length = 0;
       debts.forEach(function(r){ window.debtsData.push(r); });
       debtsData = window.debtsData;
-    } else if (isNewUser) {
-      window.debtsData = []; debtsData = [];
-      _write(uid, "debts", []);
-    }
-    return _read(uid, "dividends");
-  }).then(function(divs) {
+    } else if (isNewUser) { window.debtsData = []; debtsData = []; _write(uid,"debts",[]); }
+
+    // dividends
     if (divs && divs.length) {
       dividendsData.length = 0;
       divs.forEach(function(r){ dividendsData.push(r); });
       window.dividendsData = dividendsData;
     }
-    _ref(uid,'settings').get().then(function(snap){
+
+    // settings
+    var snap = settingsSnap;
+    if (snap && snap.exists) { var L=snap.data().lists||{};
       if(snap.exists){var L=snap.data().lists||{};
         if(L.platforms&&L.platforms.length){window._settingsPlatforms=L.platforms;if(typeof populatePlatformSelects==='function')populatePlatformSelects();}
         if(L.banks&&L.banks.length){window._settingsBanks=L.banks;if(typeof populateBankSelect==='function')populateBankSelect();}
@@ -11101,7 +10260,7 @@ function _loadData(uid) {
       if (typeof renderFunds  === "function") renderFunds();
       if (typeof renderStocks === "function") renderStocks();
     });
-  }).catch(function(e){ console.error("loadData:", e); });
+  }).catch(function(e){ console.error("loadData:", e); _badge("error"); });
 }
 
 function _clearData() {
