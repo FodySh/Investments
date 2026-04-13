@@ -2187,11 +2187,9 @@
         <div class="step" id="step-4" onclick="goStep(4)">
           <div class="step-num">4</div> التوقيت والمدة
         </div>
+
         <div class="step" id="step-5" onclick="goStep(5)">
-          <div class="step-num">5</div> تفاصيل النوع
-        </div>
-        <div class="step" id="step-6" onclick="goStep(6)">
-          <div class="step-num">6</div> المخاطر والإدارة
+          <div class="step-num">5</div> المخاطر والإدارة
         </div>
       </div>
 
@@ -2300,6 +2298,17 @@
               </div>
             </div>
           </div>
+          <!-- تفاصيل إضافية -->
+          <div class="form-section" style="margin-top:16px">
+            <div class="form-section-title">📌 تفاصيل إضافية</div>
+            <div class="form-full">
+              <div class="field-group">
+                <label class="field-label">ملاحظات خاصة بالفرصة</label>
+                <textarea class="f-textarea" id="f-type-notes" placeholder="أي معلومات إضافية تتعلق بهذه الفرصة الاستثمارية..."></textarea>
+              </div>
+            </div>
+          </div>
+
           <div style="display:flex;justify-content:flex-start;gap:12px">
             <button class="btn-submit" onclick="nextStep(1)">التالي ← البيانات المالية</button>
           </div>
@@ -2405,20 +2414,7 @@
         <div class="form-step" id="fstep-3" style="display:none">
           <div class="form-section">
             <div class="form-section-title">💰 توزيعات</div>
-            <div class="form-grid">
-              <div class="field-group">
-                <label class="field-label">نسبة العائد السنوي %</label>
-                <input class="f-input" id="f-ret-pct" type="number" step="0.01" placeholder="مثال: 10.5" oninput="calcAuto()" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">قيمة العائد الإجمالي (ر.س) <span class="hint">— أو تُحسب تلقائياً</span></label>
-                <input class="f-input" id="f-ret-val" type="number" step="0.01" placeholder="0.00" oninput="calcAuto()" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">المجموع المتوقع (أصل + عائد)</label>
-                <input class="f-input" id="f-total" type="number" step="0.01" placeholder="يُحسب تلقائياً" style="color:var(--gold)" readonly />
-              </div>
-            </div>
+
             <div class="form-grid">
               <div class="field-group">
                 <label class="field-label">نوع التوزيعات</label>
@@ -2443,10 +2439,7 @@
                   <option>لا يوجد</option>
                 </select>
               </div>
-              <div class="field-group">
-                <label class="field-label">مبلغ التوزيع الدوري (ر.س)</label>
-                <input class="f-input" id="f-dist-amt" type="number" step="0.01" placeholder="0.00" />
-              </div>
+
             </div>
             <div class="form-grid">
               <div class="field-group">
@@ -2545,14 +2538,6 @@
             </div>
           </div>
 
-          <div style="display:flex;justify-content:flex-start;gap:12px">
-            <button class="btn-submit" onclick="nextStep(4)">التالي ← تفاصيل النوع</button>
-            <button class="btn-reset" onclick="prevStep(4)">← رجوع</button>
-          </div>
-        </div>
-
-        <!-- ══ STEP 5: تفاصيل النوع ══ -->
-        <div class="form-step" id="fstep-5" style="display:none">
 
           <!-- SUKUK / BOND -->
           <div class="form-section cond-panel" id="panel-sukuk">
@@ -2656,25 +2641,14 @@
             </div>
           </div>
 
-          <!-- DEFAULT (no type selected) -->
-          <div class="form-section" id="panel-default">
-            <div class="form-section-title">📌 تفاصيل إضافية</div>
-            <div class="form-full">
-              <div class="field-group">
-                <label class="field-label">ملاحظات خاصة بالفرصة</label>
-                <textarea class="f-textarea" id="f-type-notes" placeholder="أي معلومات إضافية تتعلق بهذا النوع من الاستثمار..."></textarea>
-              </div>
-            </div>
-          </div>
-
           <div style="display:flex;justify-content:flex-start;gap:12px">
-            <button class="btn-submit" onclick="nextStep(5)">التالي ← المخاطر والإدارة</button>
-            <button class="btn-reset" onclick="prevStep(5)">← رجوع</button>
+            <button class="btn-submit" onclick="nextStep(4)">التالي ← المخاطر والإدارة</button>
+            <button class="btn-reset" onclick="prevStep(4)">← رجوع</button>
           </div>
         </div>
 
-        <!-- ══ STEP 6: المخاطر والإدارة والحفظ ══ -->
-        <div class="form-step" id="fstep-6" style="display:none">
+        <!-- ══ STEP 5 (was 6): المخاطر والإدارة والحفظ ══ -->
+        <div class="form-step" id="fstep-5" style="display:none">
           <div class="form-section">
             <div class="form-section-title">⚖️ المخاطر والضمانات</div>
             <div class="form-grid">
@@ -2689,37 +2663,10 @@
                 </select>
                 <div class="field-error" id="err-risk">يرجى اختيار مستوى المخاطرة</div>
               </div>
-              <div class="field-group">
-                <label class="field-label">درجة المخاطرة (1-10)</label>
-                <input class="f-input" id="f-risk-score" type="number" min="1" max="10" placeholder="مثال: 3" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">نوع الضمان</label>
-                <select class="f-select" id="f-guarantee">
-                  <option value="">— اختر —</option>
-                  <option>أصول مالية</option>
-                  <option>أصول عقارية</option>
-                  <option>ضمان شخصي</option>
-                  <option>كفالة بنكية</option>
-                  <option>تأمين</option>
-                  <option>لا يوجد</option>
-                </select>
-              </div>
+
+
             </div>
-            <div class="form-grid">
-              <div class="field-group">
-                <label class="field-label">قيمة الضمان (ر.س)</label>
-                <input class="f-input" id="f-guarantee-val" type="number" step="0.01" placeholder="0.00" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">سعر وقف الخسارة (ر.س)</label>
-                <input class="f-input" id="f-stop-loss" type="number" step="0.01" placeholder="0.00" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">الحد الأقصى للخسارة المقبولة %</label>
-                <input class="f-input" id="f-max-loss" type="number" step="0.01" min="0" max="100" placeholder="مثال: 20" />
-              </div>
-            </div>
+
           </div>
 
           <div class="form-section">
@@ -2759,10 +2706,7 @@
               </div>
             </div>
             <div class="form-grid-2">
-              <div class="field-group">
-                <label class="field-label">وثائق / مستندات (اسم الملف)</label>
-                <input class="f-input" id="f-docs" type="text" placeholder="مثال: عقد_الصك.pdf" />
-              </div>
+
               <div class="field-group">
                 <label class="field-label">رابط وثيقة (URL)</label>
                 <input class="f-input" id="f-doc-url" type="url" placeholder="https://..." />
@@ -2783,7 +2727,7 @@
             <button class="btn-submit" onclick="saveOpportunity()" style="font-size:15px;padding:16px 48px">
               💾 حفظ الفرصة الاستثمارية
             </button>
-            <button class="btn-reset" onclick="prevStep(6)">← رجوع</button>
+            <button class="btn-reset" onclick="prevStep(5)">← رجوع</button>
             <button class="btn-reset" onclick="resetForm()" style="color:var(--red);border-color:rgba(255,68,68,0.3)">
               🗑 مسح الكل
             </button>
@@ -5924,7 +5868,7 @@ function validateStep(step) {
       { id: 'f-date-in', errId: 'err-date-in', check: v => v !== '' },
       { id: 'f-status', errId: 'err-status', check: v => v !== '' },
     ],
-    6: [
+    5: [
       { id: 'f-risk', errId: 'err-risk', check: v => v !== '' },
     ],
   };
