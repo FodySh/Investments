@@ -4056,6 +4056,20 @@
                   <input class="f-input" id="al-next-date" type="date" />
                 </div>
               </div>
+              <!-- جدول الأقساط المتعددة -->
+              <div style="margin-top:12px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                  <label class="field-label" style="margin:0">جدول الأقساط الشهرية</label>
+                  <button type="button" onclick="addPmtRow()" style="background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);border-radius:8px;padding:4px 12px;color:var(--gold);font-size:12px;cursor:pointer;font-family:inherit">+ فترة جديدة</button>
+                </div>
+                <div id="pmt-rows">
+                  <!-- rows added dynamically -->
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(201,168,76,0.06);border-radius:8px;font-size:12px;margin-top:6px">
+                  <span style="color:var(--muted)">إجمالي مجموع الأقساط</span>
+                  <span id="pmt-grand-total" style="font-family:monospace;font-weight:700;color:var(--cyan)">—</span>
+                </div>
+              </div>
               <div class="field-group" style="margin-top:8px">
                 <label class="field-label">ملاحظات</label>
                 <textarea class="f-input" id="al-notes" rows="2" placeholder="رقم العقد، ضمانات، شروط خاصة..." style="resize:none"></textarea>
@@ -4101,6 +4115,10 @@
                 <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
                   <span style="color:var(--muted)">تكلفة الفائدة %</span>
                   <span id="al-d-cost-pct" style="font-family:monospace;font-weight:600;color:var(--red)">—</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+                  <span style="color:var(--muted)">مجموع الأقساط (القسط × الأشهر)</span>
+                  <span id="al-d-total-pmts" style="font-family:monospace;font-weight:700;color:var(--cyan)">—</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;padding:7px 0">
                   <span style="color:var(--muted)">تاريخ الانتهاء المتوقع</span>
@@ -6500,7 +6518,7 @@ function showPage(id, navEl, mobileTitle, noScroll){
   if (id === 'sukuk')  { renderSukuk(); renderFunds(); }
   if (id === 'funds')  { renderSukuk(); renderFunds(); setTimeout(function(){ switchOppsTab('funds'); }, 50); }
   if (id === 'add-stock') { resetAddStock(); calcAddStock(); setTimeout(function(){ msInit('scap',getCapitalSources(),[]); populatePlatformSelects(); },100); }
-  if (id === 'add-loan')  { calcAddLoan(); if(typeof populateBankSelect==='function') populateBankSelect(); }
+  if (id === 'add-loan')  { calcAddLoan(); if(typeof populateBankSelect==='function') populateBankSelect(); if(typeof initPmtRows==='function') initPmtRows(); }
   if (id === 'add')       { setTimeout(function(){ populateCapitalSrcSelect(); populatePlatformSelects(); populateTypeSelect(); }, 100); }
   if (id === 'add-debt')  { updateDebtDirectionLabel(); calcAddDebt(); }
   if (id === 'loans') renderLoans();
@@ -7423,6 +7441,9 @@ function calcAddLoan() {
     var endFld = document.getElementById('al-end');
     if (endFld) endFld.value = endDate.toISOString().split('T')[0];
   } else { set('al-d-end-date','—'); }
+
+  // حساب مجموع الأقساط من الجدول
+  if (typeof calcPmtTotal === 'function') calcPmtTotal();
 
   var bar = document.getElementById('al-progress-bar');
   var pctEl = document.getElementById('al-progress-pct');
@@ -9891,10 +9912,62 @@ function addCapSrc(val){
   }); }catch(e){}
 }
 function populateCapitalSrcSelect(){
-  var src=getCapitalSources();
-  if(document.getElementById('ms-cap-dd')) msInit('cap',src,_ms['cap']||[]);
-  if(document.getElementById('ms-scap-dd')) msInit('scap',src,_ms['scap']||[]);
+  var src = window._settingsCapital && window._settingsCapital.length
+    ? window._settingsCapital
+    : getCapitalSources();
+  if(document.getElementById('ms-cap-dd')) msInit('cap', src, _ms['cap']||[]);
+  if(document.getElementById('ms-scap-dd')) msInit('scap', src, _ms['scap']||[]);
 }
+
+// ══ جدول الأقساط المتعددة ══════════════════════════════════════
+var _pmtRows = [];
+
+function initPmtRows() {
+  _pmtRows = [{ pmt: 0, months: 0 }];
+  renderPmtRows();
+}
+
+function addPmtRow() {
+  _pmtRows.push({ pmt: 0, months: 0 });
+  renderPmtRows();
+}
+
+function removePmtRow(idx) {
+  if (_pmtRows.length <= 1) return;
+  _pmtRows.splice(idx, 1);
+  renderPmtRows();
+}
+
+function renderPmtRows() {
+  var container = document.getElementById('pmt-rows');
+  if (!container) return;
+  container.innerHTML = _pmtRows.map(function(row, i) {
+    return '<div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center">'
+      + '<input class="f-input" type="number" step="0.01" min="0" placeholder="القسط (ر.س)" value="' + (row.pmt||'') + '"'
+      + ' oninput="_pmtRows['+i+'].pmt=parseFloat(this.value)||0;calcPmtTotal()"'
+      + ' style="color:var(--gold);font-weight:700;font-size:13px"/>'
+      + '<input class="f-input" type="number" step="1" min="0" placeholder="عدد الأشهر" value="' + (row.months||'') + '"'
+      + ' oninput="_pmtRows['+i+'].months=parseFloat(this.value)||0;calcPmtTotal()"'
+      + ' style="font-size:13px"/>'
+      + '<button type="button" onclick="removePmtRow('+i+')" style="background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.2);border-radius:8px;padding:6px 10px;color:var(--red);cursor:pointer;font-size:14px;flex-shrink:0"'
+      + (_pmtRows.length===1?' disabled style="opacity:0.3;cursor:default"':'') + '>🗑</button>'
+      + '</div>';
+  }).join('');
+  calcPmtTotal();
+}
+
+function calcPmtTotal() {
+  var total = _pmtRows.reduce(function(s, r) { return s + (r.pmt * r.months); }, 0);
+  var el = document.getElementById('pmt-grand-total');
+  if (el) el.textContent = total > 0 ? total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ر.س' : '—';
+  // تحديث ملخص القرض
+  var summaryEl = document.getElementById('al-d-total-pmts');
+  if (summaryEl) summaryEl.textContent = total > 0 ? total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ر.س' : '—';
+  return total;
+}
+
+function getPmtTotal() { return calcPmtTotal(); }
+
 
 function saveLoansToStorage() {
   var data = window.loansData || loansData || [];
@@ -10957,7 +11030,13 @@ function _loadData(uid) {
       if(snap.exists){var L=snap.data().lists||{};
         if(L.platforms&&L.platforms.length){window._settingsPlatforms=L.platforms;if(typeof populatePlatformSelects==='function')populatePlatformSelects();}
         if(L.banks&&L.banks.length){window._settingsBanks=L.banks;if(typeof populateBankSelect==='function')populateBankSelect();}
-        if(L.capital&&L.capital.length){window._settingsCapital=L.capital;if(typeof populateCapitalSrcSelect==='function')populateCapitalSrcSelect();}
+        if(L.capital&&L.capital.length){
+          window._settingsCapital=L.capital;
+          if(typeof populateCapitalSrcSelect==='function') populateCapitalSrcSelect();
+          // إعادة تهيئة أي multi-select مفتوح
+          if(document.getElementById('ms-cap-dd')) msInit('cap', L.capital, _ms['cap']||[]);
+          if(document.getElementById('ms-scap-dd')) msInit('scap', L.capital, _ms['scap']||[]);
+        }
         if(L.types&&L.types.length){window._settingsTypes=L.types;if(typeof populateTypeSelect==='function')populateTypeSelect();}
       }
     }).catch(function(){});
