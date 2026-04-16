@@ -4400,12 +4400,17 @@ async function runAIAnalysis() {
 }
 
 //  AUTO-SYNC HOOK: called after every local change 
+var _syncTimers = {};
 function triggerSync(collection) {
   if (typeof window.fbSaveInvestments !== 'function') return;
-  try {
-    if (collection === 'investments' || !collection) window.fbSaveInvestments();
-    if (collection === 'loans')  window.fbSaveLoans();
-  } catch(e) { console.warn('triggerSync:', e); }
+  // debounce 600ms — يجمع الحفظات المتتالية في طلب واحد
+  if (_syncTimers[collection]) clearTimeout(_syncTimers[collection]);
+  _syncTimers[collection] = setTimeout(function() {
+    try {
+      if (collection === 'investments' || !collection) window.fbSaveInvestments();
+      if (collection === 'loans')  window.fbSaveLoans();
+    } catch(e) { console.warn('triggerSync:', e); }
+  }, 600);
 }
 
 //  RENDER TABLES 
@@ -5701,14 +5706,11 @@ function saveOpportunity() {
 
   savedOpportunities.push(opp);
 
+  // أضف الفرصة الكاملة لـ window.__investments أولاً
+  window.__investments.push(opp);
+
+  // ثم احفظ لـ Firebase
   triggerSync('investments');
-  // Add to main investments array so it appears in all tables
-  investments.push({
-    name: opp.name, type: opp.type, platform: opp.platform,
-    amount: opp.amount, ret_pct: opp.ret_pct, ret_val: opp.ret_val,
-    total: opp.total, date_out: opp.date_out, duration: opp.duration,
-    dist: opp.dist_freq, risk: opp.risk, status: opp.status,
-  });
 
   // Re-render all tables
   renderAll();
@@ -10306,8 +10308,17 @@ function _clearData() {
 window.fbSaveInvestments = function() {
   if (!_uid) return;
   _syncing = true;
-  _write(_uid, "investments", Array.from(window.__investments));
-  setTimeout(function(){ _syncing = false; }, 2000);
+  var snapshot = Array.from(window.__investments); // نسخة في لحظة الحفظ
+  _ref(_uid, "investments").set(
+    { data: snapshot, uid: _uid, ts: new Date().toISOString() },
+    { merge: true }
+  ).then(function() {
+    _badge("synced");
+    setTimeout(function(){ _syncing = false; }, 500);
+  }).catch(function(e) {
+    console.error("Firestore write error:", e.message);
+    _syncing = false;
+  });
 };
 window.fbSaveLoans = function() {
   if (!_uid) return;
