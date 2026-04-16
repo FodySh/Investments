@@ -3814,12 +3814,13 @@
     <!-- جدول السداد — خارج الـ grid بعرض كامل -->
     <div id="new-amort-section" style="display:none;margin-top:24px">
       <div class="section-card">
-        <div class="section-head" onclick="toggleNewAmortTable()" style="cursor:pointer">
-          <span class="section-title">📅 جدول السداد الشهري</span>
-          <div style="display:flex;align-items:center;gap:10px">
+        <div class="section-head" style="cursor:pointer">
+          <span class="section-title" onclick="toggleNewAmortTable()">📅 جدول السداد الشهري</span>
+          <div style="display:flex;align-items:center;gap:10px" onclick="toggleNewAmortTable()">
             <span id="namort-toggle-icon" style="font-size:12px;color:var(--muted)">▼ إخفاء</span>
             <span class="section-count" id="namort-count">—</span>
           </div>
+          <button onclick="event.stopPropagation();exportAmortToExcel()" style="background:rgba(0,230,118,0.12);border:1px solid rgba(0,230,118,0.3);border-radius:8px;padding:5px 12px;font-size:11px;font-weight:600;color:var(--green);cursor:pointer;font-family:inherit;white-space:nowrap">📊 تصدير Excel</button>
         </div>
         <div id="namort-table-wrap">
           <!-- ملخص سريع -->
