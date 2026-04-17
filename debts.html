@@ -1872,13 +1872,20 @@ window.fbSaveDividends = function() {
 
 //  Auth: popup on all platforms (redirect breaks on GitHub Pages / iOS Safari)
 window.googleSignIn = function() {
+  var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (isMobile) {
+    // الجوال: redirect أموثوق من popup
+    _auth.signInWithRedirect(_provider).catch(function(e) {
+      if (typeof showToast === 'function') showToast('❌ ' + e.message);
+    });
+    return;
+  }
   _auth.signInWithPopup(_provider).then(function(result) {
     // success handled by onAuthStateChanged
   }).catch(function(e) {
     if (e.code === "auth/popup-blocked") {
-      // Popup was blocked by browser — show guidance
-      if (typeof showToast === "function")
-        showToast("Please allow popups for this site");
+      // جرّب redirect كـ fallback
+      _auth.signInWithRedirect(_provider);
     } else if (e.code !== "auth/popup-closed-by-user"
             && e.code !== "auth/cancelled-popup-request") {
       console.error("SignIn error:", e.code, e.message);
@@ -1896,6 +1903,15 @@ window.googleSignOut = function() {
 };
 
 // Auth state listener
+// تحقق من نتيجة redirect (للجوال)
+_auth.getRedirectResult().then(function(result) {
+  // onAuthStateChanged سيتولى الباقي
+}).catch(function(e) {
+  if (e.code && e.code !== 'auth/no-auth-event') {
+    console.warn('Redirect result error:', e.message);
+  }
+});
+
 _auth.onAuthStateChanged(function(user) {
   window.__firebaseUser = user;
   _updateUI(user);
@@ -2053,17 +2069,18 @@ var _currentFilter = 'all';
 var _currentTab    = 'debts';
 
 // ══ Auth ═══════════════════════════════════════════════════════
-function signIn() { auth.signInWithPopup(prov).catch(function(e){ toast('❌ '+e.message,1); }); }
+function signIn() { window.googleSignIn ? window.googleSignIn() : _auth.signInWithRedirect(_provider); }
 
-auth.onAuthStateChanged(function(user) {
-  if (user) {
+// auth state handled by Firebase block above (onAuthStateChanged)
+// هذا fallback إذا لم يُعيَّن uid من الـ block الأول
+_auth.onAuthStateChanged(function(user) {
+  if (user && !uid) {
     uid = user.uid;
-    document.getElementById('login-banner').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    loadData();
-  } else {
-    document.getElementById('login-banner').style.display = 'flex';
-    document.getElementById('app').style.display = 'none';
+    var banner = document.getElementById('login-banner');
+    var app    = document.getElementById('app');
+    if (banner) banner.style.display = 'none';
+    if (app)    app.style.display    = 'block';
+    if (typeof loadData === 'function') loadData();
   }
 });
 
