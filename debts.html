@@ -1610,6 +1610,7 @@
 <script>
 
 // Firebase init — wrapped in try/catch so app works even if CDN fails
+var _auth = null, _db = null, _provider = null;
 try {
 if (typeof firebase === 'undefined') throw new Error('Firebase not loaded');
 firebase.initializeApp({
@@ -1621,9 +1622,9 @@ firebase.initializeApp({
   appId:             "1:964948881361:web:2801b8127489d953717af0"
 });
 
-var _auth     = firebase.auth();
-var _db       = firebase.firestore();
-var _provider = new firebase.auth.GoogleAuthProvider();
+_auth     = firebase.auth();
+_db       = firebase.firestore();
+_provider = new firebase.auth.GoogleAuthProvider();
 _provider.setCustomParameters({ prompt: "select_account" });
 
 var _unsubSnap = null;
@@ -2071,18 +2072,19 @@ var _currentTab    = 'debts';
 // ══ Auth ═══════════════════════════════════════════════════════
 function signIn() { window.googleSignIn ? window.googleSignIn() : _auth.signInWithRedirect(_provider); }
 
-// auth state handled by Firebase block above (onAuthStateChanged)
-// هذا fallback إذا لم يُعيَّن uid من الـ block الأول
-_auth.onAuthStateChanged(function(user) {
-  if (user && !uid) {
-    uid = user.uid;
-    var banner = document.getElementById('login-banner');
-    var app    = document.getElementById('app');
-    if (banner) banner.style.display = 'none';
-    if (app)    app.style.display    = 'block';
-    if (typeof loadData === 'function') loadData();
-  }
-});
+// auth state handled by Firebase block above
+if (typeof _auth !== 'undefined' && _auth && typeof _auth.onAuthStateChanged === 'function') {
+  _auth.onAuthStateChanged(function(user) {
+    if (user && !uid) {
+      uid = user.uid;
+      var banner = document.getElementById('login-banner');
+      var app    = document.getElementById('app');
+      if (banner) banner.style.display = 'none';
+      if (app)    app.style.display    = 'block';
+      if (typeof loadData === 'function') loadData();
+    }
+  });
+}
 
 // ══ Firebase helpers ════════════════════════════════════════════
 function ref(col) {
