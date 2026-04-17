@@ -1549,7 +1549,7 @@
           <button onclick="fetchUsStockPrices()" id="us-refresh-btn" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.3);border-radius:8px;padding:7px 12px;font-size:11px;font-weight:600;color:#60a5fa;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;gap:5px" title="تحديث أسعار السوق الأمريكي">
             <span id="us-refresh-icon">⟳</span> 🇺🇸
           </button>
-          <button onclick="showPage('add-stock',null,'📈 إضافة سهم')" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:6px">➕ إضافة سهم</button>
+          <button id="add-stock-btn" onclick="showPage('add-stock',null,'📈 إضافة سهم')" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:6px">➕ إضافة سهم</button>
         </div>
       </div>
 
@@ -1650,17 +1650,79 @@
         <!-- KPIs -->
         <div id="div-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px"></div>
         <div id="div-known-alert" style="display:none;margin-bottom:16px;padding:12px 16px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:10px;font-size:12px;color:var(--gold)"></div>
+        <!-- نموذج إضافة توزيعة -->
+        <div id="div-add-form" style="display:none;margin-bottom:20px">
+          <div class="section-card">
+            <div class="section-head">
+              <span class="section-title">➕ إضافة توزيعة يدوياً</span>
+              <button onclick="document.getElementById('div-add-form').style.display='none'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1">×</button>
+            </div>
+            <div class="section-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px">
+              <div class="field-group">
+                <label class="field-label">السهم <span style="color:var(--red)">*</span></label>
+                <select class="f-select" id="div-ticker-sel" onchange="onDivTickerChange()">
+                  <option value="">— اختر السهم —</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label class="field-label">نوع التوزيعة</label>
+                <select class="f-select" id="div-type" onchange="calcDividend()">
+                  <option value="cash">💵 نقدية</option>
+                  <option value="stock">📈 أسهم مجانية</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label class="field-label">التوزيعة للسهم (ر.س) <span style="color:var(--red)">*</span></label>
+                <input class="f-input" id="div-per-share" type="number" step="0.001" placeholder="مثال: 0.375" oninput="calcDividend()"/>
+              </div>
+              <div class="field-group">
+                <label class="field-label">تاريخ الاستحقاق (Ex-Date)</label>
+                <input class="f-input" id="div-ex-date" type="date" oninput="calcDividend()"/>
+              </div>
+              <div class="field-group">
+                <label class="field-label">تاريخ الصرف (Pay Date)</label>
+                <input class="f-input" id="div-pay-date" type="date"/>
+              </div>
+              <div class="field-group">
+                <label class="field-label">تاريخ الإعلان</label>
+                <input class="f-input" id="div-announce-date" type="date"/>
+              </div>
+              <!-- حساب تلقائي -->
+              <div id="div-calc-box" style="display:none;grid-column:1/-1;background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.2);border-radius:10px;padding:12px 16px;display:none;gap:20px;flex-wrap:wrap">
+                <div style="font-size:11px;color:var(--muted)">الأسهم: <span id="div-c-shares" style="color:var(--white);font-weight:700">—</span></div>
+                <div style="font-size:11px;color:var(--muted)">الإجمالي: <span id="div-c-total" style="color:var(--green);font-weight:700;font-family:monospace">—</span></div>
+                <div style="font-size:11px;color:var(--muted)">العائد: <span id="div-c-yield" style="color:var(--gold);font-weight:700">—</span></div>
+              </div>
+              <div style="grid-column:1/-1;display:flex;gap:10px;justify-content:flex-end">
+                <button onclick="document.getElementById('div-add-form').style.display='none'" class="btn-reset" style="padding:9px 20px;font-size:13px">إلغاء</button>
+                <button onclick="saveDividend()" class="btn-submit" style="padding:9px 24px;font-size:13px">💾 حفظ التوزيعة</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- جدول التوزيعات -->
         <div class="section-card">
           <div class="section-head">
             <span class="section-title">💰 سجل التوزيعات</span>
-            <span class="section-count" id="div-count-badge">—</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="section-count" id="div-count-badge">—</span>
+              <button onclick="showAddDividendForm()" style="background:linear-gradient(135deg,var(--green),#00b248);color:#0a1628;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:5px">➕ إضافة توزيعة</button>
+            </div>
           </div>
           <div class="table-wrap">
             <table class="data-table">
               <thead><tr>
-                <th>السهم</th><th>الرمز</th><th>التاريخ</th><th>النوع</th>
-                <th>للسهم</th><th>الأسهم</th><th>الإجمالي</th><th>الحالة</th><th></th>
+                <th>السهم</th>
+                <th>الرمز</th>
+                <th>النوع</th>
+                <th style="color:var(--gold)">للسهم</th>
+                <th>الأسهم</th>
+                <th style="color:var(--green)">الإجمالي</th>
+                <th>تاريخ الاستحقاق</th>
+                <th>تاريخ الصرف</th>
+                <th>الحالة</th>
+                <th></th>
               </tr></thead>
               <tbody id="div-tbody"></tbody>
             </table>
@@ -7635,18 +7697,19 @@ function renderDividendsTab() {
         var statusColor = d.status==='مستلمة' ? 'var(--green)' : d.status==='قادمة' ? 'var(--gold)' : 'var(--orange)';
         var statusBg    = d.status==='مستلمة' ? 'rgba(0,230,118,0.1)' : d.status==='قادمة' ? 'rgba(201,168,76,0.1)' : 'rgba(255,152,0,0.1)';
         return '<tr>' +
-          '<td>' + (d.stock_name||d.ticker) + '</td>' +
+          '<td style="font-weight:600">' + (d.stock_name||d.ticker) + '</td>' +
           '<td><span style="font-family:monospace;background:rgba(201,168,76,0.12);color:var(--gold);padding:2px 8px;border-radius:5px;font-size:11px">' + d.ticker + '</span></td>' +
-          '<td>' + (d.type==='cash'?'نقدية 💵':'أسهم مجانية 📈') + '</td>' +
-          '<td class="mono" style="color:var(--gold)">' + (d.per_share||0).toFixed(3) + ' ر.س</td>' +
-          '<td class="mono" style="color:var(--cyan)">' + (d.shares||0).toLocaleString('en-US') + '</td>' +
+          '<td>' + (d.type==='cash'?'💵 نقدية':'📈 أسهم مجانية') + '</td>' +
+          '<td class="mono" style="color:var(--gold);font-weight:700">' + (d.per_share||0).toFixed(3) + ' ر.س</td>' +
+          '<td class="mono" style="color:var(--muted)">' + (d.shares||0).toLocaleString('en-US') + '</td>' +
           '<td class="mono" style="color:var(--green);font-weight:700">' + (d.total_amount||0).toLocaleString('en-US',{minimumFractionDigits:2}) + ' ر.س</td>' +
-          '<td class="mono" style="color:var(--cyan)">' + (d.yield_pct||0).toFixed(2) + '%</td>' +
           '<td style="color:var(--muted);font-size:11px">' + (d.ex_date||'—') + '</td>' +
           '<td style="color:var(--muted);font-size:11px">' + (d.pay_date||'—') + '</td>' +
-          '<td><span style="font-size:11px;padding:3px 8px;border-radius:8px;background:'+statusBg+';color:'+statusColor+'">'+d.status+'</span></td>' +
-          '<td><button class="loan-action-btn" onclick="markDivReceived('+i+')" style="color:var(--green);display:'+(d.status==='مستلمة'?'none':'inline')+'">✅</button> ' +
-               '<button class="loan-action-btn" style="color:var(--red)" onclick="deleteDividend('+i+')">🗑</button></td>' +
+          '<td><span style="font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600;background:'+statusBg+';color:'+statusColor+'">'+d.status+'</span></td>' +
+          '<td style="display:flex;gap:4px;align-items:center">' +
+            (d.status!=='مستلمة' ? '<button class="loan-action-btn" onclick="markDivReceived('+i+')" style="color:var(--green);border-color:rgba(0,230,118,0.25)">✅ استلام</button>' : '') +
+            '<button class="loan-action-btn" style="color:var(--red);border-color:rgba(255,68,68,0.25)" onclick="deleteDividend('+i+')">🗑</button>' +
+          '</td>' +
           '</tr>';
       }).join('');
     }
