@@ -2304,101 +2304,66 @@ function _loadData(uid) {
   _badge("loading");
   _gate(false);
 
-  // تحقق إذا كان المستخدم جديداً (أول تسجيل دخول)
   var user = window.__firebaseUser;
   var isNewUser = false;
   if (user && user.metadata) {
     var created   = new Date(user.metadata.creationTime).getTime();
     var lastLogin = new Date(user.metadata.lastSignInTime).getTime();
-    // إذا الفرق أقل من دقيقتين → مستخدم جديد
     isNewUser = (lastLogin - created) < 120000;
   }
 
-  _read(uid, "investments").then(function(inv) {
-    if (inv && inv.length > 0) {
-      // بيانات موجودة في Firebase → حمّلها
-      window.__investments.length = 0;
-      inv.forEach(function(r){ window.__investments.push(r); });
-    } else if (isNewUser) {
-      // مستخدم جديد → ابدأ بمحفظة فارغة
-      window.__investments.length = 0;
-      investments.length = 0;
-      _write(uid, "investments", []);
-    } else {
-      // لا بيانات في Firebase → ابدأ بمحفظة فارغة (لا تكتب شيء)
-      window.__investments.length = 0;
-      investments.length = 0;
-    }
-    return _read(uid, "loans");
-  }).then(function(loans) {
-    if (loans) {
-      if (!Array.isArray(window.loansData)) window.loansData = [];
-      window.loansData.length = 0;
-      loans.forEach(function(r){ window.loansData.push(r); });
-      loansData = window.loansData;
-    } else if (isNewUser) {
-      window.loansData = []; loansData = [];
-      _write(uid, "loans", []);
-    }
-    return _read(uid, "debts");
-  }).then(function(debtsFirestore) {
+  // ✅ جميع الطلبات بالتوازي
+  Promise.all([
+    _read(uid, "debts"),
+    _read(uid, "jamaa"),
+    _read(uid, "loans"),
+    _ref(uid, "settings").get().catch(function(){ return null; })
+  ]).then(function(results) {
+    var debtsFirestore = results[0];
+    var jamaaFirestore = results[1];
+    var loans          = results[2];
+    var settingsSnap   = results[3];
+
+    // Debts
     if (debtsFirestore && debtsFirestore.length) {
       if (!Array.isArray(window.debtsData)) window.debtsData = [];
       window.debtsData.length = 0;
       debtsFirestore.forEach(function(r){ window.debtsData.push(r); });
       debtsData = window.debtsData;
+    } else if (isNewUser) {
+      window.debtsData = []; debtsData = [];
+      _write(uid, "debts", []);
     }
-    return _read(uid, "jamaa");
-  }).then(function(jamaaFirestore) {
+
+    // Jamaa
     if (jamaaFirestore && jamaaFirestore.length) {
       if (!Array.isArray(window.jamaaData)) window.jamaaData = [];
       window.jamaaData.length = 0;
       jamaaFirestore.forEach(function(r){ window.jamaaData.push(r); });
       jamaaData = window.jamaaData;
     }
-    return _read(uid, "dividends");
-  }).then(function(divs) {
-    if (divs && divs.length) {
-      dividendsData.length = 0;
-      divs.forEach(function(r){ dividendsData.push(r); });
-      window.dividendsData = dividendsData;
+
+    // Loans (للعرض فقط إن احتجنا)
+    if (loans && loans.length) {
+      if (!Array.isArray(window.loansData)) window.loansData = [];
+      window.loansData.length = 0;
+      loans.forEach(function(r){ window.loansData.push(r); });
     }
-    _ref(uid,'settings').get().then(function(snap){
-      if(snap.exists){var L=snap.data().lists||{};
-        if(L.platforms&&L.platforms.length){window._settingsPlatforms=L.platforms;if(typeof populatePlatformSelects==='function')populatePlatformSelects();}
-        if(L.banks&&L.banks.length){window._settingsBanks=L.banks;if(typeof populateBankSelect==='function')populateBankSelect();}
-        if(L.capital&&L.capital.length){
-          window._settingsCapital=L.capital;
-          if(typeof populateCapitalSrcSelect==='function') populateCapitalSrcSelect();
-          // إعادة تهيئة أي multi-select مفتوح
-          if(document.getElementById('ms-cap-dd')) msInit('cap', L.capital, _ms['cap']||[]);
-          if(document.getElementById('ms-scap-dd')) msInit('scap', L.capital, _ms['scap']||[]);
-        }
-        if(L.types&&L.types.length){window._settingsTypes=L.types;if(typeof populateTypeSelect==='function')populateTypeSelect();}
-      }
-    }).catch(function(){});
+
+    // Settings
+    if (settingsSnap && settingsSnap.exists) {
+      var L = settingsSnap.data().lists || {};
+      if (L.platforms && L.platforms.length) { window._settingsPlatforms = L.platforms; }
+      if (L.banks && L.banks.length) { window._settingsBanks = L.banks; }
+    }
+
     if (typeof renderDebts === "function") renderDebts();
     if (typeof renderJamaa === "function") renderJamaa();
     _badge("synced");
 
-    // Realtime listener
-    if (_unsubSnap) _unsubSnap();
-    _unsubSnap = _ref(uid,"investments").onSnapshot(function(snap) {
-      if (!snap.exists || _syncing) return;
-      var d = snap.data();
-      if (d.uid && d.uid !== uid) return;
-      if (!Array.isArray(d.data)) return;
-      window.__investments.length = 0;
-      d.data.forEach(function(r){ window.__investments.push(r); });
-      if (typeof renderAll    === "function") renderAll();
-      if (typeof renderSukuk  === "function") renderSukuk();
-      if (typeof renderStocks === "function") renderStocks();
-      if (typeof renderFunds  === "function") renderFunds();
-      if (typeof renderFunds  === "function") renderFunds();
-      if (typeof renderStocks === "function") renderStocks();
-    });
-  }).catch(function(e){ console.error("loadData:", e); });
+  }).catch(function(e){ console.error("loadData debts:", e); _badge("error"); });
 }
+
 
 function _clearData() {
   if (_unsubSnap) { _unsubSnap(); _unsubSnap = null; }
@@ -2487,9 +2452,8 @@ _auth.onAuthStateChanged(function(user) {
   } else {
     _gate(true);  // Show login banner
     // Clear any stale data shown before login
-    if (window.__investments) window.__investments.length = 0;
-    if (window.loansData)     window.loansData.length    = 0;
-    if (window.debtsData)     window.debtsData.length    = 0;
+    window.debtsData = []; debtsData = [];
+    window.jamaaData = []; jamaaData = [];
     if (typeof renderAll      === 'function') renderAll();
     if (typeof renderDashboard=== 'function') renderDashboard();
   }
