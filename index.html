@@ -7041,6 +7041,8 @@ function openLoanEditPage(idx) {
   }, 100);
 }
 
+var isLightMode = localStorage.getItem('theme') === 'light';
+
 function applyTheme(light) {
   isLightMode = light;
   document.body.classList.toggle('light-mode', light);
