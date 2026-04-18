@@ -1306,7 +1306,7 @@
 </head>
 <body>
 
-<div id="login-banner" style="position:fixed;inset:0;background:rgba(5,14,10,0.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;z-index:9999">
+<div id="login-banner" style="position:fixed;inset:0;background:rgba(5,14,10,0.97);display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;z-index:9999">
   <div style="font-size:48px">💸</div>
   <div style="font-size:20px;font-weight:700;color:var(--gold)">الديون والجمعيات</div>
   <div style="font-size:13px;color:var(--muted)">سجّل دخولك للوصول إلى بياناتك</div>
@@ -1316,7 +1316,7 @@
   </button>
 </div>
 
-<div class="app" id="app" style="display:none">
+<div class="app" id="app" style="display:block">
 <aside class="sidebar">
     <div class="logo">
       <div class="logo-mark">PORTFOLIO</div>
@@ -2238,8 +2238,10 @@ function _badge(state) {
 }
 
 function _gate(show) {
-  var g = document.getElementById("auth-gate");
+  var g = document.getElementById("auth-gate") || document.getElementById("login-banner");
   if (g) g.style.display = show ? "flex" : "none";
+  var appDiv = document.getElementById("app");
+  if (appDiv) appDiv.style.display = show ? "none" : "block";
   // Adjust top offset of sidebar/main for banner
   var sidebar = document.querySelector(".sidebar");
   var main    = document.querySelector(".main");
@@ -2650,42 +2652,7 @@ function _rerender() {
 function signIn() { window.googleSignIn ? window.googleSignIn() : _auth.signInWithRedirect(_provider); }
 
 // auth state handled by Firebase block above
-if (typeof _auth !== 'undefined' && _auth && typeof _auth.onAuthStateChanged === 'function') {
-  _auth.onAuthStateChanged(function(user) {
-    if (user && !uid) {
-      uid = user.uid;
-      var banner = document.getElementById('login-banner');
-      var app    = document.getElementById('app');
-      if (banner) banner.style.display = 'none';
-      if (app)    app.style.display    = 'block';
-      if (typeof loadData === 'function') loadData();
-    }
-  });
-}
-
-// ══ Firebase helpers ════════════════════════════════════════════
-function ref(col) {
-  return db.collection('users').doc(uid).collection('portfolio').doc(col);
-}
-function save(col, data) {
-  return ref(col).set({ data: data, updatedAt: new Date() }, { merge: true });
-}
-
-// ══ Load ════════════════════════════════════════════════════════
-function loadData() {
-  Promise.all([
-    ref('debts').get(),
-    ref('jamaa').get().catch(function(){ return null; })
-  ]).then(function(results) {
-    var ds = results[0]; var js = results[1];
-    if (ds.exists && Array.isArray(ds.data().data)) debtsData = ds.data().data;
-    if (js && js.exists && Array.isArray(js.data().data)) jamaaData = js.data().data;
-    renderAll();
-  }).catch(function(e){ toast('❌ خطأ في التحميل: '+e.message,1); });
-}
-
-// ══ Render ══════════════════════════════════════════════════════
-function renderAll() { updateKPIs(); renderDebts(); renderJamaa(); }
+// Auth handled by Firebase block above
 
 function updateKPIs() {
   var owe  = debtsData.filter(function(d){ return d.direction==='owe'&&d.status!=='مسوَّى'; }).reduce(function(s,d){ return s+(d.remaining||d.amount||0); },0);
