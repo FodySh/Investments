@@ -7292,34 +7292,38 @@ function _loadData(uid) {
   _badge("loading");
   _gate(false);
 
-  // تحقق إذا كان المستخدم جديداً (أول تسجيل دخول)
   var user = window.__firebaseUser;
   var isNewUser = false;
   if (user && user.metadata) {
     var created   = new Date(user.metadata.creationTime).getTime();
     var lastLogin = new Date(user.metadata.lastSignInTime).getTime();
-    // إذا الفرق أقل من دقيقتين → مستخدم جديد
     isNewUser = (lastLogin - created) < 120000;
   }
 
-  _read(uid, "investments").then(function(inv) {
+  // ✅ جميع الطلبات بالتوازي بدل التسلسل
+  Promise.all([
+    _read(uid, "investments"),
+    _read(uid, "loans"),
+    _read(uid, "dividends"),
+    _ref(uid, "settings").get().catch(function(){ return null; })
+  ]).then(function(results) {
+    var inv  = results[0];
+    var loans = results[1];
+    var divs  = results[2];
+    var settingsSnap = results[3];
+
+    // Investments
     if (inv && inv.length > 0) {
-      // بيانات موجودة في Firebase → حمّلها
       window.__investments.length = 0;
       inv.forEach(function(r){ window.__investments.push(r); });
-    } else if (isNewUser) {
-      // مستخدم جديد → ابدأ بمحفظة فارغة
-      window.__investments.length = 0;
-      investments.length = 0;
-      _write(uid, "investments", []);
     } else {
-      // لا بيانات في Firebase → ابدأ بمحفظة فارغة (لا تكتب شيء)
       window.__investments.length = 0;
       investments.length = 0;
+      if (isNewUser) _write(uid, "investments", []);
     }
-    return _read(uid, "loans");
-  }).then(function(loans) {
-    if (loans) {
+
+    // Loans
+    if (loans && loans.length) {
       if (!Array.isArray(window.loansData)) window.loansData = [];
       window.loansData.length = 0;
       loans.forEach(function(r){ window.loansData.push(r); });
@@ -7328,22 +7332,32 @@ function _loadData(uid) {
       window.loansData = []; loansData = [];
       _write(uid, "loans", []);
     }
-    return _read(uid, "dividends");
-  }).then(function(divs) {
+
+    // Dividends
     if (divs && divs.length) {
       dividendsData.length = 0;
       divs.forEach(function(r){ dividendsData.push(r); });
       window.dividendsData = dividendsData;
     }
+
+    // Settings
+    if (settingsSnap && settingsSnap.exists) {
+      var L = settingsSnap.data().lists || {};
+      if (L.platforms && L.platforms.length) { window._settingsPlatforms = L.platforms; if (typeof populatePlatformSelects === "function") populatePlatformSelects(); }
+      if (L.banks && L.banks.length) { window._settingsBanks = L.banks; if (typeof populateBankSelect === "function") populateBankSelect(); }
+      if (L.capital && L.capital.length) { window._settingsCapital = L.capital; if (typeof populateCapitalSrcSelect === "function") populateCapitalSrcSelect(); }
+      if (L.types && L.types.length) { window._settingsTypes = L.types; if (typeof populateTypeSelect === "function") populateTypeSelect(); }
+    }
+
     _rerender();
     initDashboardYears();
     renderDashboard();
     if (typeof renderStocks === "function") renderStocks();
     _badge("synced");
 
-    // Realtime listener
+    // Realtime listener على investments فقط
     if (_unsubSnap) _unsubSnap();
-    _unsubSnap = _ref(uid,"investments").onSnapshot(function(snap) {
+    _unsubSnap = _ref(uid, "investments").onSnapshot(function(snap) {
       if (!snap.exists || _syncing) return;
       var d = snap.data();
       if (d.uid && d.uid !== uid) return;
@@ -7354,11 +7368,11 @@ function _loadData(uid) {
       if (typeof renderSukuk  === "function") renderSukuk();
       if (typeof renderStocks === "function") renderStocks();
       if (typeof renderFunds  === "function") renderFunds();
-      if (typeof renderFunds  === "function") renderFunds();
-      if (typeof renderStocks === "function") renderStocks();
     });
-  }).catch(function(e){ console.error("loadData:", e); });
+
+  }).catch(function(e){ console.error("loadData:", e); _badge("error"); });
 }
+
 
 function _clearData() {
   if (_unsubSnap) { _unsubSnap(); _unsubSnap = null; }
