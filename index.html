@@ -781,15 +781,12 @@
 
   /* ── DEBT CARD ───────────────────────────────────────── */
   .debt-card {
-    padding: 16px 22px;
+    padding: 16px 18px;
     border-bottom: 1px solid var(--border);
-    display: grid;
-    grid-template-columns: 48px 1fr auto;
-    gap: 14px;
-    align-items: center;
     transition: background .15s;
+    border-radius: 0;
   }
-  .debt-card:last-child { border-bottom: none; }
+  .debt-card:last-child { border-bottom: none; border-radius: 0 0 14px 14px; }
   .debt-card:hover { background: rgba(255,255,255,0.02); }
   .debt-avatar {
     width: 44px; height: 44px; border-radius: 12px;
@@ -9909,7 +9906,7 @@ var editingDebtIdx = null;
 let currentDebtFilter = 'all';
 
 function saveDebtsToStorage() {
-  var data = window.debtsData || debtsData || [];
+  var data = (window.debtsData && window.debtsData.length) ? window.debtsData : (debtsData || []);
   localStorage.setItem('debtsData', JSON.stringify(data));
   window.debtsData = data;
   debtsData = data;
@@ -10130,7 +10127,9 @@ function saveDebt() {
 
 function deleteDebt(idx) {
   if (!confirm('هل تريد حذف هذه المعاملة؟')) return;
-  debtsData.splice(idx, 1);
+  var data = window.debtsData && window.debtsData.length ? window.debtsData : debtsData;
+  data.splice(idx, 1);
+  window.debtsData = data; debtsData = data;
   saveDebtsToStorage();
   renderDebts();
   showToast('🗑 تم الحذف');
@@ -10144,91 +10143,101 @@ function setDebtFilter(f, btn) {
 }
 
 function renderDebts() {
-  const oweTotal    = debtsData.filter(d=>d.direction==='owe'&&d.status!=='مسوَّى').reduce((s,d)=>s+(d.remaining||d.amount||0),0);
-  const lendTotal   = debtsData.filter(d=>d.direction==='lend'&&d.status!=='مسوَّى').reduce((s,d)=>s+(d.remaining||d.amount||0),0);
-  const net         = lendTotal - oweTotal;
+  var data = window.debtsData && window.debtsData.length ? window.debtsData : (debtsData || []);
+  debtsData = data; window.debtsData = data;
 
-  const eOwe  = document.getElementById('debts-owe');
-  const eLend = document.getElementById('debts-owed-to-me');
-  const eNet  = document.getElementById('debts-net');
-  const eNetL = document.getElementById('debts-net-label');
-  const eCnt  = document.getElementById('debts-count-kpi');
-  const eLstC = document.getElementById('debts-list-count');
-  const emptyEl = document.getElementById('debts-empty');
-  const cardsEl = document.getElementById('debts-cards');
+  var activeDebts = data.filter(function(d){ return d.status !== 'مسوَّى'; });
+  var oweTotal  = activeDebts.filter(function(d){ return d.direction==='owe'; }).reduce(function(s,d){ return s+(d.remaining||d.amount||0); }, 0);
+  var lendTotal = activeDebts.filter(function(d){ return d.direction==='lend'; }).reduce(function(s,d){ return s+(d.remaining||d.amount||0); }, 0);
+  var net = lendTotal - oweTotal;
+
+  var eOwe  = document.getElementById('debts-owe');
+  var eLend = document.getElementById('debts-owed-to-me');
+  var eNet  = document.getElementById('debts-net');
+  var eNetL = document.getElementById('debts-net-label');
+  var eCnt  = document.getElementById('debts-count-kpi');
+  var eLstC = document.getElementById('debts-list-count');
+  var emptyEl = document.getElementById('debts-empty');
+  var cardsEl = document.getElementById('debts-cards');
 
   if(eOwe)  eOwe.textContent  = oweTotal.toLocaleString('en-US',{maximumFractionDigits:0});
   if(eLend) eLend.textContent = lendTotal.toLocaleString('en-US',{maximumFractionDigits:0});
   if(eNet)  { eNet.textContent = Math.abs(net).toLocaleString('en-US',{maximumFractionDigits:0}); eNet.style.color = net >= 0 ? 'var(--green)' : 'var(--red)'; }
   if(eNetL) eNetL.textContent = net >= 0 ? '✅ رصيدك إيجابي' : '⚠️ رصيدك سلبي';
-  if(eCnt)  eCnt.textContent  = debtsData.length;
+  if(eCnt)  eCnt.textContent  = data.length;
 
-  let filtered = debtsData.map((d,i) => ({...d,_idx:i}));
-  if (currentDebtFilter === 'owe')     filtered = filtered.filter(d => d.direction === 'owe' && d.status !== 'مسوَّى');
-  if (currentDebtFilter === 'lend')    filtered = filtered.filter(d => d.direction === 'lend' && d.status !== 'مسوَّى');
-  if (currentDebtFilter === 'settled') filtered = filtered.filter(d => d.status === 'مسوَّى');
+  var filtered = data.map(function(d,i){ return Object.assign({},d,{_idx:i}); });
+  if (currentDebtFilter === 'owe')     filtered = filtered.filter(function(d){ return d.direction==='owe' && d.status!=='مسوَّى'; });
+  else if (currentDebtFilter === 'lend')    filtered = filtered.filter(function(d){ return d.direction==='lend' && d.status!=='مسوَّى'; });
+  else if (currentDebtFilter === 'settled') filtered = filtered.filter(function(d){ return d.status==='مسوَّى'; });
 
   if(eLstC) eLstC.textContent = filtered.length + ' معاملة';
   if(!cardsEl) return;
 
-  if (debtsData.length === 0) {
+  if (data.length === 0) {
     if(emptyEl) emptyEl.style.display = 'block';
     cardsEl.innerHTML = '';
     return;
   }
   if(emptyEl) emptyEl.style.display = 'none';
 
-  const statusColors = { 'قائم':'rgba(248,113,113,0.12);color:#f87171', 'جزئي':'rgba(251,191,36,0.12);color:#fbbf24', 'مسوَّى':'rgba(76,175,130,0.12);color:var(--green)', 'متنازع عنه':'rgba(255,152,0,0.12);color:var(--orange)' };
+  var statusColors = {
+    'قائم':      'background:rgba(248,113,113,0.12);color:#f87171',
+    'جزئي':      'background:rgba(251,191,36,0.12);color:#fbbf24',
+    'مسوَّى':    'background:rgba(76,175,130,0.12);color:var(--green)',
+    'متنازع عنه':'background:rgba(255,152,0,0.12);color:var(--orange)'
+  };
 
-  cardsEl.innerHTML = filtered.map(d => {
-    const isOwe = d.direction === 'owe';
-    const initials = d.person.charAt(0);
-    const sc = statusColors[d.status] || statusColors['قائم'];
-    const today = new Date();
-    const isOverdue = d.due_date && new Date(d.due_date) < today && d.status !== 'مسوَّى';
-    const pct = d.amount > 0 ? Math.min(100, (d.paid||0) / d.amount * 100) : 0;
+  cardsEl.innerHTML = filtered.map(function(d) {
+    var isOwe = d.direction === 'owe';
+    var initials = d.person ? d.person.charAt(0) : '؟';
+    var sc = statusColors[d.status] || statusColors['قائم'];
+    var today = new Date();
+    var isOverdue = d.due_date && new Date(d.due_date) < today && d.status !== 'مسوَّى';
+    var pct = d.amount > 0 ? Math.min(100, (d.paid||0) / d.amount * 100) : 0;
+    var remaining = d.remaining !== undefined ? d.remaining : (d.amount - (d.paid||0));
 
-    return `<div class="debt-card">
-      <div class="debt-avatar ${isOwe?'owe':'lend'}">${initials}</div>
-      <div>
-        <div class="debt-card-name">${d.person} <span style="font-size:10px;color:var(--muted);font-weight:400">· ${d.relation||''}</span></div>
-        <div class="debt-card-reason">${isOwe ? '⬇️ أنت مدين' : '⬆️ يدين لك'} ${d.reason ? '· ' + d.reason : ''}</div>
-        <div class="debt-card-meta">
-          <span class="loan-tag" style="background:${sc.split(';')[0]};${sc.split(';')[1]}">${d.status}</span>
-          ${d.written !== 'لا' ? `<span class="loan-tag" style="background:rgba(56,217,169,0.1);color:var(--cyan)">📄 ${d.written}</span>` : ''}
-          <span class="loan-tag" style="background:rgba(255,255,255,0.05);color:var(--muted)">${d.date||''}</span>
-        </div>
-        ${pct > 0 && pct < 100 ? `
-        <div class="loan-progress-bar" style="margin-top:8px;width:160px">
-          <div class="loan-progress-fill" style="width:${pct}%;background:${isOwe?'linear-gradient(90deg,#f87171,#fbbf24)':'linear-gradient(90deg,#4caf82,#38d9a9)'}"></div>
-        </div>
-        <div style="font-size:9px;color:var(--muted);margin-top:2px">${pct.toFixed(0)}% سُدِّد</div>
-        ` : ''}
-        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-          <button class="loan-action-btn" onclick="openDebtEditPage(${d._idx})">✏️ تعديل</button>
-          <button class="loan-action-btn" style="color:var(--red);border-color:rgba(255,77,77,0.2)" onclick="deleteDebt(${d._idx})">🗑</button>
-          ${d.contact ? `<button class="loan-action-btn" onclick="window.open('tel:${d.contact}')" style="color:var(--cyan)">📞</button>` : ''}
-          ${d.contact ? `<button class="loan-action-btn" onclick="sendWhatsApp(${d._idx})" style="color:#25d366;border-color:rgba(37,211,102,0.3)">📲 واتساب</button>` : ''}
-          <button class="loan-action-btn" onclick="generatePromissoryNote(${d._idx})" style="color:#a78bfa;border-color:rgba(167,139,250,0.3)">📜 سند</button>
-          ${d.due_date && d.status !== 'مسوَّى' ? `<button class="loan-action-btn" onclick="addDebtToGoogleCalendar(${d._idx})" style="color:#4285f4;border-color:rgba(66,133,244,0.3)" title="إضافة للتقويم">📅 تقويم</button>` : ''}
-        </div>
-      </div>
-      <div>
-        <div class="debt-amount ${isOwe?'owe':'lend'}">${(d.remaining||d.amount||0).toLocaleString('en-US',{maximumFractionDigits:0})}</div>
-        <div style="font-size:10px;color:var(--muted);text-align:left">ر.س متبقي</div>
-        ${d.due_date ? `<div class="debt-due-label ${isOverdue?'overdue':''}" style="margin-top:4px">${isOverdue?'⚠️ متأخر':'📅'} ${d.due_date}</div>` : ''}
-      </div>
-    </div>`;
+    var progressBar = (pct > 0 && pct < 100) ? (
+      '<div class="loan-progress-bar" style="margin-top:8px;width:160px">' +
+      '<div class="loan-progress-fill" style="width:'+pct+'%;background:'+(isOwe?'linear-gradient(90deg,#f87171,#fbbf24)':'linear-gradient(90deg,#4caf82,#38d9a9)')+';"></div>' +
+      '</div><div style="font-size:9px;color:var(--muted);margin-top:2px">'+pct.toFixed(0)+'% سُدِّد</div>'
+    ) : '';
+
+    var overdueTag = isOverdue ? '<span class="loan-tag" style="background:rgba(255,68,68,0.12);color:var(--red)">⏰ متأخر</span>' : '';
+    var writtenTag = (d.written && d.written !== 'لا') ? '<span class="loan-tag" style="background:rgba(56,217,169,0.1);color:var(--cyan)">📄 '+d.written+'</span>' : '';
+    var dateTag = d.date ? '<span class="loan-tag" style="background:rgba(255,255,255,0.05);color:var(--muted)">'+d.date+'</span>' : '';
+    var dueTag = d.due_date ? '<span class="loan-tag" style="background:rgba(255,255,255,0.05);color:'+(isOverdue?'var(--red)':'var(--muted)')+'">📅 '+d.due_date+'</span>' : '';
+
+    var waPhone = d.contact ? '966' + d.contact.replace(/^0/,'').replace(/\D/g,'') : '';
+    var waMsgOwe  = encodeURIComponent('السلام عليكم ' + d.person + '، أردت التذكير بالمبلغ المستحق: ' + remaining.toLocaleString('en-US') + ' ر.س');
+    var waMsgLend = encodeURIComponent('السلام عليكم ' + d.person + '، هل بالإمكان تسوية مبلغ ' + remaining.toLocaleString('en-US') + ' ر.س؟');
+    var waBtn = waPhone ? '<a href="https://wa.me/'+waPhone+'?text='+(isOwe?waMsgOwe:waMsgLend)+'" target="_blank" class="loan-action-btn" style="color:#25D366;text-decoration:none">📱 واتساب</a>' : '';
+
+    return '<div class="debt-card" style="border-right:3px solid '+(isOwe?'#f87171':'#4caf82')+'">' +
+      '<div style="display:flex;align-items:flex-start;gap:14px">' +
+      '<div class="debt-avatar '+(isOwe?'owe':'lend')+'">'+initials+'</div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div class="debt-card-name">'+d.person+' <span style="font-size:10px;color:var(--muted);font-weight:400">· '+(d.relation||'')+'</span></div>' +
+        '<div class="debt-card-reason">'+(isOwe?'⬇️ أنت مدين':'⬆️ يدين لك')+(d.reason?' · '+d.reason:'')+'</div>' +
+        '<div class="debt-card-meta" style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0">' +
+          '<span class="loan-tag" style="'+sc+'">'+d.status+'</span>' +
+          overdueTag + writtenTag + dateTag + dueTag +
+        '</div>' +
+        progressBar +
+        '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">' +
+          '<button class="loan-action-btn" onclick="openDebtEditPage('+d._idx+')">✏️ تعديل</button>' +
+          '<button class="loan-action-btn" style="color:var(--red)" onclick="deleteDebt('+d._idx+')">🗑 حذف</button>' +
+          waBtn +
+        '</div>' +
+      '</div>' +
+      '<div style="text-align:center;flex-shrink:0">' +
+        '<div style="font-size:22px;font-weight:800;font-family:monospace;color:'+(isOwe?'#f87171':'#4caf82')+'">'+remaining.toLocaleString('en-US',{maximumFractionDigits:0})+'</div>' +
+        '<div style="font-size:9px;color:var(--muted);margin-top:2px">ر.س متبقي</div>' +
+        '<div style="font-size:10px;color:var(--muted);margin-top:4px">من '+d.amount.toLocaleString('en-US',{maximumFractionDigits:0})+'</div>' +
+      '</div>' +
+      '</div></div>';
   }).join('');
 }
-
-// Init on page load
-renderLoans();
-renderDebts();
-
-
-//  THEME TOGGLE 
-let isLightMode = localStorage.getItem('theme') === 'light';
 
 function applyTheme(light) {
   isLightMode = light;
