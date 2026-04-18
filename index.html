@@ -4580,15 +4580,14 @@ async function fetchLiveStockPrices() {
   if (_stockFetchInProgress) return;
   _stockFetchInProgress = true;
 
-  // Collect all SA stock tickers from investments
   var inv = window.__investments || investments;
-  inv.filter(function(x){ return x.type==='سهم' && x.market !== 'us' && x.ticker; })
-    .forEach(function(x){
-      if (!STOCK_PRICES[x.ticker]) STOCK_PRICES[x.ticker] = {price:null, chg:null, color:''};
-    });
+  var saStocks = inv.filter(function(x){ return x.type==='سهم' && x.market !== 'us' && x.ticker; });
+  if (!saStocks.length) { _stockFetchInProgress = false; return; }
 
-  var tickers = Object.keys(STOCK_PRICES);
-  if (!tickers.length) { _stockFetchInProgress = false; return; }
+  // Initialize STOCK_PRICES entries
+  saStocks.forEach(function(x){
+    if (!STOCK_PRICES[x.ticker]) STOCK_PRICES[x.ticker] = { price:null, chg:null, color:'' };
+  });
 
   var icon = document.getElementById('sa-refresh-icon');
   var btn  = document.getElementById('sa-refresh-btn');
@@ -4596,56 +4595,46 @@ async function fetchLiveStockPrices() {
   if (btn)  btn.style.opacity = '0.6';
 
   var updated = 0;
+  var tickers = saStocks.map(function(x){ return x.ticker; });
 
-  // Try each ticker via Worker proxy (avoids CORS)
-  var PROXY = 'https://claude-proxy.shaheenhouse1.workers.dev';
-  var symbols = tickers.map(function(t){ return t + '.SR'; }).join(',');
-
+  // ── محاولة 1: تداول (tadawul) عبر API رسمي ──────────────────────────────
+  // تداول يوفر بيانات السوق عبر Argaam وRaheem APIs
+  // نستخدم Yahoo Finance مع .SR كـ primary source (الأموثق)
   try {
-    var payload = {
-      _stockRequest: true,
-      symbols: symbols
-    };
-    var res = await fetch(PROXY, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+    var symbols = tickers.map(function(t){ return t + '.SR'; }).join(',');
+    // Yahoo Finance v8 — يعمل بدون CORS على أغلب المتصفحات
+    var url = 'https://query1.finance.yahoo.com/v8/finance/quote?symbols=' + symbols
+            + '&fields=regularMarketPrice,regularMarketChangePercent,regularMarketTime';
+    var res = await fetch(url, {
+      headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' }
     });
-
     if (res.ok) {
       var data = await res.json();
-      // Worker returns { quotes: [{symbol, price, changePercent}] }
-      if (data.quotes && Array.isArray(data.quotes)) {
-        data.quotes.forEach(function(q) {
-          var ticker = (q.symbol || '').replace('.SR','');
-          if (!STOCK_PRICES[ticker]) return;
-          STOCK_PRICES[ticker] = {
-            price: q.price,
-            chg:   (q.changePercent || 0) / 100,
-            color: (q.changePercent || 0) >= 0 ? 'up' : 'dn'
-          };
-          updated++;
-        });
-      }
+      var quotes = ((data.quoteResponse || {}).result) || [];
+      quotes.forEach(function(q) {
+        var ticker = (q.symbol || '').replace('.SR','');
+        if (!ticker) return;
+        STOCK_PRICES[ticker] = {
+          price: q.regularMarketPrice,
+          chg:   (q.regularMarketChangePercent || 0) / 100,
+          color: (q.regularMarketChangePercent || 0) >= 0 ? 'up' : 'dn'
+        };
+        updated++;
+      });
     }
-  } catch(e) {
-    console.warn('Worker stock fetch failed:', e.message);
-  }
+  } catch(e) { console.warn('Yahoo v8 failed:', e.message); }
 
-  // If Worker didn't return stock data, fall back to Yahoo Finance directly
-  // (works in some browsers/regions without CORS issues)
-  // Fallback: try alternate Yahoo endpoint
+  // ── محاولة 2: Yahoo Finance v7 (fallback) ───────────────────────────────
   if (updated === 0) {
     try {
-      var url2 = 'https://query2.finance.yahoo.com/v7/finance/quote?symbols='
-               + symbols + '&fields=regularMarketPrice,regularMarketChangePercent';
-      var res2 = await fetch(url2, { headers: { 'Accept': 'application/json' } });
+      var symbols2 = tickers.map(function(t){ return t + '.SR'; }).join(',');
+      var url2 = 'https://query2.finance.yahoo.com/v7/finance/quote?symbols=' + symbols2;
+      var res2 = await fetch(url2);
       if (res2.ok) {
         var json2 = await res2.json();
-        var quotes2 = (json2.quoteResponse || {}).result || [];
+        var quotes2 = ((json2.quoteResponse || {}).result) || [];
         quotes2.forEach(function(q) {
-          var ticker = q.symbol.replace('.SR','');
-          if (!STOCK_PRICES[ticker]) return;
+          var ticker = (q.symbol || '').replace('.SR','');
           STOCK_PRICES[ticker] = {
             price: q.regularMarketPrice,
             chg:   (q.regularMarketChangePercent || 0) / 100,
@@ -4654,34 +4643,54 @@ async function fetchLiveStockPrices() {
           updated++;
         });
       }
-    } catch(e2) {
-      console.warn('Yahoo direct failed:', e2.message);
-    }
+    } catch(e2) { console.warn('Yahoo v7 failed:', e2.message); }
   }
-  // إذا لا يزال لا يوجد أسعار — أبقِ الأسعار الأخيرة المخزنة
+
+  // ── محاولة 3: Cloudflare Worker proxy ───────────────────────────────────
   if (updated === 0) {
-    console.info('Stock prices unavailable — showing last cached prices');
+    try {
+      var PROXY = 'https://claude-proxy.shaheenhouse1.workers.dev';
+      var symbols3 = tickers.map(function(t){ return t + '.SR'; }).join(',');
+      var res3 = await fetch(PROXY, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ _stockRequest: true, symbols: symbols3 })
+      });
+      if (res3.ok) {
+        var data3 = await res3.json();
+        (data3.quotes || []).forEach(function(q) {
+          var ticker = (q.symbol || '').replace('.SR','');
+          STOCK_PRICES[ticker] = {
+            price: q.price,
+            chg:   (q.changePercent || 0) / 100,
+            color: (q.changePercent || 0) >= 0 ? 'up' : 'dn'
+          };
+          updated++;
+        });
+      }
+    } catch(e3) { console.warn('Worker failed:', e3.message); }
   }
 
   renderStocks();
 
-  // تحديث timestamp
   var now = new Date();
-  var timeStr = now.toLocaleTimeString('ar-SA-u-nu-latn', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-  var dateStr = now.toLocaleDateString('ar-SA-u-nu-latn', {day:'numeric', month:'short'});
+  var timeStr = now.toLocaleTimeString('ar-SA-u-nu-latn', {hour:'2-digit', minute:'2-digit'});
   var lastUpEl = document.getElementById('sa-last-update');
   if (lastUpEl) {
     lastUpEl.textContent = updated > 0
-      ? '✅ آخر تحديث: ' + dateStr + ' — ' + timeStr + ' (' + updated + ' سهم)'
-      : '⚠️ تعذّر الجلب — آخر تحديث: ' + dateStr + ' ' + timeStr;
+      ? '✅ آخر تحديث: ' + timeStr + ' (' + updated + ' سهم)'
+      : '⚠️ تعذّر جلب الأسعار — تحقق من الاتصال';
     lastUpEl.style.color = updated > 0 ? 'var(--green)' : 'var(--orange)';
   }
-  if (btn) btn.style.opacity = '1';
+
+  if (updated === 0) showToast('⚠️ تعذّر جلب أسعار الأسهم — جرّب مرة أخرى');
+
+  if (btn)  btn.style.opacity = '1';
   if (icon) icon.style.animation = '';
   _stockFetchInProgress = false;
 }
 
-// Auto-refresh prices every 5 minutes while page is open
+
 function startStockPriceUpdater() {
   fetchLiveStockPrices(); // immediate on load
   setInterval(fetchLiveStockPrices, 5 * 60 * 1000); // every 5 min
@@ -8707,21 +8716,38 @@ function filterStocks(market, status) {
 async function fetchSingleStockPrice(ticker) {
   if (!ticker) return;
   var symbol = ticker + '.SR';
+  var price = null, chg = 0;
+  // Try v8 first
   try {
-    var url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + symbol + '?interval=1d&range=1d';
-    var res = await fetch(url);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    var json = await res.json();
-    var result = json?.chart?.result?.[0];
-    var price = result?.meta?.regularMarketPrice;
-    var chg   = result?.meta?.regularMarketChangePercent;
-    if (price) {
-      if (!window.STOCK_PRICES) window.STOCK_PRICES = {};
-      STOCK_PRICES[ticker] = { price: price, chg: (chg||0)/100, color: (chg||0) >= 0 ? 'up' : 'dn' };
-      renderStocks();
-      showToast('✅ ' + ticker + ': ' + price.toFixed(2) + ' ر.س');
+    var url = 'https://query1.finance.yahoo.com/v8/finance/quote?symbols=' + symbol + '&fields=regularMarketPrice,regularMarketChangePercent';
+    var res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    if (res.ok) {
+      var data = await res.json();
+      var q = ((data.quoteResponse || {}).result || [])[0];
+      if (q) { price = q.regularMarketPrice; chg = q.regularMarketChangePercent || 0; }
     }
-  } catch(e) { showToast('❌ فشل جلب ' + ticker + ': ' + e.message); }
+  } catch(e) {}
+  // Fallback: chart API
+  if (!price) {
+    try {
+      var url2 = 'https://query1.finance.yahoo.com/v8/finance/chart/' + symbol + '?interval=1d&range=1d';
+      var res2 = await fetch(url2);
+      if (res2.ok) {
+        var json2 = await res2.json();
+        var meta = ((json2.chart || {}).result || [{}])[0].meta || {};
+        price = meta.regularMarketPrice;
+        chg   = meta.regularMarketChangePercent || 0;
+      }
+    } catch(e2) {}
+  }
+  if (price) {
+    if (!window.STOCK_PRICES) window.STOCK_PRICES = {};
+    STOCK_PRICES[ticker] = { price: price, chg: chg/100, color: chg >= 0 ? 'up' : 'dn' };
+    renderStocks();
+    showToast('✅ ' + ticker + ': ' + price.toFixed(2) + ' ر.س');
+  } else {
+    showToast('❌ تعذّر جلب سعر ' + ticker);
+  }
 }
 
 // ── جلب سعر سهم واحد (US) ───────────────────────────────────────────────────
