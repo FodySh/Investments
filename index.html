@@ -3216,7 +3216,7 @@
       <div id="debt-form-wrap" style="display:none;margin-top:20px">
         <div class="section-card">
           <div class="section-head">
-            <span class="section-title">💸 إضافة دين / مديونية</span>
+            <span class="section-title" id="debt-form-title">💸 إضافة دين / مديونية</span>
             <button onclick="hideDebtForm()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px">×</button>
           </div>
           <div class="section-body">
@@ -7729,20 +7729,8 @@ function resetAddDebt() {
 }
 
 function openDebtEditPage(idx) {
-  _editingDebtPageIdx = idx;
-  var d = debtsData[idx];
-  if (!d) return;
-  showPage('add-debt', null, '💸 تعديل دين', true);
-  setTimeout(function(){
-    var set=function(id,v){var e=document.getElementById(id);if(e)e.value=v||'';};
-    set('ad-person',d.person); set('ad-amount',d.amount); set('ad-remaining',d.remaining||d.amount);
-    set('ad-reason',d.reason); set('ad-contact',d.contact); set('ad-date',d.date);
-    set('ad-due',d.due_date); set('ad-notes',d.notes);
-    var setsel=function(id,v){var e=document.getElementById(id);if(e&&v)e.value=v;};
-    setsel('ad-direction',d.direction); setsel('ad-relation',d.relation);
-    setsel('ad-method',d.method); setsel('ad-status',d.status); setsel('ad-written',d.written);
-    updateDebtDirectionLabel(); calcAddDebt();
-  }, 100);
+  // فتح فورم التعديل داخل صفحة الديون مباشرة
+  showDebtForm(idx);
 }
 
 
@@ -9924,10 +9912,13 @@ function showDebtForm(idx) {
   var wrap = document.getElementById('debt-form-wrap');
   if (!wrap) { console.error('debt-form-wrap not found'); return; }
   wrap.style.display = 'block';
-  setTimeout(function(){ wrap.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300);
+  var formTitle = document.getElementById('debt-form-title');
+  if (formTitle) formTitle.textContent = (idx !== null) ? '✏️ تعديل الدين' : '💸 إضافة دين جديد';
+  setTimeout(function(){ wrap.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200);
   const today = new Date().toISOString().split('T')[0];
   if (idx !== null) {
-    const d = debtsData[idx];
+    var _allDebts = (window.debtsData && window.debtsData.length) ? window.debtsData : debtsData;
+    const d = _allDebts[idx];
     document.getElementById('dt-person').value    = d.person || '';
     document.getElementById('dt-direction').value = d.direction || 'owe';
     document.getElementById('dt-amount').value    = d.amount || '';
