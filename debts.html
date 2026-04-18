@@ -1386,21 +1386,14 @@
   </aside>
 
   <main class="main">
-    <div class="mobile-topbar">
-      <div>
-        <div class="mobile-topbar-title">ديون وجمعيات</div>
-        <div class="mobile-topbar-logo">PORTFOLIO</div>
+    <div class="mobile-topbar" style="display:flex;align-items:center;justify-content:space-between;padding:0 16px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <a href="index.html" style="background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:10px;padding:6px 12px;color:var(--muted);text-decoration:none;font-size:12px">← رجوع</a>
+        <div class="mobile-topbar-title">💸 ديون وجمعيات</div>
       </div>
       <div style="display:flex;align-items:center;gap:8px">
-        <button id="mob-signin-btn" onclick="googleSignIn()" style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.08);border:1px solid var(--border);border-radius:20px;padding:5px 10px 5px 6px;cursor:pointer;color:var(--white);font-family:inherit;font-size:11px;font-weight:600">
-          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-          تسجيل الدخول
-        </button>
-        <div id="mob-user-card" style="display:none;align-items:center;gap:6px">
-          <div style="cursor:pointer" onclick="toggleMobUserMenu()">
-            <div id="mob-avatar" style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--navy);border:2px solid var(--gold);overflow:hidden">؟</div>
-          </div>
-        </div>
+        <div id="mob-user-name" style="font-size:11px;color:var(--muted);display:none"></div>
+        <a href="settings.html" style="background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:10px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px;text-decoration:none" title="الإعدادات">⚙️</a>
       </div>
     </div>
 
@@ -2275,6 +2268,9 @@ function _updateUI(user) {
   if (user) {
     var name  = user.displayName || "User";
     var first = name.split(" ")[0];
+    // Update topbar user name
+    var mobName = document.getElementById("mob-user-name");
+    if (mobName) { mobName.textContent = first; mobName.style.display = "block"; }
     var p     = user.photoURL;
     var img   = function(s) {
       return p
@@ -2667,58 +2663,6 @@ function updateKPIs() {
   document.getElementById('debts-net-label').textContent = net>=0 ? '✅ رصيدك إيجابي' : '⚠️ رصيدك سلبي';
 }
 
-function renderDebts() {
-  var filtered = debtsData.map(function(d,i){ return Object.assign({},d,{_idx:i}); });
-  if (_currentFilter==='owe')     filtered = filtered.filter(function(d){ return d.direction==='owe'&&d.status!=='مسوَّى'; });
-  if (_currentFilter==='lend')    filtered = filtered.filter(function(d){ return (d.direction==='lend'||d.direction==='owed')&&d.status!=='مسوَّى'; });
-  if (_currentFilter==='settled') filtered = filtered.filter(function(d){ return d.status==='مسوَّى'; });
-
-  var el = document.getElementById('debts-list-count');
-  if (el) el.textContent = filtered.length + ' معاملة';
-  var cards = document.getElementById('debts-cards');
-  if (!cards) return;
-
-  if (!filtered.length) {
-    cards.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--muted)">لا توجد سجلات</div>';
-    return;
-  }
-
-  cards.innerHTML = filtered.map(function(d) {
-    var isOwe = d.direction === 'owe';
-    var rem   = d.remaining != null ? d.remaining : (d.amount||0) - (d.paid||0);
-    var pct   = d.amount > 0 ? Math.min(100,(((d.paid||0)/d.amount)*100)).toFixed(0) : 0;
-    var statusColor = d.status==='مسوَّى'?'var(--green)':d.status==='جزئي'?'var(--orange)':'var(--red)';
-    var phone = (d.phone||'').replace(/\D/g,'');
-    var wa    = phone ? 'https://wa.me/966' + phone.replace(/^0/,'') + '?text=' + encodeURIComponent('السلام عليكم، بخصوص مبلغ '+((d.amount||0).toLocaleString('en-US'))+' ر.س') : '';
-
-    return '<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:12px">'
-      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
-      + '<div>'
-      + '<span style="font-size:15px;font-weight:700">' + (d.person||'—') + '</span>'
-      + (d.relation ? '<span style="font-size:11px;color:var(--muted);margin-right:8px">· '+d.relation+'</span>' : '')
-      + '</div>'
-      + '<span style="font-size:11px;font-weight:600;color:'+statusColor+'">'+( d.status||'قائم')+'</span>'
-      + '</div>'
-      + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
-      + '<span style="font-size:11px;padding:3px 10px;border-radius:20px;background:'+(isOwe?'rgba(255,68,68,0.1)':'rgba(0,230,118,0.1)')+';color:'+(isOwe?'var(--red)':'var(--green)')+'">'
-      + (isOwe ? '⬇️ عليّ' : '⬆️ يدين لك') + '</span>'
-      + (d.reason ? '<span style="font-size:11px;color:var(--muted)">· '+d.reason+'</span>' : '')
-      + '</div>'
-      + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">'
-      + '<div style="text-align:center"><div style="font-size:9px;color:var(--muted)">الكلي</div><div style="font-family:monospace;font-weight:700">'+(d.amount||0).toLocaleString('en-US',{minimumFractionDigits:0})+'</div></div>'
-      + '<div style="text-align:center"><div style="font-size:9px;color:var(--muted)">المسدد</div><div style="font-family:monospace;color:var(--green)">'+(d.paid||0).toLocaleString('en-US',{minimumFractionDigits:0})+'</div></div>'
-      + '<div style="text-align:center"><div style="font-size:9px;color:var(--muted)">المتبقي</div><div style="font-family:monospace;font-weight:800;color:'+(rem>0?'var(--red)':'var(--green)')+'">'+rem.toLocaleString('en-US',{minimumFractionDigits:0})+'</div></div>'
-      + '</div>'
-      + '<div style="height:5px;background:rgba(255,255,255,0.06);border-radius:3px;margin-bottom:10px"><div style="height:100%;background:var(--green);border-radius:3px;width:'+pct+'%"></div></div>'
-      + '<div style="display:flex;gap:6px;flex-wrap:wrap">'
-      + '<button class="loan-action-btn" onclick="editDebt('+d._idx+')" style="color:var(--gold)">✏️ تعديل</button>'
-      + '<button class="loan-action-btn" onclick="markSettled('+d._idx+')" style="color:var(--green)">✅ مسوَّى</button>'
-      + (wa ? '<a href="'+wa+'" target="_blank" class="loan-action-btn" style="color:var(--green);text-decoration:none">📱 واتساب</a>' : '')
-      + '<button class="loan-action-btn" onclick="deleteDebt('+d._idx+')" style="color:var(--red)">🗑</button>'
-      + '</div>'
-      + '</div>';
-  }).join('');
-}
 
 function renderJamaa() {
   var el = document.getElementById('jamaa-cards');
@@ -2759,9 +2703,9 @@ function switchTab(tab) {
 }
 
 function setFilter(f, btn) {
-  _currentFilter = f;
+  currentDebtFilter = f;
   document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
   renderDebts();
 }
 
