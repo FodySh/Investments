@@ -4045,7 +4045,13 @@ const investments = [];
 
 // Expose globally so Firebase module can access and sync
 window.__investments = investments;
-// loansData is exposed after its declaration below
+
+var dividendsData = JSON.parse(localStorage.getItem('dividendsData') || '[]');
+window.dividendsData = dividendsData;
+
+var _stockFilter = { sa: 'all', us: 'all' };
+
+var currentDebtFilter = 'all';
 
 
 // DASHBOARD YEAR FILTER
