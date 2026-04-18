@@ -1570,13 +1570,31 @@
           </div>
           <span id="sa-last-update" style="color:var(--muted)">لم يُحدَّث بعد</span>
         </div>
-        <div class="section-card fade-up delay-1">
+              <!-- ملخص الأسهم -->
+      <div id="stocks-summary-bar" class="fade-up" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 18px;text-align:center">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;letter-spacing:.5px">💰 المبلغ المستثمر</div>
+          <div id="stocks-sum-invested" style="font-size:20px;font-weight:800;font-family:monospace;color:var(--white)">—</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">ر.س</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 18px;text-align:center" id="stocks-sum-pnl-card">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;letter-spacing:.5px">📊 الأرباح / الخسائر</div>
+          <div id="stocks-sum-pnl" style="font-size:20px;font-weight:800;font-family:monospace;color:var(--white)">—</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">ر.س</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 18px;text-align:center">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;letter-spacing:.5px">📈 المجموع الكلي</div>
+          <div id="stocks-sum-total" style="font-size:20px;font-weight:800;font-family:monospace;color:var(--cyan)">—</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">ر.س</div>
+        </div>
+      </div>
+      <div class="section-card fade-up delay-1">
           <div class="section-head">
             <span class="section-title">🇸🇦 الأسهم السعودية</span>
             <div style="display:flex;align-items:center;gap:6px">
               <span class="section-count" id="stocks-count-badge">—</span>
-              <button onclick="exportStocksCSV('sa')" title="تصدير CSV" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--green);cursor:pointer;font-family:inherit;white-space:nowrap">⬇️ CSV</button>
-              <label title="استيراد CSV" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--cyan);cursor:pointer;white-space:nowrap">⬆️ CSV<input type="file" accept=".csv" style="display:none" onchange="importStocksCSV(event,'sa')"></label>
+              <button onclick="exportStocksExcel('sa')" title="تصدير Excel" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--green);cursor:pointer;font-family:inherit;white-space:nowrap">⬇️ Excel</button>
+              <label title="استيراد Excel" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--cyan);cursor:pointer;white-space:nowrap">⬆️ Excel<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importStocksExcel(event,'sa')"></label>
             </div>
           </div>
           <div class="table-wrap">
@@ -1603,13 +1621,31 @@
           </div>
           <span id="us-last-update" style="color:var(--muted)">لم يُحدَّث بعد</span>
         </div>
-        <div class="section-card fade-up delay-1">
+              <!-- ملخص الأسهم الأمريكية -->
+      <div id="us-stocks-summary-bar" class="fade-up" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 18px;text-align:center">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;letter-spacing:.5px">💰 المبلغ المستثمر</div>
+          <div id="us-stocks-sum-invested" style="font-size:20px;font-weight:800;font-family:monospace;color:var(--white)">—</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">$</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 18px;text-align:center" id="us-stocks-sum-pnl-card">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;letter-spacing:.5px">📊 الأرباح / الخسائر</div>
+          <div id="us-stocks-sum-pnl" style="font-size:20px;font-weight:800;font-family:monospace;color:var(--white)">—</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">$</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 18px;text-align:center">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;letter-spacing:.5px">📈 المجموع الكلي</div>
+          <div id="us-stocks-sum-total" style="font-size:20px;font-weight:800;font-family:monospace;color:var(--cyan)">—</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">$</div>
+        </div>
+      </div>
+      <div class="section-card fade-up delay-1">
           <div class="section-head">
             <span class="section-title">🇺🇸 الأسهم الأمريكية</span>
             <div style="display:flex;align-items:center;gap:6px">
               <span class="section-count" id="us-stocks-count-badge">—</span>
-              <button onclick="exportStocksCSV('us')" title="تصدير CSV" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--green);cursor:pointer;font-family:inherit;white-space:nowrap">⬇️ CSV</button>
-              <label title="استيراد CSV" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--cyan);cursor:pointer;white-space:nowrap">⬆️ CSV<input type="file" accept=".csv" style="display:none" onchange="importStocksCSV(event,'us')"></label>
+              <button onclick="exportStocksExcel('us')" title="تصدير Excel" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--green);cursor:pointer;font-family:inherit;white-space:nowrap">⬇️ Excel</button>
+              <label title="استيراد Excel" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--cyan);cursor:pointer;white-space:nowrap">⬆️ Excel<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importStocksExcel(event,'us')"></label>
             </div>
           </div>
           <div class="table-wrap">
@@ -5229,6 +5265,18 @@ function renderStocks() {
   if (badge) badge.textContent = 'إجمالي مستثمر: ' + totalInvested.toLocaleString('en-US', {maximumFractionDigits:0}) + ' ر.س';
   const countBadge = document.getElementById('stocks-count-badge');
   if (countBadge) countBadge.textContent = stockData.length + ' سهم';
+  // Summary bar
+  var sumInvested = stockData.reduce(function(s,d){ return s+(d.amount||0); }, 0);
+  var sumPnl = stockData.reduce(function(s,d){
+    var p = d.ticker ? STOCK_PRICES[d.ticker] : null;
+    var mktVal = (p && p.price && d.shares) ? p.price * d.shares : 0;
+    return s + (mktVal > 0 ? mktVal - (d.amount||0) : 0);
+  }, 0);
+  var sumTotal = sumInvested + sumPnl;
+  var fmtS = function(n){ return n.toLocaleString('en-US',{maximumFractionDigits:0}); };
+  var elI = document.getElementById('stocks-sum-invested'); if(elI) elI.textContent = fmtS(sumInvested);
+  var elP = document.getElementById('stocks-sum-pnl'); if(elP){ elP.textContent = (sumPnl>=0?'+':'')+fmtS(sumPnl); elP.style.color = sumPnl>=0?'var(--green)':'var(--red)'; }
+  var elT = document.getElementById('stocks-sum-total'); if(elT) elT.textContent = fmtS(sumTotal);
 
   //  TABLE 
   const tbody = document.getElementById('stocks-tbody');
@@ -7146,6 +7194,17 @@ function renderUsStocksTable() {
 
   var countBadge = document.getElementById('us-stocks-count-badge');
   if (countBadge) countBadge.textContent = usStocks.length + ' سهم';
+  var usSumInv = usStocks.reduce(function(s,d){ return s+(d.amount||0); }, 0);
+  var usSumPnl = usStocks.reduce(function(s,d){
+    var p = d.ticker ? US_STOCK_PRICES[d.ticker] : null;
+    var mv = (p && p.price && d.shares) ? p.price * d.shares : 0;
+    return s + (mv > 0 ? mv - (d.amount||0) : 0);
+  }, 0);
+  var usSumTot = usSumInv + usSumPnl;
+  var fmtU = function(n){ return n.toLocaleString('en-US',{maximumFractionDigits:0}); };
+  var uI = document.getElementById('us-stocks-sum-invested'); if(uI) uI.textContent = fmtU(usSumInv);
+  var uP = document.getElementById('us-stocks-sum-pnl'); if(uP){ uP.textContent = (usSumPnl>=0?'+':'')+fmtU(usSumPnl); uP.style.color = usSumPnl>=0?'var(--green)':'var(--red)'; }
+  var uT = document.getElementById('us-stocks-sum-total'); if(uT) uT.textContent = fmtU(usSumTot);
 
   var tbody = document.getElementById('us-stocks-tbody');
   if (tbody) {
@@ -8685,6 +8744,73 @@ async function fetchSingleUsStockPrice(ticker) {
   } catch(e) { showToast('❌ فشل جلب ' + ticker + ': ' + e.message); }
 }
 
+
+// ── تصدير الأسهم Excel ───────────────────────────────────────────────────────
+function exportStocksExcel(market) {
+  var inv = window.__investments || investments;
+  var data = inv.filter(function(x) {
+    return x.type === 'سهم' && (market === 'us' ? x.market === 'us' : x.market !== 'us');
+  });
+  if (!data.length) { showToast('لا توجد أسهم للتصدير'); return; }
+  var rows = [['الاسم','الرمز','عدد الأسهم','التكلفة (ر.س)','متوسط سعر الشراء','المنصة','المخاطرة','الحالة','تاريخ الشراء','السوق','اكتتاب']];
+  data.forEach(function(d) {
+    var avg = (d.shares && d.amount) ? (d.amount/d.shares).toFixed(2) : '';
+    rows.push([d.name, d.ticker||'', d.shares||'', d.amount||0, avg, d.platform||'', d.risk||'', d.status||'', d.date_in||'', market==='us'?'أمريكي':'سعودي', d.is_ipo?'نعم':'']);
+  });
+  var wb = XLSX.utils.book_new();
+  var ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = rows[0].map(function(){ return {wch:18}; });
+  XLSX.utils.book_append_sheet(wb, ws, market==='us'?'أسهم أمريكية':'أسهم سعودية');
+  XLSX.writeFile(wb, (market==='us'?'أسهم_أمريكية':'أسهم_سعودية')+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  showToast('✅ تم تصدير '+data.length+' سهم');
+}
+
+// ── استيراد الأسهم Excel ─────────────────────────────────────────────────────
+function importStocksExcel(event, market) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var wb = XLSX.read(e.target.result, {type:'array'});
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var rows = XLSX.utils.sheet_to_json(ws, {header:1});
+      if (rows.length < 2) { showToast('❌ الملف فارغ'); return; }
+      var headers = rows[0];
+      var inv = window.__investments || investments;
+      var imported = 0;
+      for (var i = 1; i < rows.length; i++) {
+        var row = {};
+        headers.forEach(function(h,idx){ row[h] = rows[i][idx]; });
+        var name = row['الاسم']||row['name']||'';
+        if (!name) continue;
+        var ticker = String(row['الرمز']||row['ticker']||'');
+        var exists = inv.some(function(x){ return x.name===name && x.ticker===ticker; });
+        if (exists) continue;
+        inv.push({
+          name: name, type: 'سهم', ticker: ticker,
+          shares: parseFloat(row['عدد الأسهم']||row['shares']||0)||null,
+          amount: parseFloat(row['التكلفة (ر.س)']||row['amount']||0)||0,
+          platform: row['المنصة']||row['platform']||'',
+          risk: row['المخاطرة']||row['risk']||'متوسط',
+          status: row['الحالة']||row['status']||'نشطة',
+          date_in: row['تاريخ الشراء']||row['date_in']||'',
+          market: market==='us'?'us':'',
+          is_ipo: (row['اكتتاب']||'').toString()==='نعم',
+          ret_pct:0, ret_val:0, total:0, dist:'لا يوجد',
+        });
+        imported++;
+      }
+      if (imported > 0) {
+        triggerSync('investments');
+        renderStocks(); renderAll();
+        showToast('✅ تم استيراد '+imported+' سهم');
+      } else { showToast('⚠️ لم يُضف شيء — قد تكون البيانات مكررة'); }
+    } catch(err) { showToast('❌ خطأ: '+err.message); }
+    event.target.value='';
+  };
+  reader.readAsArrayBuffer(file);
+}
 
 var isLightMode = localStorage.getItem('theme') === 'light';
 
