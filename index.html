@@ -3578,6 +3578,15 @@
                     <option value="مؤجلة">مؤجلة</option>
                   </select>
                 </div>
+                <div class="field-group" style="justify-content:flex-end;padding-top:8px">
+                  <label style="display:flex;align-items:center;gap:10px;cursor:pointer;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);border-radius:10px;padding:12px 16px">
+                    <input type="checkbox" id="as-is-ipo" style="width:18px;height:18px;accent-color:var(--gold);cursor:pointer;flex-shrink:0">
+                    <div>
+                      <div style="font-size:13px;font-weight:700;color:var(--gold)">🏛 اكتتاب</div>
+                      <div style="font-size:11px;color:var(--muted);margin-top:2px">ضع علامة إذا كان السهم من اكتتاب</div>
+                    </div>
+                  </label>
+                </div>
               </div>
             </div>
           </div>
@@ -5249,7 +5258,7 @@ function renderStocks() {
         : `<span style="color:#8899bb">—</span>`;
 
       return `<tr>
-        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${d.name}">${d.name}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${d.name}">${d.name}${d.is_ipo ? ' <span style="font-size:9px;background:rgba(201,168,76,0.15);color:var(--gold);padding:1px 5px;border-radius:4px;font-weight:700">اكتتاب</span>' : ''}</td>
         <td><span style="font-family:'JetBrains Mono',monospace;background:rgba(201,168,76,0.12);color:#e8c97a;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700">${d.ticker || '—'}</span></td>
         <td><span class="mono" style="color:#00d4ff">${d.shares != null ? d.shares.toLocaleString('en-US') : '<span style="color:#ff9800;font-size:11px">يحتاج تحديث</span>'}</span></td>
         <td class="mono">${(d.amount||0).toLocaleString('en-US',{minimumFractionDigits:2})}</td>
@@ -5261,123 +5270,16 @@ function renderStocks() {
         <td style="color:#8899bb">${d.platform||'—'}</td>
         <td>${riskPill(d.risk)}</td>
         <td>${statusPill(d.status)}</td>
+        <td style="white-space:nowrap">
+          <button onclick="editStockFromCard(${inv.indexOf(d)})" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;color:var(--gold);font-family:inherit">✏️</button>
+          ${d.ticker ? `<button onclick="fetchSingleStockPrice('${d.ticker}')" style="background:rgba(56,217,169,0.08);border:1px solid rgba(56,217,169,0.2);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;color:#38d9a9;font-family:inherit" title="جلب السعر">⟳</button>` : ''}
+        </td>
       </tr>`;
     }).join('');
   }
 
-  //  CARDS 
-  const grid = document.getElementById('stocks-cards-grid');
-  if (!grid) return;
 
-  const SPARKLINES = {
-    'dn': '0,8 20,12 40,10 60,20 80,25 100,30 120,28',
-    'up': '0,30 20,26 40,22 60,16 80,10 100,6 120,4',
-    '':   '0,18 20,16 40,18 60,17 80,18 100,17 120,18',
-  };
-
-  grid.innerHTML = stockData.map(d => {
-    const p = d.ticker ? STOCK_PRICES[d.ticker] : null;
-    const currPrice = p?.price;
-    const chgPct = p?.chg;
-    const color = p?.color || '';
-    const buyPricePerShare = (d.shares && d.amount) ? d.amount / d.shares : null;
-    const mktVal = (currPrice && d.shares) ? currPrice * d.shares : null;
-    const pnl = (mktVal && d.amount) ? mktVal - d.amount : null;
-
-    const borderColor = color === 'up'
-      ? 'rgba(0,230,118,0.3)' : color === 'dn'
-      ? 'rgba(255,68,68,0.3)' : 'rgba(136,153,187,0.2)';
-
-    const sparkColor = color === 'up' ? '#00e676' : color === 'dn' ? '#ff4444' : '#8899bb';
-    const sparkPts = SPARKLINES[color] || SPARKLINES[''];
-    const sparkFill = color === 'up'
-      ? 'rgba(0,230,118,0.1)' : color === 'dn'
-      ? 'rgba(255,68,68,0.1)' : 'rgba(136,153,187,0.06)';
-
-    const priceDisplay = currPrice ? currPrice.toFixed(2) : '—';
-    const priceClass = color || '';
-
-    let infoBox = '';
-    if (pnl != null) {
-      const bgColor = pnl >= 0 ? 'rgba(0,230,118,0.1)' : 'rgba(255,68,68,0.1)';
-      const txtColor = pnl >= 0 ? '#00e676' : '#ff4444';
-      const label = pnl >= 0 ? 'ربح غير محقق' : 'خسارة غير محققة';
-      infoBox = `<div style="margin-top:10px;padding:8px 10px;background:${bgColor};border-radius:8px;font-size:11px;color:${txtColor}">
-        ${label}: ${pnl >= 0 ? '+' : ''}${pnl.toLocaleString('en-US',{minimumFractionDigits:2})} ر.س
-      </div>`;
-    } else if (!d.shares) {
-      infoBox = `<div style="margin-top:10px;padding:8px 10px;background:rgba(255,152,0,0.08);border-radius:8px;font-size:11px;color:#ff9800">
-        ⚠ عدد الأسهم غير محدد — أدخله في قاعدة البيانات
-      </div>`;
-    } else {
-      infoBox = `<div style="margin-top:10px;padding:8px 10px;background:rgba(136,153,187,0.08);border-radius:8px;font-size:11px;color:#8899bb">
-        السعر غير متوفر حالياً
-      </div>`;
-    }
-
-    const sharesLine = d.shares != null
-      ? `${d.shares.toLocaleString('en-US')} سهم`
-      : `<span style="color:#ff9800">عدد الأسهم غير محدد</span>`;
-
-    const buyLine = buyPricePerShare
-      ? ` · سعر الشراء: ${buyPricePerShare.toFixed(2)} ر.س` : '';
-
-    return `<div class="stock-card" style="border-color:${borderColor}">
-      <!-- Header: ticker + platform -->
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="
-            font-family:'JetBrains Mono',monospace;
-            font-size:15px;font-weight:800;
-            background:rgba(201,168,76,0.15);
-            color:#e8c97a;
-            padding:4px 10px;border-radius:7px;
-            letter-spacing:1px;
-            border:1px solid rgba(201,168,76,0.25)
-          ">${d.ticker || '—'}</span>
-          <span style="font-size:10px;color:#8899bb">${d.platform||''}</span>
-        </div>
-        <div style="
-          font-size:11px;font-weight:700;
-          color:#00d4ff;
-          background:rgba(0,212,255,0.1);
-          border:1px solid rgba(0,212,255,0.2);
-          padding:3px 9px;border-radius:6px;
-          font-family:'JetBrains Mono',monospace;
-        ">${d.shares != null ? d.shares.toLocaleString('en-US') + ' سهم' : '—'}</div>
-      </div>
-
-      <!-- Company name -->
-      <div class="stock-name">${d.name.replace(/^\d+ سهم في /,'').replace(/^اكتتاب /,'')}</div>
-
-      <!-- Price + change -->
-      <div class="stock-price ${priceClass}">${priceDisplay}</div>
-      <div class="stock-change ${priceClass}">
-        ${chgPct != null ? (chgPct >= 0 ? '▲' : '▼') + ' ' + (Math.abs(chgPct)*100).toFixed(1) + '% من سعر الشراء' : 'سعر الاكتتاب'}
-      </div>
-
-      <!-- Buy info -->
-      <div class="stock-ipo" style="font-size:11px;color:#8899bb;margin-top:6px">
-        مستثمر: <span style="color:#f0f4ff;font-weight:600">${(d.amount||0).toLocaleString('en-US',{minimumFractionDigits:2})} ر.س</span>${buyLine}
-      </div>
-
-      ${infoBox}
-
-      <svg class="mini-sparkline" viewBox="0 0 120 36" preserveAspectRatio="none">
-        <polyline points="${sparkPts}" fill="none" stroke="${sparkColor}" stroke-width="2" opacity=".8"/>
-        <polyline points="${sparkPts} 120,36 0,36" fill="${sparkFill}" stroke="none"/>
-      </svg>
-    </div>`;
-  }).join('');
 }
-
-renderAll();
-renderStocks();
-// Init dashboard year filter after data is loaded
-setTimeout(function() {
-  initDashboardYears();
-  renderDashboard();
-}, 100);
 
 function filterAll(v){ currentSearch=v; renderAll(); }
 function setFilter(f,btn){
@@ -6773,7 +6675,8 @@ function saveAddStock() {
     notes:    (document.getElementById('as-notes')||{}).value || '',
     buy_price_per_share: buyPrice,
     added_at: new Date().toISOString(),
-    market: _currentStockMarket
+    market: _currentStockMarket,
+    is_ipo: (document.getElementById('as-is-ipo')||{}).checked || false
   };
 
   if (!Array.isArray(window.__investments)) window.__investments = investments;
@@ -6803,6 +6706,7 @@ function resetAddStock() {
    'as-target','as-stop-loss','as-pe','as-div-yield','as-notes'].forEach(function(id) {
     var e = document.getElementById(id); if (e) e.value = '';
   });
+  var ipoEl = document.getElementById('as-is-ipo'); if (ipoEl) ipoEl.checked = false;
   ['as-sector','as-platform','as-status','as-risk','as-horizon','as-reason'].forEach(function(id) {
     var e = document.getElementById(id); if (e) e.selectedIndex = 0;
   });
@@ -6838,6 +6742,7 @@ function editStockFromCard(invIdx) {
     setsel('as-horizon',  stock.horizon);
     setsel('as-reason',   stock.reason);
     calcAddStock();
+    var ipoEl = document.getElementById('as-is-ipo'); if (ipoEl) ipoEl.checked = !!stock.is_ipo;
   }, 100);
 }
 
@@ -7040,6 +6945,1746 @@ function openLoanEditPage(idx) {
     calcAddLoan();
   }, 100);
 }
+
+// ── تبديل تبويب الأسهم SA/US ─────────────────────────────────────────────────
+function switchStocksTab(tab) {
+  _currentStocksTab = tab;
+  var colors = { sa: 'var(--gold)', us: '#60a5fa', div: 'var(--green)' };
+  ['sa','us','div'].forEach(function(t) {
+    var panel = document.getElementById('stocks-tab-' + t);
+    var btn   = document.getElementById('tab-' + t);
+    if (panel) panel.style.display = t === tab ? 'block' : 'none';
+    if (btn) {
+      btn.style.borderBottomColor = t === tab ? colors[t] : 'transparent';
+      btn.style.color             = t === tab ? colors[t] : 'var(--muted)';
+    }
+  });
+  if (tab === 'us')  { renderUsStocksTable(); fetchUsStockPrices(); }
+  if (tab === 'div') { if (typeof renderDividendsTab === 'function') renderDividendsTab(); }
+}
+
+// ── تبديل سوق في فورم الإضافة ─────────────────────────────────────────────────
+function setStockMarket(mkt) {
+  _currentStockMarket = mkt;
+  var btnSa = document.getElementById('mkt-btn-sa');
+  var btnUs = document.getElementById('mkt-btn-us');
+  var tickerEl = document.getElementById('as-ticker');
+
+  if (mkt === 'sa') {
+    if (btnSa) { btnSa.style.borderColor='var(--gold)'; btnSa.style.background='rgba(201,168,76,0.15)'; btnSa.style.color='var(--gold)'; }
+    if (btnUs) { btnUs.style.borderColor='var(--border)'; btnUs.style.background='transparent'; btnUs.style.color='var(--muted)'; }
+    if (tickerEl) { tickerEl.maxLength=6; tickerEl.placeholder='مثال: 2222'; tickerEl.style.direction='ltr'; }
+  } else {
+    if (btnUs) { btnUs.style.borderColor='var(--gold)'; btnUs.style.background='rgba(201,168,76,0.15)'; btnUs.style.color='var(--gold)'; }
+    if (btnSa) { btnSa.style.borderColor='var(--border)'; btnSa.style.background='transparent'; btnSa.style.color='var(--muted)'; }
+    if (tickerEl) { tickerEl.maxLength=10; tickerEl.placeholder='مثال: AAPL, NVDA'; tickerEl.style.direction='ltr'; }
+  }
+  // clear previous fetch
+  var nameEl = document.getElementById('as-name');
+  if (nameEl) nameEl.value = '';
+  var statusEl = document.getElementById('as-ticker-status');
+  if (statusEl) statusEl.textContent = '';
+}
+
+// ── جلب اسم الشركة تلقائياً عند إدخال الرمز ──────────────────────────────────
+function onTickerInput() {
+  var tickerEl = document.getElementById('as-ticker');
+  if (!tickerEl) return;
+  var raw = tickerEl.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  tickerEl.value = raw;
+  calcAddStock();
+
+  // Debounce: wait 700ms after user stops typing
+  clearTimeout(_tickerFetchTimer);
+  if (raw.length < 2) return;
+  _tickerFetchTimer = setTimeout(function() { fetchCompanyName(raw); }, 700);
+}
+
+async function fetchCompanyName(ticker) {
+  var nameEl     = document.getElementById('as-name');
+  var statusEl   = document.getElementById('as-ticker-status');
+  var fetchingEl = document.getElementById('as-name-fetching');
+  if (!nameEl) return;
+  if (statusEl)   statusEl.textContent = '⏳';
+  if (fetchingEl) fetchingEl.style.display = 'block';
+
+  var symbol = _currentStockMarket === 'sa' ? ticker + '.SR' : ticker;
+  var PROXY  = 'https://claude-proxy.shaheenhouse1.workers.dev';
+
+  // قاموس الأسهم السعودية الشائعة (fallback سريع)
+  var saNames = {
+    '2222':'أرامكو السعودية','2280':'المراعي','4017':'فقيه للرعاية الصحية',
+    '5110':'السعودية للكهرباء','2084':'دار الأركان','4163':'سلامة',
+    '1834':'الراجحي للتأمين','2284':'ACWA Power','4143':'عناية',
+    '1211':'معادن','1120':'مصرف الراجحي','1180':'البنك الأهلي السعودي',
+    '1150':'بنك الرياض','1140':'بنك الجزيرة','4260':'أكواباور',
+    '2381':'بان للصناعات','4200':'بنك البلاد','1010':'الراجحي المالية',
+    '2010':'سابك','4030':'سلامة للتأمين','2350':'الشركة الخليجية للصناعات',
+    '4240':'تمكين','7010':'الاتصالات السعودية','7020':'اتحاد الاتصالات',
+    '2330':'أدوية التميمي','4110':'سلامة','4031':'التعاونية للتأمين'
+  };
+
+  var found = false;
+
+  // 1) جرب عبر الـ Worker أولاً
+  try {
+    var res = await fetch(PROXY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ _stockRequest: true, symbols: symbol })
+    });
+    if (res.ok) {
+      var data = await res.json();
+      var q = (data.quotes || [])[0];
+      if (q && q.name && q.name !== symbol) {
+        nameEl.value = q.name;
+        if (q.price) {
+          var priceEl = document.getElementById('as-curr-price');
+          if (priceEl && !priceEl.value) priceEl.value = parseFloat(q.price).toFixed(2);
+        }
+        found = true;
+      }
+    }
+  } catch(e) { /* Worker unavailable */ }
+
+  // 2) Fallback: قاموس الأسهم السعودية
+  if (!found && _currentStockMarket === 'sa' && saNames[ticker]) {
+    nameEl.value = saNames[ticker];
+    found = true;
+  }
+
+  // 3) إذا لم يُجلب شيء
+  if (!found) {
+    if (statusEl) statusEl.textContent = '❓';
+    nameEl.placeholder = 'أدخل الاسم يدوياً';
+    if (fetchingEl) fetchingEl.style.display = 'none';
+    return;
+  }
+
+  if (statusEl)   statusEl.textContent = '✅';
+  if (fetchingEl) fetchingEl.style.display = 'none';
+  calcAddStock();
+  showToast('✅ ' + nameEl.value);
+}
+
+// ── تحديث الأسعار لكلا السوقين ────────────────────────────────────────────────
+function refreshAllStockPrices() {
+  fetchLiveStockPrices();
+  fetchUsStockPrices();
+}
+
+// ── أسعار الأسهم الأمريكية via Yahoo Finance ──────────────────────────────────
+var US_STOCK_PRICES = {};
+
+async function fetchUsStockPrices() {
+  var inv = window.__investments || investments;
+  var _sfUs = (_stockFilter && _stockFilter.us) ? _stockFilter.us : 'all';
+  var usStocks = inv.filter(function(x){
+    if (x.type !== 'سهم' || x.market !== 'us' || !x.ticker) return false;
+    if (_sfUs !== 'all' && x.status !== _sfUs) return false;
+    return true;
+  });
+  if (!usStocks.length) return;
+
+  var icon = document.getElementById('stocks-refresh-icon');
+  if (icon) icon.style.animation = 'spin 1s linear infinite';
+
+  var symbols = usStocks.map(function(s){ return s.ticker; }).join(',');
+  var PROXY   = 'https://claude-proxy.shaheenhouse1.workers.dev';
+  var updated = 0;
+
+  // ── الطلب عبر Cloudflare Worker (يتجاوز CORS) ──────────────────
+  try {
+    var res = await fetch(PROXY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ _stockRequest: true, symbols: symbols, market: 'us' })
+    });
+    if (res.ok) {
+      var data = await res.json();
+      (data.quotes || []).forEach(function(q) {
+        US_STOCK_PRICES[q.symbol] = {
+          price: q.price,
+          chg:   (q.changePercent || 0) / 100,
+          color: (q.changePercent || 0) >= 0 ? 'up' : 'dn',
+          name:  q.name || q.symbol
+        };
+        updated++;
+      });
+    }
+  } catch(e) { console.warn('Worker US fetch failed:', e.message); }
+
+  // ── Fallback: Yahoo Finance مباشرة (إذا فشل الـ Worker) ─────────
+  if (updated === 0) {
+    try {
+      var url = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + symbols
+              + '&fields=regularMarketPrice,regularMarketChangePercent,longName,shortName';
+      var res2 = await fetch(url);
+      if (res2.ok) {
+        var json2 = await res2.json();
+        (json2.quoteResponse?.result || []).forEach(function(q) {
+          US_STOCK_PRICES[q.symbol] = {
+            price: q.regularMarketPrice,
+            chg:   (q.regularMarketChangePercent || 0) / 100,
+            color: (q.regularMarketChangePercent || 0) >= 0 ? 'up' : 'dn',
+            name:  q.longName || q.shortName || q.symbol
+          };
+          updated++;
+        });
+      }
+    } catch(e2) { console.warn('Yahoo US direct failed:', e2.message); }
+  }
+
+  renderUsStocksTable();
+  if (icon) icon.style.animation = '';
+}
+
+// ── رندر جدول الأسهم الأمريكية ────────────────────────────────────────────────
+function renderUsStocksTable() {
+  var inv = window.__investments || investments;
+  var usStocks = inv.filter(function(x){ return x.type === 'سهم' && x.market === 'us'; });
+
+  var countBadge = document.getElementById('us-stocks-count-badge');
+  if (countBadge) countBadge.textContent = usStocks.length + ' سهم';
+
+  var tbody = document.getElementById('us-stocks-tbody');
+  if (tbody) {
+    tbody.innerHTML = usStocks.map(function(d, i) {
+      var p = d.ticker ? US_STOCK_PRICES[d.ticker] : null;
+      var currPrice = p ? p.price : null;
+      var mktVal    = (currPrice && d.shares) ? currPrice * d.shares : null;
+      var pnl       = (mktVal && d.amount) ? mktVal - d.amount : null;
+      var chgPct    = p ? p.chg : null;
+      var realIdx   = inv.indexOf(d);
+
+      var priceCell = currPrice ? '<span class="mono '+(p.color||'')+'">' + currPrice.toFixed(2) + '</span>' : '<span style="color:var(--muted)">—</span>';
+      var chgCell   = chgPct != null ? '<span class="'+(chgPct>=0?'up':'dn')+'">'+(chgPct>=0?'▲':'▼')+' '+(Math.abs(chgPct)*100).toFixed(1)+'%</span>' : '—';
+      var mktCell   = mktVal ? '<span class="mono">' + mktVal.toLocaleString('en-US',{minimumFractionDigits:2}) + '</span>' : '—';
+      var pnlCell   = pnl != null ? '<span class="mono '+(pnl>=0?'up':'dn')+'">'+(pnl>=0?'+':'')+pnl.toLocaleString('en-US',{minimumFractionDigits:2})+'</span>' : '—';
+
+      return '<tr>' +
+        '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (d.name||'').replace(/^\d+ سهم في /,'') + '</td>' +
+        '<td><span style="font-family:monospace;background:rgba(96,165,250,0.12);color:#60a5fa;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700">' + (d.ticker||'—') + '</span></td>' +
+        '<td class="mono">' + (d.shares||'—') + '</td>' +
+        '<td class="mono">$' + (d.amount||0).toLocaleString('en-US',{minimumFractionDigits:2}) + '</td>' +
+        '<td class="mono" style="color:var(--gold)">' + (d.buy_price_per_share ? ('$'+parseFloat(d.buy_price_per_share).toFixed(2)) : (d.shares&&d.amount ? '$'+(d.amount/d.shares).toFixed(2) : '—')) + '</td>' +
+        '<td>' + priceCell + '</td>' +
+        '<td>' + chgCell + '</td>' +
+        '<td>' + mktCell + '</td>' +
+        '<td>' + pnlCell + '</td>' +
+        '<td style="color:var(--muted);font-size:11px">' + (d.platform||'—') + '</td>' +
+        '<td style="white-space:nowrap">' +
+        '<button onclick="editStockFromCard(' + realIdx + ')" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;color:var(--gold);font-family:inherit">✏️</button> ' +
+        (d.ticker ? '<button onclick="fetchSingleUsStockPrice(\'' + d.ticker + '\')" style="background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.2);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;color:#60a5fa;font-family:inherit" title="جلب السعر">⟳</button>' : '') +
+        '</td>' +
+        '</tr>';
+    }).join('') || '<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--muted)">لا توجد أسهم أمريكية — أضف سهماً باختيار 🇺🇸 أمريكي</td></tr>';
+  }
+
+
+}
+
+function switchReportsTab(tab) {
+  _currentReportsTab = tab;
+  var tabs = ['calendar','cashflow','dividends','analyst','insights'];
+  tabs.forEach(function(t) {
+    var panel = document.getElementById('rtab-panel-' + t);
+    var btn   = document.getElementById('rtab-' + t);
+    if (panel) panel.style.display = t === tab ? 'block' : 'none';
+    if (btn) {
+      btn.style.borderBottomColor = t === tab ? 'var(--gold)' : 'transparent';
+      btn.style.color = t === tab ? 'var(--gold)' : 'var(--muted)';
+    }
+  });
+  if (tab === 'calendar')  renderCalendar();
+  if (tab === 'cashflow')  renderCashflow();
+  if (tab === 'dividends') renderDividendsTab();
+  if (tab === 'analyst')   { /* AI analysis runs on button click */ }
+  if (tab === 'insights')  { renderSharpe(); renderBenchmark(); }
+}
+
+// ══════════════════════════════════════════════
+// DIVIDENDS SYSTEM
+// ══════════════════════════════════════════════
+
+// قاعدة بيانات التوزيعات التاريخية للأسهم السعودية الشائعة
+var KNOWN_DIVIDENDS = {
+  '2222': { name:'أرامكو', history:[
+    { year:2024, per_share:0.35, ex_date:'2024-12-05', pay_date:'2025-01-05', type:'cash', q:'Q4' },
+    { year:2024, per_share:0.35, ex_date:'2024-09-04', pay_date:'2024-10-05', type:'cash', q:'Q3' },
+    { year:2024, per_share:0.35, ex_date:'2024-06-05', pay_date:'2024-07-07', type:'cash', q:'Q2' },
+    { year:2024, per_share:0.35, ex_date:'2024-03-06', pay_date:'2024-04-07', type:'cash', q:'Q1' },
+    { year:2023, per_share:0.35, ex_date:'2023-12-06', pay_date:'2024-01-07', type:'cash', q:'Q4' }
+  ]},
+  '2280': { name:'المراعي', history:[
+    { year:2024, per_share:0.375, ex_date:'2024-04-10', pay_date:'2024-05-05', type:'cash', q:'نصف سنوي' },
+    { year:2023, per_share:0.375, ex_date:'2023-10-11', pay_date:'2023-11-05', type:'cash', q:'نصف سنوي' }
+  ]},
+  '1120': { name:'مصرف الراجحي', history:[
+    { year:2024, per_share:1.00, ex_date:'2024-10-09', pay_date:'2024-11-04', type:'cash', q:'نصف سنوي' },
+    { year:2024, per_share:1.00, ex_date:'2024-04-10', pay_date:'2024-05-06', type:'cash', q:'نصف سنوي' }
+  ]},
+  '1180': { name:'البنك الأهلي السعودي', history:[
+    { year:2024, per_share:0.80, ex_date:'2024-09-11', pay_date:'2024-10-07', type:'cash', q:'نصف سنوي' }
+  ]},
+  '5110': { name:'السعودية للكهرباء', history:[
+    { year:2024, per_share:0.50, ex_date:'2024-06-12', pay_date:'2024-07-08', type:'cash', q:'سنوي' }
+  ]},
+  '1211': { name:'معادن', history:[
+    { year:2024, per_share:0.30, ex_date:'2024-03-27', pay_date:'2024-04-22', type:'cash', q:'سنوي' }
+  ]}
+};
+
+// تحميل التوزيعات المحفوظة
+var dividendsData = JSON.parse(localStorage.getItem('dividendsData') || '[]');
+
+function saveDividendsToStorage() {
+  localStorage.setItem('dividendsData', JSON.stringify(dividendsData));
+  window.dividendsData = dividendsData;
+  // Firebase sync
+  if (typeof window.fbSaveDividends === 'function') window.fbSaveDividends();
+}
+
+// ── رندر تبويب التوزيعات ──────────────────────────────────────────────────────
+function renderDividendsTab() {
+  var inv = window.__investments || investments;
+  var saStocks = inv.filter(function(x){ return x.type==='سهم' && x.status==='نشطة' && x.market !== 'us'; });
+
+  // تحديث KPIs
+  var totalReceived = dividendsData.filter(function(d){ return d.status==='مستلمة'; })
+    .reduce(function(s,d){ return s+(d.total_amount||0); }, 0);
+  var totalPending  = dividendsData.filter(function(d){ return d.status!=='مستلمة'; })
+    .reduce(function(s,d){ return s+(d.total_amount||0); }, 0);
+  var annualYield   = saStocks.reduce(function(s,x){
+    var known = KNOWN_DIVIDENDS[x.ticker];
+    if (!known) return s;
+    var lastYear = new Date().getFullYear() - 1;
+    var annual = known.history.filter(function(h){ return h.year >= lastYear; })
+      .reduce(function(t,h){ return t+(h.per_share * (x.shares||0)); }, 0);
+    return s + annual;
+  }, 0);
+
+  var kpiEl = document.getElementById('div-kpis');
+  if (kpiEl) {
+    var fmt = function(n){ return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+    kpiEl.innerHTML =
+      '<div class="kpi-card" style="--accent:var(--green)"><div class="kpi-icon">✅</div><div class="kpi-label">توزيعات مستلمة</div><div class="kpi-value">'+fmt(totalReceived)+'</div><div class="kpi-sub">ر.س</div></div>' +
+      '<div class="kpi-card" style="--accent:var(--gold)"><div class="kpi-icon">⏳</div><div class="kpi-label">توزيعات قادمة</div><div class="kpi-value">'+fmt(totalPending)+'</div><div class="kpi-sub">ر.س</div></div>' +
+      '<div class="kpi-card" style="--accent:var(--cyan)"><div class="kpi-icon">📊</div><div class="kpi-label">عائد سنوي تقديري</div><div class="kpi-value">'+fmt(annualYield)+'</div><div class="kpi-sub">ر.س (بناءً على التاريخي)</div></div>' +
+      '<div class="kpi-card" style="--accent:#a78bfa"><div class="kpi-icon">🏷️</div><div class="kpi-label">أسهم نشطة بتوزيعات</div><div class="kpi-value">'+saStocks.filter(function(x){return KNOWN_DIVIDENDS[x.ticker];}).length+'</div><div class="kpi-sub">من '+saStocks.length+' سهم</div></div>';
+  }
+
+  // تنبيه التوزيعات المعروفة للأسهم النشطة
+  var knownAlert = document.getElementById('div-known-alert');
+  if (knownAlert) {
+    var knownStocks = saStocks.filter(function(x){ return KNOWN_DIVIDENDS[x.ticker]; });
+    if (knownStocks.length > 0) {
+      knownAlert.style.display = 'block';
+      knownAlert.innerHTML = '💡 <strong>توزيعات معروفة لـ ' + knownStocks.length + ' سهم في محفظتك:</strong> ' +
+        knownStocks.map(function(x){ return KNOWN_DIVIDENDS[x.ticker].name + ' (' + x.ticker + ')'; }).join(' • ') +
+        ' — <a href="#" onclick="autoImportKnownDividends();return false;" style="color:var(--gold);text-decoration:underline">استيراد تلقائي ←</a>';
+    } else {
+      knownAlert.style.display = 'none';
+    }
+  }
+
+  // جدول التوزيعات
+  var tbody = document.getElementById('div-tbody');
+  var countBadge = document.getElementById('div-count-badge');
+  if (countBadge) countBadge.textContent = dividendsData.length + ' توزيعة';
+
+  if (tbody) {
+    if (!dividendsData.length) {
+      tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:32px;color:var(--muted)">لا توجد توزيعات مسجلة — أضف توزيعة أو اضغط "استيراد تلقائي" أعلاه</td></tr>';
+    } else {
+      tbody.innerHTML = dividendsData.map(function(d, i) {
+        var statusColor = d.status==='مستلمة' ? 'var(--green)' : d.status==='قادمة' ? 'var(--gold)' : 'var(--orange)';
+        var statusBg    = d.status==='مستلمة' ? 'rgba(0,230,118,0.1)' : d.status==='قادمة' ? 'rgba(201,168,76,0.1)' : 'rgba(255,152,0,0.1)';
+        return '<tr>' +
+          '<td>' + (d.stock_name||d.ticker) + '</td>' +
+          '<td><span style="font-family:monospace;background:rgba(201,168,76,0.12);color:var(--gold);padding:2px 8px;border-radius:5px;font-size:11px">' + d.ticker + '</span></td>' +
+          '<td>' + (d.type==='cash'?'نقدية 💵':'أسهم مجانية 📈') + '</td>' +
+          '<td class="mono" style="color:var(--gold)">' + (d.per_share||0).toFixed(3) + ' ر.س</td>' +
+          '<td class="mono" style="color:var(--cyan)">' + (d.shares||0).toLocaleString('en-US') + '</td>' +
+          '<td class="mono" style="color:var(--green);font-weight:700">' + (d.total_amount||0).toLocaleString('en-US',{minimumFractionDigits:2}) + ' ر.س</td>' +
+          '<td class="mono" style="color:var(--cyan)">' + (d.yield_pct||0).toFixed(2) + '%</td>' +
+          '<td style="color:var(--muted);font-size:11px">' + (d.ex_date||'—') + '</td>' +
+          '<td style="color:var(--muted);font-size:11px">' + (d.pay_date||'—') + '</td>' +
+          '<td><span style="font-size:11px;padding:3px 8px;border-radius:8px;background:'+statusBg+';color:'+statusColor+'">'+d.status+'</span></td>' +
+          '<td><button class="loan-action-btn" onclick="markDivReceived('+i+')" style="color:var(--green);display:'+(d.status==='مستلمة'?'none':'inline')+'">✅</button> ' +
+               '<button class="loan-action-btn" style="color:var(--red)" onclick="deleteDividend('+i+')">🗑</button></td>' +
+          '</tr>';
+      }).join('');
+    }
+  }
+
+  // ملخص سنوي
+  renderDividendsSummary(saStocks);
+}
+
+function renderDividendsSummary(saStocks) {
+  var summaryEl = document.getElementById('div-summary');
+  if (!summaryEl) return;
+
+  // اجمع حسب السنة
+  var byYear = {};
+  dividendsData.forEach(function(d) {
+    var yr = d.ex_date ? d.ex_date.split('-')[0] : new Date().getFullYear().toString();
+    if (!byYear[yr]) byYear[yr] = { total:0, count:0, received:0 };
+    byYear[yr].total  += (d.total_amount||0);
+    byYear[yr].count  += 1;
+    if (d.status==='مستلمة') byYear[yr].received += (d.total_amount||0);
+  });
+
+  var years = Object.keys(byYear).sort().reverse();
+  if (!years.length) {
+    summaryEl.innerHTML = '<div style="color:var(--muted);text-align:center;padding:16px">لا توجد بيانات كافية للملخص السنوي</div>';
+    return;
+  }
+
+  var fmt = function(n){ return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+  summaryEl.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px">' +
+    years.map(function(yr) {
+      var d = byYear[yr];
+      var pct = d.total > 0 ? (d.received/d.total*100) : 0;
+      return '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">' +
+        '<span style="font-size:13px;font-weight:700;color:var(--white);min-width:50px">' + yr + '</span>' +
+        '<span class="mono" style="color:var(--gold);min-width:120px">' + fmt(d.total) + ' ر.س</span>' +
+        '<div style="flex:1;height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;min-width:100px">' +
+          '<div style="height:100%;width:'+pct.toFixed(0)+'%;background:linear-gradient(90deg,var(--green),#00b248);border-radius:4px"></div>' +
+        '</div>' +
+        '<span style="font-size:11px;color:var(--muted)">' + d.count + ' توزيعة</span>' +
+        '</div>';
+    }).join('') + '</div>';
+}
+
+// ── إضافة توزيعة ─────────────────────────────────────────────────────────────
+function showAddDividendForm() {
+  var form = document.getElementById('div-add-form');
+  if (!form) return;
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  if (form.style.display === 'none') return;
+
+  // ملء قائمة الأسهم النشطة
+  var inv = window.__investments || investments;
+  var saStocks = inv.filter(function(x){ return x.type==='سهم' && x.status==='نشطة' && x.market !== 'us'; });
+  var sel = document.getElementById('div-ticker-sel');
+  if (sel) {
+    sel.innerHTML = '<option value="">— اختر السهم —</option>' +
+      saStocks.map(function(x){
+        return '<option value="'+x.ticker+'" data-shares="'+x.shares+'" data-amount="'+x.amount+'" data-name="'+x.name.replace(/^\d+ سهم في /,'')+'">'+x.ticker+' - '+x.name.replace(/^\d+ سهم في /,'')+'</option>';
+      }).join('');
+  }
+  // تاريخ اليوم
+  var today = new Date().toISOString().split('T')[0];
+  var exDate = document.getElementById('div-ex-date');
+  var payDate = document.getElementById('div-pay-date');
+  var annDate = document.getElementById('div-announce-date');
+  if (annDate) annDate.value = today;
+  form.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function onDivTickerChange() {
+  var perShare = document.getElementById('div-per-share');
+  if (perShare) perShare.value = '';
+  calcDividend();
+  // تعبئة تلقائية من قاعدة البيانات المعروفة
+  var sel = document.getElementById('div-ticker-sel');
+  if (!sel || !sel.value) return;
+  var known = KNOWN_DIVIDENDS[sel.value];
+  if (known && known.history.length) {
+    var latest = known.history[0];
+    if (perShare) perShare.value = latest.per_share;
+    var exDate = document.getElementById('div-ex-date');
+    var payDate = document.getElementById('div-pay-date');
+    if (exDate && !exDate.value) exDate.value = latest.ex_date;
+    if (payDate && !payDate.value) payDate.value = latest.pay_date;
+    calcDividend();
+    showToast('💡 تم تعبئة آخر توزيعة معروفة لـ ' + sel.value);
+  }
+}
+
+function calcDividend() {
+  var sel = document.getElementById('div-ticker-sel');
+  var perShare = parseFloat((document.getElementById('div-per-share')||{}).value) || 0;
+  if (!sel || !sel.value || !perShare) {
+    document.getElementById('div-calc-box').style.display = 'none';
+    return;
+  }
+  var opt = sel.options[sel.selectedIndex];
+  var shares = parseInt(opt?.dataset?.shares) || 0;
+  var amount = parseFloat(opt?.dataset?.amount) || 0;
+  var total  = perShare * shares;
+  var yieldPct = amount > 0 ? (total/amount*100) : 0;
+  var fmt = function(n){ return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+  var set = function(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; };
+  set('div-c-shares', shares.toLocaleString('en-US') + ' سهم');
+  set('div-c-total',  fmt(total) + ' ر.س');
+  set('div-c-yield',  yieldPct.toFixed(2) + '%');
+  document.getElementById('div-calc-box').style.display = 'block';
+}
+
+function saveDividend() {
+  var sel = document.getElementById('div-ticker-sel');
+  var perShare = parseFloat((document.getElementById('div-per-share')||{}).value) || 0;
+  if (!sel || !sel.value) { showToast('❌ اختر السهم'); return; }
+  if (!perShare)           { showToast('❌ أدخل قيمة التوزيعة للسهم'); return; }
+  var opt    = sel.options[sel.selectedIndex];
+  var shares = parseInt(opt?.dataset?.shares) || 0;
+  var amount = parseFloat(opt?.dataset?.amount) || 0;
+  var total  = perShare * shares;
+  var exDate = (document.getElementById('div-ex-date')||{}).value || '';
+  var now    = new Date();
+  var exD    = exDate ? new Date(exDate) : null;
+  var status = exD && exD <= now ? 'مستلمة' : 'قادمة';
+  var record = {
+    ticker:       sel.value,
+    stock_name:   opt?.dataset?.name || sel.value,
+    type:         (document.getElementById('div-type')||{}).value || 'cash',
+    per_share:    perShare,
+    shares:       shares,
+    total_amount: total,
+    yield_pct:    amount > 0 ? total/amount*100 : 0,
+    announce_date:(document.getElementById('div-announce-date')||{}).value || '',
+    ex_date:      exDate,
+    pay_date:     (document.getElementById('div-pay-date')||{}).value || '',
+    status:       status,
+    created_at:   new Date().toISOString()
+  };
+  dividendsData.unshift(record);
+  saveDividendsToStorage();
+  document.getElementById('div-add-form').style.display = 'none';
+  renderDividendsTab();
+  showToast('✅ تم حفظ توزيعة ' + sel.value + ': ' + total.toLocaleString('en-US',{maximumFractionDigits:2}) + ' ر.س');
+}
+
+function markDivReceived(idx) {
+  dividendsData[idx].status = 'مستلمة';
+  saveDividendsToStorage();
+  renderDividendsTab();
+  showToast('✅ تم تأكيد استلام التوزيعة');
+}
+
+function deleteDividend(idx) {
+  if (!confirm('حذف هذه التوزيعة؟')) return;
+  dividendsData.splice(idx, 1);
+  saveDividendsToStorage();
+  renderDividendsTab();
+  showToast('تم الحذف');
+}
+
+// ── استيراد تلقائي للتوزيعات المعروفة ────────────────────────────────────────
+function autoImportKnownDividends() {
+  var inv = window.__investments || investments;
+  var saStocks = inv.filter(function(x){ return x.type==='سهم' && x.status==='نشطة' && x.market !== 'us'; });
+  var count = 0;
+  saStocks.forEach(function(stock) {
+    var known = KNOWN_DIVIDENDS[stock.ticker];
+    if (!known) return;
+    known.history.forEach(function(h) {
+      // تحقق أنها غير موجودة مسبقاً
+      var exists = dividendsData.some(function(d){
+        return d.ticker === stock.ticker && d.ex_date === h.ex_date;
+      });
+      if (exists) return;
+      var total = h.per_share * (stock.shares || 0);
+      var now = new Date(); var exD = new Date(h.ex_date);
+      dividendsData.push({
+        ticker: stock.ticker, stock_name: known.name, type: h.type,
+        per_share: h.per_share, shares: stock.shares||0, total_amount: total,
+        yield_pct: stock.amount>0 ? total/stock.amount*100 : 0,
+        announce_date:'', ex_date: h.ex_date, pay_date: h.pay_date,
+        status: exD <= now ? 'مستلمة' : 'قادمة',
+        created_at: new Date().toISOString(), source:'auto'
+      });
+      count++;
+    });
+  });
+  if (count > 0) {
+    saveDividendsToStorage();
+    renderDividendsTab();
+    showToast('✅ تم استيراد ' + count + ' توزيعة تاريخية');
+  } else {
+    showToast('ℹ️ لا توجد توزيعات جديدة للاستيراد');
+  }
+}
+
+// ── جلب توزيعات من Yahoo Finance ─────────────────────────────────────────────
+async function fetchDividendsForStock() {
+  var sel = document.getElementById('div-ticker-sel');
+  if (!sel || !sel.value) { showToast('❌ اختر السهم أولاً'); return; }
+  var ticker = sel.value + '.SR';
+  showToast('⏳ جاري الجلب من Yahoo Finance...');
+  try {
+    var url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + ticker + '?interval=1mo&range=2y&events=dividends';
+    var res = await fetch(url, { mode:'cors' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var json = await res.json();
+    var events = json?.chart?.result?.[0]?.events?.dividends;
+    if (!events || !Object.keys(events).length) {
+      showToast('ℹ️ لا توجد بيانات توزيعات من Yahoo لهذا السهم');
+      return;
+    }
+    var inv = window.__investments || investments;
+    var stock = inv.find(function(x){ return x.ticker === sel.value && x.type === 'سهم'; });
+    var shares = stock ? (stock.shares||0) : 0;
+    var amount = stock ? (stock.amount||0) : 0;
+    var count = 0;
+    Object.values(events).forEach(function(e) {
+      var exDate = new Date(e.date * 1000).toISOString().split('T')[0];
+      var exists = dividendsData.some(function(d){ return d.ticker===sel.value && d.ex_date===exDate; });
+      if (exists) return;
+      var total = e.amount * shares;
+      dividendsData.push({
+        ticker: sel.value, stock_name: sel.options[sel.selectedIndex]?.dataset?.name || sel.value,
+        type: 'cash', per_share: e.amount, shares: shares, total_amount: total,
+        yield_pct: amount>0?total/amount*100:0, announce_date:'', ex_date: exDate, pay_date:'',
+        status: new Date(exDate) <= new Date() ? 'مستلمة' : 'قادمة',
+        created_at: new Date().toISOString(), source:'yahoo'
+      });
+      count++;
+    });
+    if (count > 0) {
+      saveDividendsToStorage();
+      renderDividendsTab();
+      showToast('✅ تم استيراد ' + count + ' توزيعة من Yahoo Finance');
+      document.getElementById('div-add-form').style.display = 'none';
+    } else {
+      showToast('ℹ️ التوزيعات موجودة مسبقاً');
+    }
+  } catch(e) {
+    showToast('❌ فشل الجلب: ' + e.message + ' — أدخل يدوياً');
+  }
+}
+
+// ══════════════════════════════════════════════
+// METALS (GOLD & SILVER) — المعادن الثمينة
+// ══════════════════════════════════════════════
+var metalsData = JSON.parse(localStorage.getItem('metalsData') || '[]');
+window.metalsData = metalsData;
+var _editingMetalIdx = null;
+
+function saveMetalsToStorage() {
+  localStorage.setItem('metalsData', JSON.stringify(metalsData));
+  window.metalsData = metalsData;
+  if (typeof window.fbSaveMetals === 'function') window.fbSaveMetals();
+}
+
+function showAddMetalForm() {
+  var form = document.getElementById('metals-add-form');
+  if (!form) return;
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  if (form.style.display !== 'none') {
+    var today = new Date().toISOString().split('T')[0];
+    var d = document.getElementById('m-date');
+    if (d && !d.value) d.value = today;
+  }
+}
+
+function calcMetal() {
+  function gv(id) { var e=document.getElementById(id); return e?e.value:''; }
+  function gf(id) { return parseFloat(gv(id))||0; }
+  var weight    = gf('m-weight');
+  var buyPrice  = gf('m-buy-price');
+  var currPrice = gf('m-curr-price');
+  var karat     = parseInt(gv('m-karat')) || 21;
+  var purity    = karat <= 24 ? karat/24 : 1; // for silver karat=999 → 1
+  var pureWeight = weight * purity;
+  var cost      = weight * buyPrice;
+  var currVal   = currPrice > 0 ? weight * currPrice : 0;
+  var pnl       = currVal > 0 ? currVal - cost : 0;
+  var box       = document.getElementById('m-calc-box');
+  var fmt       = function(n){return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});};
+  var set       = function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+  if (cost > 0) {
+    if (box) box.style.display = 'block';
+    set('m-c-cost', fmt(cost) + ' ر.س');
+    set('m-c-curr', currVal > 0 ? fmt(currVal) + ' ر.س' : '—');
+    set('m-c-pure', pureWeight.toFixed(3) + ' جم');
+    var pnlEl = document.getElementById('m-c-pnl');
+    if (pnlEl) {
+      pnlEl.textContent = pnl !== 0 ? (pnl>0?'+':'')+fmt(pnl)+' ر.س' : '—';
+      pnlEl.style.color = pnl > 0 ? 'var(--green)' : pnl < 0 ? 'var(--red)' : 'var(--muted)';
+    }
+  } else {
+    if (box) box.style.display = 'none';
+  }
+}
+
+function saveMetal() {
+  function gv(id) { var e=document.getElementById(id); return e?e.value:''; }
+  function gf(id) { return parseFloat(gv(id))||0; }
+  var type = gv('m-type');
+  var weight = gf('m-weight');
+  var buyPrice = gf('m-buy-price');
+  if (!weight)    { showToast('❌ أدخل الوزن'); return; }
+  if (!buyPrice)  { showToast('❌ أدخل سعر الشراء'); return; }
+  var karat = parseInt(gv('m-karat')) || 21;
+  var purity = karat <= 24 ? karat/24 : 1;
+  var metal = {
+    type:      type || 'ذهب',
+    form:      gv('m-form'),
+    weight:    weight,
+    karat:     karat,
+    purity:    purity,
+    pure_weight: weight * purity,
+    buy_price: buyPrice,
+    curr_price:gf('m-curr-price') || 0,
+    cost:      weight * buyPrice,
+    curr_val:  gf('m-curr-price') > 0 ? weight * gf('m-curr-price') : 0,
+    storage:   gv('m-storage'),
+    date:      gv('m-date') || new Date().toISOString().split('T')[0],
+    notes:     gv('m-notes'),
+    status:    'نشطة',
+    created_at:new Date().toISOString()
+  };
+  metal.pnl = metal.curr_val > 0 ? metal.curr_val - metal.cost : 0;
+  var data = window.metalsData || metalsData;
+  if (!Array.isArray(data)) data = [];
+  if (_editingMetalIdx !== null) {
+    data[_editingMetalIdx] = metal;
+    showToast('✅ تم تحديث المعدن');
+  } else {
+    data.push(metal);
+    showToast('✅ تم حفظ ' + type + ' — ' + weight + ' جرام');
+  }
+  metalsData = data;
+  window.metalsData = data;
+  saveMetalsToStorage();
+  renderMetals();
+  resetMetalForm();
+  document.getElementById('metals-add-form').style.display = 'none';
+}
+
+function resetMetalForm() {
+  _editingMetalIdx = null;
+  ['m-weight','m-buy-price','m-curr-price','m-notes'].forEach(function(id){
+    var e=document.getElementById(id); if(e) e.value='';
+  });
+  var typeEl = document.getElementById('m-type'); if(typeEl) typeEl.value='ذهب';
+  var karatEl = document.getElementById('m-karat'); if(karatEl) karatEl.value='21';
+  var box = document.getElementById('m-calc-box'); if(box) box.style.display='none';
+}
+
+function renderMetals() {
+  var data = window.metalsData || metalsData || [];
+  var goldW = data.filter(function(x){return x.type==='ذهب';}).reduce(function(s,x){return s+(x.weight||0);},0);
+  var silverW = data.filter(function(x){return x.type==='فضة';}).reduce(function(s,x){return s+(x.weight||0);},0);
+  var totalCost = data.reduce(function(s,x){return s+(x.cost||0);},0);
+  var totalCurr = data.reduce(function(s,x){return s+(x.curr_val||0);},0);
+  var fmt = function(n){return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});};
+
+  // Badge
+  var badge = document.getElementById('metals-total-badge');
+  if (badge) badge.textContent = data.length + ' معدن — ' + fmt(totalCost) + ' ر.س';
+
+  // KPIs
+  var kpis = document.getElementById('metals-kpis');
+  if (kpis) {
+    kpis.innerHTML =
+      '<div class="kpi-card" style="--accent:var(--gold)"><div class="kpi-icon">🥇</div><div class="kpi-label">ذهب</div><div class="kpi-value">' + goldW.toFixed(2) + '</div><div class="kpi-sub">جرام</div></div>' +
+      '<div class="kpi-card" style="--accent:#a0aec0"><div class="kpi-icon">🥈</div><div class="kpi-label">فضة</div><div class="kpi-value">' + silverW.toFixed(2) + '</div><div class="kpi-sub">جرام</div></div>' +
+      '<div class="kpi-card" style="--accent:var(--gold)"><div class="kpi-icon">💰</div><div class="kpi-label">إجمالي التكلفة</div><div class="kpi-value">' + fmt(totalCost) + '</div><div class="kpi-sub">ر.س</div></div>' +
+      '<div class="kpi-card" style="--accent:var(--cyan)"><div class="kpi-icon">📊</div><div class="kpi-label">القيمة الحالية</div><div class="kpi-value">' + (totalCurr > 0 ? fmt(totalCurr) : '—') + '</div><div class="kpi-sub">ر.س</div></div>';
+  }
+
+  // Count badge
+  var cnt = document.getElementById('metals-count-badge');
+  if (cnt) cnt.textContent = data.length + ' سجل';
+
+  // Table
+  var tbody = document.getElementById('metals-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = data.map(function(m, i) {
+    var pnlColor = m.pnl > 0 ? 'var(--green)' : m.pnl < 0 ? 'var(--red)' : 'var(--muted)';
+    var typeIcon = m.type === 'ذهب' ? '🥇' : '🥈';
+    return '<tr>' +
+      '<td><span style="font-size:15px">' + typeIcon + '</span> ' + m.type + '</td>' +
+      '<td style="color:var(--muted)">' + (m.form||'—') + '</td>' +
+      '<td class="mono">' + (m.weight||0).toFixed(2) + '</td>' +
+      '<td style="color:var(--gold)">' + (m.karat||'—') + (m.karat<=24?'k':'') + '</td>' +
+      '<td class="mono">' + (m.buy_price||0).toFixed(2) + '</td>' +
+      '<td class="mono">' + (m.curr_price>0 ? m.curr_price.toFixed(2) : '—') + '</td>' +
+      '<td class="mono" style="color:var(--white)">' + (m.cost||0).toLocaleString('en-US',{maximumFractionDigits:2}) + ' ر.س</td>' +
+      '<td class="mono" style="color:var(--cyan)">' + (m.curr_val>0 ? m.curr_val.toLocaleString('en-US',{maximumFractionDigits:2})+' ر.س' : '—') + '</td>' +
+      '<td class="mono" style="color:' + pnlColor + '">' + (m.pnl !== 0 ? (m.pnl>0?'+':'')+m.pnl.toLocaleString('en-US',{maximumFractionDigits:2})+' ر.س' : '—') + '</td>' +
+      '<td style="color:var(--muted);font-size:11px">' + (m.date||'—') + '</td>' +
+      '<td style="color:var(--muted);font-size:11px">' + (m.storage||'—') + '</td>' +
+      '<td style="display:flex;gap:4px"><button class="loan-action-btn" onclick="editMetal(' + i + ')">✏️</button><button class="loan-action-btn" style="color:var(--red)" onclick="deleteMetal(' + i + ')">🗑</button></td>' +
+      '</tr>';
+  }).join('') || '<tr><td colspan="12" style="text-align:center;padding:32px;color:var(--muted)">لا توجد معادن — أضف ذهباً أو فضة</td></tr>';
+}
+
+function editMetal(idx) {
+  _editingMetalIdx = idx;
+  var m = (window.metalsData||metalsData)[idx];
+  if (!m) return;
+  function sv(id,v){var e=document.getElementById(id);if(e)e.value=v||'';}
+  sv('m-type', m.type); sv('m-form', m.form); sv('m-weight', m.weight);
+  sv('m-karat', m.karat); sv('m-buy-price', m.buy_price);
+  sv('m-curr-price', m.curr_price||''); sv('m-date', m.date);
+  sv('m-storage', m.storage); sv('m-notes', m.notes);
+  document.getElementById('metals-add-form').style.display = 'block';
+  var title = document.getElementById('metals-form-title');
+  if (title) title.textContent = '✏️ تعديل: ' + m.type;
+  calcMetal();
+}
+
+function deleteMetal(idx) {
+  if (!confirm('حذف هذا المعدن؟')) return;
+  var data = window.metalsData || metalsData;
+  data.splice(idx, 1);
+  metalsData = data; window.metalsData = data;
+  saveMetalsToStorage(); renderMetals();
+}
+
+// ══════════════════════════════════════════════
+// JAMAA (جمعيات الادخار)
+// ══════════════════════════════════════════════
+var jamaaData = JSON.parse(localStorage.getItem('jamaaData') || '[]');
+window.jamaaData = jamaaData;
+var _editingJamaaIdx = null;
+
+function saveJamaaToStorage() {
+  localStorage.setItem('jamaaData', JSON.stringify(jamaaData));
+  window.jamaaData = jamaaData;
+  if (typeof window.fbSaveJamaa === 'function') window.fbSaveJamaa();
+}
+
+function switchDebtsTab(tab) {
+  var tabs = ['debts','jamaa'];
+  tabs.forEach(function(t) {
+    var panel = document.getElementById('dt-panel-' + t);
+    var btn   = document.getElementById('dt-tab-' + t);
+    if (panel) panel.style.display = t === tab ? 'block' : 'none';
+    if (btn) {
+      btn.style.borderBottomColor = t === tab ? 'var(--gold)' : 'transparent';
+      btn.style.color = t === tab ? 'var(--gold)' : 'var(--muted)';
+    }
+  });
+  var btnDebt  = document.getElementById('btn-add-debt');
+  var btnJamaa = document.getElementById('btn-add-jamaa');
+  if (btnDebt)  btnDebt.style.display  = tab === 'debts' ? '' : 'none';
+  if (btnJamaa) btnJamaa.style.display = tab === 'jamaa' ? '' : 'none';
+  if (tab === 'jamaa') renderJamaa();
+}
+
+function showAddJamaaForm() {
+  var form = document.getElementById('jamaa-add-form');
+  if (!form) return;
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  if (form.style.display !== 'none') {
+    var today = new Date().toISOString().split('T')[0];
+    var d = document.getElementById('j-start');
+    if (d && !d.value) d.value = today;
+    calcJamaa();
+  }
+}
+
+function calcJamaa() {
+  function gv(id){var e=document.getElementById(id);return e?e.value:'';}
+  function gf(id){return parseFloat(gv(id))||0;}
+  var monthly = gf('j-monthly');
+  var members = gf('j-members');
+  var turn    = gf('j-turn');
+  var startDate = gv('j-start');
+  if (!monthly || !members) { document.getElementById('j-calc-box').style.display='none'; return; }
+  var total   = monthly * members;
+  var receive = monthly * members; // total pot
+  var fmt     = function(n){return n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});};
+  var set     = function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+  document.getElementById('j-calc-box').style.display = 'block';
+  set('j-c-total',   fmt(total)   + ' ر.س');
+  set('j-c-receive', fmt(receive) + ' ر.س');
+  // موعد الدور
+  if (turn && startDate && turn <= members) {
+    var d = new Date(startDate);
+    d.setMonth(d.getMonth() + turn - 1);
+    set('j-c-turn-date', d.toLocaleDateString('ar-SA-u-nu-latn',{year:'numeric',month:'long'}));
+  } else {
+    set('j-c-turn-date','—');
+  }
+  // المدفوع حتى الآن
+  if (startDate) {
+    var now = new Date();
+    var start = new Date(startDate);
+    var monthsPassed = Math.max(0, (now.getFullYear() - start.getFullYear())*12 + (now.getMonth()-start.getMonth()));
+    monthsPassed = Math.min(monthsPassed, members);
+    set('j-c-paid-so-far', fmt(monthly * monthsPassed) + ' ر.س (' + monthsPassed + ' شهر)');
+  } else { set('j-c-paid-so-far','—'); }
+}
+
+function saveJamaa() {
+  function gv(id){var e=document.getElementById(id);return e?e.value:'';}
+  function gf(id){return parseFloat(gv(id))||0;}
+  var name    = gv('j-name').trim();
+  var monthly = gf('j-monthly');
+  var members = gf('j-members');
+  if (!name)    { showToast('❌ أدخل اسم الجمعية'); return; }
+  if (!monthly) { showToast('❌ أدخل القسط الشهري'); return; }
+  if (!members) { showToast('❌ أدخل عدد الأعضاء'); return; }
+  var turn = gf('j-turn');
+  var startDate = gv('j-start');
+  var turnDate = '';
+  if (turn && startDate) {
+    var d = new Date(startDate);
+    d.setMonth(d.getMonth() + turn - 1);
+    turnDate = d.toISOString().split('T')[0];
+  }
+  var now = new Date();
+  var start = startDate ? new Date(startDate) : now;
+  var monthsPassed = Math.max(0, Math.min(members,
+    (now.getFullYear()-start.getFullYear())*12 + (now.getMonth()-start.getMonth())
+  ));
+  var jamaa = {
+    name:        name,
+    monthly:     monthly,
+    members:     members,
+    turn:        turn,
+    turn_date:   turnDate,
+    total_pot:   monthly * members,
+    paid_so_far: monthly * monthsPassed,
+    months_passed: monthsPassed,
+    start_date:  startDate,
+    status:      gv('j-status') || 'نشطة',
+    method:      gv('j-method'),
+    manager:     gv('j-manager'),
+    contact:     gv('j-contact'),
+    notes:       gv('j-notes'),
+    created_at:  new Date().toISOString()
+  };
+  var data = window.jamaaData || jamaaData;
+  if (!Array.isArray(data)) data = [];
+  if (_editingJamaaIdx !== null) {
+    data[_editingJamaaIdx] = jamaa;
+    showToast('✅ تم تحديث الجمعية: ' + name);
+  } else {
+    data.push(jamaa);
+    showToast('✅ تم حفظ الجمعية: ' + name);
+  }
+  jamaaData = data; window.jamaaData = data;
+  saveJamaaToStorage();
+  renderJamaa();
+  resetJamaaForm();
+  document.getElementById('jamaa-add-form').style.display = 'none';
+}
+
+function resetJamaaForm() {
+  _editingJamaaIdx = null;
+  ['j-name','j-monthly','j-members','j-turn','j-start','j-manager','j-contact','j-notes'].forEach(function(id){
+    var e=document.getElementById(id); if(e) e.value='';
+  });
+  document.getElementById('j-calc-box').style.display = 'none';
+}
+
+function renderJamaa() {
+  var data = window.jamaaData || jamaaData || [];
+  var active  = data.filter(function(x){return x.status==='نشطة';});
+  var totalPot = data.reduce(function(s,x){return s+(x.total_pot||0);},0);
+  var totalPaid = data.reduce(function(s,x){return s+(x.paid_so_far||0);},0);
+  var fmt = function(n){return n.toLocaleString('en-US',{maximumFractionDigits:0});};
+
+  // KPIs
+  var kpis = document.getElementById('jamaa-kpis');
+  if (kpis) {
+    kpis.innerHTML =
+      '<div class="kpi-card" style="--accent:var(--green)"><div class="kpi-icon">✅</div><div class="kpi-label">نشطة</div><div class="kpi-value">'+active.length+'</div><div class="kpi-sub">جمعية</div></div>' +
+      '<div class="kpi-card" style="--accent:var(--gold)"><div class="kpi-icon">🏦</div><div class="kpi-label">إجمالي الأوعية</div><div class="kpi-value">'+fmt(totalPot)+'</div><div class="kpi-sub">ر.س</div></div>' +
+      '<div class="kpi-card" style="--accent:var(--orange)"><div class="kpi-icon">💸</div><div class="kpi-label">المدفوع حتى الآن</div><div class="kpi-value">'+fmt(totalPaid)+'</div><div class="kpi-sub">ر.س</div></div>' +
+      '<div class="kpi-card" style="--accent:var(--cyan)"><div class="kpi-icon">📋</div><div class="kpi-label">إجمالي الجمعيات</div><div class="kpi-value">'+data.length+'</div><div class="kpi-sub">جمعية</div></div>';
+  }
+
+  var cnt = document.getElementById('jamaa-count-badge');
+  if (cnt) cnt.textContent = data.length + ' جمعية';
+  var empty = document.getElementById('jamaa-empty');
+  var cards = document.getElementById('jamaa-cards');
+  if (!cards) return;
+  if (!data.length) {
+    if (empty) empty.style.display = 'block';
+    cards.innerHTML = '';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  cards.innerHTML = data.map(function(j, i) {
+    var pct = j.total_pot > 0 ? Math.min(100,(j.paid_so_far/j.total_pot*100)).toFixed(0) : 0;
+    var statusColor = j.status==='نشطة' ? 'var(--green)' : 'var(--muted)';
+    var statusBg    = j.status==='نشطة' ? 'rgba(0,230,118,0.1)' : 'rgba(136,153,187,0.1)';
+    return '<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:10px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<span style="font-size:22px">🤝</span>' +
+          '<div><div style="font-size:15px;font-weight:700">' + j.name + '</div>' +
+          '<div style="font-size:11px;color:var(--muted)">' + (j.manager?'مدير: '+j.manager:'') + '</div></div>' +
+        '</div>' +
+        '<span style="font-size:11px;padding:3px 10px;border-radius:8px;background:'+statusBg+';color:'+statusColor+'">' + j.status + '</span>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font-size:12px">' +
+        '<div><div style="color:var(--muted);margin-bottom:2px">القسط/شهر</div><div style="font-family:monospace;font-weight:700;color:var(--gold)">' + fmt(j.monthly) + ' ر.س</div></div>' +
+        '<div><div style="color:var(--muted);margin-bottom:2px">الأعضاء</div><div style="font-family:monospace;font-weight:700">' + j.members + ' عضو</div></div>' +
+        '<div><div style="color:var(--muted);margin-bottom:2px">دورك</div><div style="font-family:monospace;font-weight:700;color:var(--cyan)">' + (j.turn ? 'الشهر '+j.turn : '—') + '</div></div>' +
+        '<div><div style="color:var(--muted);margin-bottom:2px">إجمالي الوعاء</div><div style="font-family:monospace;font-weight:700;color:var(--green)">' + fmt(j.total_pot) + ' ر.س</div></div>' +
+      '</div>' +
+      (j.turn_date ? '<div style="font-size:11px;color:var(--cyan)">📅 موعد دورك: ' + j.turn_date + '</div>' : '') +
+      '<div>' +
+        '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px">' +
+          '<span>تقدم السداد</span><span>' + pct + '% (' + fmt(j.paid_so_far) + ' / ' + fmt(j.total_pot) + ' ر.س)</span>' +
+        '</div>' +
+        '<div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden">' +
+          '<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--green),#38d9a9);border-radius:3px;transition:width .5s"></div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:8px">' +
+        (j.contact ? '<button class="loan-action-btn" onclick="sendJamaaWhatsApp('+i+')" style="color:#25d366;border-color:rgba(37,211,102,0.3)">📲 واتساب</button>' : '') +
+        '<button class="loan-action-btn" onclick="editJamaa('+i+')" style="margin-right:auto">✏️ تعديل</button>' +
+        '<button class="loan-action-btn" style="color:var(--red)" onclick="deleteJamaa('+i+')">🗑</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function editJamaa(idx) {
+  _editingJamaaIdx = idx;
+  var j = (window.jamaaData||jamaaData)[idx];
+  if (!j) return;
+  function sv(id,v){var e=document.getElementById(id);if(e)e.value=v||'';}
+  sv('j-name',j.name); sv('j-monthly',j.monthly); sv('j-members',j.members);
+  sv('j-turn',j.turn); sv('j-start',j.start_date); sv('j-status',j.status);
+  sv('j-method',j.method); sv('j-manager',j.manager);
+  sv('j-contact',j.contact); sv('j-notes',j.notes);
+  document.getElementById('jamaa-add-form').style.display = 'block';
+  var title = document.getElementById('jamaa-form-title');
+  if (title) title.textContent = '✏️ تعديل: ' + j.name;
+  calcJamaa();
+}
+
+function deleteJamaa(idx) {
+  if (!confirm('حذف هذه الجمعية؟')) return;
+  var data = window.jamaaData || jamaaData;
+  data.splice(idx, 1);
+  jamaaData = data; window.jamaaData = data;
+  saveJamaaToStorage(); renderJamaa();
+}
+
+
+// ══════════════════════════════════════════════════════
+// إضافة دين لتقويم Google Calendar
+// ══════════════════════════════════════════════════════
+function addDebtToGoogleCalendar(idx) {
+  var dd = window.debtsData || debtsData;
+  var d  = dd[idx];
+  if (!d) return;
+  if (!d.due_date) {
+    showToast('⚠️ لا يوجد تاريخ استحقاق — أضف تاريخاً عند تعديل الدين');
+    return;
+  }
+
+  var isOwe  = d.direction === 'owe';
+  var amt    = (d.remaining || d.amount || 0).toLocaleString('en-US', {maximumFractionDigits:0});
+  var nl     = String.fromCharCode(10);
+
+  // عنوان الحدث
+  var titleText = (isOwe ? '💸 سداد دين — ' : '💰 استرداد دين — ') + d.person
+                + ' (' + amt + ' ر.س)';
+
+  // تفاصيل الحدث
+  var detailsArr = [
+    (isOwe ? '📌 عليك سداد مبلغ: ' : '📌 لك مبلغ: ') + amt + ' ر.س',
+    '👤 الشخص: ' + d.person
+  ];
+  if (d.reason)   detailsArr.push('📝 السبب: ' + d.reason);
+  if (d.contact)  detailsArr.push('📞 التواصل: ' + d.contact);
+  if (d.method)   detailsArr.push('💳 طريقة السداد: ' + d.method);
+  detailsArr.push('');
+  detailsArr.push('— محفظتي المالية 📊');
+
+  // تحويل التاريخ: YYYY-MM-DD → YYYYMMDD
+  var dt      = d.due_date.replace(/-/g, '');
+  // نهاية الحدث: اليوم نفسه + 1 (Google Calendar all-day)
+  var dtEnd   = dt; // same day
+
+  var calUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+    + '&text='     + encodeURIComponent(titleText)
+    + '&dates='    + dt + '/' + dt
+    + '&details='  + encodeURIComponent(detailsArr.join(nl))
+    + '&location=' + encodeURIComponent('المملكة العربية السعودية')
+    + '&trp=false';
+
+  window.open(calUrl, '_blank');
+  showToast('📅 تم فتح تقويم Google — أضف التذكير');
+}
+
+// ══════════════════════════════════════════════════════
+// أعضاء الجمعية — الإضافة والإزالة
+// ══════════════════════════════════════════════════════
+var _jamaaParticipants = [];
+
+function addJamaaParticipant() {
+  _jamaaParticipants.push({ name: '', phone: '', turn: '' });
+  renderJamaaParticipants();
+}
+
+function removeJamaaParticipant(i) {
+  _jamaaParticipants.splice(i, 1);
+  renderJamaaParticipants();
+}
+
+function renderJamaaParticipants() {
+  var list = document.getElementById('j-participants-list');
+  if (!list) return;
+  if (!_jamaaParticipants.length) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0">لا يوجد أعضاء — اضغط "+ إضافة عضو"</div>';
+    return;
+  }
+  list.innerHTML = _jamaaParticipants.map(function(p, i) {
+    return '<div style="display:grid;grid-template-columns:1fr 1fr 80px 32px;gap:8px;align-items:center">'
+      + '<input class="f-input" type="text" placeholder="اسم العضو" value="' + (p.name||'') + '" oninput="_jamaaParticipants['+i+'].name=this.value" style="font-size:12px;padding:7px 10px" />'
+      + '<input class="f-input" type="tel" placeholder="05xxxxxxxx" value="' + (p.phone||'') + '" oninput="_jamaaParticipants['+i+'].phone=this.value" style="font-size:12px;padding:7px 10px;direction:ltr" />'
+      + '<input class="f-input" type="number" placeholder="دوره" value="' + (p.turn||'') + '" oninput="_jamaaParticipants['+i+'].turn=parseInt(this.value)||0" style="font-size:12px;padding:7px 8px;text-align:center" />'
+      + '<button onclick="removeJamaaParticipant('+i+')" style="background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.2);border-radius:8px;padding:7px;cursor:pointer;color:var(--red);font-size:13px;line-height:1">×</button>'
+      + '</div>';
+  }).join('');
+}
+
+// ── تعديل saveJamaa لحفظ المشاركين ──────────────────────────────────────────
+var _origSaveJamaa = saveJamaa;
+saveJamaa = function() {
+  // Get participants from UI before original save
+  var listEl = document.getElementById('j-participants-list');
+  if (listEl) {
+    // sync from inputs
+    listEl.querySelectorAll('input[type="text"]').forEach(function(inp, i) {
+      if (_jamaaParticipants[i]) _jamaaParticipants[i].name = inp.value;
+    });
+  }
+  _origSaveJamaa();
+};
+
+// ── تعديل saveJamaa نفسه لتضمين المشاركين ──────────────────────────────────
+// نعدّل الكائن بعد الحفظ مباشرة
+var _origSaveJamaaStorage = saveJamaaToStorage;
+saveJamaaToStorage = function() {
+  // Attach participants to last added/edited jamaa entry
+  var data = window.jamaaData || jamaaData;
+  if (data && data.length > 0) {
+    var target = _editingJamaaIdx !== null ? data[_editingJamaaIdx] : data[data.length - 1];
+    if (target) target.participants = JSON.parse(JSON.stringify(_jamaaParticipants));
+  }
+  _origSaveJamaaStorage();
+};
+
+// ── عرض جدول الأدوار في كرت الجمعية ────────────────────────────────────────
+var _origRenderJamaa = renderJamaa;
+renderJamaa = function() {
+  _origRenderJamaa();
+  // Enhance cards with participants table
+  var data = window.jamaaData || jamaaData || [];
+  var cards = document.getElementById('jamaa-cards');
+  if (!cards || !data.length) return;
+
+  var cardDivs = cards.querySelectorAll('div[style*="border:1px solid"]');
+  data.forEach(function(j, idx) {
+    var parts = j.participants || [];
+    if (!parts.length || !cardDivs[idx]) return;
+    // Sort by turn
+    var sorted = parts.slice().sort(function(a, b) { return (a.turn||99) - (b.turn||99); });
+    var tableHtml = '<div style="margin-top:10px;border-top:1px solid rgba(255,255,255,0.07);padding-top:10px">'
+      + '<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:8px">👥 جدول الأدوار</div>'
+      + '<div style="display:grid;grid-template-columns:40px 1fr 1fr 80px;gap:4px;font-size:11px">'
+      + '<div style="color:var(--muted);padding:4px 0">الدور</div>'
+      + '<div style="color:var(--muted);padding:4px 0">الاسم</div>'
+      + '<div style="color:var(--muted);padding:4px 0">الجوال</div>'
+      + '<div style="color:var(--muted);padding:4px 0">المبلغ</div>'
+      + sorted.map(function(p) {
+          var isMyTurn = p.turn == j.turn;
+          var turnDate = '';
+          if (j.start_date && p.turn) {
+            var d = new Date(j.start_date);
+            d.setMonth(d.getMonth() + (p.turn||1) - 1);
+            turnDate = d.toLocaleDateString('ar-SA-u-nu-latn',{month:'short',year:'2-digit'});
+          }
+          var fmt = function(n){return n.toLocaleString('en-US',{maximumFractionDigits:0});};
+          return '<div style="padding:4px 6px;border-radius:4px;background:rgba(255,255,255,0.03);text-align:center;font-weight:700;color:' + (isMyTurn?'var(--gold)':'var(--white)') + '">' + (p.turn||'—') + '</div>'
+            + '<div style="padding:4px 6px;border-radius:4px;background:rgba(255,255,255,0.03)' + (isMyTurn?';color:var(--gold);font-weight:700':'') + '">' + (p.name||'—') + (isMyTurn?' ⭐':'') + '</div>'
+            + '<div style="padding:4px 6px;border-radius:4px;background:rgba(255,255,255,0.03)">'
+            + (p.phone ? '<a href="https://wa.me/966' + p.phone.replace(/^0/,'') + '" target="_blank" style="color:#25d366;text-decoration:none;font-size:10px">📲 ' + p.phone + '</a>' : '—')
+            + '</div>'
+            + '<div style="padding:4px 6px;border-radius:4px;background:rgba(255,255,255,0.03);text-align:center;color:var(--green);font-family:monospace">' + fmt(j.total_pot||0) + '</div>';
+        }).join('')
+      + '</div></div>';
+
+    var existing = cardDivs[idx].querySelector('.jamaa-participants-table');
+    if (existing) existing.remove();
+    var wrapper = document.createElement('div');
+    wrapper.className = 'jamaa-participants-table';
+    wrapper.innerHTML = tableHtml;
+    cardDivs[idx].appendChild(wrapper);
+  });
+};
+
+// ── تحميل المشاركين عند فتح فورم التعديل ────────────────────────────────────
+var _origEditJamaa = editJamaa;
+editJamaa = function(idx) {
+  _origEditJamaa(idx);
+  var j = (window.jamaaData || jamaaData)[idx];
+  _jamaaParticipants = j && j.participants ? JSON.parse(JSON.stringify(j.participants)) : [];
+  setTimeout(renderJamaaParticipants, 150);
+};
+
+// ── إعادة تعيين المشاركين عند مسح الفورم ────────────────────────────────────
+var _origResetJamaaForm = resetJamaaForm;
+resetJamaaForm = function() {
+  _origResetJamaaForm();
+  _jamaaParticipants = [];
+  renderJamaaParticipants();
+};
+
+
+// ══════════════════════════════════════════════════════
+// مصدر رأس المال — إدارة ديناميكية
+// ══════════════════════════════════════════════════════
+var _defaultCapitalSources = ['مستحقات','Cash Flow','رصيد الإجازة','تحويشة','أرباح سابقة','ايجار عقار','مدخرات','مكافأة','قرض','أخرى'];
+
+function getCapitalSources() {
+  try {
+    var stored = JSON.parse(localStorage.getItem('capitalSources') || 'null');
+    return stored && stored.length ? stored : _defaultCapitalSources.slice();
+  } catch(e) { return _defaultCapitalSources.slice(); }
+}
+
+function saveCapitalSources(list) {
+  localStorage.setItem('capitalSources', JSON.stringify(list));
+}
+
+function populateCapitalSrcSelect() {
+  var sel = document.getElementById('f-capital-src');
+  if (!sel) return;
+  var current = sel.value;
+  var sources = getCapitalSources();
+  sel.innerHTML = '<option value="">— اختر المصدر —</option>'
+    + sources.map(function(s) {
+        return '<option value="' + s + '"' + (s === current ? ' selected' : '') + '>' + s + '</option>';
+      }).join('');
+}
+
+function showCapitalSrcSettings() {
+  document.getElementById('capital-src-modal').style.display = 'flex';
+  renderCapitalSrcList();
+}
+
+function closeCapitalSrcSettings() {
+  document.getElementById('capital-src-modal').style.display = 'none';
+  populateCapitalSrcSelect(); // refresh after edits
+}
+
+function renderCapitalSrcList() {
+  var list = document.getElementById('capital-src-list');
+  if (!list) return;
+  var sources = getCapitalSources();
+  if (!sources.length) { list.innerHTML = '<div style="color:var(--muted);font-size:12px">لا توجد مصادر</div>'; return; }
+  list.innerHTML = sources.map(function(s, i) {
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,0.04);border-radius:10px;border:1px solid var(--border)">'
+      + '<span style="flex:1;font-size:13px">' + s + '</span>'
+      + '<button onclick="deleteCapitalSrc(' + i + ')" style="background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.2);border-radius:7px;padding:4px 10px;cursor:pointer;color:var(--red);font-size:12px">حذف</button>'
+      + '</div>';
+  }).join('');
+}
+
+function addCapitalSrc() {
+  var inp = document.getElementById('capital-src-new-input');
+  if (!inp) return;
+  var val = inp.value.trim();
+  if (!val) { showToast('❌ أدخل اسم المصدر'); return; }
+  var sources = getCapitalSources();
+  if (sources.includes(val)) { showToast('المصدر موجود مسبقاً'); return; }
+  sources.push(val);
+  saveCapitalSources(sources);
+  inp.value = '';
+  renderCapitalSrcList();
+  showToast('✅ تمت الإضافة: ' + val);
+}
+
+function deleteCapitalSrc(i) {
+  var sources = getCapitalSources();
+  sources.splice(i, 1);
+  saveCapitalSources(sources);
+  renderCapitalSrcList();
+}
+
+// استدعاء تعبئة القائمة عند فتح صفحة الإضافة
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(populateCapitalSrcSelect, 500);
+});
+
+
+// ══════════════════════════════════════════════
+// واتساب الجمعيات
+// ══════════════════════════════════════════════
+function sendJamaaWhatsApp(idx) {
+  var j = (window.jamaaData || jamaaData)[idx];
+  if (!j) return;
+  var nl = String.fromCharCode(10);
+  var fmt = function(n){ return n.toLocaleString('en-US',{maximumFractionDigits:0}); };
+  var msg = [
+    '🤝 *جمعية: ' + j.name + '*',
+    '',
+    '• القسط الشهري: *' + fmt(j.monthly) + ' ر.س*',
+    '• عدد الأعضاء: ' + j.members + ' عضو',
+    '• إجمالي الوعاء: ' + fmt(j.total_pot) + ' ر.س',
+    (j.turn ? '• دورك: الشهر ' + j.turn : ''),
+    (j.turn_date ? '• تاريخ دورك: ' + j.turn_date : ''),
+    '',
+    '— محفظتي المالية 📊'
+  ].filter(function(x){ return x !== undefined; }).join(nl);
+  var phone = j.contact ? '966' + j.contact.replace(/^0/, '') : '';
+  var url = phone
+    ? 'https://wa.me/' + phone + '?text=' + encodeURIComponent(msg)
+    : 'https://wa.me/?text=' + encodeURIComponent(msg);
+  window.open(url, '_blank');
+}
+
+
+// ══════════════════════════════════════════════════════
+// SETTINGS SYSTEM — مصادر رأس المال + المنصات + الاسم
+// ══════════════════════════════════════════════════════
+
+var _defaultCapitalSources  = ['مستحقات','Cash Flow','رصيد الإجازة','تحويشة','أرباح سابقة','ايجار عقار','مدخرات','مكافأة','قرض','أخرى'];
+var _defaultPlatforms       = ['ترميز','منافع','دراية','ابيان','عوائد','منصة الأهلي','رياض المالية','الراجحي المالية','بنك البلاد','إتقان','أخرى'];
+
+function _getSettings() {
+  try { return JSON.parse(localStorage.getItem('appSettings') || '{}'); } catch(e) { return {}; }
+}
+function _saveSettings(s) { localStorage.setItem('appSettings', JSON.stringify(s)); }
+
+function getCapitalSources() {
+  var s = _getSettings();
+  return (s.capitalSources && s.capitalSources.length) ? s.capitalSources : _defaultCapitalSources.slice();
+}
+function getPlatforms() {
+  var s = _getSettings();
+  return (s.platforms && s.platforms.length) ? s.platforms : _defaultPlatforms.slice();
+}
+function getDisplayName() {
+  var s = _getSettings();
+  return s.displayName || (window.__firebaseUser && window.__firebaseUser.displayName) || '';
+}
+
+// ── تعبئة القوائم المنسدلة ───────────────────────────────────────────────────
+function populateCapitalSrcSelect() {
+  var sel = document.getElementById('f-capital-src');
+  if (!sel) return;
+  var current = sel.value;
+  var sources = getCapitalSources();
+  sel.innerHTML = '<option value="">— اختر المصدر —</option>'
+    + sources.map(function(s) {
+        return '<option value="' + s + '"' + (s === current ? ' selected' : '') + '>' + s + '</option>';
+      }).join('');
+}
+
+function populatePlatformSelects() {
+  var platforms = getPlatforms();
+  var opts = '<option value="">— اختر المنصة —</option>'
+    + platforms.map(function(p){ return '<option>' + p + '</option>'; }).join('');
+
+  // كل select الخاصة بالمنصة في التطبيق
+  ['f-platform', 'al-bank', 'as-platform'].forEach(function(id) {
+    var sel = document.getElementById(id);
+    if (!sel) return;
+    var cur = sel.value;
+    // f-platform لها optgroups — نبقيها كما هي
+    if (id === 'f-platform') return;
+    if (id === 'al-bank') return; // للقروض لها قائمة خاصة
+    // as-platform: نحدّث optgroups
+    if (id === 'as-platform') {
+      var saOpts = platforms.filter(function(p){ return !['Interactive Brokers','Alpaca','Robinhood','TD Ameritrade','Charles Schwab'].includes(p); })
+        .map(function(p){ return '<option>' + p + '</option>'; }).join('');
+      var existingSa = sel.querySelector('#as-platform-sa-group');
+      if (existingSa) existingSa.innerHTML = saOpts;
+      return;
+    }
+  });
+}
+
+// ── فتح/إغلاق الـ Modal ──────────────────────────────────────────────────────
+function openSettingsModal() {
+  var modal = document.getElementById('settings-modal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+
+  var s = _getSettings();
+
+  // تعبئة الاسم
+  var nameInp = document.getElementById('settings-display-name');
+  if (nameInp) nameInp.value = s.displayName || (window.__firebaseUser && window.__firebaseUser.displayName) || '';
+
+  // تعبئة مصادر رأس المال
+  renderSettingsList('capital', getCapitalSources());
+
+  // تعبئة المنصات
+  renderSettingsList('platforms', getPlatforms());
+}
+
+function closeSettingsModal() {
+  var modal = document.getElementById('settings-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+// ── عرض القائمة في الـ Modal ─────────────────────────────────────────────────
+function renderSettingsList(key, items) {
+  var listEl = document.getElementById('settings-' + key + '-list');
+  if (!listEl) return;
+  if (!items.length) {
+    listEl.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:6px 0">لا توجد عناصر</div>';
+    return;
+  }
+  listEl.innerHTML = items.map(function(item, i) {
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(255,255,255,0.04);border-radius:9px;border:1px solid var(--border)">'
+      + '<span style="flex:1;font-size:12px">' + item + '</span>'
+      + '<button onclick="removeSettingsItem(\'' + key + '\',' + i + ')" style="background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.2);border-radius:6px;padding:2px 8px;cursor:pointer;color:var(--red);font-size:11px;flex-shrink:0">حذف</button>'
+      + '</div>';
+  }).join('');
+}
+
+function addSettingsItem(key) {
+  var inp = document.getElementById('settings-' + key + '-input');
+  if (!inp) return;
+  var val = inp.value.trim();
+  if (!val) { showToast('❌ أدخل اسماً'); return; }
+  var s = _getSettings();
+  var list = key === 'capital' ? getCapitalSources() : getPlatforms();
+  if (list.includes(val)) { showToast('العنصر موجود مسبقاً'); return; }
+  list.push(val);
+  if (key === 'capital') s.capitalSources = list;
+  else s.platforms = list;
+  _saveSettings(s);
+  inp.value = '';
+  renderSettingsList(key, list);
+  showToast('✅ تمت إضافة: ' + val);
+}
+
+function removeSettingsItem(key, idx) {
+  var s = _getSettings();
+  var list = key === 'capital' ? getCapitalSources() : getPlatforms();
+  list.splice(idx, 1);
+  if (key === 'capital') s.capitalSources = list;
+  else s.platforms = list;
+  _saveSettings(s);
+  renderSettingsList(key, list);
+}
+
+function saveSettings() {
+  var s = _getSettings();
+  var nameInp = document.getElementById('settings-display-name');
+  if (nameInp && nameInp.value.trim()) {
+    s.displayName = nameInp.value.trim();
+  }
+  // capital و platforms محفوظة تلقائياً عند الإضافة/الحذف
+  _saveSettings(s);
+
+  // تحديث القوائم في التطبيق
+  populateCapitalSrcSelect();
+  populatePlatformSelects();
+
+  closeSettingsModal();
+  showToast('✅ تم حفظ الإعدادات');
+}
+
+// ── تعبئة تلقائية عند فتح صفحة الإضافة ─────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    populateCapitalSrcSelect();
+    populatePlatformSelects();
+  }, 600);
+});
+
+// ── إغلاق بالضغط خارج الـ modal ────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  var modal = document.getElementById('settings-modal');
+  if (modal && modal.style.display === 'flex' && e.target === modal) {
+    closeSettingsModal();
+  }
+});
+
+
+// ══════════════════════════════════════════════════════
+// CSV EXPORT / IMPORT — الأسهم والصكوك والصناديق
+// ══════════════════════════════════════════════════════
+
+function _downloadCSV(filename, rows) {
+  var bom  = '﻿'; // BOM for Excel Arabic support
+  var csv  = bom + rows.map(function(row) {
+    return row.map(function(cell) {
+      var s = String(cell == null ? '' : cell);
+      // Escape cells with commas, quotes, or newlines
+      if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+        s = '"' + s.replace(/"/g, '""') + '"';
+      }
+      return s;
+    }).join(',');
+  }).join('\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+}
+
+// ── تصدير الأسهم ────────────────────────────────────────────────────────────
+function exportStocksCSV(market) {
+  var inv = window.__investments || investments;
+  var data = inv.filter(function(x) {
+    return x.type === 'سهم' && (market === 'us' ? x.market === 'us' : x.market !== 'us');
+  });
+  if (!data.length) { showToast('لا توجد أسهم للتصدير'); return; }
+
+  var headers = ['الاسم','الرمز','عدد الأسهم','التكلفة (ر.س)','متوسط سعر الشراء',
+                 'المنصة','المخاطرة','الحالة','تاريخ الشراء','تاريخ الخروج','السوق'];
+  var rows = [headers].concat(data.map(function(d) {
+    var avgPrice = d.shares && d.amount ? (d.amount / d.shares).toFixed(2) : '';
+    return [
+      d.name, d.ticker || '', d.shares || '', d.amount || '', avgPrice,
+      d.platform || '', d.risk || '', d.status || '',
+      d.date_in || '', d.date_out || '',
+      market === 'us' ? 'أمريكي' : 'سعودي'
+    ];
+  }));
+  var fname = (market === 'us' ? 'أسهم_أمريكية' : 'أسهم_سعودية') + '_' + new Date().toISOString().slice(0,10) + '.csv';
+  _downloadCSV(fname, rows);
+  showToast('✅ تم تصدير ' + data.length + ' سهم');
+}
+
+// ── استيراد الأسهم ───────────────────────────────────────────────────────────
+function importStocksCSV(event, market) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var text   = e.target.result.replace(/^﻿/, ''); // remove BOM
+      var lines  = text.split('\n').filter(function(l){ return l.trim(); });
+      if (lines.length < 2) { showToast('❌ الملف فارغ'); return; }
+      var headers = lines[0].split(',').map(function(h){ return h.trim().replace(/^"|"$/g,''); });
+      var imported = 0;
+      var inv = window.__investments || investments;
+
+      for (var i = 1; i < lines.length; i++) {
+        var cols = _parseCSVLine(lines[i]);
+        if (cols.length < 2) continue;
+        var row = {};
+        headers.forEach(function(h, idx) { row[h] = (cols[idx] || '').trim(); });
+
+        // تحقق من وجود البيانات الأساسية
+        var name = row['الاسم'] || row['name'] || '';
+        if (!name) continue;
+
+        // تحقق من التكرار
+        var exists = inv.some(function(x){ return x.name === name && x.ticker === (row['الرمز']||row['ticker']||''); });
+        if (exists) continue;
+
+        inv.push({
+          name:      name,
+          type:      'سهم',
+          ticker:    row['الرمز'] || row['ticker'] || '',
+          shares:    parseFloat(row['عدد الأسهم'] || row['shares'] || 0) || null,
+          amount:    parseFloat(row['التكلفة (ر.س)'] || row['amount'] || 0) || 0,
+          platform:  row['المنصة'] || row['platform'] || '',
+          risk:      row['المخاطرة'] || row['risk'] || 'متوسط',
+          status:    row['الحالة'] || row['status'] || 'نشطة',
+          date_in:   row['تاريخ الشراء'] || row['date_in'] || '',
+          date_out:  row['تاريخ الخروج'] || row['date_out'] || null,
+          market:    market === 'us' ? 'us' : '',
+          ret_pct:   parseFloat(row['ret_pct'] || 0) || 0,
+          ret_val:   parseFloat(row['ret_val'] || 0) || 0,
+          total:     parseFloat(row['total'] || 0) || 0,
+          dist:      row['dist'] || 'لا يوجد',
+        });
+        imported++;
+      }
+
+      if (imported > 0) {
+        triggerSync('investments');
+        renderStocks(); renderAll();
+        showToast('✅ تم استيراد ' + imported + ' سهم جديد');
+      } else {
+        showToast('⚠️ لم يُضف شيء — قد تكون البيانات مكررة');
+      }
+    } catch(err) {
+      showToast('❌ خطأ في قراءة الملف: ' + err.message);
+    }
+    event.target.value = ''; // reset input
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+// ── تصدير الصكوك والصناديق ───────────────────────────────────────────────────
+function exportOppsCSV(type) {
+  var inv = window.__investments || investments;
+  var typeMap = { sukuk: ['صك','مرابحة','سند','وديعة'], funds: ['صندوق'] };
+  var types   = typeMap[type] || [];
+  var data    = inv.filter(function(x){ return types.includes(x.type); });
+  if (!data.length) { showToast('لا توجد بيانات للتصدير'); return; }
+
+  var headers = ['الاسم','النوع','المنصة','المبلغ (ر.س)','مصدر رأس المال',
+                 'العائد %','العائد ر.س','المجموع المتوقع','المدة',
+                 'تاريخ الدخول','تاريخ الخروج','التوزيع','المخاطرة','الحالة'];
+  var rows = [headers].concat(data.map(function(d) {
+    return [
+      d.name, d.type, d.platform || '', d.amount || 0, d.capital_src || '',
+      d.ret_pct ? (d.ret_pct * 100).toFixed(2) + '%' : '',
+      d.ret_val || '', d.total || '', d.duration || '',
+      d.date_in || '', d.date_out || '', d.dist || '', d.risk || '', d.status || ''
+    ];
+  }));
+  var label = type === 'sukuk' ? 'صكوك' : 'صناديق';
+  var fname = label + '_' + new Date().toISOString().slice(0,10) + '.csv';
+  _downloadCSV(fname, rows);
+  showToast('✅ تم تصدير ' + data.length + ' ' + label);
+}
+
+// ── استيراد الصكوك والصناديق ─────────────────────────────────────────────────
+function importOppsCSV(event, type) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var text  = e.target.result.replace(/^﻿/, '');
+      var lines = text.split('\n').filter(function(l){ return l.trim(); });
+      if (lines.length < 2) { showToast('❌ الملف فارغ'); return; }
+      var headers  = lines[0].split(',').map(function(h){ return h.trim().replace(/^"|"$/g,''); });
+      var imported = 0;
+      var inv      = window.__investments || investments;
+      var defaultType = type === 'sukuk' ? 'صك' : 'صندوق';
+
+      for (var i = 1; i < lines.length; i++) {
+        var cols = _parseCSVLine(lines[i]);
+        if (cols.length < 2) continue;
+        var row  = {};
+        headers.forEach(function(h, idx){ row[h] = (cols[idx] || '').trim(); });
+
+        var name = row['الاسم'] || row['name'] || '';
+        if (!name) continue;
+        var exists = inv.some(function(x){ return x.name === name; });
+        if (exists) continue;
+
+        var retPct = parseFloat((row['العائد %'] || '0').replace('%','')) || 0;
+        inv.push({
+          name:        name,
+          type:        row['النوع'] || defaultType,
+          platform:    row['المنصة'] || row['platform'] || '',
+          amount:      parseFloat(row['المبلغ (ر.س)'] || row['amount'] || 0) || 0,
+          capital_src: row['مصدر رأس المال'] || '',
+          ret_pct:     retPct / 100,
+          ret_val:     parseFloat(row['العائد ر.س'] || row['ret_val'] || 0) || 0,
+          total:       parseFloat(row['المجموع المتوقع'] || row['total'] || 0) || 0,
+          duration:    row['المدة'] || row['duration'] || '',
+          date_in:     row['تاريخ الدخول'] || row['date_in'] || '',
+          date_out:    row['تاريخ الخروج'] || row['date_out'] || null,
+          dist:        row['التوزيع'] || row['dist'] || 'عند الاستحقاق',
+          risk:        row['المخاطرة'] || row['risk'] || 'منخفض',
+          status:      row['الحالة'] || row['status'] || 'نشطة',
+        });
+        imported++;
+      }
+
+      if (imported > 0) {
+        triggerSync('investments');
+        if (type === 'sukuk') renderSukuk(); else renderFunds();
+        renderAll();
+        showToast('✅ تم استيراد ' + imported + ' سجل');
+      } else {
+        showToast('⚠️ لم يُضف شيء — قد تكون البيانات مكررة');
+      }
+    } catch(err) {
+      showToast('❌ خطأ في قراءة الملف: ' + err.message);
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+// ── CSV Line Parser (يدعم الخلايا التي تحتوي فواصل بين quotes) ──────────────
+function _parseCSVLine(line) {
+  var result = [], cur = '', inQuote = false;
+  for (var i = 0; i < line.length; i++) {
+    var ch = line[i];
+    if (ch === '"') {
+      if (inQuote && line[i+1] === '"') { cur += '"'; i++; }
+      else inQuote = !inQuote;
+    } else if (ch === ',' && !inQuote) {
+      result.push(cur); cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  result.push(cur);
+  return result;
+}
+
+
+// ── فلتر الأسهم ──────────────────────────────────────────────────────────────
+var _stockFilter = { sa: 'all', us: 'all' };
+
+function filterStocks(market, status) {
+  _stockFilter[market] = status;
+  var color  = market === 'sa' ? 'var(--gold)' : '#60a5fa';
+  var bg     = market === 'sa' ? 'rgba(201,168,76,0.15)' : 'rgba(96,165,250,0.15)';
+  var map    = { all: 'all', active: 'نشطة', done: 'مستلمة' };
+  ['all','active','done'].forEach(function(k) {
+    var btn = document.getElementById('sf-' + market + '-' + k);
+    if (!btn) return;
+    var sel = map[k] === status || (k === 'all' && status === 'all');
+    btn.style.borderColor = sel ? color : 'var(--border)';
+    btn.style.background  = sel ? bg    : 'transparent';
+    btn.style.color       = sel ? color : 'var(--muted)';
+  });
+  if (market === 'sa') renderStocks();
+  else                 renderUsStocksTable();
+}
+
+
+
+// ── جلب سعر سهم واحد (SA) ───────────────────────────────────────────────────
+async function fetchSingleStockPrice(ticker) {
+  if (!ticker) return;
+  var symbol = ticker + '.SR';
+  try {
+    var url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + symbol + '?interval=1d&range=1d';
+    var res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var json = await res.json();
+    var result = json?.chart?.result?.[0];
+    var price = result?.meta?.regularMarketPrice;
+    var chg   = result?.meta?.regularMarketChangePercent;
+    if (price) {
+      if (!window.STOCK_PRICES) window.STOCK_PRICES = {};
+      STOCK_PRICES[ticker] = { price: price, chg: (chg||0)/100, color: (chg||0) >= 0 ? 'up' : 'dn' };
+      renderStocks();
+      showToast('✅ ' + ticker + ': ' + price.toFixed(2) + ' ر.س');
+    }
+  } catch(e) { showToast('❌ فشل جلب ' + ticker + ': ' + e.message); }
+}
+
+// ── جلب سعر سهم واحد (US) ───────────────────────────────────────────────────
+async function fetchSingleUsStockPrice(ticker) {
+  if (!ticker) return;
+  try {
+    var url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + ticker + '?interval=1d&range=1d';
+    var res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var json = await res.json();
+    var result = json?.chart?.result?.[0];
+    var price = result?.meta?.regularMarketPrice;
+    var chg   = result?.meta?.regularMarketChangePercent;
+    if (price) {
+      if (!window.US_STOCK_PRICES) window.US_STOCK_PRICES = {};
+      US_STOCK_PRICES[ticker] = { price: price, chg: (chg||0)/100, color: (chg||0) >= 0 ? 'up' : 'dn', name: ticker };
+      renderUsStocksTable();
+      showToast('✅ ' + ticker + ': $' + price.toFixed(2));
+    }
+  } catch(e) { showToast('❌ فشل جلب ' + ticker + ': ' + e.message); }
+}
+
 
 var isLightMode = localStorage.getItem('theme') === 'light';
 
