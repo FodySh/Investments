@@ -4584,7 +4584,6 @@ async function fetchLiveStockPrices() {
   var saStocks = inv.filter(function(x){ return x.type==='سهم' && x.market !== 'us' && x.ticker; });
   if (!saStocks.length) { _stockFetchInProgress = false; return; }
 
-  // Initialize STOCK_PRICES entries
   saStocks.forEach(function(x){
     if (!STOCK_PRICES[x.ticker]) STOCK_PRICES[x.ticker] = { price:null, chg:null, color:'' };
   });
@@ -4594,81 +4593,97 @@ async function fetchLiveStockPrices() {
   if (icon) icon.style.animation = 'spin 1s linear infinite';
   if (btn)  btn.style.opacity = '0.6';
 
-  var updated = 0;
   var tickers = saStocks.map(function(x){ return x.ticker; });
+  var updated = 0;
 
-  // ── محاولة 1: تداول (tadawul) عبر API رسمي ──────────────────────────────
-  // تداول يوفر بيانات السوق عبر Argaam وRaheem APIs
-  // نستخدم Yahoo Finance مع .SR كـ primary source (الأموثق)
-  try {
-    var symbols = tickers.map(function(t){ return t + '.SR'; }).join(',');
-    // Yahoo Finance v8 — يعمل بدون CORS على أغلب المتصفحات
-    var url = 'https://query1.finance.yahoo.com/v8/finance/quote?symbols=' + symbols
-            + '&fields=regularMarketPrice,regularMarketChangePercent,regularMarketTime';
-    var res = await fetch(url, {
-      headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' }
-    });
-    if (res.ok) {
-      var data = await res.json();
-      var quotes = ((data.quoteResponse || {}).result) || [];
-      quotes.forEach(function(q) {
-        var ticker = (q.symbol || '').replace('.SR','');
-        if (!ticker) return;
-        STOCK_PRICES[ticker] = {
-          price: q.regularMarketPrice,
-          chg:   (q.regularMarketChangePercent || 0) / 100,
-          color: (q.regularMarketChangePercent || 0) >= 0 ? 'up' : 'dn'
-        };
-        updated++;
-      });
-    }
-  } catch(e) { console.warn('Yahoo v8 failed:', e.message); }
+  // تقسيم الأسهم لمجموعات من 10 لتجاوز حد Yahoo Finance
+  var CHUNK = 10;
+  var chunks = [];
+  for (var i = 0; i < tickers.length; i += CHUNK) {
+    chunks.push(tickers.slice(i, i + CHUNK));
+  }
 
-  // ── محاولة 2: Yahoo Finance v7 (fallback) ───────────────────────────────
-  if (updated === 0) {
+  for (var ci = 0; ci < chunks.length; ci++) {
+    var chunk = chunks[ci];
+    var symbols = chunk.map(function(t){ return t + '.SR'; }).join(',');
+    var chunkUpdated = false;
+
+    // محاولة 1: Yahoo Finance v8
     try {
-      var symbols2 = tickers.map(function(t){ return t + '.SR'; }).join(',');
-      var url2 = 'https://query2.finance.yahoo.com/v7/finance/quote?symbols=' + symbols2;
-      var res2 = await fetch(url2);
-      if (res2.ok) {
-        var json2 = await res2.json();
-        var quotes2 = ((json2.quoteResponse || {}).result) || [];
-        quotes2.forEach(function(q) {
+      var url = 'https://query1.finance.yahoo.com/v8/finance/quote?symbols=' + symbols
+              + '&fields=regularMarketPrice,regularMarketChangePercent';
+      var res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (res.ok) {
+        var data = await res.json();
+        var quotes = ((data.quoteResponse || {}).result) || [];
+        quotes.forEach(function(q) {
           var ticker = (q.symbol || '').replace('.SR','');
+          if (!ticker) return;
           STOCK_PRICES[ticker] = {
             price: q.regularMarketPrice,
             chg:   (q.regularMarketChangePercent || 0) / 100,
             color: (q.regularMarketChangePercent || 0) >= 0 ? 'up' : 'dn'
           };
-          updated++;
+          updated++; chunkUpdated = true;
         });
       }
-    } catch(e2) { console.warn('Yahoo v7 failed:', e2.message); }
+    } catch(e) { console.warn('Yahoo v8 chunk', ci, 'failed:', e.message); }
+
+    // محاولة 2: Yahoo Finance v7 fallback
+    if (!chunkUpdated) {
+      try {
+        var url2 = 'https://query2.finance.yahoo.com/v7/finance/quote?symbols=' + symbols;
+        var res2 = await fetch(url2);
+        if (res2.ok) {
+          var json2 = await res2.json();
+          ((json2.quoteResponse || {}).result || []).forEach(function(q) {
+            var ticker = (q.symbol || '').replace('.SR','');
+            STOCK_PRICES[ticker] = {
+              price: q.regularMarketPrice,
+              chg:   (q.regularMarketChangePercent || 0) / 100,
+              color: (q.regularMarketChangePercent || 0) >= 0 ? 'up' : 'dn'
+            };
+            updated++; chunkUpdated = true;
+          });
+        }
+      } catch(e2) { console.warn('Yahoo v7 chunk', ci, 'failed:', e2.message); }
+    }
+
+    // تحديث الجدول بعد كل مجموعة لإظهار النتائج تدريجياً
+    renderStocks();
+
+    // انتظر قليلاً بين الطلبات لتجنب rate limiting
+    if (ci < chunks.length - 1) {
+      await new Promise(function(r){ setTimeout(r, 300); });
+    }
   }
 
-  // ── محاولة 3: Cloudflare Worker proxy ───────────────────────────────────
-  if (updated === 0) {
+  // محاولة 3: Cloudflare Worker للأسهم التي فشلت
+  var failedTickers = tickers.filter(function(t){ return !STOCK_PRICES[t] || !STOCK_PRICES[t].price; });
+  if (failedTickers.length) {
     try {
       var PROXY = 'https://claude-proxy.shaheenhouse1.workers.dev';
-      var symbols3 = tickers.map(function(t){ return t + '.SR'; }).join(',');
+      var failSymbols = failedTickers.map(function(t){ return t + '.SR'; }).join(',');
       var res3 = await fetch(PROXY, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ _stockRequest: true, symbols: symbols3 })
+        body: JSON.stringify({ _stockRequest: true, symbols: failSymbols })
       });
       if (res3.ok) {
         var data3 = await res3.json();
         (data3.quotes || []).forEach(function(q) {
           var ticker = (q.symbol || '').replace('.SR','');
-          STOCK_PRICES[ticker] = {
-            price: q.price,
-            chg:   (q.changePercent || 0) / 100,
-            color: (q.changePercent || 0) >= 0 ? 'up' : 'dn'
-          };
-          updated++;
+          if (!STOCK_PRICES[ticker] || !STOCK_PRICES[ticker].price) {
+            STOCK_PRICES[ticker] = {
+              price: q.price,
+              chg:   (q.changePercent || 0) / 100,
+              color: (q.changePercent || 0) >= 0 ? 'up' : 'dn'
+            };
+            updated++;
+          }
         });
       }
-    } catch(e3) { console.warn('Worker failed:', e3.message); }
+    } catch(e3) { console.warn('Worker fallback failed:', e3.message); }
   }
 
   renderStocks();
@@ -4678,12 +4693,10 @@ async function fetchLiveStockPrices() {
   var lastUpEl = document.getElementById('sa-last-update');
   if (lastUpEl) {
     lastUpEl.textContent = updated > 0
-      ? '✅ آخر تحديث: ' + timeStr + ' (' + updated + ' سهم)'
-      : '⚠️ تعذّر جلب الأسعار — تحقق من الاتصال';
+      ? '✅ ' + timeStr + ' — ' + updated + ' من ' + tickers.length + ' سهم'
+      : '⚠️ تعذّر جلب الأسعار';
     lastUpEl.style.color = updated > 0 ? 'var(--green)' : 'var(--orange)';
   }
-
-  if (updated === 0) showToast('⚠️ تعذّر جلب أسعار الأسهم — جرّب مرة أخرى');
 
   if (btn)  btn.style.opacity = '1';
   if (icon) icon.style.animation = '';
