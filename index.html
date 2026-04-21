@@ -3676,7 +3676,43 @@
           </div>
         </div>
 
-        <!-- يسار: ملخص حسابي -->
+        <!-- جدول الأقساط المتعددة -->
+          <div class="section-card" style="margin-bottom:0">
+            <div class="section-head">
+              <span class="section-title">📋 جدول الأقساط</span>
+              <div style="display:flex;gap:6px;align-items:center">
+                <span style="font-size:11px;color:var(--muted)">أضف قسطاً واحداً أو أكثر</span>
+                <button type="button" onclick="addInstallmentRow()" style="background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);border-radius:7px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;color:var(--gold);font-family:inherit">+ إضافة</button>
+              </div>
+            </div>
+            <div class="section-body" style="padding:12px">
+              <div style="overflow-x:auto">
+                <table style="width:100%;border-collapse:collapse;font-size:12px">
+                  <thead>
+                    <tr style="border-bottom:1px solid var(--border)">
+                      <th style="padding:8px 10px;text-align:right;color:var(--muted);font-weight:600;white-space:nowrap">من سنة</th>
+                      <th style="padding:8px 10px;text-align:right;color:var(--muted);font-weight:600;white-space:nowrap">إلى سنة</th>
+                      <th style="padding:8px 10px;text-align:right;color:var(--muted);font-weight:600;white-space:nowrap">قيمة القسط (ر.س/شهر)</th>
+                      <th style="padding:8px 10px;text-align:right;color:var(--muted);font-weight:600;white-space:nowrap">عدد الأشهر</th>
+                      <th style="padding:8px 10px;text-align:right;color:var(--muted);font-weight:600;white-space:nowrap">إجمالي</th>
+                      <th style="padding:8px 4px;width:32px"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="inst-table-body"></tbody>
+                  <tfoot>
+                    <tr style="border-top:2px solid var(--border);background:rgba(201,168,76,0.04)">
+                      <td colspan="3" style="padding:10px 10px;font-size:11px;color:var(--muted)">الإجمالي</td>
+                      <td style="padding:10px;font-family:monospace;font-weight:700;color:var(--white)" id="inst-total-months">—</td>
+                      <td style="padding:10px;font-family:monospace;font-weight:700;color:var(--gold)" id="inst-total-amount">—</td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+
+                <!-- يسار: ملخص حسابي -->
         <div style="display:flex;flex-direction:column;gap:16px">
           <div class="section-card" style="position:sticky;top:72px;border:1px solid rgba(201,168,76,0.3)">
             <div class="section-head" style="background:rgba(201,168,76,0.06)">
@@ -6637,6 +6673,117 @@ function editStockFromCard(invIdx) {
 // ══════════════════════════════════════════════
 var _editingLoanPageIdx = null;
 
+
+// ══════════════════════════════════════════════════════
+// MULTI-INSTALLMENT TABLE — جدول الأقساط المتعددة
+// ══════════════════════════════════════════════════════
+var _installmentRows = [];
+
+function addInstallmentRow(fromYear, toYear, pmt) {
+  _installmentRows.push({
+    fromYear: fromYear || '',
+    toYear:   toYear   || '',
+    pmt:      pmt      || ''
+  });
+  renderInstallmentTable();
+}
+
+function removeInstallmentRow(i) {
+  _installmentRows.splice(i, 1);
+  renderInstallmentTable();
+}
+
+function renderInstallmentTable() {
+  var tbody = document.getElementById('inst-table-body');
+  if (!tbody) return;
+
+  tbody.innerHTML = _installmentRows.map(function(row, i) {
+    var months = row.fromYear !== '' && row.toYear !== '' && row.fromYear <= row.toYear
+      ? Math.round((parseFloat(row.toYear) - parseFloat(row.fromYear)) * 12)
+      : 0;
+    var total = months > 0 && row.pmt ? (months * parseFloat(row.pmt)) : 0;
+
+    return '<tr style="border-bottom:1px solid rgba(255,255,255,0.04)">' +
+      '<td style="padding:6px 8px"><input type="number" min="1" step="0.5" value="'+row.fromYear+'" placeholder="1" ' +
+        'oninput="_installmentRows['+i+'].fromYear=parseFloat(this.value)||0;renderInstallmentTable();calcFromInstallments()" ' +
+        'style="width:70px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--white);font-family:inherit;font-size:12px;outline:none"></td>' +
+      '<td style="padding:6px 8px"><input type="number" min="1" step="0.5" value="'+row.toYear+'" placeholder="5" ' +
+        'oninput="_installmentRows['+i+'].toYear=parseFloat(this.value)||0;renderInstallmentTable();calcFromInstallments()" ' +
+        'style="width:70px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--white);font-family:inherit;font-size:12px;outline:none"></td>' +
+      '<td style="padding:6px 8px"><input type="number" min="0" step="0.01" value="'+row.pmt+'" placeholder="2500" ' +
+        'oninput="_installmentRows['+i+'].pmt=parseFloat(this.value)||0;renderInstallmentTable();calcFromInstallments()" ' +
+        'style="width:110px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--gold);font-family:monospace;font-size:13px;font-weight:700;outline:none"></td>' +
+      '<td style="padding:6px 10px;font-family:monospace;color:var(--cyan)">' + (months || '—') + '</td>' +
+      '<td style="padding:6px 10px;font-family:monospace;color:var(--white);font-weight:700">' +
+        (total > 0 ? total.toLocaleString('en-US',{maximumFractionDigits:0}) : '—') + '</td>' +
+      '<td style="padding:6px 4px;text-align:center">' +
+        '<button onclick="removeInstallmentRow('+i+')" style="background:rgba(255,68,68,0.1);border:1px solid rgba(255,68,68,0.2);border-radius:5px;padding:3px 7px;cursor:pointer;color:var(--red);font-size:11px">✕</button>' +
+      '</td>' +
+    '</tr>';
+  }).join('');
+
+  // Totals
+  var totalMonths = 0, totalAmount = 0;
+  _installmentRows.forEach(function(row) {
+    var months = row.fromYear !== '' && row.toYear !== '' && parseFloat(row.toYear) >= parseFloat(row.fromYear)
+      ? Math.round((parseFloat(row.toYear) - parseFloat(row.fromYear)) * 12)
+      : 0;
+    var pmt = parseFloat(row.pmt) || 0;
+    totalMonths += months;
+    totalAmount += months * pmt;
+  });
+
+  var el1 = document.getElementById('inst-total-months');
+  var el2 = document.getElementById('inst-total-amount');
+  if (el1) el1.textContent = totalMonths || '—';
+  if (el2) el2.textContent = totalAmount > 0 ? totalAmount.toLocaleString('en-US',{maximumFractionDigits:0}) + ' ر.س' : '—';
+}
+
+function calcFromInstallments() {
+  // حساب المجاميع من جدول الأقساط المدخلة يدوياً
+  if (!_installmentRows.length) return;
+
+  var totalMonths = 0, totalAmount = 0, weightedPmt = 0;
+  var hasValid = false;
+
+  _installmentRows.forEach(function(row) {
+    var fromY = parseFloat(row.fromYear) || 0;
+    var toY   = parseFloat(row.toYear)   || 0;
+    var pmt   = parseFloat(row.pmt)      || 0;
+    if (fromY > 0 && toY >= fromY && pmt > 0) {
+      var months = Math.round((toY - fromY) * 12);
+      totalMonths += months;
+      totalAmount += months * pmt;
+      hasValid = true;
+    }
+  });
+
+  if (!hasValid) return;
+
+  var principal = parseFloat((document.getElementById('al-principal')||{}).value) || 0;
+  var totalInterest = totalAmount - principal;
+
+  var fmt = function(n) { return n.toLocaleString('en-US',{maximumFractionDigits:0}); };
+  var set = function(id, v) { var e = document.getElementById(id); if(e) e.textContent = v; };
+
+  // حساب القسط المتوسط (للعرض)
+  var avgPmt = totalMonths > 0 ? totalAmount / totalMonths : 0;
+  set('al-c-pmt', avgPmt > 0 ? fmt(avgPmt) + ' (متوسط)' : '—');
+  set('al-c-total', totalAmount > 0 ? fmt(totalAmount) : '—');
+  set('al-c-interest', totalInterest > 0 ? fmt(totalInterest) : (principal > 0 ? '—' : '—'));
+  set('al-c-months', totalMonths || '—');
+
+  // حساب المتبقي
+  var paid = parseFloat((document.getElementById('al-paid')||{}).value) || 0;
+  var remaining = Math.max(0, totalAmount - paid);
+  set('al-c-remaining', fmt(remaining));
+}
+
+function resetInstallmentTable() {
+  _installmentRows = [];
+  renderInstallmentTable();
+}
+
 function calcAddLoan() {
   var principal = parseFloat((document.getElementById('al-principal')||{}).value) || 0;
   var rate      = parseFloat((document.getElementById('al-rate')||{}).value) || 0;
@@ -6785,7 +6932,8 @@ function saveAddLoan() {
     next_date:   (document.getElementById('al-next-date')||{}).value || '',
     notes:       (document.getElementById('al-notes')||{}).value || '',
     collateral:  'بدون ضمان',
-    created_at:  new Date().toISOString()
+    created_at:  new Date().toISOString(),
+    installment_rows: JSON.parse(JSON.stringify(_installmentRows)),
   };
 
   // Ensure loansData is always a valid array
@@ -6811,8 +6959,8 @@ function resetAddLoan() {
   });
   document.getElementById('al-bank').selectedIndex=0;
   calcAddLoan();
+  resetInstallmentTable();
 }
-
 function openLoanEditPage(idx) {
   _editingLoanPageIdx = idx;
   var l = loansData[idx];
@@ -6828,6 +6976,9 @@ function openLoanEditPage(idx) {
     var titleEl=document.getElementById('add-loan-title');
     if(titleEl) titleEl.textContent='🏦 تعديل القرض: '+l.name;
     calcAddLoan();
+    // Restore installment rows
+    _installmentRows = Array.isArray(l && l.installment_rows) ? JSON.parse(JSON.stringify(l.installment_rows)) : [];
+    renderInstallmentTable();
   }, 100);
 }
 
