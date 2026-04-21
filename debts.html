@@ -1302,7 +1302,10 @@
   .ms-opt::before { content:'';display:inline-block;width:14px;font-size:12px; }
   .ms-opt.sel::before { content:'✓';color:var(--gold);font-weight:700; }
 
-  </style>
+  
+  .debt-card-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .debt-card-reason { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11px; color:var(--muted); }
+</style>
 </head>
 <body>
 
@@ -1326,33 +1329,18 @@
       <a href="index.html" class="nav-item" style="text-decoration:none">
         <span class="nav-icon">🏠</span> الرئيسية
       </a>
-      <a href="index.html#stocks" class="nav-item" style="text-decoration:none">
-        <span class="nav-icon">📈</span> الأسهم
-      </a>
-      <a href="index.html#sukuk" class="nav-item" style="text-decoration:none">
-        <span class="nav-icon">🏛</span> الصكوك والصناديق
-      </a>
-      <a href="index.html#loans" class="nav-item" style="text-decoration:none">
-        <span class="nav-icon">🏦</span> القروض البنكية
-      </a>
       <div class="nav-item nav-debts active">
         <span class="nav-icon">💸</span> ديون وجمعيات
       </div>
-      <a href="index.html#analyst" class="nav-item" style="text-decoration:none">
-        <span class="nav-icon">🔍</span> رأي المحلل
-      </a>
-      <a href="settings.html" class="nav-item" style="text-decoration:none">
-        <span class="nav-icon">⚙️</span> الإعدادات
-      </a>
     </nav>
     <div class="sidebar-footer">
-      <!-- Theme toggle compact -->
+      <!-- Theme toggle -->
       <div class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="تبديل الوضع" style="flex-shrink:0">
         <div class="theme-toggle-knob" id="theme-knob">🌙</div>
       </div>
       <!-- Sync badge -->
       <div id="sync-badge" style="display:none;padding:4px 10px;border-radius:6px;border:1px solid;font-size:11px;font-weight:600;white-space:nowrap;transition:all .3s"></div>
-      <!-- Auth compact -->
+      <!-- Auth -->
       <div class="auth-section" style="padding:0;border-top:none;margin-top:0">
         <button class="auth-btn-google" id="auth-signin-btn" onclick="googleSignIn()" style="padding:6px 12px;border-radius:8px;white-space:nowrap">
           <svg class="google-icon" viewBox="0 0 24 24" style="width:14px;height:14px">
@@ -1368,14 +1356,13 @@
           <div style="cursor:pointer;flex:1;min-width:0" onclick="toggleDesktopUserMenu()">
             <div class="auth-user-name" id="auth-user-name" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</div>
           </div>
-          <!-- زر الإعدادات -->
-          <button onclick="window.open('https://fodysh.github.io/Investments/settings.html','_blank')" title="الإعدادات" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:7px;padding:4px 7px;cursor:pointer;font-size:13px;color:var(--gold);flex-shrink:0;line-height:1">⚙️</button>
+          <a href="settings.html" title="الإعدادات" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:7px;padding:4px 7px;cursor:pointer;font-size:13px;color:var(--gold);flex-shrink:0;line-height:1;text-decoration:none">⚙️</a>
           <!-- Desktop user dropdown -->
           <div id="desktop-user-menu" style="display:none;position:fixed;top:60px;left:8px;background:var(--sidebar-bg);border:1px solid var(--border);border-radius:12px;padding:8px;z-index:500;box-shadow:0 8px 32px rgba(0,0,0,0.4);backdrop-filter:blur(20px);min-width:200px">
             <div id="desktop-menu-email" style="padding:8px 12px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border);margin-bottom:4px"></div>
-            <button onclick="window.open('https://fodysh.github.io/Investments/settings.html','_blank');toggleDesktopUserMenu()" style="width:100%;display:flex;align-items:center;gap:10px;background:rgba(201,168,76,0.08);border:none;padding:9px 12px;color:var(--gold);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;border-radius:8px;text-align:right;margin-bottom:4px">
+            <a href="settings.html" onclick="toggleDesktopUserMenu()" style="width:100%;display:flex;align-items:center;gap:10px;background:rgba(201,168,76,0.08);border:none;padding:9px 12px;color:var(--gold);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;border-radius:8px;text-align:right;margin-bottom:4px;text-decoration:none">
               ⚙️ الإعدادات
-            </button>
+            </a>
             <button onclick="googleSignOut();toggleDesktopUserMenu()" style="width:100%;display:flex;align-items:center;gap:10px;background:rgba(255,77,77,0.08);border:none;padding:9px 12px;color:var(--red);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;border-radius:8px;text-align:right">
               🚪 تسجيل الخروج
             </button>
@@ -5381,7 +5368,7 @@ function renderDebts() {
 
   var activeDebts = data.filter(function(d){ return d.status !== 'مسوَّى'; });
   var oweTotal  = activeDebts.filter(function(d){ return d.direction==='owe'; }).reduce(function(s,d){ return s+(d.remaining||d.amount||0); }, 0);
-  var lendTotal = activeDebts.filter(function(d){ return d.direction==='lend'; }).reduce(function(s,d){ return s+(d.remaining||d.amount||0); }, 0);
+  var lendTotal = activeDebts.filter(function(d){ return d.direction==='lend'||d.direction==='owed'; }).reduce(function(s,d){ return s+(d.remaining||d.amount||0); }, 0);
   var net = lendTotal - oweTotal;
 
   var eOwe  = document.getElementById('debts-owe');
@@ -5401,7 +5388,7 @@ function renderDebts() {
 
   var filtered = data.map(function(d,i){ return Object.assign({},d,{_idx:i}); });
   if (currentDebtFilter === 'owe')     filtered = filtered.filter(function(d){ return d.direction==='owe' && d.status!=='مسوَّى'; });
-  else if (currentDebtFilter === 'lend')    filtered = filtered.filter(function(d){ return d.direction==='lend' && d.status!=='مسوَّى'; });
+  else if (currentDebtFilter === 'lend')    filtered = filtered.filter(function(d){ return (d.direction==='lend'||d.direction==='owed') && d.status!=='مسوَّى'; });
   else if (currentDebtFilter === 'settled') filtered = filtered.filter(function(d){ return d.status==='مسوَّى'; });
 
   if(eLstC) eLstC.textContent = filtered.length + ' معاملة';
@@ -5449,9 +5436,9 @@ function renderDebts() {
     return '<div class="debt-card" style="border-right:3px solid '+(isOwe?'#f87171':'#4caf82')+'">' +
       '<div style="display:flex;align-items:flex-start;gap:14px">' +
       '<div class="debt-avatar '+(isOwe?'owe':'lend')+'">'+initials+'</div>' +
-      '<div style="flex:1;min-width:0">' +
-        '<div class="debt-card-name">'+d.person+' <span style="font-size:10px;color:var(--muted);font-weight:400">· '+(d.relation||'')+'</span></div>' +
-        '<div class="debt-card-reason">'+(isOwe?'⬇️ أنت مدين':'⬆️ يدين لك')+(d.reason?' · '+d.reason:'')+'</div>' +
+      '<div style="flex:1;min-width:0;overflow:hidden">' +
+        '<div class="debt-card-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px">'+d.person+' <span style="font-size:10px;color:var(--muted);font-weight:400">· '+(d.relation||'')+'</span></div>' +
+        '<div class="debt-card-reason" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px">'+(isOwe?'⬇️ أنت مدين':'⬆️ يدين لك')+(d.reason?' · '+d.reason:'')+'</div>' +
         '<div class="debt-card-meta" style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0">' +
           '<span class="loan-tag" style="'+sc+'">'+d.status+'</span>' +
           overdueTag + writtenTag + dateTag + dueTag +
