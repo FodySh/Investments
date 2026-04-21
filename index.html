@@ -4520,7 +4520,6 @@ document.addEventListener('DOMContentLoaded', function() {
   setTimeout(startStockPriceUpdater, 1500);
   setTimeout(renderCalendar, 800);
   setTimeout(renderCashflow, 900);
-  setTimeout(function() { renderSharpe(); renderBenchmark(); }, 1000);
   checkMaturityAlerts();
   setInterval(checkMaturityAlerts, 60 * 60 * 1000); // re-check every hour
 });
@@ -4529,7 +4528,7 @@ document.addEventListener('DOMContentLoaded', function() {
 var _origShowPage = showPage;
 showPage = function(id, navEl, mobileTitle, noScroll) {
   _origShowPage(id, navEl, mobileTitle, noScroll);
-  if (id === 'reports')  { renderCalendar(); renderCashflow(); renderSharpe(); renderBenchmark(); renderDividendsTab(); }
+  if (id === 'reports')  { renderCalendar(); renderCashflow(); renderDividendsTab(); }
   if (id === 'analyst')  { id = 'reports'; window.__currentPage = 'reports'; setTimeout(function(){ switchReportsTab('analyst'); }, 80); }
   // Only scroll to top if NOT called from a form button
   if (!noScroll) {
@@ -8486,6 +8485,12 @@ resetJamaaForm = function() {
 // مصدر رأس المال — إدارة ديناميكية
 // ══════════════════════════════════════════════════════
 var _defaultCapitalSources = ['مستحقات','Cash Flow','رصيد الإجازة','تحويشة','أرباح سابقة','ايجار عقار','مدخرات','مكافأة','قرض','أخرى'];
+var _defaultPlatforms       = ['ترميز','منافع','دراية','ابيان','عوائد','منصة الأهلي','رياض المالية','الراجحي المالية','بنك البلاد','إتقان','أخرى'];
+
+function _getSettings() {
+  try { return JSON.parse(localStorage.getItem('appSettings') || '{}'); } catch(e) { return {}; }
+}
+function _saveSettings(s) { localStorage.setItem('appSettings', JSON.stringify(s)); }
 
 function getCapitalSources() {
   var s = _getSettings();
