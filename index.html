@@ -5691,6 +5691,20 @@ function showPage(id, navEl, mobileTitle, noScroll){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
 
+  // ── تنظيف عند الانتقال ──────────────────────────
+  // إخفاء جدول السداد عند مغادرة صفحة القروض
+  if (id !== 'loans' && id !== 'add-loan') {
+    var amortSec = document.getElementById('amort-section');
+    if (amortSec) amortSec.style.display = 'none';
+    var pmtBox = document.getElementById('pmt-box');
+    if (pmtBox) pmtBox.style.display = 'none';
+  }
+  // إعادة رسم قاعدة البيانات عند الانتقال إليها فقط
+  if (id !== 'db') {
+    var dbWrap = document.querySelector('#page-db .db-table-wrap');
+    if (dbWrap) dbWrap.innerHTML = '';
+  }
+
   // Desktop sidebar
   document.querySelectorAll('.sidebar .nav-item').forEach(n=>n.classList.remove('active'));
   const sidebarMatch = [...document.querySelectorAll('.sidebar .nav-item')]
@@ -5918,6 +5932,9 @@ function switchDbTab(tab, btnEl) {
   var titleEl = document.getElementById('db-page-title');
   var titles = { stocks:'🗄️ الأسهم', sukuk:'🗄️ الصكوك', funds:'🗄️ الصناديق' };
   if (titleEl) titleEl.textContent = 'قاعدة البيانات — ' + (titles[tab]||tab);
+  // Clear old table content before re-rendering
+  var dbTable = document.getElementById('db-tbody');
+  if (dbTable) dbTable.innerHTML = '';
   dbRender();
 }
 
