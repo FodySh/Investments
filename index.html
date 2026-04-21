@@ -4342,7 +4342,8 @@ function renderAll(){
   const sub = document.getElementById('all-page-sub');
   if(sub) sub.textContent = data.length + ' فرصة';
 
-  document.getElementById('all-tbody').innerHTML = data.map((d,i)=>{
+  var allTbody = document.getElementById('all-tbody');
+  if (allTbody) allTbody.innerHTML = data.map((d,i)=>{
     // Find real index in investments array
     const realIdx = investments.indexOf(d);
     return `<tr>
@@ -9215,14 +9216,9 @@ function _gate(show) {
 
 function _rerender() {
   ["renderAll","renderSukuk","renderFunds","renderStocks",
-   "renderLoans","renderDebts","renderUsStocksTable","renderMetals","renderJamaa"].forEach(function(fn) {
+   "renderLoans","renderUsStocksTable","renderMetals","renderJamaa"].forEach(function(fn) {
     if (typeof window[fn] === "function") window[fn]();
   });
-  // Refresh active reports tab
-  if (typeof renderDividendsTab === 'function' && window.__currentPage === 'reports') {
-    renderDividendsTab();
-  }
-  dbRender();
 }
 
 function _updateUI(user) {
