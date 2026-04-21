@@ -3117,7 +3117,7 @@
           <div class="section-head"><span class="section-title">📋 التفاصيل الشهرية</span></div>
           <div class="table-wrap">
             <table class="data-table">
-              <thead><tr><th>الشهر</th><th>التوزيعات المتوقعة</th><th>استحقاقات رأس المال</th><th>إجمالي التدفق</th><th>الفرص</th></tr></thead>
+              <thead><tr><th>الشهر</th><th style="color:#34d399">صكوك</th><th style="color:#00e676">أسهم</th><th style="color:#60a5fa">رأس مال</th><th style="color:var(--gold)">الإجمالي</th><th>التفاصيل</th></tr></thead>
               <tbody id="cf-tbody"></tbody>
             </table>
           </div>
@@ -3227,30 +3227,7 @@
 
       <!-- ── تبويب: التحليل المتقدم ── -->
       <div 
-        <div class="two-col fade-up" style="margin-bottom:12px">
-          <div class="section-card">
-            <div class="section-head"><span class="section-title">⚡ نسبة شارب (Sharpe Ratio)</span></div>
-            <div class="section-body" id="sharpe-body">
-              <div style="text-align:center;padding:20px">
-                <div id="sharpe-value" style="font-size:48px;font-weight:800;font-family:monospace;color:var(--gold)">—</div>
-                <div id="sharpe-label" style="font-size:13px;color:var(--muted);margin-top:8px">—</div>
-                <div style="margin-top:16px;padding:12px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:12px;color:var(--muted);text-align:right;line-height:1.7">
-                  نسبة شارب = (عائد المحفظة - معدل الخطر الصفري) / الانحراف المعياري للعوائد<br>
-                  <span style="color:var(--green)">فوق 1.0</span> ممتاز  •  <span style="color:var(--gold)">0.5-1.0</span> جيد  •  <span style="color:var(--red)">تحت 0.5</span> ضعيف
-                </div>
-              </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px" id="sharpe-details"></div>
-            </div>
-          </div>
-          <div class="section-card">
-            <div class="section-head">
-              <span class="section-title">📈 مقارنة بالبنشمارك</span>
-              <button onclick="refreshBenchmark()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--muted);cursor:pointer;font-family:inherit">تحديث</button>
-            </div>
-            <div class="section-body" id="benchmark-body">
-              <div style="display:flex;flex-direction:column;gap:10px" id="benchmark-bars"></div>
-              <div style="margin-top:12px;font-size:11px;color:var(--muted);text-align:center" id="benchmark-note">يتم جلب بيانات SAIBOR ومؤشر تداول تلقائياً</div>
-            </div>
+        
           </div>
         </div>
         <div class="section-card fade-up" id="import-preview" style="display:none;margin-bottom:16px">
@@ -4677,106 +4654,156 @@ function checkMaturityAlerts() {
 // 3. CASH FLOW
 // 
 function renderCashflow() {
-  var months = parseInt((document.getElementById('cf-months')||{value:'12'}).value || 12);
-  var inv    = window.__investments || [];
-  var now    = new Date(); now.setHours(0,0,0,0);
+  var months    = parseInt((document.getElementById('cf-months')||{value:'12'}).value || 12);
+  var inv       = window.__investments || [];
+  var divs      = window.dividendsData || dividendsData || [];
+  var now       = new Date(); now.setHours(0,0,0,0);
   var monthNames = ['يناير','فبراير','مارس','أبريل','مايو','يونيو',
                     'يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  var fmt = function(n){ return n.toLocaleString('en-US',{maximumFractionDigits:0}); };
 
-  // Build monthly cash flows
+  // ── بناء شبكة الأشهر ────────────────────────────────────────────
   var monthData = [];
   for (var m = 0; m < months; m++) {
     var dt = new Date(now.getFullYear(), now.getMonth() + m, 1);
     var key = dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0');
-    monthData.push({ key:key, label:monthNames[dt.getMonth()]+' '+dt.getFullYear(),
-      shortLabel: monthNames[dt.getMonth()].slice(0,3), distributions:0, capital:0, items:[] });
+    monthData.push({
+      key:key, year:dt.getFullYear(), month:dt.getMonth(),
+      label: monthNames[dt.getMonth()] + ' ' + dt.getFullYear(),
+      shortLabel: monthNames[dt.getMonth()].slice(0,3),
+      distributions:0, capital:0, dividends:0, items:[]
+    });
   }
+  var keyMap = {};
+  monthData.forEach(function(m){ keyMap[m.key] = m; });
 
+  // ── 1. استثمارات نشطة (توزيعات دورية + رأس مال عند الاستحقاق) ──
   inv.forEach(function(x) {
-    if (x.status !== 'نشطة') return;
-    var matDate  = parseDate(x.date_out);
-    var distFreq = x.dist || '';
-    var retVal   = Math.max(0, x.ret_val || 0);
-    var amt      = x.amount || 0;
+    if (x.status === 'مستلمة') return;
+    var matDate   = parseDate(x.date_out);
+    var distFreq  = x.dist || '';
+    var retVal    = Math.max(0, x.ret_val || 0);
+    var amt       = x.amount || 0;
 
-    // Capital return at maturity
+    // رأس المال عند الاستحقاق
     if (matDate) {
       var matKey = matDate.getFullYear() + '-' + String(matDate.getMonth()+1).padStart(2,'0');
-      var slot   = monthData.find(function(m){return m.key===matKey;});
-      if (slot) { slot.capital += (x.total || amt); slot.items.push(x.name); }
+      if (keyMap[matKey]) {
+        keyMap[matKey].capital += (x.total || (amt + retVal));
+        keyMap[matKey].items.push(x.name || '');
+      }
     }
 
-    // Periodic distributions
-    var monthsPerDist = distFreq==='شهري'?1:distFreq==='ربع سنوي'?3:distFreq==='نصف سنوي'?6:distFreq==='سنوي'?12:0;
+    // توزيعات دورية من الاستثمار
+    var monthsPerDist = distFreq==='شهري'?1:distFreq==='ربع سنوي'?3:
+                        distFreq==='نصف سنوي'?6:distFreq==='سنوي'?12:0;
     if (monthsPerDist > 0 && retVal > 0) {
-      var distAmt = retVal / (matDate ? Math.max(1, Math.ceil((matDate-now)/(86400000*30*monthsPerDist))) : 12/monthsPerDist);
+      var periods = matDate
+        ? Math.max(1, Math.ceil((matDate - now) / (86400000 * 30 * monthsPerDist)))
+        : Math.floor(12 / monthsPerDist);
+      var distAmt = retVal / periods;
       for (var i = 0; i < months; i += monthsPerDist) {
-        if (i < monthData.length) monthData[i].distributions += distAmt;
+        if (monthData[i]) monthData[i].distributions += distAmt;
       }
     }
   });
 
-  // KPIs
-  var totalDist = monthData.reduce(function(s,m){return s+m.distributions;},0);
-  var totalCap  = monthData.reduce(function(s,m){return s+m.capital;},0);
-  var maxFlow   = Math.max.apply(null, monthData.map(function(m){return m.distributions+m.capital;})) || 1;
+  // ── 2. توزيعات فعلية من سجل التوزيعات ──────────────────────────
+  divs.forEach(function(d) {
+    if (!d.pay_date && !d.ex_date) return;
+    var dateStr = d.pay_date || d.ex_date;
+    var key = dateStr.slice(0,7); // YYYY-MM
+    if (keyMap[key] && d.total_amount) {
+      keyMap[key].dividends += (d.total_amount || 0);
+      if (!keyMap[key].items.includes(d.stock_name||d.ticker||''))
+        keyMap[key].items.push(d.stock_name || d.ticker || '');
+    }
+  });
+
+  // ── KPIs ────────────────────────────────────────────────────────
+  var totalDist = monthData.reduce(function(s,m){ return s + m.distributions; }, 0);
+  var totalDiv  = monthData.reduce(function(s,m){ return s + m.dividends; }, 0);
+  var totalCap  = monthData.reduce(function(s,m){ return s + m.capital; }, 0);
+  var grandTotal = totalDist + totalDiv + totalCap;
+  var maxFlow = Math.max.apply(null, monthData.map(function(m){
+    return m.distributions + m.dividends + m.capital;
+  })) || 1;
 
   var kpiEl = document.getElementById('cf-kpis');
   if (kpiEl) {
-    var fmt = function(n){return n.toLocaleString('en-US',{maximumFractionDigits:0});};
     kpiEl.innerHTML =
-      '<div class="kpi-card" style="--accent:#34d399"><div class="kpi-icon">💧</div><div class="kpi-label">إجمالي التوزيعات المتوقعة</div><div class="kpi-value">'+fmt(totalDist)+'</div><div class="kpi-sub">ريال سعودي</div></div>' +
-      '<div class="kpi-card" style="--accent:#60a5fa"><div class="kpi-icon">🔄</div><div class="kpi-label">إجمالي رأس المال العائد</div><div class="kpi-value">'+fmt(totalCap)+'</div><div class="kpi-sub">ريال سعودي</div></div>' +
-      '<div class="kpi-card" style="--accent:#c9a84c"><div class="kpi-icon">💰</div><div class="kpi-label">الإجمالي الكلي</div><div class="kpi-value">'+fmt(totalDist+totalCap)+'</div><div class="kpi-sub">ريال سعودي</div></div>' +
-      '<div class="kpi-card" style="--accent:#a78bfa"><div class="kpi-icon">📅</div><div class="kpi-label">متوسط شهري</div><div class="kpi-value">'+fmt((totalDist+totalCap)/months)+'</div><div class="kpi-sub">ريال سعودي</div></div>';
+      '<div class="kpi-card" style="--accent:#34d399"><div class="kpi-icon">💧</div><div class="kpi-label">توزيعات الصكوك</div><div class="kpi-value">'+fmt(totalDist)+'</div><div class="kpi-sub">ر.س</div></div>' +
+      '<div class="kpi-card" style="--accent:#00e676"><div class="kpi-icon">💰</div><div class="kpi-label">توزيعات الأسهم</div><div class="kpi-value">'+fmt(totalDiv)+'</div><div class="kpi-sub">ر.س</div></div>' +
+      '<div class="kpi-card" style="--accent:#60a5fa"><div class="kpi-icon">🔄</div><div class="kpi-label">رأس المال العائد</div><div class="kpi-value">'+fmt(totalCap)+'</div><div class="kpi-sub">ر.س</div></div>' +
+      '<div class="kpi-card" style="--accent:#c9a84c"><div class="kpi-icon">📊</div><div class="kpi-label">الإجمالي الكلي</div><div class="kpi-value">'+fmt(grandTotal)+'</div><div class="kpi-sub">ر.س</div></div>';
   }
 
-  // Bar chart
+  // ── الرسم البياني ────────────────────────────────────────────────
   var chartEl  = document.getElementById('cf-chart');
   var labelsEl = document.getElementById('cf-chart-labels');
   var cfLabel  = document.getElementById('cf-chart-label');
-  if (cfLabel) cfLabel.textContent = months + ' شهراً قادماً';
+  if (cfLabel) cfLabel.textContent = months + ' شهراً';
 
   if (chartEl) {
     chartEl.innerHTML = monthData.map(function(m) {
-      var total = m.distributions + m.capital;
-      var hPct  = (total / maxFlow * 100).toFixed(1);
-      var dPct  = (m.distributions / maxFlow * 100).toFixed(1);
-      var cPct  = (m.capital / maxFlow * 100).toFixed(1);
-      return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:28px" title="'+m.label+': '+total.toLocaleString('en-US',{maximumFractionDigits:0})+' ر.س">' +
-        '<div style="font-size:9px;color:var(--muted);text-align:center">' + (total>0?total.toLocaleString('en-US',{maximumFractionDigits:0}):'') + '</div>' +
-        '<div style="width:100%;display:flex;flex-direction:column;justify-content:flex-end;height:120px">' +
-          '<div style="width:100%;height:'+cPct+'%;background:rgba(96,165,250,0.7);border-radius:3px 3px 0 0"></div>' +
-          '<div style="width:100%;height:'+dPct+'%;background:rgba(52,211,153,0.8);border-radius:' + (m.capital?'0':'3px 3px 0 0') + '"></div>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-  }
-  if (labelsEl) {
-    labelsEl.innerHTML = monthData.map(function(m) {
-      return '<div style="flex:1;text-align:center;font-size:9px;color:var(--muted);min-width:28px;overflow:hidden">' + m.shortLabel + '</div>';
+      var total = m.distributions + m.dividends + m.capital;
+      var dPct  = total > 0 ? (m.distributions / maxFlow * 100).toFixed(1) : 0;
+      var divPct= total > 0 ? (m.dividends     / maxFlow * 100).toFixed(1) : 0;
+      var cPct  = total > 0 ? (m.capital       / maxFlow * 100).toFixed(1) : 0;
+      var label = total > 0 ? fmt(total) : '';
+      var color = total > 0 ? 'var(--white)' : 'var(--muted)';
+      var hasBot = m.capital > 0 || m.dividends > 0 ? '0' : '3px 3px 0 0';
+      var html = '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:28px">';
+      html += '<div style="font-size:9px;color:'+color+';text-align:center">'+label+'</div>';
+      html += '<div style="width:100%;display:flex;flex-direction:column;justify-content:flex-end;height:120px">';
+      html += '<div style="width:100%;height:'+cPct+'%;background:rgba(96,165,250,0.75);border-radius:3px 3px 0 0;min-height:'+(m.capital>0?3:0)+'px"></div>';
+      html += '<div style="width:100%;height:'+divPct+'%;background:rgba(0,230,118,0.75);min-height:'+(m.dividends>0?2:0)+'px"></div>';
+      html += '<div style="width:100%;height:'+dPct+'%;background:rgba(52,211,153,0.8);border-radius:'+hasBot+'"></div>';
+      html += '</div></div>';
+      return html;
     }).join('');
   }
 
-  // Table
+  if (labelsEl) {
+    labelsEl.innerHTML = monthData.map(function(m) {
+      return '<div style="flex:1;text-align:center;font-size:9px;color:var(--muted);min-width:28px;overflow:hidden">'+m.shortLabel+'</div>';
+    }).join('');
+  }
+
+  // ── جدول التفاصيل الشهرية ────────────────────────────────────────
   var tbody = document.getElementById('cf-tbody');
   if (tbody) {
-    tbody.innerHTML = monthData.filter(function(m){return m.distributions+m.capital>0;}).map(function(m) {
-      var total = m.distributions + m.capital;
-      return '<tr>' +
-        '<td style="color:var(--muted)">' + m.label + '</td>' +
-        '<td class="mono ' + (m.distributions>0?'up':'') + '">' + (m.distributions>0?'+'+m.distributions.toLocaleString('en-US',{maximumFractionDigits:0}):'—') + '</td>' +
-        '<td class="mono ' + (m.capital>0?'up':'') + '">' + (m.capital>0?m.capital.toLocaleString('en-US',{maximumFractionDigits:0}):'—') + '</td>' +
-        '<td class="mono" style="color:var(--gold);font-weight:700">' + total.toLocaleString('en-US',{maximumFractionDigits:0}) + '</td>' +
-        '<td style="font-size:11px;color:var(--muted)">' + m.items.join('، ').slice(0,60) + (m.items.join('').length>60?'...':'') + '</td>' +
-      '</tr>';
-    }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">لا توجد تدفقات متوقعة في هذه الفترة</td></tr>';
+    var rows = monthData.filter(function(m){
+      return m.distributions + m.dividends + m.capital > 0;
+    });
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">لا توجد تدفقات متوقعة في هذه الفترة</td></tr>';
+    } else {
+      tbody.innerHTML = rows.map(function(m) {
+        var total = m.distributions + m.dividends + m.capital;
+        return '<tr id="cf-row-'+m.key+'">' +
+          '<td style="color:var(--muted)">'+m.label+'</td>' +
+          '<td class="mono '+(m.distributions>0?'up':'')+'">'+(m.distributions>0?'+'+fmt(m.distributions):'—')+'</td>' +
+          '<td class="mono '+(m.dividends>0?'up':'')+'">'+(m.dividends>0?'+'+fmt(m.dividends):'—')+'</td>' +
+          '<td class="mono '+(m.capital>0?'up':'')+'">'+(m.capital>0?fmt(m.capital):'—')+'</td>' +
+          '<td class="mono" style="color:var(--gold);font-weight:700">'+fmt(total)+'</td>' +
+          '<td style="font-size:11px;color:var(--muted)">'+([...new Set(m.items)].join('، ')).slice(0,60)+'</td>' +
+        '</tr>';
+      }).join('');
+    }
   }
 }
 
-// 
-// 4. SHARPE RATIO
-// 
+function highlightCfMonth(key) {
+  document.querySelectorAll('[id^="cf-row-"]').forEach(function(r){
+    r.style.background = '';
+  });
+  var row = document.getElementById('cf-row-' + key);
+  if (row) {
+    row.style.background = 'rgba(201,168,76,0.08)';
+    row.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+}
 
 
 function importPortfolioFile(event) {
