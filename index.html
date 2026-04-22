@@ -298,8 +298,8 @@
   .analyst-text { font-size: 12px; color: var(--muted); line-height: 1.7; }
 
   /* ── TAB SYSTEM ──────────────────────────────────────── */
-  .page { display: none; overflow: hidden; max-height: 0; }
-  .page.active { display: block; overflow: visible; max-height: none; }
+  .page { display: none; overflow: hidden; max-height: 0; contain: layout; }
+  .page.active { display: block; overflow: visible; max-height: none; contain: none; }
   /* New feature pages: tighter top spacing */
   #page-calendar.active,
   #page-cashflow.active,
@@ -799,6 +799,8 @@
   .db-table { width: max-content; min-width: 100%; border-collapse: collapse; }
 
   /* Row number column */
+  .page:not(.active) .db-table .db-col-num,
+  .page:not(.active) .db-col-actions { position: relative !important; }
   .db-table .db-col-num {
     position: sticky; right: 0; z-index: 2;
     background: var(--card);
@@ -1229,6 +1231,8 @@
   }
   .step.active .step-num { background: rgba(201,168,76,0.3); color: var(--gold); }
   .step.done .step-num { background: rgba(0,230,118,0.3); color: var(--green); }
+
+8,0.3); color: var(--green); }
 
 </style>
 </head>
@@ -2048,16 +2052,14 @@
           <div class="step-num">2</div> البيانات المالية
         </div>
         <div class="step" id="step-3" onclick="goStep(3)">
-          <div class="step-num">3</div> العوائد والتوزيعات
+          <div class="step-num">3</div> توزيعات
         </div>
         <div class="step" id="step-4" onclick="goStep(4)">
           <div class="step-num">4</div> التوقيت والمدة
         </div>
+
         <div class="step" id="step-5" onclick="goStep(5)">
-          <div class="step-num">5</div> تفاصيل النوع
-        </div>
-        <div class="step" id="step-6" onclick="goStep(6)">
-          <div class="step-num">6</div> المخاطر والإدارة
+          <div class="step-num">5</div> المخاطر والإدارة
         </div>
       </div>
 
@@ -2096,9 +2098,19 @@
                 </select>
                 <div class="field-error" id="err-type">يرجى اختيار نوع الأصل</div>
               </div>
-              <div class="field-group">
-                <label class="field-label">تصنيف فرعي</label>
-                <input class="f-input" id="f-subtype" type="text" placeholder="مثال: مرابحة، عقاري، نمو..." />
+              <div class="field-group" id="sukuk-type-in-step1" style="display:none">
+                <label class="field-label">نوع الصك</label>
+                <select class="f-select" id="f-sukuk-type">
+                  <option value="">— اختر —</option>
+                  <option>مرابحة</option>
+                  <option>إجارة</option>
+                  <option>مشاركة</option>
+                  <option>مضاربة</option>
+                  <option>تطوير عقاري</option>
+                  <option>استثمار عقاري</option>
+                  <option>تمويل مشاريع</option>
+                  <option>حكومي</option>
+                </select>
               </div>
               <div class="field-group">
                 <label class="field-label">القطاع الاقتصادي</label>
@@ -2123,7 +2135,7 @@
             <div class="form-grid">
               <div class="field-group">
                 <label class="field-label">المنصة / الوسيط <span class="req">*</span></label>
-                <select class="f-select" id="f-platform">
+                <select class="f-select" id="f-platform" onchange="autoFillPlatformFees(this.value)">
                   <option value="">— اختر المنصة —</option>
                   <option>ترميز</option>
                   <option>منافع</option>
@@ -2145,17 +2157,25 @@
                 <label class="field-label">المنصة (أخرى) <span class="hint">— إذا لم تجدها في القائمة</span></label>
                 <input class="f-input" id="f-platform-other" type="text" placeholder="اسم المنصة..." />
               </div>
-              <div class="field-group">
-                <label class="field-label">مصدر رأس المال</label>
-                <div style="display:flex;gap:8px;align-items:center">
-                  <select class="f-select" id="f-capital-src" style="flex:1">
-                    <option value="">— اختر المصدر —</option>
-                  </select>
-                  <button type="button" onclick="showCapitalSrcSettings()" title="إدارة المصادر" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);border-radius:8px;padding:8px 10px;cursor:pointer;font-size:14px;flex-shrink:0;color:var(--gold)">⚙️</button>
+              <div class="field-group" style="grid-column:span 2">
+                <label class="field-label">مصدر رأس المال <span style="font-size:10px;color:var(--muted)">(يمكن اختيار أكثر من مصدر)</span></label>
+                <div id="f-capital-src-wrap" style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;min-height:44px">
+                  <span style="font-size:11px;color:var(--muted);align-self:center" id="f-capital-src-placeholder">جاري التحميل...</span>
                 </div>
               </div>
             </div>
           </div>
+          <!-- تفاصيل إضافية -->
+          <div class="form-section" style="margin-top:16px">
+            <div class="form-section-title">📌 تفاصيل إضافية</div>
+            <div class="form-full">
+              <div class="field-group">
+                <label class="field-label">ملاحظات خاصة بالفرصة</label>
+                <textarea class="f-textarea" id="f-type-notes" placeholder="أي معلومات إضافية تتعلق بهذه الفرصة الاستثمارية..."></textarea>
+              </div>
+            </div>
+          </div>
+
           <div style="display:flex;justify-content:flex-start;gap:12px">
             <button class="btn-submit" onclick="nextStep(1)">التالي ← البيانات المالية</button>
           </div>
@@ -2164,7 +2184,7 @@
         <!-- ══ STEP 2: البيانات المالية ══ -->
         <div class="form-step" id="fstep-2" style="display:none">
           <div class="form-section">
-            <div class="form-section-title">💰 البيانات المالية الأساسية</div>
+            <div class="form-section-title">💰 البيانات المالية</div>
             <div class="form-grid">
               <div class="field-group">
                 <label class="field-label">المبلغ المستثمر (ر.س) <span class="req">*</span></label>
@@ -2183,14 +2203,42 @@
                 </select>
               </div>
               <div class="field-group">
-                <label class="field-label">رسوم الاشتراك (ر.س)</label>
-                <input class="f-input" id="f-fees" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAuto()" />
+                <label class="field-label">مدة الفرصة (بالأشهر)</label>
+                <input class="f-input" id="f-months" type="number" step="1" min="1" placeholder="مثال: 12" oninput="calcAuto()" />
               </div>
             </div>
             <div class="form-grid">
               <div class="field-group">
-                <label class="field-label">ضرائب ورسوم أخرى (ر.س)</label>
+                <label class="field-label">عائد الفرصة %</label>
+                <input class="f-input" id="f-ret-pct" type="number" step="0.01" placeholder="مثال: 10.5" oninput="calcAuto()" />
+              </div>
+              <div class="field-group">
+                <label class="field-label">عائد الفرصة السنوي % <span class="hint">— يُحسب تلقائياً</span></label>
+                <input class="f-input" id="f-ret-annual" type="number" step="0.01" placeholder="يُحسب تلقائياً" readonly style="color:var(--cyan)" />
+              </div>
+              <div class="field-group">
+                <label class="field-label">قيمة العائد (ر.س) <span class="hint">— تُحسب تلقائياً</span></label>
+                <input class="f-input" id="f-ret-val" type="number" step="0.01" placeholder="تُحسب تلقائياً" style="color:var(--green)" oninput="calcAuto()" />
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="field-group">
+                <label class="field-label">رسوم الوكالة (ر.س)</label>
+                <input class="f-input" id="f-fees" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAuto()" />
+              </div>
+              <div class="field-group">
+                <label class="field-label">الضريبة (ر.س)</label>
                 <input class="f-input" id="f-tax" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcAuto()" />
+              </div>
+              <div class="field-group">
+                <label class="field-label">العائد بعد الخصم (ر.س) <span class="hint">— تلقائي</span></label>
+                <input class="f-input" id="f-net-ret" type="number" step="0.01" placeholder="تُحسب تلقائياً" readonly style="color:var(--gold)" />
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="field-group">
+                <label class="field-label">المجموع المتوقع (أصل + عائد) <span class="hint">— تلقائي</span></label>
+                <input class="f-input" id="f-total" type="number" step="0.01" placeholder="يُحسب تلقائياً" readonly style="color:var(--gold);font-weight:700" />
               </div>
               <div class="field-group">
                 <label class="field-label">القيمة السوقية الحالية (ر.س) <span class="hint">— إن وُجدت</span></label>
@@ -2206,17 +2254,25 @@
           <!-- LIVE CALC PREVIEW -->
           <div class="calc-box" id="calc-preview">
             <div class="calc-item">
-              <div class="calc-label">صافي المبلغ بعد الرسوم</div>
-              <div class="calc-val" id="c-net">—</div>
+              <div class="calc-label">قيمة العائد</div>
+              <div class="calc-val" id="c-net" style="color:var(--green)">—</div>
             </div>
             <div class="calc-item">
-              <div class="calc-label">الربح / الخسارة غير المحققة</div>
-              <div class="calc-val" id="c-unrealized">—</div>
+              <div class="calc-label">العائد بعد الخصم</div>
+              <div class="calc-val" id="c-unrealized" style="color:var(--gold)">—</div>
+            </div>
+            <div class="calc-item">
+              <div class="calc-label">المجموع المتوقع</div>
+              <div class="calc-val" id="c-net2" style="color:var(--cyan)">—</div>
+            </div>
+            <div class="calc-item">
+              <div class="calc-label">العائد السنوي %</div>
+              <div class="calc-val" id="c-ret2" style="color:var(--gold)">—</div>
             </div>
           </div>
 
           <div style="display:flex;justify-content:flex-start;gap:12px">
-            <button class="btn-submit" onclick="nextStep(2)">التالي ← العوائد والتوزيعات</button>
+            <button class="btn-submit" onclick="nextStep(2)">التالي ← توزيعات</button>
             <button class="btn-reset" onclick="prevStep(2)">← رجوع</button>
           </div>
         </div>
@@ -2224,21 +2280,8 @@
         <!-- ══ STEP 3: العوائد والتوزيعات ══ -->
         <div class="form-step" id="fstep-3" style="display:none">
           <div class="form-section">
-            <div class="form-section-title">📈 العوائد والتوزيعات</div>
-            <div class="form-grid">
-              <div class="field-group">
-                <label class="field-label">نسبة العائد السنوي %</label>
-                <input class="f-input" id="f-ret-pct" type="number" step="0.01" placeholder="مثال: 10.5" oninput="calcAuto()" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">قيمة العائد الإجمالي (ر.س) <span class="hint">— أو تُحسب تلقائياً</span></label>
-                <input class="f-input" id="f-ret-val" type="number" step="0.01" placeholder="0.00" oninput="calcAuto()" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">المجموع المتوقع (أصل + عائد)</label>
-                <input class="f-input" id="f-total" type="number" step="0.01" placeholder="يُحسب تلقائياً" style="color:var(--gold)" readonly />
-              </div>
-            </div>
+            <div class="form-section-title">💰 توزيعات</div>
+
             <div class="form-grid">
               <div class="field-group">
                 <label class="field-label">نوع التوزيعات</label>
@@ -2263,10 +2306,7 @@
                   <option>لا يوجد</option>
                 </select>
               </div>
-              <div class="field-group">
-                <label class="field-label">مبلغ التوزيع الدوري (ر.س)</label>
-                <input class="f-input" id="f-dist-amt" type="number" step="0.01" placeholder="0.00" />
-              </div>
+
             </div>
             <div class="form-grid">
               <div class="field-group">
@@ -2320,10 +2360,7 @@
                 <label class="field-label">تاريخ الاستحقاق / الخروج</label>
                 <input class="f-input" id="f-date-out" type="date" oninput="calcDays()" />
               </div>
-              <div class="field-group">
-                <label class="field-label">المدة الكلية</label>
-                <input class="f-input" id="f-duration" type="text" placeholder="مثال: 12 شهر، 9 أشهر، سنتين" />
-              </div>
+
             </div>
             <div class="form-grid">
               <div class="field-group">
@@ -2368,51 +2405,18 @@
             </div>
           </div>
 
-          <div style="display:flex;justify-content:flex-start;gap:12px">
-            <button class="btn-submit" onclick="nextStep(4)">التالي ← تفاصيل النوع</button>
-            <button class="btn-reset" onclick="prevStep(4)">← رجوع</button>
-          </div>
-        </div>
-
-        <!-- ══ STEP 5: تفاصيل النوع ══ -->
-        <div class="form-step" id="fstep-5" style="display:none">
 
           <!-- SUKUK / BOND -->
           <div class="form-section cond-panel" id="panel-sukuk">
             <div class="form-section-title">🏛 تفاصيل الصك / السند</div>
             <div class="form-grid">
-              <div class="field-group">
-                <label class="field-label">رقم الإصدار / ISIN</label>
-                <input class="f-input" id="f-isin" type="text" placeholder="مثال: 1011-28 أو SA0123..." />
-              </div>
-              <div class="field-group">
-                <label class="field-label">جهة الإصدار</label>
-                <input class="f-input" id="f-issuer" type="text" placeholder="اسم الشركة أو الجهة" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">نوع الصك</label>
-                <select class="f-select" id="f-sukuk-type">
-                  <option value="">— اختر —</option>
-                  <option>مرابحة</option>
-                  <option>إجارة</option>
-                  <option>مشاركة</option>
-                  <option>مضاربة</option>
-                  <option>تطوير عقاري</option>
-                  <option>استثمار عقاري</option>
-                  <option>تمويل مشاريع</option>
-                  <option>حكومي</option>
-                </select>
-              </div>
+
+
+
             </div>
             <div class="form-grid">
-              <div class="field-group">
-                <label class="field-label">معدل الكوبون / العائد السنوي %</label>
-                <input class="f-input" id="f-coupon" type="number" step="0.01" placeholder="مثال: 10.22" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">القيمة الاسمية للصك (ر.س)</label>
-                <input class="f-input" id="f-face-val" type="number" step="0.01" placeholder="0.00" />
-              </div>
+
+
               <div class="field-group">
                 <label class="field-label">التصنيف الائتماني</label>
                 <select class="f-select" id="f-credit-rating">
@@ -2504,25 +2508,14 @@
             </div>
           </div>
 
-          <!-- DEFAULT (no type selected) -->
-          <div class="form-section" id="panel-default">
-            <div class="form-section-title">📌 تفاصيل إضافية</div>
-            <div class="form-full">
-              <div class="field-group">
-                <label class="field-label">ملاحظات خاصة بالفرصة</label>
-                <textarea class="f-textarea" id="f-type-notes" placeholder="أي معلومات إضافية تتعلق بهذا النوع من الاستثمار..."></textarea>
-              </div>
-            </div>
-          </div>
-
           <div style="display:flex;justify-content:flex-start;gap:12px">
-            <button class="btn-submit" onclick="nextStep(5)">التالي ← المخاطر والإدارة</button>
-            <button class="btn-reset" onclick="prevStep(5)">← رجوع</button>
+            <button class="btn-submit" onclick="nextStep(4)">التالي ← المخاطر والإدارة</button>
+            <button class="btn-reset" onclick="prevStep(4)">← رجوع</button>
           </div>
         </div>
 
-        <!-- ══ STEP 6: المخاطر والإدارة والحفظ ══ -->
-        <div class="form-step" id="fstep-6" style="display:none">
+        <!-- ══ STEP 5 (was 6): المخاطر والإدارة والحفظ ══ -->
+        <div class="form-step" id="fstep-5" style="display:none">
           <div class="form-section">
             <div class="form-section-title">⚖️ المخاطر والضمانات</div>
             <div class="form-grid">
@@ -2537,37 +2530,10 @@
                 </select>
                 <div class="field-error" id="err-risk">يرجى اختيار مستوى المخاطرة</div>
               </div>
-              <div class="field-group">
-                <label class="field-label">درجة المخاطرة (1-10)</label>
-                <input class="f-input" id="f-risk-score" type="number" min="1" max="10" placeholder="مثال: 3" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">نوع الضمان</label>
-                <select class="f-select" id="f-guarantee">
-                  <option value="">— اختر —</option>
-                  <option>أصول مالية</option>
-                  <option>أصول عقارية</option>
-                  <option>ضمان شخصي</option>
-                  <option>كفالة بنكية</option>
-                  <option>تأمين</option>
-                  <option>لا يوجد</option>
-                </select>
-              </div>
+
+
             </div>
-            <div class="form-grid">
-              <div class="field-group">
-                <label class="field-label">قيمة الضمان (ر.س)</label>
-                <input class="f-input" id="f-guarantee-val" type="number" step="0.01" placeholder="0.00" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">سعر وقف الخسارة (ر.س)</label>
-                <input class="f-input" id="f-stop-loss" type="number" step="0.01" placeholder="0.00" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">الحد الأقصى للخسارة المقبولة %</label>
-                <input class="f-input" id="f-max-loss" type="number" step="0.01" min="0" max="100" placeholder="مثال: 20" />
-              </div>
-            </div>
+
           </div>
 
           <div class="form-section">
@@ -2607,10 +2573,7 @@
               </div>
             </div>
             <div class="form-grid-2">
-              <div class="field-group">
-                <label class="field-label">وثائق / مستندات (اسم الملف)</label>
-                <input class="f-input" id="f-docs" type="text" placeholder="مثال: عقد_الصك.pdf" />
-              </div>
+
               <div class="field-group">
                 <label class="field-label">رابط وثيقة (URL)</label>
                 <input class="f-input" id="f-doc-url" type="url" placeholder="https://..." />
@@ -2631,7 +2594,7 @@
             <button class="btn-submit" onclick="saveOpportunity()" style="font-size:15px;padding:16px 48px">
               💾 حفظ الفرصة الاستثمارية
             </button>
-            <button class="btn-reset" onclick="prevStep(6)">← رجوع</button>
+            <button class="btn-reset" onclick="prevStep(5)">← رجوع</button>
             <button class="btn-reset" onclick="resetForm()" style="color:var(--red);border-color:rgba(255,68,68,0.3)">
               🗑 مسح الكل
             </button>
@@ -5205,7 +5168,107 @@ function g(id) {
 function gf(id) { return parseFloat(g(id)) || 0; }
 
 // Auto-calculate financial values
+
+function calcFinancialFields() {
+  var amount  = parseFloat(document.getElementById('f-amount')?.value) || 0;
+  var months  = parseFloat(document.getElementById('f-months')?.value) || 0;
+  var retPct  = parseFloat(document.getElementById('f-ret-pct')?.value) || 0;
+  var fees    = parseFloat(document.getElementById('f-fees')?.value)    || 0;
+  var tax     = parseFloat(document.getElementById('f-tax')?.value)     || 0;
+
+  var retVal    = amount > 0 && retPct > 0 ? amount * (retPct / 100) : 0;
+  var retAnnual = months > 0 && retPct > 0 ? (retPct / months) * 12 : retPct;
+  var netRet    = retVal - (fees + tax);
+  var total     = amount + netRet;
+
+  var setRO = function(id, val) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    if (val !== 0) el.value = val.toFixed(2);
+  };
+
+  setRO('f-ret-annual', retAnnual);
+  if (retPct > 0 && !(document.getElementById('f-ret-val')?.matches(':focus'))) setRO('f-ret-val', retVal);
+  setRO('f-net-ret', Math.max(0, netRet));
+  setRO('f-total', total > 0 ? total : 0);
+
+  // تحديث الـ calc boxes
+  var fmt = function(n){ return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+  var setEl = function(id, v){ var e=document.getElementById(id); if(e) e.textContent = v; };
+  setEl('c-net',       retVal  > 0 ? fmt(retVal)  + ' ر.س' : '—');
+  setEl('c-unrealized', netRet > 0 ? fmt(netRet)  + ' ر.س' : '—');
+  setEl('c-net2',       total  > 0 ? fmt(total)   + ' ر.س' : '—');
+  setEl('c-ret2',       retAnnual  > 0 ? retAnnual.toFixed(2) + '%' : '—');
+  // بقية الـ calc boxes القديمة
+  setEl('c-total2', total > 0 ? fmt(total) + ' ر.س' : '—');
+  setEl('c-roi',    retPct > 0 ? retPct.toFixed(2) + '%' : '—');
+}
+
+
+
+function showCapitalSrcSettings() {
+  document.getElementById('capital-src-modal').style.display = 'flex';
+  renderCapitalSrcList();
+}
+
+
+// ── Auto-fill رسوم الوكالة عند اختيار المنصة ─────────────────────────────
+function autoFillPlatformFees(platform) {
+  if (!platform) return;
+  var settings = {};
+  try { settings = JSON.parse(localStorage.getItem('appSettings') || '{}'); } catch(e) {}
+  var fees = settings.platformFees || [];
+  // Also check Firestore cache if available
+  var row = fees.find(function(r){ return r.platform === platform; });
+  var feesEl   = document.getElementById('f-fees');
+  var hintEl   = document.getElementById('f-fees-hint');
+  var amount   = parseFloat((document.getElementById('f-amount')||{}).value) || 0;
+
+  if (row && row.pct > 0) {
+    var calcFee = amount > 0 ? (amount * row.pct / 100) : 0;
+    if (feesEl && (feesEl.value === '' || feesEl.value === '0' || parseFloat(feesEl.value) === 0)) {
+      if (calcFee > 0) feesEl.value = calcFee.toFixed(2);
+    }
+    if (hintEl) {
+      hintEl.textContent = row.pct + '%' + (row.note ? ' · ' + row.note : '');
+    }
+    if (calcFee > 0 && feesEl) {
+      feesEl.style.borderColor = 'rgba(201,168,76,0.4)';
+      showToast('💼 رسوم ' + platform + ': ' + row.pct + '% = ' + calcFee.toLocaleString('en-US',{maximumFractionDigits:2}) + ' ر.س');
+    }
+  } else {
+    if (hintEl) hintEl.textContent = '';
+    if (feesEl) feesEl.style.borderColor = '';
+  }
+  calcAuto();
+}
+
+// تحديث رسوم الوكالة تلقائياً عند تغيير المبلغ أيضاً
+function calcAutoWithFees() {
+  var platform = (document.getElementById('f-platform')||{}).value;
+  if (platform) autoFillPlatformFees(platform);
+  else calcAuto();
+}
+
+// تحميل إعدادات رسوم الوكالة من Firestore عند فتح الفورم
+function loadPlatformFeesCache() {
+  // محاولة جلب من Firestore للتأكد من أحدث نسخة
+  if (typeof firebase !== 'undefined' && window.__firebaseUser) {
+    firebase.firestore()
+      .collection('users').doc(window.__firebaseUser.uid)
+      .collection('portfolio').doc('settings')
+      .get().then(function(doc) {
+        if (doc.exists && doc.data().lists && doc.data().lists.platformFees) {
+          var s = _getSettings();
+          s.platformFees = doc.data().lists.platformFees;
+          _saveSettings(s);
+        }
+      }).catch(function(){});
+  }
+}
+
 function calcAuto() {
+  calcFinancialFields();
   const amount = gf('f-amount');
   const fees = gf('f-fees');
   const tax = gf('f-tax');
@@ -5335,6 +5398,12 @@ function calcStockPrice() {
 // Show/hide type-specific panels
 function onTypeChange() {
   const type = g('f-type');
+  // إظهار نوع الصك في step 1 إذا كان الاختيار صك أو سند أو مرابحة
+  var sukukTypeEl = document.getElementById('sukuk-type-in-step1');
+  if (sukukTypeEl) {
+    var showSukukType = ['صك','سند','مرابحة','وديعة','عقد آجل'].includes(val);
+    sukukTypeEl.style.display = showSukukType ? 'block' : 'none';
+  }
   const panels = ['panel-sukuk', 'panel-stock', 'panel-estate', 'panel-default'];
   panels.forEach(p => {
     const el = document.getElementById(p);
@@ -5399,8 +5468,11 @@ function saveOpportunity() {
   if (!validateStep(6)) return;
 
   const net = gf('f-amount') - gf('f-fees') - gf('f-tax');
-  const retPct = gf('f-ret-pct') / 100;
-  const retVal = gf('f-ret-val') || net * retPct;
+  const retPct    = gf('f-ret-pct') / 100;
+  const retVal    = gf('f-ret-val') || 0;
+  const retAnnual = gf('f-ret-annual') / 100 || 0;
+  const monthsDur = gf('f-months') || 0;
+  const netRet    = gf('f-net-ret') || 0;
   const platform = g('f-platform') !== 'أخرى' && g('f-platform') !== '' ? g('f-platform') : g('f-platform-other');
 
   const opp = {
@@ -5410,7 +5482,7 @@ function saveOpportunity() {
     subtype: g('f-subtype'),
     sector: g('f-sector'),
     platform,
-    capital_src: g('f-capital-src'),
+    capital_src: getCapitalSrcSelected().join('، '),
     amount: gf('f-amount'),
     currency: g('f-currency'),
     fees: gf('f-fees'),
@@ -5704,8 +5776,10 @@ function showPage(id, navEl, mobileTitle, noScroll){
   }
   // إعادة رسم قاعدة البيانات عند الانتقال إليها فقط
   if (id !== 'db') {
-    var dbWrap = document.querySelector('#page-db .db-table-wrap');
-    if (dbWrap) dbWrap.innerHTML = '';
+    var dbThead = document.getElementById('db-thead');
+    var dbTbody = document.getElementById('db-tbody');
+    if (dbThead) dbThead.innerHTML = '';
+    if (dbTbody) dbTbody.innerHTML = '';
   }
 
   // Desktop sidebar
@@ -8739,16 +8813,29 @@ function getDisplayName() {
 }
 
 // ── تعبئة القوائم المنسدلة ───────────────────────────────────────────────────
-function populateCapitalSrcSelect() {
-  var sel = document.getElementById('f-capital-src');
-  if (!sel) return;
-  var current = sel.value;
+function populateCapitalSrcSelect(selectedArr) {
+  var wrap = document.getElementById('f-capital-src-wrap');
+  if (!wrap) return;
+  var selected = Array.isArray(selectedArr) ? selectedArr : 
+    (selectedArr ? [selectedArr] : []);
   var sources = getCapitalSources();
-  sel.innerHTML = '<option value="">— اختر المصدر —</option>'
-    + sources.map(function(s) {
-        return '<option value="' + s + '"' + (s === current ? ' selected' : '') + '>' + s + '</option>';
-      }).join('');
+  if (!sources.length) { wrap.innerHTML = '<span style="font-size:11px;color:var(--muted)">لا توجد مصادر — أضفها من الإعدادات</span>'; return; }
+  wrap.innerHTML = sources.map(function(s) {
+    var chk = selected.includes(s) ? 'checked' : '';
+    return '<label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:7px;padding:5px 10px;cursor:pointer;font-size:12px;white-space:nowrap">' +
+      '<input type="checkbox" value="' + s + '" ' + chk + ' style="accent-color:var(--gold);width:14px;height:14px;cursor:pointer">' +
+      '<span>' + s + '</span></label>';
+  }).join('');
+  var ph = document.getElementById('f-capital-src-placeholder');
+  if (ph) ph.remove();
 }
+
+function getCapitalSrcSelected() {
+  var wrap = document.getElementById('f-capital-src-wrap');
+  if (!wrap) return [];
+  return Array.from(wrap.querySelectorAll('input[type=checkbox]:checked')).map(function(el){ return el.value; });
+}
+
 
 function populatePlatformSelects() {
   var platforms = getPlatforms();
