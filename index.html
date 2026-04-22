@@ -6715,37 +6715,68 @@ function renderInstallmentTable() {
   if (!tbody) return;
 
   tbody.innerHTML = _installmentRows.map(function(row, i) {
-    var months = row.fromYear !== '' && row.toYear !== '' && row.fromYear <= row.toYear
-      ? Math.round((parseFloat(row.toYear) - parseFloat(row.fromYear)) * 12)
-      : 0;
+    var months = (row.fromYear !== '' && row.toYear !== '' &&
+                  parseFloat(row.toYear) >= parseFloat(row.fromYear))
+      ? Math.round((parseFloat(row.toYear) - parseFloat(row.fromYear)) * 12) : 0;
     var total = months > 0 && row.pmt ? (months * parseFloat(row.pmt)) : 0;
+    var fmt = function(n){ return n > 0 ? n.toLocaleString('en-US',{maximumFractionDigits:0}) : '—'; };
 
-    return '<tr style="border-bottom:1px solid rgba(255,255,255,0.04)">' +
-      '<td style="padding:6px 8px"><input type="number" min="1" step="0.5" value="'+row.fromYear+'" placeholder="1" ' +
-        'oninput="_installmentRows['+i+'].fromYear=parseFloat(this.value)||0;renderInstallmentTable();calcFromInstallments()" ' +
-        'style="width:70px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--white);font-family:inherit;font-size:12px;outline:none"></td>' +
-      '<td style="padding:6px 8px"><input type="number" min="1" step="0.5" value="'+row.toYear+'" placeholder="5" ' +
-        'oninput="_installmentRows['+i+'].toYear=parseFloat(this.value)||0;renderInstallmentTable();calcFromInstallments()" ' +
-        'style="width:70px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--white);font-family:inherit;font-size:12px;outline:none"></td>' +
-      '<td style="padding:6px 8px"><input type="number" min="0" step="0.01" value="'+row.pmt+'" placeholder="2500" ' +
-        'oninput="_installmentRows['+i+'].pmt=parseFloat(this.value)||0;renderInstallmentTable();calcFromInstallments()" ' +
-        'style="width:110px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--gold);font-family:monospace;font-size:13px;font-weight:700;outline:none"></td>' +
-      '<td style="padding:6px 10px;font-family:monospace;color:var(--cyan)">' + (months || '—') + '</td>' +
-      '<td style="padding:6px 10px;font-family:monospace;color:var(--white);font-weight:700">' +
-        (total > 0 ? total.toLocaleString('en-US',{maximumFractionDigits:0}) : '—') + '</td>' +
+    return '<tr style="border-bottom:1px solid rgba(255,255,255,0.04)" id="inst-row-'+i+'">' +
+      '<td style="padding:6px 8px">' +
+        '<input type="number" min="1" step="0.5" value="'+row.fromYear+'" placeholder="1"' +
+        ' data-i="'+i+'" data-key="fromYear"' +
+        ' onchange="instUpdateCell(this)" onblur="instCalcTotals()"' +
+        ' style="width:75px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--white);font-family:inherit;font-size:13px;outline:none">' +
+      '</td>' +
+      '<td style="padding:6px 8px">' +
+        '<input type="number" min="1" step="0.5" value="'+row.toYear+'" placeholder="5"' +
+        ' data-i="'+i+'" data-key="toYear"' +
+        ' onchange="instUpdateCell(this)" onblur="instCalcTotals()"' +
+        ' style="width:75px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--white);font-family:inherit;font-size:13px;outline:none">' +
+      '</td>' +
+      '<td style="padding:6px 8px">' +
+        '<input type="number" min="0" step="1" value="'+row.pmt+'" placeholder="2500"' +
+        ' data-i="'+i+'" data-key="pmt"' +
+        ' onchange="instUpdateCell(this)" onblur="instCalcTotals()"' +
+        ' style="width:160px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--gold);font-family:monospace;font-size:14px;font-weight:700;outline:none">' +
+      '</td>' +
+      '<td style="padding:6px 10px;font-family:monospace;color:var(--cyan)" id="inst-months-'+i+'">' + (months || '—') + '</td>' +
+      '<td style="padding:6px 10px;font-family:monospace;font-weight:700;color:var(--white)" id="inst-total-'+i+'">' + fmt(total) + '</td>' +
       '<td style="padding:6px 4px;text-align:center">' +
-        '<button onclick="removeInstallmentRow('+i+')" style="background:rgba(255,68,68,0.1);border:1px solid rgba(255,68,68,0.2);border-radius:5px;padding:3px 7px;cursor:pointer;color:var(--red);font-size:11px">✕</button>' +
+        '<button type="button" onclick="removeInstallmentRow('+i+')" style="background:rgba(255,68,68,0.1);border:1px solid rgba(255,68,68,0.2);border-radius:5px;padding:3px 8px;cursor:pointer;color:var(--red);font-size:11px">✕</button>' +
       '</td>' +
     '</tr>';
   }).join('');
 
-  // Totals
+  instCalcTotals();
+}
+
+function instUpdateCell(input) {
+  var i = parseInt(input.dataset.i);
+  var key = input.dataset.key;
+  var val = parseFloat(input.value) || 0;
+  _installmentRows[i][key] = val;
+
+  // Update only row totals without re-rendering entire table
+  var fromY = parseFloat(_installmentRows[i].fromYear) || 0;
+  var toY   = parseFloat(_installmentRows[i].toYear)   || 0;
+  var pmt   = parseFloat(_installmentRows[i].pmt)      || 0;
+  var months = (fromY > 0 && toY >= fromY) ? Math.round((toY - fromY) * 12) : 0;
+  var total  = months * pmt;
+
+  var mEl = document.getElementById('inst-months-'+i);
+  var tEl = document.getElementById('inst-total-'+i);
+  if (mEl) mEl.textContent = months || '—';
+  if (tEl) tEl.textContent = total > 0 ? total.toLocaleString('en-US',{maximumFractionDigits:0}) : '—';
+}
+
+function instCalcTotals() {
   var totalMonths = 0, totalAmount = 0;
-  _installmentRows.forEach(function(row) {
-    var months = row.fromYear !== '' && row.toYear !== '' && parseFloat(row.toYear) >= parseFloat(row.fromYear)
-      ? Math.round((parseFloat(row.toYear) - parseFloat(row.fromYear)) * 12)
-      : 0;
-    var pmt = parseFloat(row.pmt) || 0;
+  _installmentRows.forEach(function(row, i) {
+    var fromY = parseFloat(row.fromYear) || 0;
+    var toY   = parseFloat(row.toYear)   || 0;
+    var pmt   = parseFloat(row.pmt)      || 0;
+    var months = (fromY > 0 && toY >= fromY) ? Math.round((toY - fromY) * 12) : 0;
     totalMonths += months;
     totalAmount += months * pmt;
   });
@@ -6754,7 +6785,10 @@ function renderInstallmentTable() {
   var el2 = document.getElementById('inst-total-amount');
   if (el1) el1.textContent = totalMonths || '—';
   if (el2) el2.textContent = totalAmount > 0 ? totalAmount.toLocaleString('en-US',{maximumFractionDigits:0}) + ' ر.س' : '—';
+
+  calcFromInstallments();
 }
+
 
 function calcFromInstallments() {
   // حساب المجاميع من جدول الأقساط المدخلة يدوياً
