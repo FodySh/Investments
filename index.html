@@ -1413,37 +1413,112 @@
     <!-- PAGE: DASHBOARD -->
     <!-- ═══════════════════════════════════════════════ -->
     <div id="page-dashboard" class="page active">
-      <div class="page-header fade-up">
+
+      <!-- ── رأس الصفحة ── -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:20px" class="fade-up">
         <div>
-          <div class="page-title">📊 لوحة التحكم</div>
-          <div class="page-sub" id="dash-subtitle">نظرة شاملة على المحفظة الاستثمارية</div>
+          <div style="font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px" id="dash-greeting">نظرة عامة على المحفظة</div>
+          <div style="font-size:26px;font-weight:800;color:var(--white)">لوحة التحكم</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px" id="dash-subtitle">جميع الاستثمارات · آخر تحديث الآن</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <div class="date-badge" id="dash-date-badge">جميع السنوات</div>
-          <select id="dash-year-filter" onchange="renderDashboard()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--white);font-size:12px;font-family:inherit;outline:none">
+          <select id="dash-year-filter" onchange="renderDashboard()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 14px;color:var(--white);font-size:12px;font-family:inherit;outline:none">
             <option value="all">كل السنوات</option>
           </select>
+          <div id="dash-date-badge" class="date-badge">جميع السنوات</div>
         </div>
       </div>
-      <div class="kpi-grid fade-up delay-1" id="dash-kpi-grid"></div>
-      <div class="two-col fade-up delay-2">
+
+      <!-- ── KPIs Row 1: الأرقام الرئيسية ── -->
+      <div id="dash-kpi-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px" class="fade-up delay-1"></div>
+
+      <!-- ── KPIs Row 2: مؤشرات إضافية ── -->
+      <div id="dash-kpi-extra" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px" class="fade-up delay-1"></div>
+
+      <!-- ── السطر الأول: الدونات + المنصات ── -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px" class="fade-up delay-2">
         <div class="section-card">
-          <div class="section-head"><span class="section-title">📌 توزيع الأصول</span></div>
-          <div class="section-body"><div id="dash-donut-wrap" style="display:flex;align-items:center;gap:24px;justify-content:center"><div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">لا توجد بيانات بعد</div></div></div>
+          <div class="section-head">
+            <span class="section-title">🥧 توزيع الأصول</span>
+            <span class="section-count" id="dash-asset-count">—</span>
+          </div>
+          <div class="section-body">
+            <div id="dash-donut-wrap" style="display:flex;align-items:center;gap:20px;justify-content:center;flex-wrap:wrap"></div>
+          </div>
         </div>
         <div class="section-card">
-          <div class="section-head"><span class="section-title">🏦 التوزيع حسب المنصة</span></div>
-          <div class="section-body"><div id="dash-platform-bars" class="bar-list"><div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">لا توجد بيانات بعد</div></div></div>
+          <div class="section-head">
+            <span class="section-title">🏛 التوزيع حسب المنصة</span>
+          </div>
+          <div class="section-body">
+            <div id="dash-platform-bars" class="bar-list"></div>
+          </div>
         </div>
       </div>
-      <div class="two-col fade-up delay-3">
+
+      <!-- ── السطر الثاني: القروض + التدفق النقدي القادم ── -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px" class="fade-up delay-2">
+        <div class="section-card">
+          <div class="section-head">
+            <span class="section-title">🏦 القروض البنكية</span>
+            <span class="section-count" id="dash-loans-count">—</span>
+          </div>
+          <div class="section-body" id="dash-loans-summary"></div>
+        </div>
+        <div class="section-card">
+          <div class="section-head">
+            <span class="section-title">💧 التدفق النقدي — 3 أشهر قادمة</span>
+          </div>
+          <div class="section-body" id="dash-cashflow-preview"></div>
+        </div>
+      </div>
+
+      <!-- ── السطر الثالث: المخاطر + أفضل أداء ── -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px" class="fade-up delay-3">
         <div id="dash-risk-by-year"></div>
         <div class="section-card">
-          <div class="section-head"><span class="section-title">🏆 أفضل الاستثمارات أداءً</span></div>
-          <div class="section-body" id="dash-top-performers"><div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">لا توجد بيانات بعد</div></div>
+          <div class="section-head">
+            <span class="section-title">🏆 أفضل الفرص أداءً</span>
+          </div>
+          <div class="section-body" id="dash-top-performers"></div>
         </div>
       </div>
-    </div>
+
+      <!-- ── السطر الرابع: الاستحقاقات القادمة + الأسهم ── -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px" class="fade-up delay-3">
+        <div class="section-card">
+          <div class="section-head">
+            <span class="section-title">📅 الاستحقاقات القادمة (90 يوم)</span>
+            <span class="section-count" id="dash-maturity-count">—</span>
+          </div>
+          <div class="section-body" id="dash-maturity-list" style="padding:0"></div>
+        </div>
+        <div class="section-card">
+          <div class="section-head">
+            <span class="section-title">📈 محفظة الأسهم</span>
+          </div>
+          <div class="section-body" id="dash-stocks-summary"></div>
+        </div>
+      </div>
+
+      <!-- ── السطر الخامس: ديون + تنبيهات ── -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px" class="fade-up delay-4">
+        <div class="section-card">
+          <div class="section-head">
+            <span class="section-title">💸 الديون والجمعيات</span>
+          </div>
+          <div class="section-body" id="dash-debts-summary"></div>
+        </div>
+        <div class="section-card">
+          <div class="section-head">
+            <span class="section-title">⚡ تنبيهات المحفظة</span>
+            <span class="section-count" id="dash-alerts-count">—</span>
+          </div>
+          <div class="section-body" id="dash-alerts-list" style="padding:0"></div>
+        </div>
+      </div>
+
+
     <!-- PAGE: STOCKS -->
     <!-- ═══════════════════════════════════════════════ -->
     <div id="page-stocks" class="page">
@@ -3900,41 +3975,304 @@ function initDashboardYears() {
 function renderDashboard() {
   var yr   = (document.getElementById('dash-year-filter')||{}).value || 'all';
   var inv  = window.__investments || [];
+  var loans = window.loansData || loansData || [];
+  var divs = window.dividendsData || dividendsData || [];
+  var debtsArr = window.debtsData || [];
+
   var data = yr === 'all' ? inv : inv.filter(function(x) {
-    var y1 = (x.date_in||'').split('/').pop(); var y2 = (x.date_out||'').split('/').pop();
-    return y1===yr || y2===yr;
+    var y = (x.date_in||'').slice(0,4);
+    return y === yr;
   });
-  var totalAmt = data.reduce(function(s,x){return s+(x.amount||0);},0);
-  var totalRet = data.reduce(function(s,x){return s+(x.ret_val||0);},0);
-  var totalExp = data.reduce(function(s,x){return s+(x.total||0);},0);
-  var active   = data.filter(function(x){return x.status==='نشطة';});
-  var done     = data.filter(function(x){return x.status==='مستلمة';});
-  var roi      = totalAmt>0 ? (totalRet/totalAmt*100).toFixed(2) : '0';
-  var fmt      = function(n){ return n.toLocaleString('en-US',{maximumFractionDigits:0}); };
 
+  var fmt  = function(n){ return n.toLocaleString('en-US',{maximumFractionDigits:0}); };
+  var fmt2 = function(n){ return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+  var now  = new Date(); now.setHours(0,0,0,0);
+
+  // ── تصنيف الاستثمارات ────────────────────────────────
+  var active   = data.filter(function(x){ return x.status==='نشطة'; });
+  var done     = data.filter(function(x){ return x.status==='مستلمة'; });
+  var stocks   = data.filter(function(x){ return x.type==='سهم'; });
+  var sukuk    = data.filter(function(x){ return ['صك','مرابحة','سند','وديعة'].includes(x.type); });
+  var funds    = data.filter(function(x){ return x.type==='صندوق'; });
+
+  // ── الأرقام الإجمالية ───────────────────────────────
+  var totalAmt    = data.reduce(function(s,x){ return s+(x.amount||0); }, 0);
+  var totalRet    = data.reduce(function(s,x){ return s+(x.ret_val||0); }, 0);
+  var totalExp    = data.reduce(function(s,x){ return s+(x.total||0); }, 0);
+  var activeAmt   = active.reduce(function(s,x){ return s+(x.amount||0); }, 0);
+  var roi         = totalAmt>0 ? (totalRet/totalAmt*100) : 0;
+  var growth      = totalAmt>0 ? ((totalExp-totalAmt)/totalAmt*100) : 0;
+
+  // ── تحديث العنوان ───────────────────────────────────
   var sub = document.getElementById('dash-subtitle');
-  if (sub) sub.textContent = yr==='all' ? 'نظرة شاملة على المحفظة الاستثمارية' : 'عرض سنة '+yr+' — '+data.length+' فرصة';
+  if (sub) sub.textContent = (yr==='all'?'جميع السنوات':yr) + ' · ' + data.length + ' فرصة استثمارية';
   var badge = document.getElementById('dash-date-badge');
-  if (badge) badge.textContent = yr==='all' ? 'جميع السنوات' : yr;
+  if (badge) badge.textContent = yr==='all' ? 'الكل' : yr;
 
+  // تحية حسب الوقت
+  var h = new Date().getHours();
+  var greet = h<12?'صباح الخير 🌅':h<17?'مساء النشاط ☀️':'مساء الخير 🌙';
+  var gEl = document.getElementById('dash-greeting');
+  if (gEl) gEl.textContent = greet + ' — ' + new Date().toLocaleDateString('ar-SA',{weekday:'long',day:'numeric',month:'long'});
+
+  // ══════════════════════════════════════════════════════
+  // KPIs الرئيسية
+  // ══════════════════════════════════════════════════════
   var kpiGrid = document.getElementById('dash-kpi-grid');
   if (kpiGrid) {
-    if (!data.length) {
-      kpiGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">سجّل دخولك وأضف استثماراتك لعرض الإحصاءات</div>';
-    } else {
-      var growth = totalAmt>0 ? ((totalExp-totalAmt)/totalAmt*100).toFixed(1) : '0';
-      kpiGrid.innerHTML =
-        mkKpi('💰','إجمالي المبلغ المستثمر',fmt(totalAmt),'ريال سعودي',data.length+' فرصة','badge-gold','#c9a84c') +
-        mkKpi('📈','إجمالي العوائد',fmt(totalRet),'ريال سعودي','ROI '+roi+'%','badge-green','#00e676') +
-        mkKpi('🔮','المجموع المتوقع',fmt(totalExp),'ريال سعودي','+'+growth+'% نمو','badge-gold','#00d4ff') +
-        mkKpi('✅','الاستثمارات النشطة',active.length,'من أصل '+data.length+' فرصة',done.length+' مستلمة','badge-green','#00e676');
-    }
+    kpiGrid.innerHTML = !data.length
+      ? '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">أضف استثماراتك لعرض الإحصاءات</div>'
+      : mkKpi('💰','إجمالي رأس المال',fmt(totalAmt),'ر.س',data.length+' فرصة','badge-gold','#c9a84c')
+      + mkKpi('💹','إجمالي العوائد',fmt(totalRet),'ر.س','ROI '+roi.toFixed(2)+'%','badge-green','#00e676')
+      + mkKpi('🔮','المجموع المتوقع',fmt(totalExp),'ر.س','+'+growth.toFixed(1)+'% نمو','badge-gold','#00d4ff')
+      + mkKpi('⚡','رأس المال النشط',fmt(activeAmt),'ر.س',active.length+' فرصة نشطة','badge-green','#a78bfa');
   }
+
+  // KPIs الثانوية
+  var loanTotal   = loans.reduce(function(s,l){ return s+(l.remaining||0); }, 0);
+  var lendTotal   = (debtsArr||[]).filter(function(d){ return d.direction==='lend'||d.direction==='owed'; }).reduce(function(s,d){ return s+(d.remaining||d.amount||0); }, 0);
+  var oweTotal    = (debtsArr||[]).filter(function(d){ return d.direction==='owe'; }).reduce(function(s,d){ return s+(d.remaining||d.amount||0); }, 0);
+  var divTotal    = divs.reduce(function(s,d){ return s+(d.total_amount||0); }, 0);
+
+  var kpiExtra = document.getElementById('dash-kpi-extra');
+  if (kpiExtra && data.length) {
+    kpiExtra.innerHTML =
+      mkKpiSmall('🏦','المديونية البنكية',fmt(loanTotal),'ر.س متبقي','#f87171')
+    + mkKpiSmall('💚','لي على الآخرين',fmt(lendTotal),'ر.س','#34d399')
+    + mkKpiSmall('🔴','عليّ للآخرين',fmt(oweTotal),'ر.س','#f87171')
+    + mkKpiSmall('💰','توزيعات مستلمة',fmt(divTotal),'ر.س','#c9a84c')
+    + mkKpiSmall('📊','عدد الأسهم',stocks.length+' سهم','صكوك: '+sukuk.length,'#60a5fa')
+    + mkKpiSmall('✅','مكتملة',done.length+' فرصة',(done.length/Math.max(data.length,1)*100).toFixed(0)+'% معدل الاستحقاق','#34d399');
+  } else if (kpiExtra) { kpiExtra.innerHTML = ''; }
+
+  // ══════════════════════════════════════════════════════
+  // الدونات والمنصات
+  // ══════════════════════════════════════════════════════
   renderDonutChart(data, totalAmt, fmt);
   renderPlatformBars(data, totalAmt, fmt);
+
+  // ══════════════════════════════════════════════════════
+  // القروض البنكية
+  // ══════════════════════════════════════════════════════
+  var loansSec = document.getElementById('dash-loans-summary');
+  var loansCnt = document.getElementById('dash-loans-count');
+  if (loansCnt) loansCnt.textContent = loans.length + ' قرض';
+  if (loansSec) {
+    if (!loans.length) {
+      loansSec.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px">لا توجد قروض مسجلة</div>';
+    } else {
+      var totalPrincipal = loans.reduce(function(s,l){ return s+(l.principal||0); }, 0);
+      var totalPaid      = loans.reduce(function(s,l){ return s+(l.paid_amount||0); }, 0);
+      var totalRemaining = loans.reduce(function(s,l){ return s+(l.remaining||0); }, 0);
+      var totalMonthly   = loans.reduce(function(s,l){ return s+(l.pmt||l.installment||0); }, 0);
+      loansSec.innerHTML =
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'
+        + _dKpi('المبلغ الأصلي',fmt(totalPrincipal),'ر.س','#8899bb')
+        + _dKpi('إجمالي القسط',fmt(totalMonthly),'ر.س/شهر','#f59e0b')
+        + _dKpi('المسدد',fmt(totalPaid),'ر.س','#34d399')
+        + _dKpi('المتبقي',fmt(totalRemaining),'ر.س','#f87171')
+        + '</div>'
+        + loans.slice(0,3).map(function(l){
+            var pct = l.principal>0?Math.round((l.paid_amount||0)/l.principal*100):0;
+            return '<div style="margin-bottom:10px">'
+              + '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">'
+              + '<span style="font-weight:600">'+l.name+'</span>'
+              + '<span style="color:var(--muted)">'+pct+'%</span></div>'
+              + '<div style="height:5px;background:rgba(255,255,255,0.07);border-radius:3px">'
+              + '<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,#f59e0b,#ef4444);border-radius:3px"></div>'
+              + '</div></div>';
+          }).join('');
+    }
+  }
+
+  // ══════════════════════════════════════════════════════
+  // التدفق النقدي (3 أشهر)
+  // ══════════════════════════════════════════════════════
+  var cfSec = document.getElementById('dash-cashflow-preview');
+  if (cfSec) {
+    var cfMonths = [];
+    for (var m=0; m<3; m++) {
+      var dt = new Date(now.getFullYear(), now.getMonth()+m, 1);
+      var key = dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0');
+      var mnames = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+      cfMonths.push({ key:key, label:mnames[dt.getMonth()], dist:0, capital:0, divs:0 });
+    }
+    var keyMap={};cfMonths.forEach(function(m){keyMap[m.key]=m;});
+
+    active.forEach(function(x) {
+      var matDate = parseDate(x.date_out);
+      if (matDate) {
+        var mk = matDate.getFullYear()+'-'+String(matDate.getMonth()+1).padStart(2,'0');
+        if (keyMap[mk]) keyMap[mk].capital += (x.total||x.amount||0);
+      }
+      var freq = x.dist||'';
+      var mpd = freq==='شهري'?1:freq==='ربع سنوي'?3:freq==='نصف سنوي'?6:freq==='سنوي'?12:0;
+      if (mpd>0&&x.ret_val>0) { for(var i=0;i<3;i+=mpd) if(cfMonths[i]) cfMonths[i].dist+=x.ret_val/Math.max(1,Math.ceil(12/mpd)); }
+    });
+    divs.forEach(function(d){
+      var dk=(d.pay_date||d.ex_date||'').slice(0,7);
+      if(keyMap[dk]&&d.total_amount) keyMap[dk].divs+=d.total_amount;
+    });
+
+    var maxCF=Math.max.apply(null,cfMonths.map(function(m){return m.dist+m.capital+m.divs;}))||1;
+    cfSec.innerHTML = '<div style="display:flex;gap:10px">' +
+      cfMonths.map(function(m){
+        var tot=m.dist+m.capital+m.divs;
+        var h1=(m.capital/maxCF*80).toFixed(1),h2=(m.divs/maxCF*80).toFixed(1),h3=(m.dist/maxCF*80).toFixed(1);
+        return '<div style="flex:1;text-align:center">'
+          +'<div style="font-size:11px;font-weight:700;color:'+(tot>0?'var(--white)':'var(--muted)')+';margin-bottom:4px">'+(tot>0?fmt(tot):' ')+'</div>'
+          +'<div style="display:flex;flex-direction:column;justify-content:flex-end;height:80px;gap:1px">'
+          +'<div style="height:'+h1+'px;background:rgba(96,165,250,0.75);border-radius:2px 2px 0 0;min-height:'+(m.capital>0?3:0)+'px"></div>'
+          +'<div style="height:'+h2+'px;background:rgba(0,230,118,0.75);min-height:'+(m.divs>0?2:0)+'px"></div>'
+          +'<div style="height:'+h3+'px;background:rgba(52,211,153,0.8);min-height:'+(m.dist>0?2:0)+'px"></div>'
+          +'</div>'
+          +'<div style="font-size:11px;color:var(--muted);margin-top:4px">'+m.label+'</div></div>';
+      }).join('')+'</div>'
+      +'<div style="display:flex;gap:12px;margin-top:10px;font-size:10px;color:var(--muted)">'
+      +'<span><span style="display:inline-block;width:10px;height:10px;background:rgba(96,165,250,0.75);border-radius:2px;margin-left:4px"></span>رأس مال</span>'
+      +'<span><span style="display:inline-block;width:10px;height:10px;background:rgba(0,230,118,0.75);border-radius:2px;margin-left:4px"></span>أسهم</span>'
+      +'<span><span style="display:inline-block;width:10px;height:10px;background:rgba(52,211,153,0.8);border-radius:2px;margin-left:4px"></span>صكوك</span>'
+      +'</div>';
+  }
+
+  // ══════════════════════════════════════════════════════
+  // المخاطر + أفضل أداء
+  // ══════════════════════════════════════════════════════
   renderRiskSection(data, yr);
   renderTopPerformers(data, fmt);
+
+  // ══════════════════════════════════════════════════════
+  // الاستحقاقات القادمة (90 يوم)
+  // ══════════════════════════════════════════════════════
+  var matList = document.getElementById('dash-maturity-list');
+  var matCount = document.getElementById('dash-maturity-count');
+  if (matList) {
+    var upcoming = active.filter(function(x){
+      var d = parseDate(x.date_out);
+      if (!d) return false;
+      var diff = Math.floor((d-now)/86400000);
+      return diff>=0 && diff<=90;
+    }).sort(function(a,b){ return parseDate(a.date_out)-parseDate(b.date_out); });
+
+    if (matCount) matCount.textContent = upcoming.length + ' فرصة';
+    if (!upcoming.length) {
+      matList.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px">لا توجد استحقاقات في 90 يوم</div>';
+    } else {
+      matList.innerHTML = upcoming.map(function(x){
+        var d = parseDate(x.date_out);
+        var diff = Math.floor((d-now)/86400000);
+        var urgency = diff<=7?'#f87171':diff<=30?'#f59e0b':'#34d399';
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid var(--border)">'
+          +'<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+x.name+'</div>'
+          +'<div style="font-size:10px;color:var(--muted)">'+fmt(x.total||x.amount||0)+' ر.س</div></div>'
+          +'<div style="text-align:left;flex-shrink:0">'
+          +'<div style="font-size:12px;font-weight:700;color:'+urgency+'">'+diff+' يوم</div>'
+          +'<div style="font-size:10px;color:var(--muted)">'+x.date_out+'</div></div>'
+          +'</div>';
+      }).join('');
+    }
+  }
+
+  // ══════════════════════════════════════════════════════
+  // ملخص الأسهم
+  // ══════════════════════════════════════════════════════
+  var stocksSec = document.getElementById('dash-stocks-summary');
+  if (stocksSec) {
+    var saStocks = (window.__investments||[]).filter(function(x){ return x.type==='سهم'&&x.market!=='us'; });
+    var usStocks = (window.__investments||[]).filter(function(x){ return x.type==='سهم'&&x.market==='us'; });
+    var saAmt    = saStocks.reduce(function(s,x){ return s+(x.amount||0); },0);
+    var usAmt    = usStocks.reduce(function(s,x){ return s+(x.amount||0); },0);
+    var saPnl=0,usPnl=0;
+    saStocks.forEach(function(x){ var p=x.ticker?STOCK_PRICES[x.ticker]:null; if(p&&p.price&&x.shares) saPnl+=(p.price*x.shares)-(x.amount||0); });
+    usStocks.forEach(function(x){ var p=x.ticker?US_STOCK_PRICES[x.ticker]:null; if(p&&p.price&&x.shares) usPnl+=(p.price*x.shares)-(x.amount||0); });
+    stocksSec.innerHTML =
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+      + _dKpi('🇸🇦 سعودي',fmt(saAmt),'ر.س — '+saStocks.length+' سهم',saPnl>=0?'#34d399':'#f87171')
+      + _dKpi('🇺🇸 أمريكي','$'+fmt(usAmt),usStocks.length+' سهم',usPnl>=0?'#34d399':'#f87171')
+      + _dKpi('ر/خ سعودي',(saPnl>=0?'+':'')+fmt(saPnl),'ر.س',saPnl>=0?'#34d399':'#f87171')
+      + _dKpi('ر/خ أمريكي',(usPnl>=0?'+':'')+'$'+fmt(usPnl),'',usPnl>=0?'#34d399':'#f87171')
+      + '</div>';
+  }
+
+  // ══════════════════════════════════════════════════════
+  // ملخص الديون
+  // ══════════════════════════════════════════════════════
+  var debtsSec = document.getElementById('dash-debts-summary');
+  if (debtsSec) {
+    var activeDebts = (debtsArr||[]).filter(function(d){ return d.status!=='مسوَّى'; });
+    var lend2  = activeDebts.filter(function(d){ return d.direction==='lend'||d.direction==='owed'; });
+    var owe2   = activeDebts.filter(function(d){ return d.direction==='owe'; });
+    var lendT  = lend2.reduce(function(s,d){ return s+(d.remaining||d.amount||0); },0);
+    var oweT   = owe2.reduce(function(s,d){ return s+(d.remaining||d.amount||0); },0);
+    debtsSec.innerHTML =
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">'
+      + _dKpi('⬆️ لي على الآخرين',fmt(lendT),'ر.س — '+lend2.length+' دين','#34d399')
+      + _dKpi('⬇️ عليّ للآخرين',fmt(oweT),'ر.س — '+owe2.length+' دين','#f87171')
+      + '</div>'
+      + (activeDebts.length?activeDebts.slice(0,3).map(function(d){
+          var isLend=d.direction==='lend'||d.direction==='owed';
+          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">'
+            +'<div><div style="font-size:12px;font-weight:600">'+(d.person||'—')+'</div>'
+            +'<div style="font-size:10px;color:var(--muted)">'+(isLend?'⬆️ يدين لك':'⬇️ أنت مدين')+'</div></div>'
+            +'<div style="font-size:13px;font-weight:700;color:'+(isLend?'#34d399':'#f87171')+'">'+fmt(d.remaining||d.amount||0)+' ر.س</div>'
+            +'</div>';
+        }).join('')
+        :'<div style="text-align:center;color:var(--muted);padding:12px;font-size:12px">لا توجد ديون نشطة</div>');
+  }
+
+  // ══════════════════════════════════════════════════════
+  // التنبيهات
+  // ══════════════════════════════════════════════════════
+  var alertsList = document.getElementById('dash-alerts-list');
+  var alertsCount = document.getElementById('dash-alerts-count');
+  if (alertsList) {
+    var alerts = [];
+    // استحقاقات خلال 7 أيام
+    active.forEach(function(x){
+      var d=parseDate(x.date_out); if(!d) return;
+      var diff=Math.floor((d-now)/86400000);
+      if(diff>=0&&diff<=7) alerts.push({type:'danger',icon:'🔔',msg:'يستحق خلال '+diff+' أيام: '+x.name});
+      else if(diff>=0&&diff<=30) alerts.push({type:'warning',icon:'⚠️',msg:'يستحق خلال '+diff+' يوم: '+x.name});
+    });
+    // قروض مستحقة
+    loans.forEach(function(l){
+      var nd=parseDate(l.next_date); if(!nd) return;
+      var diff=Math.floor((nd-now)/86400000);
+      if(diff>=0&&diff<=7) alerts.push({type:'danger',icon:'🏦',msg:'قسط مستحق خلال '+diff+' أيام: '+l.name});
+    });
+    // فرص بدون تاريخ خروج
+    var noDate=active.filter(function(x){ return !x.date_out&&x.type!=='سهم'; });
+    if(noDate.length) alerts.push({type:'info',icon:'📋',msg:noDate.length+' فرصة بدون تاريخ استحقاق'});
+
+    if(alertsCount) alertsCount.textContent = alerts.length + (alerts.length?'':'');
+    alertsList.innerHTML = !alerts.length
+      ? '<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px">✅ لا توجد تنبيهات</div>'
+      : alerts.slice(0,6).map(function(a){
+          var bg = a.type==='danger'?'rgba(248,113,113,0.08)':a.type==='warning'?'rgba(245,158,11,0.08)':'rgba(96,165,250,0.08)';
+          var cl = a.type==='danger'?'#f87171':a.type==='warning'?'#f59e0b':'#60a5fa';
+          return '<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:'+bg+'">'
+            +'<span style="font-size:16px">'+a.icon+'</span>'
+            +'<span style="font-size:12px;color:'+cl+'">'+a.msg+'</span></div>';
+        }).join('');
+  }
 }
+
+// ── مساعدات الداشبورد ──────────────────────────────────────────────────────
+function _dKpi(label, val, sub, color) {
+  return '<div style="background:rgba(255,255,255,0.03);border-radius:10px;padding:12px;border:1px solid var(--border)">'
+    +'<div style="font-size:10px;color:var(--muted);margin-bottom:4px">'+label+'</div>'
+    +'<div style="font-size:16px;font-weight:800;font-family:monospace;color:'+(color||'var(--white)')+'">'+val+'</div>'
+    +'<div style="font-size:10px;color:var(--muted);margin-top:2px">'+sub+'</div>'
+    +'</div>';
+}
+function mkKpiSmall(icon, label, val, sub, color) {
+  return '<div class="kpi-card" style="--accent:'+color+';padding:12px 14px">'
+    +'<div style="font-size:18px">'+icon+'</div>'
+    +'<div class="kpi-label" style="font-size:10px">'+label+'</div>'
+    +'<div class="kpi-value" style="font-size:16px;color:'+color+'">'+val+'</div>'
+    +'<div class="kpi-sub">'+sub+'</div></div>';
+}
+
 
 function renderDonutChart(data, totalAmt, fmt) {
   var wrap = document.getElementById('dash-donut-wrap');
@@ -5215,10 +5553,11 @@ function showCapitalSrcSettings() {
 // ── Auto-fill رسوم الوكالة عند اختيار المنصة ─────────────────────────────
 function autoFillPlatformFees(platform) {
   if (!platform) return;
-  var settings = {};
-  try { settings = JSON.parse(localStorage.getItem('appSettings') || '{}'); } catch(e) {}
-  var fees = settings.platformFees || [];
-  // Also check Firestore cache if available
+  // Priority: Firestore cache → localStorage
+  var fees = window._platformFees || [];
+  if (!fees.length) {
+    try { fees = (JSON.parse(localStorage.getItem('appSettings') || '{}')).platformFees || []; } catch(e) {}
+  }
   var row = fees.find(function(r){ return r.platform === platform; });
   var feesEl   = document.getElementById('f-fees');
   var hintEl   = document.getElementById('f-fees-hint');
@@ -9635,6 +9974,13 @@ function _loadData(uid) {
       if (L.banks && L.banks.length) { window._settingsBanks = L.banks; if (typeof populateBankSelect === "function") populateBankSelect(); }
       if (L.capital && L.capital.length) { window._settingsCapital = L.capital; if (typeof populateCapitalSrcSelect === "function") populateCapitalSrcSelect(); }
       if (L.types && L.types.length) { window._settingsTypes = L.types; if (typeof populateTypeSelect === "function") populateTypeSelect(); }
+      // رسوم الوكالة — حفظها في localStorage لاستخدامها في autoFillPlatformFees
+      if (L.platformFees && L.platformFees.length) {
+        window._platformFees = L.platformFees;
+        var s = _getSettings();
+        s.platformFees = L.platformFees;
+        _saveSettings(s);
+      }
     }
 
     _rerender();
