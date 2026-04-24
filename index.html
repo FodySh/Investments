@@ -1260,9 +1260,9 @@
       <div class="logo-title">محفظتي المالية</div>
     </div>
     <nav>
-      <a class="nav-item" href="dashboard.html" style="text-decoration:none">
-        <span class="nav-icon">📊</span> لوحة التحكم
-      </a>
+      <div class="nav-item active" onclick="showPage('home',this)">
+        <span class="nav-icon">🏠</span> الرئيسية
+      </div>
       <div class="nav-item" onclick="showPage('stocks',this)">
         <span class="nav-icon">📈</span> الأسهم
       </div>
@@ -1412,7 +1412,7 @@
     <!-- ═══════════════════════════════════════════════ -->
     <!-- PAGE: DASHBOARD -->
     <!-- ═══════════════════════════════════════════════ -->
-    <div id="page-dashboard" class="page active">
+    <div id="page-home" class="page active">
       <div class="page-header fade-up">
         <div>
           <div class="page-title">📊 لوحة التحكم</div>
@@ -3769,7 +3769,7 @@
 <nav class="mobile-nav">
   <div class="mobile-nav-inner">
 
-    <div class="mnav-item active" id="mnav-dashboard" onclick="showPage('dashboard',this,'📊 لوحة التحكم')">
+    <div class="mnav-item active" id="mnav-home" onclick="showPage('home',this,'🏠 الرئيسية')">
       <div class="mnav-icon-wrap"><span class="mnav-icon">🏠</span></div>
       <span class="mnav-label">الرئيسية</span>
     </div>
@@ -5772,7 +5772,7 @@ const PAGE_TITLES = {
   'reports':    '📊 التقارير والتحليل',
   'sukuk':      '🏦 الفرص الاستثمارية',
   'funds':      '🏦 الفرص الاستثمارية',
-  'dashboard':  '📊 لوحة التحكم',
+  'home':  '🏠 الرئيسية',
   'stocks':     '📈 الأسهم',
   'all':        '📋 جميع الفرص',
   'analyst':    '🔍 رأي المحلل',
@@ -5816,7 +5816,7 @@ function showPage(id, navEl, mobileTitle, noScroll){
   // Mobile bottom nav — highlight correct button
   document.querySelectorAll('.mnav-item').forEach(n=>n.classList.remove('active'));
   var mnavMap = {
-    'dashboard':  'mnav-dashboard',
+    'home':  'mnav-home',
     'stocks':     'mnav-stocks',
     'sukuk':      'mnav-sukuk',
     'funds':      'mnav-sukuk',
@@ -5858,7 +5858,7 @@ function showPage(id, navEl, mobileTitle, noScroll){
   if (id === 'add')       { setTimeout(function(){ populateCapitalSrcSelect(); populatePlatformSelects(); }, 100); }
   if (id === 'add-debt')  { updateDebtDirectionLabel(); calcAddDebt(); }
   if (id === 'loans') renderLoans();
-  if (id === 'dashboard') { initDashboardYears(); renderDashboard(); }
+  if (id === 'home') { initDashboardYears(); renderDashboard(); }
 }
 
 // 
@@ -12002,7 +12002,7 @@ const PAGE_TITLES = {
   'reports':    '📊 التقارير والتحليل',
   'sukuk':      '🏦 الفرص الاستثمارية',
   'funds':      '🏦 الفرص الاستثمارية',
-  'dashboard':  '📊 لوحة التحكم',
+  'home':  '🏠 الرئيسية',
   'stocks':     '📈 الأسهم',
   'all':        '📋 جميع الفرص',
   'analyst':    '🔍 رأي المحلل',
@@ -12046,7 +12046,7 @@ function showPage(id, navEl, mobileTitle, noScroll){
   // Mobile bottom nav — highlight correct button
   document.querySelectorAll('.mnav-item').forEach(n=>n.classList.remove('active'));
   var mnavMap = {
-    'dashboard':  'mnav-dashboard',
+    'home':  'mnav-home',
     'stocks':     'mnav-stocks',
     'sukuk':      'mnav-sukuk',
     'funds':      'mnav-sukuk',
@@ -12088,7 +12088,7 @@ function showPage(id, navEl, mobileTitle, noScroll){
   if (id === 'add')       { setTimeout(function(){ populateCapitalSrcSelect(); populatePlatformSelects(); }, 100); }
   if (id === 'add-debt')  { updateDebtDirectionLabel(); calcAddDebt(); }
   if (id === 'loans') renderLoans();
-  if (id === 'dashboard') { initDashboardYears(); renderDashboard(); }
+  if (id === 'home') { initDashboardYears(); renderDashboard(); }
 }
 
 // 
