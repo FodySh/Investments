@@ -69,6 +69,9 @@
     min-height: 100vh;
     overflow-x: hidden;
     transition: background .35s ease, color .35s ease;
+  
+    .sidebar { display: none !important; }
+    .main { margin-right: 0 !important; }
   }
 
   /* ── ANIMATED BACKGROUND ─────────────────────────────── */
@@ -551,6 +554,8 @@
 
   @media (max-width: 768px) {
     .mobile-nav { display: flex !important; flex-direction: column; }
+    .sidebar { display: none !important; }
+    .main { margin-right: 0 !important; padding: 16px 12px 80px !important; }
   }
 
   /* ── MOBILE TOP BAR ────────────────────────────────── */
@@ -1266,6 +1271,9 @@
       <div class="nav-item" onclick="showPage('stocks',this)">
         <span class="nav-icon">📈</span> الأسهم
       </div>
+      <a class="nav-item" href="dashboard.html" style="text-decoration:none;display:flex;align-items:center;gap:10px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);border-radius:10px;margin:2px 8px;padding:10px 12px">
+        <span class="nav-icon">📊</span> لوحة التحكم
+      </a>
       
       <div class="nav-item" onclick="showPage('sukuk',this)">
         <span class="nav-icon">🏦</span> الفرص
