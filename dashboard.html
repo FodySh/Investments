@@ -1783,6 +1783,36 @@ window.IS_FIREBASE_CONFIGURED = true;
 
 <script>
 
+// ── Utility Functions ───────────────────────────────────────────────────────
+function parseDate(str) {
+  if (!str) return null;
+  var d = new Date(str);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function showToast(msg, duration) {
+  var t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, duration || 3000);
+}
+
+function fmtNum(n, decimals) {
+  if (n == null || isNaN(n)) return '—';
+  return Number(n).toLocaleString('en-US', {
+    minimumFractionDigits: decimals || 0,
+    maximumFractionDigits: decimals || 0
+  });
+}
+
+function fmtPct(p) {
+  if (p == null || isNaN(p)) return '—';
+  var cls = p >= 0 ? 'up' : 'dn';
+  return '<span class="' + cls + '">' + (p >= 0 ? '+' : '') + (p * 100).toFixed(2) + '%</span>';
+}
+
+
 // ── Global Data Arrays ──────────────────────────────────────────────────────
 var investments   = [];
 var loansData     = [];
