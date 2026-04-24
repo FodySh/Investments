@@ -1677,8 +1677,8 @@ function _loadData(uid) {
     }
 
     if (typeof _rerender === "function") _rerender();
-    initDashboardYears();
-    renderDashboard();
+    initYearFilter();
+    buildDashboard();
     if (typeof renderStocks === "function") renderStocks();
     _badge("synced");
     if (typeof window.__onDataLoaded === 'function') window.__onDataLoaded();
@@ -1767,7 +1767,7 @@ _auth.onAuthStateChanged(function(user) {
     if (window.loansData)     window.loansData.length    = 0;
 
     if (typeof renderAll      === 'function') renderAll();
-    if (typeof renderDashboard=== 'function') renderDashboard();
+    if (typeof renderDashboard=== 'function') buildDashboard();
   }
 });
 
@@ -2019,8 +2019,8 @@ function _loadData(uid) {
     }
 
     _rerender();
-    initDashboardYears();
-    renderDashboard();
+    initYearFilter();
+    buildDashboard();
     if (typeof renderStocks === "function") renderStocks();
     _badge("synced");
 
