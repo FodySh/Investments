@@ -1659,11 +1659,12 @@ function _loadData(uid) {
       if (L.types && L.types.length) { window._settingsTypes = L.types; if (typeof populateTypeSelect === "function") populateTypeSelect(); }
     }
 
-    _rerender();
+    if (typeof _rerender === "function") _rerender();
     initDashboardYears();
     renderDashboard();
     if (typeof renderStocks === "function") renderStocks();
     _badge("synced");
+    if (typeof window.__onDataLoaded === 'function') window.__onDataLoaded();
 
     // Realtime listener على investments فقط
     if (_unsubSnap) _unsubSnap();
@@ -1765,6 +1766,37 @@ window.IS_FIREBASE_CONFIGURED = true;
 </script>
 
 <script>
+
+// ── Global Data Arrays ──────────────────────────────────────────────────────
+var investments   = [];
+var loansData     = [];
+var dividendsData = [];
+var debtsData     = [];
+window.__investments  = investments;
+window.loansData      = loansData;
+window.dividendsData  = dividendsData;
+window.debtsData      = debtsData;
+
+
+// ── Theme ──────────────────────────────────────────────────────────────────
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', isLightMode ? 'light' : 'dark');
+}
+function toggleTheme() {
+  isLightMode = !isLightMode;
+  localStorage.setItem('theme', isLightMode ? 'light' : 'dark');
+  applyTheme();
+}
+
+// ── Google Auth ─────────────────────────────────────────────────────────────
+function googleSignIn() {
+  var provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider).catch(function(e){ showToast('❌ '+e.message); });
+}
+function googleSignOut() {
+  firebase.auth().signOut().then(function(){ window.location.reload(); }).catch(function(e){ showToast('❌ '+e.message); });
+}
+
 var _unsubSnap = null;
 var _syncing   = false;
 var _uid       = null;
@@ -2567,7 +2599,7 @@ function initYearFilter() {
 // Firebase Auth listener
 // ══════════════════════════════════════════════════════
 var isLightMode = localStorage.getItem('theme') === 'light';
-applyTheme();
+try { applyTheme(); } catch(e) {}
 
 firebase.auth().onAuthStateChanged(function(user) {
   window.__firebaseUser = user;
