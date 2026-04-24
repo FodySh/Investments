@@ -1461,6 +1461,23 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" onerror="window._firebaseFailed=true"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js" onerror="window._firebaseFailed=true"></script>
 <script>
+// ── applyTheme (defined early so it's available everywhere) ─────────────
+function applyTheme() {
+  var light = localStorage.getItem('theme') === 'light';
+  document.documentElement.setAttribute('data-theme', light ? 'light' : 'dark');
+}
+applyTheme();
+
+// ── Global Data Arrays (needed by _loadData) ───────────────────────────── (needed by _loadData) ─────────────────────────────
+var investments   = [];
+var loansData     = [];
+var dividendsData = [];
+var debtsData     = [];
+window.__investments  = investments;
+window.loansData      = loansData;
+window.dividendsData  = dividendsData;
+window.debtsData      = debtsData;
+
 // Firebase init — wrapped in try/catch so app works even if CDN fails
 try {
 if (typeof firebase === 'undefined') throw new Error('Firebase not loaded');
@@ -1675,12 +1692,11 @@ function _loadData(uid) {
       if (!Array.isArray(d.data)) return;
       window.__investments.length = 0;
       d.data.forEach(function(r){ window.__investments.push(r); });
-      if (typeof renderAll    === "function") renderAll();
-      if (typeof renderSukuk  === "function") renderSukuk();
-      if (typeof renderStocks === "function") renderStocks();
-      if (typeof renderFunds  === "function") renderFunds();
+      if (typeof window.__onDataLoaded === "function") window.__onDataLoaded();
     });
 
+  }).then(function() {
+    if (typeof window.__onDataLoaded === "function") window.__onDataLoaded();
   }).catch(function(e){ console.error("loadData:", e); _badge("error"); });
 }
 
@@ -1779,12 +1795,10 @@ window.debtsData      = debtsData;
 
 
 // ── Theme ──────────────────────────────────────────────────────────────────
-function applyTheme() {
-  document.documentElement.setAttribute('data-theme', isLightMode ? 'light' : 'dark');
-}
+// applyTheme defined in firebase script block above
 function toggleTheme() {
-  isLightMode = !isLightMode;
-  localStorage.setItem('theme', isLightMode ? 'light' : 'dark');
+  var light = localStorage.getItem('theme') === 'light';
+  localStorage.setItem('theme', light ? 'dark' : 'light');
   applyTheme();
 }
 
