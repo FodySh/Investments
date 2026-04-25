@@ -3030,6 +3030,51 @@
     </div><!-- end page-loans -->
 
     <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- PAGE: REPORTS — التقارير والتدفق المالي                        -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <div id="page-reports" class="page">
+      <div class="page-header fade-up">
+        <div>
+          <div class="page-title">📊 التقارير والتدفق المالي</div>
+          <div class="page-sub">نظرة شاملة على التدفقات الداخلة والخارجة</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <select id="cf-year-filter" onchange="renderCashflow()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--white);font-size:12px;font-family:inherit;outline:none"></select>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div id="cf-kpi-grid" class="kpi-grid fade-up" style="margin-bottom:20px"></div>
+
+      <!-- مخطط التدفق الشهري -->
+      <div class="section-card fade-up delay-1" style="margin-bottom:20px">
+        <div class="section-head">
+          <span class="section-title">📈 التدفق النقدي الشهري</span>
+          <div style="display:flex;gap:14px;align-items:center;font-size:11px">
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:50%;background:#4caf82;display:inline-block"></span>داخل</span>
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:50%;background:#f87171;display:inline-block"></span>خارج</span>
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:50%;background:#60a5fa;display:inline-block"></span>صافي</span>
+          </div>
+        </div>
+        <div class="section-body" id="cf-chart-wrap" style="overflow-x:auto;padding-bottom:8px">
+          <div style="text-align:center;padding:40px;color:var(--muted)">جاري التحميل...</div>
+        </div>
+      </div>
+
+      <!-- تفاصيل المصادر -->
+      <div class="two-col fade-up delay-2">
+        <div class="section-card">
+          <div class="section-head"><span class="section-title">🟢 مصادر الدخل</span></div>
+          <div class="section-body" id="cf-income-list"></div>
+        </div>
+        <div class="section-card">
+          <div class="section-head"><span class="section-title">🔴 مصادر الإنفاق</span></div>
+          <div class="section-body" id="cf-expense-list"></div>
+        </div>
+      </div>
+    </div><!-- end page-reports -->
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
     
 </main>
 
@@ -3549,55 +3594,7 @@
       <style>@media(max-width:768px){.add-form-grid{grid-template-columns:1fr !important}#add-loan-summary{position:static !important}}</style>
     </div>
 
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- PAGE: REPORTS — التقارير والسيولة              -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <div id="page-reports" class="page">
-      <div class="page-header fade-up">
-        <div>
-          <div class="page-title">📊 التقارير والتحليل</div>
-          <div class="page-sub">متابعة السيولة والأداء الاستثماري</div>
-        </div>
-      </div>
 
-      <!-- ── قسم السيولة الخارجة ─────────────────────── -->
-      <div class="section-card fade-up" style="margin-bottom:20px">
-        <div class="section-head" style="justify-content:space-between;align-items:center">
-          <span class="section-title">💸 السيولة الخارجة من العوائد</span>
-          <div style="display:flex;align-items:center;gap:8px">
-            <div id="liquidity-total-badge" style="background:rgba(255,179,71,0.12);border:1px solid rgba(255,179,71,0.3);border-radius:8px;padding:5px 14px;font-size:12px;color:#ffb347;font-family:monospace;font-weight:700">0 ر.س</div>
-            <button onclick="toggleLiquidityForm()" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">＋ إضافة</button>
-          </div>
-        </div>
-        <div class="section-body">
-          <p style="font-size:12px;color:var(--muted);margin-bottom:14px">مبالغ تم سحبها من عوائد الاستثمارات ولم يتم إعادة استثمارها في فرص أخرى.</p>
-
-          <!-- فورم الإضافة -->
-          <div id="liquidity-form" style="display:none;background:rgba(255,179,71,0.05);border:1px solid rgba(255,179,71,0.2);border-radius:12px;padding:16px;margin-bottom:16px">
-            <div style="display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:10px;align-items:end">
-              <div>
-                <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">التاريخ</label>
-                <input type="date" id="liq-date" style="width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--white);font-family:inherit;font-size:13px;outline:none">
-              </div>
-              <div>
-                <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">المبلغ (ر.س)</label>
-                <input type="number" id="liq-amount" placeholder="0" min="0" step="0.01" style="width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--white);font-family:monospace;font-size:13px;outline:none">
-              </div>
-              <div>
-                <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">ملاحظة</label>
-                <input type="text" id="liq-note" placeholder="مثال: سحب أرباح أرامكو - نفقات" style="width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--white);font-family:inherit;font-size:13px;outline:none">
-              </div>
-              <button onclick="addLiquidityRecord()" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">حفظ</button>
-            </div>
-          </div>
-
-          <!-- جدول السجلات -->
-          <div id="liquidity-list">
-            <div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">لا توجد سجلات بعد — اضغط "إضافة" لتسجيل سيولة خارجة</div>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- ═══════════════════════════════════════ -->
     
@@ -3735,10 +3732,6 @@ window.__investments = investments;
 
 var dividendsData = JSON.parse(localStorage.getItem('dividendsData') || '[]');
 window.dividendsData = dividendsData;
-
-// السيولة الخارجة من العوائد
-var liquidityData = JSON.parse(localStorage.getItem('liquidityData') || '[]');
-window.liquidityData = liquidityData;
 
 var _stockFilter = { sa: 'all', us: 'all' };
 
@@ -4182,8 +4175,8 @@ function startStockPriceUpdater() {
 // Start after DOM ready
 document.addEventListener('DOMContentLoaded', function() {
   setTimeout(startStockPriceUpdater, 1500);
-  setTimeout(function(){ if (typeof renderCalendar === 'function') renderCalendar(); }, 800);
-  setTimeout(function(){ if (typeof renderCashflow === 'function') renderCashflow(); }, 900);
+  setTimeout(renderCalendar, 800);
+  setTimeout(function(){ if(typeof renderCashflow==='function') renderCashflow(); }, 900);
   checkMaturityAlerts();
   setInterval(checkMaturityAlerts, 60 * 60 * 1000); // re-check every hour
 });
@@ -4192,7 +4185,7 @@ document.addEventListener('DOMContentLoaded', function() {
 var _origShowPage = showPage;
 showPage = function(id, navEl, mobileTitle, noScroll) {
   _origShowPage(id, navEl, mobileTitle, noScroll);
-  if (id === 'reports')  { if (typeof renderCalendar==='function') renderCalendar(); if (typeof renderCashflow==='function') renderCashflow(); renderDividendsTab(); if (typeof renderLiquidityList==='function') renderLiquidityList(); }
+  if (id === 'reports')  { if(typeof renderCalendar==='function') renderCalendar(); renderCashflow(); if(typeof renderDividendsTab==='function') renderDividendsTab(); }
   if (id === 'analyst')  { id = 'reports'; window.__currentPage = 'reports'; setTimeout(function(){ switchReportsTab('analyst'); }, 80); }
   // Only scroll to top if NOT called from a form button
   if (!noScroll) {
@@ -7271,141 +7264,6 @@ function renderDivTable(data) {
   }).join('');
 }
 
-// ── بيانات التوزيعات المعروفة للأسهم السعودية ────────────────────────────────
-var KNOWN_DIVIDENDS = {
-  '2222': { name: 'أرامكو', history: [
-    { year:2024, ex_date:'2024-03-04', pay_date:'2024-03-14', per_share:0.35 },
-    { year:2024, ex_date:'2024-06-03', pay_date:'2024-06-13', per_share:0.35 },
-    { year:2024, ex_date:'2024-09-02', pay_date:'2024-09-12', per_share:0.35 },
-    { year:2024, ex_date:'2024-12-02', pay_date:'2024-12-12', per_share:0.35 }
-  ]},
-  '1120': { name: 'الراجحي', history: [
-    { year:2024, ex_date:'2024-04-08', pay_date:'2024-04-18', per_share:1.25 },
-    { year:2024, ex_date:'2024-10-07', pay_date:'2024-10-17', per_share:1.25 }
-  ]},
-  '1180': { name: 'الأهلي', history: [
-    { year:2024, ex_date:'2024-04-15', pay_date:'2024-04-25', per_share:0.40 },
-    { year:2024, ex_date:'2024-10-14', pay_date:'2024-10-24', per_share:0.40 }
-  ]},
-  '2010': { name: 'سابك', history: [
-    { year:2024, ex_date:'2024-05-06', pay_date:'2024-05-16', per_share:0.75 }
-  ]},
-  '2350': { name: 'شركة الكيمائية', history: [
-    { year:2024, ex_date:'2024-06-10', pay_date:'2024-06-20', per_share:0.50 }
-  ]},
-  '4020': { name: 'بياع', history: [] },
-  '4220': { name: 'الإتحاد العقارية', history: [] },
-  '1211': { name: 'معادن', history: [
-    { year:2024, ex_date:'2024-04-22', pay_date:'2024-05-02', per_share:0.30 }
-  ]},
-  '2240': { name: 'زين السعودية', history: [
-    { year:2024, ex_date:'2024-05-13', pay_date:'2024-05-23', per_share:0.25 }
-  ]},
-  '7010': { name: 'STC', history: [
-    { year:2024, ex_date:'2024-04-29', pay_date:'2024-05-09', per_share:0.75 },
-    { year:2024, ex_date:'2024-10-28', pay_date:'2024-11-07', per_share:0.75 }
-  ]}
-};
-
-// ══════════════════════════════════════════════════════
-// السيولة الخارجة من العوائد
-// ══════════════════════════════════════════════════════
-
-function toggleLiquidityForm() {
-  var f = document.getElementById('liquidity-form');
-  if (!f) return;
-  var isOpen = f.style.display !== 'none';
-  f.style.display = isOpen ? 'none' : 'block';
-  if (!isOpen) {
-    // ضبط التاريخ على اليوم
-    var today = new Date().toISOString().slice(0,10);
-    var dateEl = document.getElementById('liq-date');
-    if (dateEl && !dateEl.value) dateEl.value = today;
-    document.getElementById('liq-amount').focus();
-  }
-}
-
-function addLiquidityRecord() {
-  var date   = (document.getElementById('liq-date')   || {}).value;
-  var amount = parseFloat((document.getElementById('liq-amount') || {}).value) || 0;
-  var note   = ((document.getElementById('liq-note')  || {}).value || '').trim();
-
-  if (!date)   { showToast('⚠️ أدخل التاريخ'); return; }
-  if (amount <= 0) { showToast('⚠️ أدخل مبلغاً صحيحاً'); return; }
-
-  liquidityData.unshift({ id: Date.now(), date: date, amount: amount, note: note });
-  saveLiquidityData();
-  renderLiquidityList();
-
-  // مسح الفورم
-  document.getElementById('liq-amount').value = '';
-  document.getElementById('liq-note').value   = '';
-  document.getElementById('liquidity-form').style.display = 'none';
-  showToast('✅ تم تسجيل السيولة الخارجة: ' + amount.toLocaleString('en-US') + ' ر.س');
-}
-
-function deleteLiquidityRecord(id) {
-  if (!confirm('حذف هذا السجل؟')) return;
-  liquidityData = liquidityData.filter(function(r){ return r.id !== id; });
-  window.liquidityData = liquidityData;
-  saveLiquidityData();
-  renderLiquidityList();
-  showToast('تم الحذف');
-}
-
-function saveLiquidityData() {
-  localStorage.setItem('liquidityData', JSON.stringify(liquidityData));
-  window.liquidityData = liquidityData;
-  if (typeof window.fbSaveLiquidity === 'function') window.fbSaveLiquidity();
-}
-
-function renderLiquidityList() {
-  var list  = document.getElementById('liquidity-list');
-  var badge = document.getElementById('liquidity-total-badge');
-  if (!list) return;
-
-  var data = window.liquidityData || liquidityData;
-
-  var total = data.reduce(function(s,r){ return s + (r.amount||0); }, 0);
-  if (badge) badge.textContent = total.toLocaleString('en-US', {maximumFractionDigits:2}) + ' ر.س';
-
-  if (!data.length) {
-    list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">لا توجد سجلات بعد — اضغط "إضافة" لتسجيل سيولة خارجة</div>';
-    return;
-  }
-
-  // ترتيب حسب التاريخ (الأحدث أولاً)
-  var sorted = data.slice().sort(function(a,b){ return b.date.localeCompare(a.date); });
-
-  list.innerHTML =
-    '<table style="width:100%;border-collapse:collapse;font-size:13px">' +
-    '<thead><tr style="border-bottom:1px solid var(--border)">' +
-    '<th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:600;font-size:11px">التاريخ</th>' +
-    '<th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:600;font-size:11px">المبلغ (ر.س)</th>' +
-    '<th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:600;font-size:11px">الملاحظة</th>' +
-    '<th style="padding:8px 10px"></th>' +
-    '</tr></thead><tbody>' +
-    sorted.map(function(r) {
-      return '<tr style="border-bottom:1px solid rgba(255,255,255,0.04);transition:background .15s" onmouseover="this.style.background=\'rgba(255,179,71,0.04)\'" onmouseout="this.style.background=\'\'">' +
-        '<td style="padding:10px;color:var(--muted);font-family:monospace;font-size:12px">' + r.date + '</td>' +
-        '<td style="padding:10px;color:#ffb347;font-family:monospace;font-weight:700">' + (r.amount||0).toLocaleString('en-US',{maximumFractionDigits:2}) + '</td>' +
-        '<td style="padding:10px;color:var(--white)">' + (r.note || '—') + '</td>' +
-        '<td style="padding:10px;text-align:left">' +
-          '<button onclick="deleteLiquidityRecord(' + r.id + ')" style="background:none;border:1px solid rgba(255,77,77,0.3);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--red);cursor:pointer;font-family:inherit">🗑</button>' +
-        '</td>' +
-      '</tr>';
-    }).join('') +
-    '</tbody></table>';
-}
-
-// ── stub لدوال التقارير (يتم تعريفها في ملف منفصل إن وُجد) ──────────────────
-if (typeof renderCalendar === 'undefined') {
-  window.renderCalendar = function() {};
-}
-if (typeof renderCashflow === 'undefined') {
-  window.renderCashflow = function() {};
-}
-
 function renderDividendsTab() {
   var inv = window.__investments || investments;
   var saStocks = inv.filter(function(x){ return x.type==='سهم' && x.status==='نشطة' && x.market !== 'us'; });
@@ -7804,6 +7662,209 @@ function resetMetalForm() {
   var typeEl = document.getElementById('m-type'); if(typeEl) typeEl.value='ذهب';
   var karatEl = document.getElementById('m-karat'); if(karatEl) karatEl.value='21';
   var box = document.getElementById('m-calc-box'); if(box) box.style.display='none';
+}
+
+// ══════════════════════════════════════════════════════
+// التدفق المالي الشهري
+// ══════════════════════════════════════════════════════
+function renderCashflow() {
+  var inv   = window.__investments || investments || [];
+  var loans = window.loansData     || loansData   || [];
+  var liq   = window.liquidityData || liquidityData || [];
+  var divs  = window.dividendsData || dividendsData || [];
+
+  // ── بناء قائمة السنوات المتاحة ───────────────────────
+  var years = new Set();
+  var now   = new Date();
+  var curY  = now.getFullYear();
+  // أضف السنة الحالية والسنتين السابقتين دائماً
+  [curY-2, curY-1, curY, curY+1].forEach(function(y){ years.add(y); });
+  inv.forEach(function(x) {
+    if (x.date_in)  years.add(parseInt((x.date_in||'').slice(0,4)));
+    if (x.date_out) years.add(parseInt((x.date_out||'').slice(0,4)));
+  });
+  loans.forEach(function(l) {
+    if (l.start_date) years.add(parseInt((l.start_date||'').slice(0,4)));
+  });
+
+  var sortedYears = Array.from(years).filter(Boolean).sort();
+  var sel = document.getElementById('cf-year-filter');
+  if (sel) {
+    var prevVal = sel.value || String(curY);
+    sel.innerHTML = sortedYears.map(function(y){
+      return '<option value="'+y+'"'+(String(y)===prevVal?' selected':'')+'>'+y+'</option>';
+    }).join('');
+    if (!sel.value) sel.value = String(curY);
+  }
+  var filterYear = sel ? parseInt(sel.value) || curY : curY;
+
+  var MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+
+  // ── مصفوفة 12 شهر ────────────────────────────────────
+  var monthly = Array.from({length:12}, function(_, i) {
+    return { m: i, income: 0, expense: 0, incSrc: [], expSrc: [] };
+  });
+
+  // ── 1. عوائد الاستثمارات النشطة (موزّعة على أشهر المدة) ──
+  inv.forEach(function(x) {
+    if (!x.amount || !x.ret_val) return;
+    var dIn  = x.date_in  ? new Date(x.date_in)  : null;
+    var dOut = x.date_out ? new Date(x.date_out) : null;
+    if (!dIn) return;
+
+    // حدد أشهر تقاطع الاستثمار مع السنة المطلوبة
+    var yStart = new Date(filterYear, 0, 1);
+    var yEnd   = new Date(filterYear, 11, 31);
+    var start  = dIn  > yStart ? dIn  : yStart;
+    var end    = dOut && dOut < yEnd ? dOut : yEnd;
+    if (start > end) return;
+
+    // عدد الأشهر الكلية للاستثمار
+    var totalMonths = 1;
+    if (dOut) {
+      totalMonths = Math.max(1,
+        (dOut.getFullYear() - dIn.getFullYear()) * 12 +
+        (dOut.getMonth() - dIn.getMonth()) + 1
+      );
+    }
+    var monthlyReturn = x.ret_val / totalMonths;
+
+    for (var m = start.getMonth(); m <= end.getMonth() || (end.getFullYear() > filterYear && m < 12); m++) {
+      if (m > 11) break;
+      // تحقق أن الشهر ضمن نطاق البداية والنهاية في السنة المختارة
+      var mStart = new Date(filterYear, m, 1);
+      var mEnd   = new Date(filterYear, m+1, 0);
+      if (mStart > end || mEnd < start) continue;
+      monthly[m].income += monthlyReturn;
+      monthly[m].incSrc.push({ name: x.name || 'فرصة', amount: monthlyReturn });
+    }
+  });
+
+  // ── 2. توزيعات الأسهم المستلمة ─────────────────────────
+  divs.forEach(function(d) {
+    var payDate = d.pay_date || d.ex_date;
+    if (!payDate) return;
+    var dt = new Date(payDate);
+    if (dt.getFullYear() !== filterYear) return;
+    var m = dt.getMonth();
+    monthly[m].income += d.total_amount || 0;
+    monthly[m].incSrc.push({ name: '🏷️ ' + (d.ticker||'توزيعة'), amount: d.total_amount||0 });
+  });
+
+  // ── 3. أقساط القروض (خارجة) ─────────────────────────────
+  loans.forEach(function(l) {
+    if (!l.installment || l.installment <= 0) return;
+    var startD = l.start_date ? new Date(l.start_date) : null;
+    if (!startD) return;
+    var totalMonths = (l.years || 1) * 12;
+    var endD = new Date(startD);
+    endD.setMonth(endD.getMonth() + totalMonths);
+
+    for (var m = 0; m < 12; m++) {
+      var mDate = new Date(filterYear, m, 1);
+      if (mDate >= startD && mDate < endD) {
+        // تحقق لم يُسدَّد بالكامل
+        var paid = l.paid_amount || 0;
+        var total = l.total_amount || 0;
+        if (paid >= total && total > 0) continue;
+        monthly[m].expense += l.installment;
+        monthly[m].expSrc.push({ name: '🏦 ' + (l.name||'قرض'), amount: l.installment });
+      }
+    }
+  });
+
+  // ── 4. السيولة الخارجة ───────────────────────────────────
+  liq.forEach(function(r) {
+    if (!r.date) return;
+    var dt = new Date(r.date);
+    if (dt.getFullYear() !== filterYear) return;
+    var m = dt.getMonth();
+    monthly[m].expense += r.amount || 0;
+    monthly[m].expSrc.push({ name: '💸 ' + (r.note||'سيولة خارجة'), amount: r.amount||0 });
+  });
+
+  // ── KPIs ───────────────────────────────────────────────────
+  var totalIn  = monthly.reduce(function(s,m){ return s+m.income;  }, 0);
+  var totalOut = monthly.reduce(function(s,m){ return s+m.expense; }, 0);
+  var net      = totalIn - totalOut;
+  var fmt = function(v){ return v.toLocaleString('en-US',{maximumFractionDigits:0}); };
+
+  var kpiGrid = document.getElementById('cf-kpi-grid');
+  if (kpiGrid) {
+    kpiGrid.innerHTML =
+      '<div class="kpi-card" style="--accent:var(--green)"><div class="kpi-icon">📥</div><div class="kpi-label">إجمالي الداخل</div><div class="kpi-value">'+fmt(totalIn)+'</div><div class="kpi-sub">ر.س</div></div>' +
+      '<div class="kpi-card" style="--accent:var(--red)"><div class="kpi-icon">📤</div><div class="kpi-label">إجمالي الخارج</div><div class="kpi-value">'+fmt(totalOut)+'</div><div class="kpi-sub">ر.س</div></div>' +
+      '<div class="kpi-card" style="--accent:'+(net>=0?'var(--cyan)':'var(--red)')+'"><div class="kpi-icon">'+(net>=0?'✅':'⚠️')+'</div><div class="kpi-label">صافي التدفق</div><div class="kpi-value">'+fmt(Math.abs(net))+'</div><div class="kpi-sub">'+(net>=0?'فائض ▲':'عجز ▼')+'</div></div>' +
+      '<div class="kpi-card" style="--accent:var(--gold)"><div class="kpi-icon">📊</div><div class="kpi-label">متوسط الداخل الشهري</div><div class="kpi-value">'+fmt(totalIn/12)+'</div><div class="kpi-sub">ر.س / شهر</div></div>';
+  }
+
+  // ── رسم المخطط الشمعي ────────────────────────────────────
+  var maxVal = Math.max(1, Math.max.apply(null, monthly.map(function(m){ return Math.max(m.income, m.expense); })));
+  var chartH = 160; // ارتفاع أعمدة البار بالـ px
+
+  var chartWrap = document.getElementById('cf-chart-wrap');
+  if (chartWrap) {
+    chartWrap.innerHTML =
+      '<div style="display:flex;align-items:flex-end;gap:6px;padding:16px 8px 0;min-width:600px;direction:ltr">' +
+      monthly.map(function(mo, i) {
+        var inH  = mo.income  > 0 ? Math.max(4, Math.round(mo.income  / maxVal * chartH)) : 0;
+        var outH = mo.expense > 0 ? Math.max(4, Math.round(mo.expense / maxVal * chartH)) : 0;
+        var netM = mo.income - mo.expense;
+        var netColor = netM >= 0 ? '#4caf82' : '#f87171';
+        var netH = Math.max(2, Math.round(Math.abs(netM) / maxVal * chartH * 0.5));
+
+        return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px" title="'+MONTHS_AR[i]+'\nداخل: '+fmt(mo.income)+'\nخارج: '+fmt(mo.expense)+'\nصافي: '+fmt(netM)+'">' +
+          // قيمة الصافي
+          '<div style="font-size:9px;color:'+netColor+';font-family:monospace;white-space:nowrap">'+(netM>=0?'+':'')+fmt(netM)+'</div>' +
+          // الأعمدة
+          '<div style="display:flex;gap:2px;align-items:flex-end;height:'+chartH+'px">' +
+            '<div style="width:14px;height:'+inH+'px;background:#4caf82;border-radius:3px 3px 0 0;opacity:0.85" title="داخل: '+fmt(mo.income)+'"></div>' +
+            '<div style="width:14px;height:'+outH+'px;background:#f87171;border-radius:3px 3px 0 0;opacity:0.85" title="خارج: '+fmt(mo.expense)+'"></div>' +
+          '</div>' +
+          // خط الصافي
+          '<div style="width:100%;height:'+netH+'px;background:'+netColor+';border-radius:2px;opacity:0.5"></div>' +
+          // اسم الشهر
+          '<div style="font-size:9px;color:var(--muted);margin-top:4px;text-align:center">'+MONTHS_AR[i].slice(0,3)+'</div>' +
+        '</div>';
+      }).join('') +
+      '</div>';
+  }
+
+  // ── قوائم المصادر ────────────────────────────────────────
+  function buildSourceList(containerId, rows, color) {
+    var el = document.getElementById(containerId);
+    if (!el) return;
+    // تجميع حسب الاسم
+    var grouped = {};
+    rows.forEach(function(m) {
+      m.forEach(function(s) {
+        grouped[s.name] = (grouped[s.name]||0) + s.amount;
+      });
+    });
+    var entries = Object.keys(grouped).map(function(k){ return {name:k, amount:grouped[k]}; });
+    entries.sort(function(a,b){ return b.amount - a.amount; });
+
+    if (!entries.length) {
+      el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">لا توجد بيانات</div>';
+      return;
+    }
+    var maxA = entries[0].amount;
+    el.innerHTML = entries.map(function(e) {
+      var pct = maxA > 0 ? e.amount/maxA*100 : 0;
+      return '<div style="margin-bottom:10px">'+
+        '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">'+
+          '<span style="color:var(--white)">'+ e.name +'</span>'+
+          '<span style="color:'+color+';font-family:monospace;font-weight:700">'+fmt(e.amount)+' ر.س</span>'+
+        '</div>'+
+        '<div style="height:5px;background:rgba(255,255,255,0.07);border-radius:3px">'+
+          '<div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:3px;transition:width .6s ease"></div>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+
+  buildSourceList('cf-income-list',  monthly.map(function(m){ return m.incSrc; }), '#4caf82');
+  buildSourceList('cf-expense-list', monthly.map(function(m){ return m.expSrc; }), '#f87171');
 }
 
 function renderMetals() {
@@ -9322,14 +9383,12 @@ function _loadData(uid) {
     _read(uid, "investments"),
     _read(uid, "loans"),
     _read(uid, "dividends"),
-    _read(uid, "liquidity"),
     _ref(uid, "settings").get().catch(function(){ return null; })
   ]).then(function(results) {
-    var inv          = results[0];
-    var loans        = results[1];
-    var divs         = results[2];
-    var liqCloud     = results[3];
-    var settingsSnap = results[4];
+    var inv  = results[0];
+    var loans = results[1];
+    var divs  = results[2];
+    var settingsSnap = results[3];
 
     // Investments
     if (inv && inv.length > 0) {
@@ -9357,31 +9416,7 @@ function _loadData(uid) {
       dividendsData.length = 0;
       divs.forEach(function(r){ dividendsData.push(r); });
       window.dividendsData = dividendsData;
-    } else {
-      var localDivs = JSON.parse(localStorage.getItem('dividendsData') || '[]');
-      if (localDivs.length > 0) {
-        dividendsData.length = 0;
-        localDivs.forEach(function(r){ dividendsData.push(r); });
-        window.dividendsData = dividendsData;
-        _write(uid, "dividends", localDivs);
-      }
     }
-
-    // Liquidity (السيولة الخارجة)
-    if (liqCloud && liqCloud.length) {
-      liquidityData.length = 0;
-      liqCloud.forEach(function(r){ liquidityData.push(r); });
-      window.liquidityData = liquidityData;
-    } else {
-      var localLiq = JSON.parse(localStorage.getItem('liquidityData') || '[]');
-      if (localLiq.length > 0) {
-        liquidityData.length = 0;
-        localLiq.forEach(function(r){ liquidityData.push(r); });
-        window.liquidityData = liquidityData;
-        _write(uid, "liquidity", localLiq);
-      }
-    }
-    if (typeof renderLiquidityList === "function") renderLiquidityList();
 
     // Settings
     if (settingsSnap && settingsSnap.exists) {
@@ -9395,8 +9430,7 @@ function _loadData(uid) {
     _rerender();
     initDashboardYears();
     renderDashboard();
-    if (typeof renderStocks        === "function") renderStocks();
-    if (typeof renderDividendsTab  === "function") renderDividendsTab();
+    if (typeof renderStocks === "function") renderStocks();
     _badge("synced");
 
     // Realtime listener على investments فقط
@@ -9423,12 +9457,8 @@ function _clearData() {
   _uid = null;
   if (Array.isArray(window.__investments)) window.__investments.length = 0;
   if (Array.isArray(window.loansData))    { window.loansData.length = 0; loansData = window.loansData; }
-  if (Array.isArray(window.dividendsData)) { window.dividendsData.length = 0; dividendsData.length = 0; }
-  if (Array.isArray(window.liquidityData)) { window.liquidityData.length = 0; liquidityData.length = 0; }
 
   _rerender();
-  if (typeof renderDividendsTab  === "function") renderDividendsTab();
-  if (typeof renderLiquidityList === "function") renderLiquidityList();
   _gate(true);
 }
 
@@ -9446,11 +9476,6 @@ window.fbSaveLoans = function() {
 window.fbSaveDividends = function() {
   if (!_uid) return;
   _write(_uid, "dividends", Array.from(window.dividendsData || dividendsData));
-};
-
-window.fbSaveLiquidity = function() {
-  if (!_uid) return;
-  _write(_uid, "liquidity", Array.from(window.liquidityData || liquidityData));
 };
 
 //  Auth: popup on all platforms (redirect breaks on GitHub Pages / iOS Safari)
