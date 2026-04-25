@@ -776,6 +776,33 @@
   .loan-action-btn:hover { color: var(--white); border-color: var(--gold); }
 
   /* ── DEBT CARD ───────────────────────────────────────── */
+  .debt-card {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background .15s;
+    direction: rtl;
+  }
+  .debt-card:last-child { border-bottom: none; }
+  .debt-card:hover { background: rgba(201,168,76,0.03); }
+  .debt-card-inner { display: flex; align-items: flex-start; gap: 14px; }
+  .debt-card-body  { flex: 1; min-width: 0; }
+  .debt-card-top   { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+  .debt-card-info  { flex: 1; min-width: 0; }
+  .debt-card-amount-wrap { text-align: left; flex-shrink: 0; }
+  .debt-card-name   { font-size: 14px; font-weight: 700; color: var(--white); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .debt-card-reason { font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
+  .debt-card-meta   { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 4px; align-items: center; }
+  .debt-card-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
+  .debt-amount-main  { font-size: 20px; font-weight: 800; font-family: 'JetBrains Mono', monospace; white-space: nowrap; line-height: 1.2; }
+  .debt-amount-label { font-size: 9px; color: var(--muted); margin-top: 2px; text-align: left; }
+  .debt-amount-total { font-size: 10px; color: var(--muted); margin-top: 2px; text-align: left; }
+  .debt-avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+  .debt-avatar.owe  { background: rgba(248,113,113,0.18); color: #f87171; }
+  .debt-avatar.lend { background: rgba(76,175,130,0.18);  color: #4caf82; }
+  @media (max-width: 600px) {
+    .debt-card { padding: 14px; }
+    .debt-amount-main { font-size: 17px; }
+  }
 
   /* ══════════════════════════════════════════════════════
      DATABASE PAGE STYLES
@@ -5434,28 +5461,33 @@ function renderDebts() {
     var waBtn = waPhone ? '<a href="https://wa.me/'+waPhone+'?text='+(isOwe?waMsgOwe:waMsgLend)+'" target="_blank" class="loan-action-btn" style="color:#25D366;text-decoration:none">📱 واتساب</a>' : '';
 
     return '<div class="debt-card" style="border-right:3px solid '+(isOwe?'#f87171':'#4caf82')+'">' +
-      '<div style="display:flex;align-items:flex-start;gap:14px">' +
-      '<div class="debt-avatar '+(isOwe?'owe':'lend')+'">'+initials+'</div>' +
-      '<div style="flex:1;min-width:0;overflow:hidden">' +
-        '<div class="debt-card-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px">'+d.person+' <span style="font-size:10px;color:var(--muted);font-weight:400">· '+(d.relation||'')+'</span></div>' +
-        '<div class="debt-card-reason" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px">'+(isOwe?'⬇️ أنت مدين':'⬆️ يدين لك')+(d.reason?' · '+d.reason:'')+'</div>' +
-        '<div class="debt-card-meta" style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0">' +
-          '<span class="loan-tag" style="'+sc+'">'+d.status+'</span>' +
-          overdueTag + writtenTag + dateTag + dueTag +
-        '</div>' +
-        progressBar +
-        '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">' +
-          '<button class="loan-action-btn" onclick="openDebtEditPage('+d._idx+')">✏️ تعديل</button>' +
-          '<button class="loan-action-btn" style="color:var(--red)" onclick="deleteDebt('+d._idx+')">🗑 حذف</button>' +
-          waBtn +
+      '<div class="debt-card-inner">' +
+        '<div class="debt-avatar '+(isOwe?'owe':'lend')+'">'+initials+'</div>' +
+        '<div class="debt-card-body">' +
+          '<div class="debt-card-top">' +
+            '<div class="debt-card-info">' +
+              '<div class="debt-card-name">'+d.person+' <span style="font-size:10px;color:var(--muted);font-weight:400">· '+(d.relation||'')+'</span></div>' +
+              '<div class="debt-card-reason">'+(isOwe?'⬇️ أنت مدين':'⬆️ يدين لك')+(d.reason?' · '+d.reason:'')+'</div>' +
+            '</div>' +
+            '<div class="debt-card-amount-wrap">' +
+              '<div class="debt-amount-main" style="color:'+(isOwe?'#f87171':'#4caf82')+'">'+remaining.toLocaleString('en-US',{maximumFractionDigits:0})+'</div>' +
+              '<div class="debt-amount-label">ر.س متبقي</div>' +
+              '<div class="debt-amount-total">من '+d.amount.toLocaleString('en-US',{maximumFractionDigits:0})+'</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="debt-card-meta">' +
+            '<span class="loan-tag" style="'+sc+'">'+d.status+'</span>' +
+            overdueTag + writtenTag + dateTag + dueTag +
+          '</div>' +
+          progressBar +
+          '<div class="debt-card-actions">' +
+            '<button class="loan-action-btn" onclick="openDebtEditPage('+d._idx+')">✏️ تعديل</button>' +
+            '<button class="loan-action-btn" style="color:var(--red)" onclick="deleteDebt('+d._idx+')">🗑 حذف</button>' +
+            waBtn +
+          '</div>' +
         '</div>' +
       '</div>' +
-      '<div style="text-align:center;flex-shrink:0">' +
-        '<div style="font-size:22px;font-weight:800;font-family:monospace;color:'+(isOwe?'#f87171':'#4caf82')+'">'+remaining.toLocaleString('en-US',{maximumFractionDigits:0})+'</div>' +
-        '<div style="font-size:9px;color:var(--muted);margin-top:2px">ر.س متبقي</div>' +
-        '<div style="font-size:10px;color:var(--muted);margin-top:4px">من '+d.amount.toLocaleString('en-US',{maximumFractionDigits:0})+'</div>' +
-      '</div>' +
-      '</div></div>';
+    '</div>';
   }).join('');
 }
 </script>
