@@ -69,9 +69,6 @@
     min-height: 100vh;
     overflow-x: hidden;
     transition: background .35s ease, color .35s ease;
-  
-    .sidebar { display: none !important; }
-    .main { margin-right: 0 !important; }
   }
 
   /* ── ANIMATED BACKGROUND ─────────────────────────────── */
@@ -3575,7 +3572,7 @@
       <span class="mnav-label">الفرص</span>
     </div>
 
-    <div class="mnav-item" id="mnav-loans" onclick="showPage('loans',this,'🏦 القروض البنكية')">
+    <div class="mnav-item" id="mnav-loans" onclick="showPage('loans',this,'💰 القروض')">
       <div class="mnav-icon-wrap"><span class="mnav-icon">💰</span></div>
       <span class="mnav-label">القروض</span>
     </div>
@@ -3585,7 +3582,8 @@
       <span class="mnav-label">الديون</span>
     </div>
 
-    
+    <div class="mnav-item" id="mnav-reports" onclick="window.location.href='dashboard.html'">
+      <div class="mnav-icon-wrap"><span class="mnav-icon">📊</span></div>
       <span class="mnav-label">التقارير</span>
     </div>
 
