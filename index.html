@@ -1416,37 +1416,100 @@
     <!-- PAGE: DASHBOARD -->
     <!-- ═══════════════════════════════════════════════ -->
     <div id="page-home" class="page active">
-      <div class="page-header fade-up">
-        <div>
-          <div class="page-title">📊 لوحة التحكم</div>
-          <div class="page-sub" id="dash-subtitle">نظرة شاملة على المحفظة الاستثمارية</div>
+
+      <!-- Hero Section -->
+      <div style="text-align:center;padding:60px 20px 40px;position:relative">
+
+        <!-- Glow background -->
+        <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:300px;background:radial-gradient(ellipse,rgba(201,168,76,0.12) 0%,transparent 70%);pointer-events:none"></div>
+
+        <div class="fade-up" style="display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);border-radius:50px;padding:6px 18px;font-size:12px;font-weight:600;color:var(--gold);margin-bottom:24px;letter-spacing:.5px">
+          ✦ محفظتي المالية — نسختك الشخصية
         </div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <div class="date-badge" id="dash-date-badge">جميع السنوات</div>
-          <select id="dash-year-filter" onchange="renderDashboard()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--white);font-size:12px;font-family:inherit;outline:none">
-            <option value="all">كل السنوات</option>
-          </select>
+
+        <div class="fade-up" style="font-size:clamp(28px,5vw,52px);font-weight:900;color:var(--white);line-height:1.2;margin-bottom:16px">
+          استثماراتك كلها<br>
+          <span style="background:linear-gradient(135deg,#c9a84c,#f0d080,#c9a84c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">في مكان واحد</span>
+        </div>
+
+        <div class="fade-up delay-1" style="font-size:16px;color:var(--muted);max-width:500px;margin:0 auto 36px;line-height:1.7">
+          أداة متكاملة لإدارة محفظتك الاستثمارية — أسهم، صكوك، صناديق، قروض، وأكثر. تتبع أداءك وحلّل عوائدك بلحظة واحدة.
+        </div>
+
+        <div class="fade-up delay-1" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+          <button onclick="showPage('add',this)" style="background:linear-gradient(135deg,#c9a84c,#a07830);color:#000;border:none;border-radius:12px;padding:14px 28px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 20px rgba(201,168,76,0.3);transition:transform .2s" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+            ➕ أضف فرصة جديدة
+          </button>
+          <a href="dashboard.html" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--white);border-radius:12px;padding:14px 28px;font-size:14px;font-weight:700;text-decoration:none;transition:all .2s;display:inline-block" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">
+            📊 لوحة التحكم
+          </a>
         </div>
       </div>
-      <div class="kpi-grid fade-up delay-1" id="dash-kpi-grid"></div>
-      <div class="two-col fade-up delay-2">
-        <div class="section-card">
-          <div class="section-head"><span class="section-title">📌 توزيع الأصول</span></div>
-          <div class="section-body"><div id="dash-donut-wrap" style="display:flex;align-items:center;gap:24px;justify-content:center"><div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">لا توجد بيانات بعد</div></div></div>
+
+      <!-- Stats Banner -->
+      <div id="home-stats" class="fade-up delay-1" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:48px">
+      </div>
+
+      <!-- Features Grid -->
+      <div class="fade-up delay-2" style="margin-bottom:48px">
+        <div style="text-align:center;margin-bottom:32px">
+          <div style="font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">ما الذي تحصل عليه</div>
+          <div style="font-size:28px;font-weight:800;color:var(--white)">كل ما تحتاجه في تطبيق واحد</div>
         </div>
-        <div class="section-card">
-          <div class="section-head"><span class="section-title">🏦 التوزيع حسب المنصة</span></div>
-          <div class="section-body"><div id="dash-platform-bars" class="bar-list"><div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">لا توجد بيانات بعد</div></div></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
+
+          <div onclick="showPage('stocks',this)" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden" onmouseover="this.style.borderColor='rgba(201,168,76,0.4)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'">
+            <div style="font-size:32px;margin-bottom:12px">📈</div>
+            <div style="font-size:16px;font-weight:700;color:var(--white);margin-bottom:6px">الأسهم السعودية والأمريكية</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.6">تتبع محفظتك من السوق السعودي وول ستريت — مع أسعار مباشرة وتحليل الأرباح والخسائر</div>
+            <div style="position:absolute;top:16px;left:16px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:6px;padding:3px 8px;font-size:10px;color:var(--gold);font-weight:600">LIVE</div>
+          </div>
+
+          <div onclick="showPage('sukuk',this)" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden" onmouseover="this.style.borderColor='rgba(56,217,169,0.4)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'">
+            <div style="font-size:32px;margin-bottom:12px">🏛</div>
+            <div style="font-size:16px;font-weight:700;color:var(--white);margin-bottom:6px">الصكوك والصناديق</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.6">تتبع عوائدك من الصكوك والمرابحات والصناديق — مع تنبيهات الاستحقاق وتفصيل التوزيعات</div>
+          </div>
+
+          <div onclick="showPage('loans',this)" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;cursor:pointer;transition:all .25s" onmouseover="this.style.borderColor='rgba(96,165,250,0.4)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'">
+            <div style="font-size:32px;margin-bottom:12px">🏦</div>
+            <div style="font-size:16px;font-weight:700;color:var(--white);margin-bottom:6px">إدارة القروض</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.6">حسّب أقساطك ورصيدك المتبقي — مع جدول إطفاء تفصيلي وتتبع المدفوعات</div>
+          </div>
+
+          <div onclick="window.location.href='debts.html'" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;cursor:pointer;transition:all .25s" onmouseover="this.style.borderColor='rgba(248,113,113,0.4)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'">
+            <div style="font-size:32px;margin-bottom:12px">💸</div>
+            <div style="font-size:16px;font-weight:700;color:var(--white);margin-bottom:6px">الديون والجمعيات</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.6">تتبع ما لك وما عليك — مع إشعارات واتساب وسندات لدى الجهات الرسمية</div>
+          </div>
+
+          <div onclick="window.location.href='dashboard.html'" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;cursor:pointer;transition:all .25s" onmouseover="this.style.borderColor='rgba(167,139,250,0.4)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'">
+            <div style="font-size:32px;margin-bottom:12px">📊</div>
+            <div style="font-size:16px;font-weight:700;color:var(--white);margin-bottom:6px">لوحة التحكم الشاملة</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.6">نظرة 360° على محفظتك — CAGR، خريطة حرارة العوائد، التدفق النقدي، وتنبيهات ذكية</div>
+          </div>
+
+          <div onclick="window.location.href='dashboard.html'" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;cursor:pointer;transition:all .25s" onmouseover="this.style.borderColor='rgba(52,211,153,0.4)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'">
+            <div style="font-size:32px;margin-bottom:12px">🤖</div>
+            <div style="font-size:16px;font-weight:700;color:var(--white);margin-bottom:6px">رأي المحلل الذكي</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.6">تحليل مدعوم بـ Claude AI — يقرأ بياناتك الفعلية ويعطيك توصيات مخصصة لمحفظتك</div>
+          </div>
+
         </div>
       </div>
-      <div class="two-col fade-up delay-3">
-        <div id="dash-risk-by-year"></div>
-        <div class="section-card">
-          <div class="section-head"><span class="section-title">🏆 أفضل الاستثمارات أداءً</span></div>
-          <div class="section-body" id="dash-top-performers"><div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">لا توجد بيانات بعد</div></div>
+
+      <!-- CTA Footer -->
+      <div class="fade-up delay-3" style="text-align:center;background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(56,217,169,0.05));border:1px solid rgba(201,168,76,0.2);border-radius:20px;padding:40px 24px;margin-bottom:32px">
+        <div style="font-size:22px;font-weight:800;color:var(--white);margin-bottom:10px">ابدأ الآن — مجاناً وآمن</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:24px">بياناتك محفوظة على حسابك الشخصي فقط — لا مشاركة، لا إعلانات</div>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+          <button onclick="showPage('add',this)" style="background:linear-gradient(135deg,#c9a84c,#a07830);color:#000;border:none;border-radius:10px;padding:12px 24px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit">➕ أضف فرصتك الأولى</button>
+          <button onclick="showPage('stocks',this)" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--white);border-radius:10px;padding:12px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📈 إضافة سهم</button>
+          <button onclick="showPage('db',this)" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--white);border-radius:10px;padding:12px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🗄️ قاعدة البيانات</button>
         </div>
       </div>
-    </div>
+
+
     <!-- PAGE: STOCKS -->
     <!-- ═══════════════════════════════════════════════ -->
     <div id="page-stocks" class="page">
@@ -7160,6 +7223,7 @@ function applyDivFilter() {
   var toDate   = (document.getElementById('div-filter-to')      || {}).value;
   var status   = (document.getElementById('div-filter-status')  || {}).value;
 
+  var dividendsData = window.dividendsData || [];
   var all = dividendsData;
   _divFilteredData = all.filter(function(d) {
     if (tickerQ && !(
@@ -7225,6 +7289,7 @@ function renderDividendsTab() {
   var saStocks = inv.filter(function(x){ return x.type==='سهم' && x.status==='نشطة' && x.market !== 'us'; });
 
   // تحديث KPIs
+  var dividendsData = window.dividendsData || [];
   var totalReceived = dividendsData.filter(function(d){ return d.status==='مستلمة'; })
     .reduce(function(s,d){ return s+(d.total_amount||0); }, 0);
   var totalPending  = dividendsData.filter(function(d){ return d.status!=='مستلمة'; })
@@ -14998,8 +15063,34 @@ function _gate(show) {
   }
 }
 
+
+// ── Render home page stats ──────────────────────────────────────────────────
+function renderHomeStats() {
+  var inv   = window.__investments || [];
+  var loans = window.loansData || [];
+  var divs  = window.dividendsData || [];
+  var active = inv.filter(function(x){ return x.status === 'نشطة'; });
+  var totalAmt = inv.reduce(function(s,x){ return s+(x.amount||0); }, 0);
+  var totalRet = inv.reduce(function(s,x){ return s+(x.ret_val||0); }, 0);
+  var fmt = function(n){ return n >= 1000000 ? (n/1000000).toFixed(1)+'م' : n >= 1000 ? (n/1000).toFixed(0)+'k' : n.toFixed(0); };
+  var el = document.getElementById('home-stats');
+  if (!el) return;
+  var stats = [
+    { label:'إجمالي المستثمر', value: fmt(totalAmt)+' ر.س', color:'#c9a84c' },
+    { label:'العوائد المتوقعة', value: fmt(totalRet)+' ر.س', color:'#34d399' },
+    { label:'فرص نشطة', value: active.length+' فرصة', color:'#60a5fa' },
+    { label:'قروض مسجلة', value: loans.length+' قرض', color:'#f59e0b' },
+  ];
+  el.innerHTML = stats.map(function(s){
+    return '<div style="background:var(--card);padding:20px;text-align:center">' +
+      '<div style="font-size:22px;font-weight:800;font-family:monospace;color:'+s.color+'">'+s.value+'</div>' +
+      '<div style="font-size:11px;color:var(--muted);margin-top:4px">'+s.label+'</div>' +
+    '</div>';
+  }).join('');
+}
+
 function _rerender() {
-  ["renderAll","renderSukuk","renderFunds","renderStocks",
+  ["renderAll","renderSukuk","renderFunds","renderStocks","renderHomeStats",
    "renderLoans","renderUsStocksTable","renderMetals","renderJamaa"].forEach(function(fn) {
     if (typeof window[fn] === "function") window[fn]();
   });
