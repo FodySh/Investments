@@ -3867,8 +3867,7 @@ function toggleAnalystAuto() {
 var _analysisUsed = false;
 
 
-async 
-function triggerSync(collection) {
+async function triggerSync(collection) {
   if (typeof window.fbSaveInvestments !== 'function') return;
   if (_syncTimer[collection]) clearTimeout(_syncTimer[collection]);
   _syncTimer[collection] = setTimeout(function() {
@@ -5103,7 +5102,7 @@ function closeMobileMore() {
   if (btn) btn.classList.remove('active');
 }
 
-const PAGE_TITLES = {
+var PAGE_TITLES = {
   'add-stock':  '📈 إضافة سهم',
   'add-loan':   '🏦 إضافة قرض',
   'add-debt':   '💸 إضافة دين',
