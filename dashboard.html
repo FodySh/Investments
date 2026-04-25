@@ -2552,26 +2552,30 @@ function renderCashflow() {
                     'يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
   var fmt = function(n){ return n.toLocaleString('en-US',{maximumFractionDigits:0}); };
 
-  // ── بناء شبكة الأشهر ────────────────────────────────────────────
+  // ── بناء شبكة الأشهر (نصف الفترة ماضي، نصفها مستقبل) ──────────
+  var halfBack = Math.floor(months / 2);
   var monthData = [];
-  for (var m = 0; m < months; m++) {
+  for (var m = -halfBack; m < months - halfBack; m++) {
     var dt = new Date(now.getFullYear(), now.getMonth() + m, 1);
     var key = dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0');
     monthData.push({
       key:key, year:dt.getFullYear(), month:dt.getMonth(),
       label: monthNames[dt.getMonth()] + ' ' + dt.getFullYear(),
       shortLabel: monthNames[dt.getMonth()].slice(0,3),
+      isPast: m < 0,
       distributions:0, capital:0, dividends:0, items:[]
     });
   }
   var keyMap = {};
   monthData.forEach(function(m){ keyMap[m.key] = m; });
 
-  // ── 1. استثمارات نشطة (توزيعات دورية + رأس مال عند الاستحقاق) ──
+  // ── 1. استثمارات (توزيعات دورية + رأس مال عند الاستحقاق) ────────
   inv.forEach(function(x) {
-    if (x.status === 'مستلمة') return;
+    if (x.status === 'مستلمة' || x.status === 'مغلقة') return;
     var matDate   = parseDate(x.date_out);
-    var distFreq  = x.dist || '';
+    var startDate = parseDate(x.date_in);
+    // دعم حقلي dist_freq و dist معاً
+    var distFreq  = x.dist_freq || x.dist || '';
     var retVal    = Math.max(0, x.ret_val || 0);
     var amt       = x.amount || 0;
 
@@ -2584,33 +2588,53 @@ function renderCashflow() {
       }
     }
 
-    // توزيعات دورية من الاستثمار
+    // توزيعات دورية
     var monthsPerDist = distFreq==='شهري'?1:distFreq==='ربع سنوي'?3:
                         distFreq==='نصف سنوي'?6:distFreq==='سنوي'?12:0;
     if (monthsPerDist > 0 && retVal > 0) {
-      var periods = matDate
-        ? Math.max(1, Math.ceil((matDate - now) / (86400000 * 30 * monthsPerDist)))
-        : Math.floor(12 / monthsPerDist);
-      var distAmt = retVal / periods;
-      for (var i = 0; i < months; i += monthsPerDist) {
-        if (monthData[i]) monthData[i].distributions += distAmt;
+      // حساب عدد الدورات الكلي لتوزيع العائد
+      var invStart = startDate || new Date(now.getFullYear(), now.getMonth() - 6, 1);
+      var invEnd   = matDate   || new Date(now.getFullYear(), now.getMonth() + 12, 1);
+      var totalMonths = Math.max(1,
+        (invEnd.getFullYear() - invStart.getFullYear()) * 12 +
+        (invEnd.getMonth() - invStart.getMonth())
+      );
+      var totalPeriods = Math.max(1, Math.ceil(totalMonths / monthsPerDist));
+      var distAmt = retVal / totalPeriods;
+
+      // ضع التوزيعات في الأشهر المناسبة
+      var cursor = new Date(invStart);
+      while (cursor < invEnd) {
+        var cKey = cursor.getFullYear() + '-' + String(cursor.getMonth()+1).padStart(2,'0');
+        if (keyMap[cKey]) {
+          keyMap[cKey].distributions += distAmt;
+          if (!keyMap[cKey].items.includes(x.name||'')) keyMap[cKey].items.push(x.name||'');
+        }
+        cursor.setMonth(cursor.getMonth() + monthsPerDist);
+      }
+    } else if (retVal > 0 && !matDate) {
+      // عائد بدون توزيعات دورية — ضعه في الشهر الحالي للتوضيح
+      var nowKey = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+      if (keyMap[nowKey]) {
+        keyMap[nowKey].distributions += retVal;
+        keyMap[nowKey].items.push(x.name||'');
       }
     }
   });
 
-  // ── 2. توزيعات فعلية من سجل التوزيعات ──────────────────────────
+  // ── 2. توزيعات فعلية من سجل التوزيعات ───────────────────────────
   divs.forEach(function(d) {
     if (!d.pay_date && !d.ex_date) return;
     var dateStr = d.pay_date || d.ex_date;
-    var key = dateStr.slice(0,7); // YYYY-MM
+    var key = dateStr.slice(0,7);
     if (keyMap[key] && d.total_amount) {
       keyMap[key].dividends += (d.total_amount || 0);
-      if (!keyMap[key].items.includes(d.stock_name||d.ticker||''))
-        keyMap[key].items.push(d.stock_name || d.ticker || '');
+      var label = d.stock_name || d.ticker || '';
+      if (label && !keyMap[key].items.includes(label)) keyMap[key].items.push(label);
     }
   });
 
-  // ── KPIs ────────────────────────────────────────────────────────
+  // ── KPIs ─────────────────────────────────────────────────────────
   var totalDist = monthData.reduce(function(s,m){ return s + m.distributions; }, 0);
   var totalDiv  = monthData.reduce(function(s,m){ return s + m.dividends; }, 0);
   var totalCap  = monthData.reduce(function(s,m){ return s + m.capital; }, 0);
@@ -2628,7 +2652,7 @@ function renderCashflow() {
       '<div class="kpi-card" style="--accent:#c9a84c"><div class="kpi-icon">📊</div><div class="kpi-label">الإجمالي الكلي</div><div class="kpi-value">'+fmt(grandTotal)+'</div><div class="kpi-sub">ر.س</div></div>';
   }
 
-  // ── الرسم البياني ────────────────────────────────────────────────
+  // ── الرسم البياني ─────────────────────────────────────────────────
   var chartEl  = document.getElementById('cf-chart');
   var labelsEl = document.getElementById('cf-chart-labels');
   var cfLabel  = document.getElementById('cf-chart-label');
@@ -2637,45 +2661,52 @@ function renderCashflow() {
   if (chartEl) {
     chartEl.innerHTML = monthData.map(function(m) {
       var total = m.distributions + m.dividends + m.capital;
-      var dPct  = total > 0 ? (m.distributions / maxFlow * 100).toFixed(1) : 0;
-      var divPct= total > 0 ? (m.dividends     / maxFlow * 100).toFixed(1) : 0;
-      var cPct  = total > 0 ? (m.capital       / maxFlow * 100).toFixed(1) : 0;
+      var dPct  = (m.distributions / maxFlow * 100).toFixed(1);
+      var divPct= (m.dividends     / maxFlow * 100).toFixed(1);
+      var cPct  = (m.capital       / maxFlow * 100).toFixed(1);
       var label = total > 0 ? fmt(total) : '';
       var color = total > 0 ? 'var(--white)' : 'var(--muted)';
-      var hasBot = m.capital > 0 || m.dividends > 0 ? '0' : '3px 3px 0 0';
-      var html = '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:28px">';
-      html += '<div style="font-size:9px;color:'+color+';text-align:center">'+label+'</div>';
+      var opacity = m.isPast ? '0.45' : '0.85';
+      var html = '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:28px;cursor:pointer" onclick="highlightCfMonth(\''+m.key+'\')" title="'+m.label+'\n'+fmt(total)+' ر.س">';
+      html += '<div style="font-size:9px;color:'+color+';text-align:center;white-space:nowrap">'+label+'</div>';
       html += '<div style="width:100%;display:flex;flex-direction:column;justify-content:flex-end;height:120px">';
-      html += '<div style="width:100%;height:'+cPct+'%;background:rgba(96,165,250,0.75);border-radius:3px 3px 0 0;min-height:'+(m.capital>0?3:0)+'px"></div>';
-      html += '<div style="width:100%;height:'+divPct+'%;background:rgba(0,230,118,0.75);min-height:'+(m.dividends>0?2:0)+'px"></div>';
-      html += '<div style="width:100%;height:'+dPct+'%;background:rgba(52,211,153,0.8);border-radius:'+hasBot+'"></div>';
-      html += '</div></div>';
+      html += '<div style="width:100%;height:'+cPct+'%;background:rgba(96,165,250,'+opacity+');border-radius:3px 3px 0 0;min-height:'+(m.capital>0?3:0)+'px"></div>';
+      html += '<div style="width:100%;height:'+divPct+'%;background:rgba(0,230,118,'+opacity+');min-height:'+(m.dividends>0?2:0)+'px"></div>';
+      html += '<div style="width:100%;height:'+dPct+'%;background:rgba(52,211,153,'+opacity+');border-radius:'+(m.capital>0||m.dividends>0?'0':'3px 3px 0 0')+';min-height:'+(m.distributions>0?2:0)+'px"></div>';
+      html += '</div>';
+      // خط يفصل الماضي عن المستقبل
+      if (!m.isPast && monthData[monthData.indexOf(m)-1] && monthData[monthData.indexOf(m)-1].isPast) {
+        html = '<div style="width:2px;background:rgba(201,168,76,0.4);height:130px;align-self:flex-end;border-radius:2px;margin:0 2px"></div>' + html;
+      }
+      html += '</div>';
       return html;
     }).join('');
   }
 
   if (labelsEl) {
     labelsEl.innerHTML = monthData.map(function(m) {
-      return '<div style="flex:1;text-align:center;font-size:9px;color:var(--muted);min-width:28px;overflow:hidden">'+m.shortLabel+'</div>';
+      var isNow = m.key === (now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0'));
+      return '<div style="flex:1;text-align:center;font-size:9px;color:'+(isNow?'var(--gold)':'var(--muted)')+';min-width:28px;overflow:hidden;font-weight:'+(isNow?'700':'400')+'">'+m.shortLabel+'</div>';
     }).join('');
   }
 
-  // ── جدول التفاصيل الشهرية ────────────────────────────────────────
+  // ── جدول التفاصيل الشهرية ─────────────────────────────────────────
   var tbody = document.getElementById('cf-tbody');
   if (tbody) {
     var rows = monthData.filter(function(m){
       return m.distributions + m.dividends + m.capital > 0;
     });
     if (!rows.length) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">لا توجد تدفقات متوقعة في هذه الفترة</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">أضف استثمارات بتاريخ استحقاق أو توزيعات دورية لعرض التدفقات</td></tr>';
     } else {
       tbody.innerHTML = rows.map(function(m) {
         var total = m.distributions + m.dividends + m.capital;
-        return '<tr id="cf-row-'+m.key+'">' +
-          '<td style="color:var(--muted)">'+m.label+'</td>' +
-          '<td class="mono '+(m.distributions>0?'up':'')+'">'+(m.distributions>0?'+'+fmt(m.distributions):'—')+'</td>' +
-          '<td class="mono '+(m.dividends>0?'up':'')+'">'+(m.dividends>0?'+'+fmt(m.dividends):'—')+'</td>' +
-          '<td class="mono '+(m.capital>0?'up':'')+'">'+(m.capital>0?fmt(m.capital):'—')+'</td>' +
+        var pastStyle = m.isPast ? 'opacity:0.6' : '';
+        return '<tr id="cf-row-'+m.key+'" style="'+pastStyle+'">' +
+          '<td style="color:var(--muted)">'+m.label+(m.isPast?' <span style="font-size:10px;color:var(--muted)">(ماضٍ)</span>':'')+'</td>' +
+          '<td class="mono '+(m.distributions>0?'up':'')+'">'+( m.distributions>0?'+'+fmt(m.distributions):'—')+'</td>' +
+          '<td class="mono '+(m.dividends>0?'up':'')+'">'+( m.dividends>0?'+'+fmt(m.dividends):'—')+'</td>' +
+          '<td class="mono '+(m.capital>0?'up':'')+'">'+( m.capital>0?fmt(m.capital):'—')+'</td>' +
           '<td class="mono" style="color:var(--gold);font-weight:700">'+fmt(total)+'</td>' +
           '<td style="font-size:11px;color:var(--muted)">'+([...new Set(m.items)].join('، ')).slice(0,60)+'</td>' +
         '</tr>';
