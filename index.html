@@ -9168,6 +9168,15 @@ function _loadData(uid) {
       dividendsData.length = 0;
       divs.forEach(function(r){ dividendsData.push(r); });
       window.dividendsData = dividendsData;
+    } else {
+      // رفع البيانات المحلية إلى Firebase إذا كانت موجودة
+      var localDivs = JSON.parse(localStorage.getItem('dividendsData') || '[]');
+      if (localDivs.length > 0) {
+        dividendsData.length = 0;
+        localDivs.forEach(function(r){ dividendsData.push(r); });
+        window.dividendsData = dividendsData;
+        _write(uid, "dividends", localDivs);
+      }
     }
 
     // Settings
@@ -9182,7 +9191,8 @@ function _loadData(uid) {
     _rerender();
     initDashboardYears();
     renderDashboard();
-    if (typeof renderStocks === "function") renderStocks();
+    if (typeof renderStocks        === "function") renderStocks();
+    if (typeof renderDividendsTab  === "function") renderDividendsTab();
     _badge("synced");
 
     // Realtime listener على investments فقط
@@ -9209,8 +9219,10 @@ function _clearData() {
   _uid = null;
   if (Array.isArray(window.__investments)) window.__investments.length = 0;
   if (Array.isArray(window.loansData))    { window.loansData.length = 0; loansData = window.loansData; }
+  if (Array.isArray(window.dividendsData)) { window.dividendsData.length = 0; dividendsData.length = 0; }
 
   _rerender();
+  if (typeof renderDividendsTab === "function") renderDividendsTab();
   _gate(true);
 }
 
