@@ -4130,8 +4130,8 @@ function startStockPriceUpdater() {
 // Start after DOM ready
 document.addEventListener('DOMContentLoaded', function() {
   setTimeout(startStockPriceUpdater, 1500);
-  setTimeout(renderCalendar, 800);
-  setTimeout(renderCashflow, 900);
+  setTimeout(function(){ if (typeof renderCalendar === 'function') renderCalendar(); }, 800);
+  setTimeout(function(){ if (typeof renderCashflow === 'function') renderCashflow(); }, 900);
   checkMaturityAlerts();
   setInterval(checkMaturityAlerts, 60 * 60 * 1000); // re-check every hour
 });
@@ -4140,7 +4140,7 @@ document.addEventListener('DOMContentLoaded', function() {
 var _origShowPage = showPage;
 showPage = function(id, navEl, mobileTitle, noScroll) {
   _origShowPage(id, navEl, mobileTitle, noScroll);
-  if (id === 'reports')  { renderCalendar(); renderCashflow(); renderDividendsTab(); }
+  if (id === 'reports')  { if (typeof renderCalendar==='function') renderCalendar(); if (typeof renderCashflow==='function') renderCashflow(); renderDividendsTab(); }
   if (id === 'analyst')  { id = 'reports'; window.__currentPage = 'reports'; setTimeout(function(){ switchReportsTab('analyst'); }, 80); }
   // Only scroll to top if NOT called from a form button
   if (!noScroll) {
@@ -7217,6 +7217,50 @@ function renderDivTable(data) {
       '</td>' +
       '</tr>';
   }).join('');
+}
+
+// ── بيانات التوزيعات المعروفة للأسهم السعودية ────────────────────────────────
+var KNOWN_DIVIDENDS = {
+  '2222': { name: 'أرامكو', history: [
+    { year:2024, ex_date:'2024-03-04', pay_date:'2024-03-14', per_share:0.35 },
+    { year:2024, ex_date:'2024-06-03', pay_date:'2024-06-13', per_share:0.35 },
+    { year:2024, ex_date:'2024-09-02', pay_date:'2024-09-12', per_share:0.35 },
+    { year:2024, ex_date:'2024-12-02', pay_date:'2024-12-12', per_share:0.35 }
+  ]},
+  '1120': { name: 'الراجحي', history: [
+    { year:2024, ex_date:'2024-04-08', pay_date:'2024-04-18', per_share:1.25 },
+    { year:2024, ex_date:'2024-10-07', pay_date:'2024-10-17', per_share:1.25 }
+  ]},
+  '1180': { name: 'الأهلي', history: [
+    { year:2024, ex_date:'2024-04-15', pay_date:'2024-04-25', per_share:0.40 },
+    { year:2024, ex_date:'2024-10-14', pay_date:'2024-10-24', per_share:0.40 }
+  ]},
+  '2010': { name: 'سابك', history: [
+    { year:2024, ex_date:'2024-05-06', pay_date:'2024-05-16', per_share:0.75 }
+  ]},
+  '2350': { name: 'شركة الكيمائية', history: [
+    { year:2024, ex_date:'2024-06-10', pay_date:'2024-06-20', per_share:0.50 }
+  ]},
+  '4020': { name: 'بياع', history: [] },
+  '4220': { name: 'الإتحاد العقارية', history: [] },
+  '1211': { name: 'معادن', history: [
+    { year:2024, ex_date:'2024-04-22', pay_date:'2024-05-02', per_share:0.30 }
+  ]},
+  '2240': { name: 'زين السعودية', history: [
+    { year:2024, ex_date:'2024-05-13', pay_date:'2024-05-23', per_share:0.25 }
+  ]},
+  '7010': { name: 'STC', history: [
+    { year:2024, ex_date:'2024-04-29', pay_date:'2024-05-09', per_share:0.75 },
+    { year:2024, ex_date:'2024-10-28', pay_date:'2024-11-07', per_share:0.75 }
+  ]}
+};
+
+// ── stub لدوال التقارير (يتم تعريفها في ملف منفصل إن وُجد) ──────────────────
+if (typeof renderCalendar === 'undefined') {
+  window.renderCalendar = function() {};
+}
+if (typeof renderCashflow === 'undefined') {
+  window.renderCashflow = function() {};
 }
 
 function renderDividendsTab() {
