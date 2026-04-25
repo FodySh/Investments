@@ -3549,7 +3549,55 @@
       <style>@media(max-width:768px){.add-form-grid{grid-template-columns:1fr !important}#add-loan-summary{position:static !important}}</style>
     </div>
 
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- PAGE: REPORTS — التقارير والسيولة              -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div id="page-reports" class="page">
+      <div class="page-header fade-up">
+        <div>
+          <div class="page-title">📊 التقارير والتحليل</div>
+          <div class="page-sub">متابعة السيولة والأداء الاستثماري</div>
+        </div>
+      </div>
 
+      <!-- ── قسم السيولة الخارجة ─────────────────────── -->
+      <div class="section-card fade-up" style="margin-bottom:20px">
+        <div class="section-head" style="justify-content:space-between;align-items:center">
+          <span class="section-title">💸 السيولة الخارجة من العوائد</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div id="liquidity-total-badge" style="background:rgba(255,179,71,0.12);border:1px solid rgba(255,179,71,0.3);border-radius:8px;padding:5px 14px;font-size:12px;color:#ffb347;font-family:monospace;font-weight:700">0 ر.س</div>
+            <button onclick="toggleLiquidityForm()" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">＋ إضافة</button>
+          </div>
+        </div>
+        <div class="section-body">
+          <p style="font-size:12px;color:var(--muted);margin-bottom:14px">مبالغ تم سحبها من عوائد الاستثمارات ولم يتم إعادة استثمارها في فرص أخرى.</p>
+
+          <!-- فورم الإضافة -->
+          <div id="liquidity-form" style="display:none;background:rgba(255,179,71,0.05);border:1px solid rgba(255,179,71,0.2);border-radius:12px;padding:16px;margin-bottom:16px">
+            <div style="display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:10px;align-items:end">
+              <div>
+                <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">التاريخ</label>
+                <input type="date" id="liq-date" style="width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--white);font-family:inherit;font-size:13px;outline:none">
+              </div>
+              <div>
+                <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">المبلغ (ر.س)</label>
+                <input type="number" id="liq-amount" placeholder="0" min="0" step="0.01" style="width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--white);font-family:monospace;font-size:13px;outline:none">
+              </div>
+              <div>
+                <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">ملاحظة</label>
+                <input type="text" id="liq-note" placeholder="مثال: سحب أرباح أرامكو - نفقات" style="width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--white);font-family:inherit;font-size:13px;outline:none">
+              </div>
+              <button onclick="addLiquidityRecord()" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">حفظ</button>
+            </div>
+          </div>
+
+          <!-- جدول السجلات -->
+          <div id="liquidity-list">
+            <div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">لا توجد سجلات بعد — اضغط "إضافة" لتسجيل سيولة خارجة</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- ═══════════════════════════════════════ -->
     
@@ -3687,6 +3735,10 @@ window.__investments = investments;
 
 var dividendsData = JSON.parse(localStorage.getItem('dividendsData') || '[]');
 window.dividendsData = dividendsData;
+
+// السيولة الخارجة من العوائد
+var liquidityData = JSON.parse(localStorage.getItem('liquidityData') || '[]');
+window.liquidityData = liquidityData;
 
 var _stockFilter = { sa: 'all', us: 'all' };
 
@@ -4140,7 +4192,7 @@ document.addEventListener('DOMContentLoaded', function() {
 var _origShowPage = showPage;
 showPage = function(id, navEl, mobileTitle, noScroll) {
   _origShowPage(id, navEl, mobileTitle, noScroll);
-  if (id === 'reports')  { if (typeof renderCalendar==='function') renderCalendar(); if (typeof renderCashflow==='function') renderCashflow(); renderDividendsTab(); }
+  if (id === 'reports')  { if (typeof renderCalendar==='function') renderCalendar(); if (typeof renderCashflow==='function') renderCashflow(); renderDividendsTab(); if (typeof renderLiquidityList==='function') renderLiquidityList(); }
   if (id === 'analyst')  { id = 'reports'; window.__currentPage = 'reports'; setTimeout(function(){ switchReportsTab('analyst'); }, 80); }
   // Only scroll to top if NOT called from a form button
   if (!noScroll) {
@@ -7255,6 +7307,97 @@ var KNOWN_DIVIDENDS = {
   ]}
 };
 
+// ══════════════════════════════════════════════════════
+// السيولة الخارجة من العوائد
+// ══════════════════════════════════════════════════════
+
+function toggleLiquidityForm() {
+  var f = document.getElementById('liquidity-form');
+  if (!f) return;
+  var isOpen = f.style.display !== 'none';
+  f.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) {
+    // ضبط التاريخ على اليوم
+    var today = new Date().toISOString().slice(0,10);
+    var dateEl = document.getElementById('liq-date');
+    if (dateEl && !dateEl.value) dateEl.value = today;
+    document.getElementById('liq-amount').focus();
+  }
+}
+
+function addLiquidityRecord() {
+  var date   = (document.getElementById('liq-date')   || {}).value;
+  var amount = parseFloat((document.getElementById('liq-amount') || {}).value) || 0;
+  var note   = ((document.getElementById('liq-note')  || {}).value || '').trim();
+
+  if (!date)   { showToast('⚠️ أدخل التاريخ'); return; }
+  if (amount <= 0) { showToast('⚠️ أدخل مبلغاً صحيحاً'); return; }
+
+  liquidityData.unshift({ id: Date.now(), date: date, amount: amount, note: note });
+  saveLiquidityData();
+  renderLiquidityList();
+
+  // مسح الفورم
+  document.getElementById('liq-amount').value = '';
+  document.getElementById('liq-note').value   = '';
+  document.getElementById('liquidity-form').style.display = 'none';
+  showToast('✅ تم تسجيل السيولة الخارجة: ' + amount.toLocaleString('en-US') + ' ر.س');
+}
+
+function deleteLiquidityRecord(id) {
+  if (!confirm('حذف هذا السجل؟')) return;
+  liquidityData = liquidityData.filter(function(r){ return r.id !== id; });
+  window.liquidityData = liquidityData;
+  saveLiquidityData();
+  renderLiquidityList();
+  showToast('تم الحذف');
+}
+
+function saveLiquidityData() {
+  localStorage.setItem('liquidityData', JSON.stringify(liquidityData));
+  window.liquidityData = liquidityData;
+  if (typeof window.fbSaveLiquidity === 'function') window.fbSaveLiquidity();
+}
+
+function renderLiquidityList() {
+  var list  = document.getElementById('liquidity-list');
+  var badge = document.getElementById('liquidity-total-badge');
+  if (!list) return;
+
+  var data = window.liquidityData || liquidityData;
+
+  var total = data.reduce(function(s,r){ return s + (r.amount||0); }, 0);
+  if (badge) badge.textContent = total.toLocaleString('en-US', {maximumFractionDigits:2}) + ' ر.س';
+
+  if (!data.length) {
+    list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">لا توجد سجلات بعد — اضغط "إضافة" لتسجيل سيولة خارجة</div>';
+    return;
+  }
+
+  // ترتيب حسب التاريخ (الأحدث أولاً)
+  var sorted = data.slice().sort(function(a,b){ return b.date.localeCompare(a.date); });
+
+  list.innerHTML =
+    '<table style="width:100%;border-collapse:collapse;font-size:13px">' +
+    '<thead><tr style="border-bottom:1px solid var(--border)">' +
+    '<th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:600;font-size:11px">التاريخ</th>' +
+    '<th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:600;font-size:11px">المبلغ (ر.س)</th>' +
+    '<th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:600;font-size:11px">الملاحظة</th>' +
+    '<th style="padding:8px 10px"></th>' +
+    '</tr></thead><tbody>' +
+    sorted.map(function(r) {
+      return '<tr style="border-bottom:1px solid rgba(255,255,255,0.04);transition:background .15s" onmouseover="this.style.background=\'rgba(255,179,71,0.04)\'" onmouseout="this.style.background=\'\'">' +
+        '<td style="padding:10px;color:var(--muted);font-family:monospace;font-size:12px">' + r.date + '</td>' +
+        '<td style="padding:10px;color:#ffb347;font-family:monospace;font-weight:700">' + (r.amount||0).toLocaleString('en-US',{maximumFractionDigits:2}) + '</td>' +
+        '<td style="padding:10px;color:var(--white)">' + (r.note || '—') + '</td>' +
+        '<td style="padding:10px;text-align:left">' +
+          '<button onclick="deleteLiquidityRecord(' + r.id + ')" style="background:none;border:1px solid rgba(255,77,77,0.3);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--red);cursor:pointer;font-family:inherit">🗑</button>' +
+        '</td>' +
+      '</tr>';
+    }).join('') +
+    '</tbody></table>';
+}
+
 // ── stub لدوال التقارير (يتم تعريفها في ملف منفصل إن وُجد) ──────────────────
 if (typeof renderCalendar === 'undefined') {
   window.renderCalendar = function() {};
@@ -9179,12 +9322,14 @@ function _loadData(uid) {
     _read(uid, "investments"),
     _read(uid, "loans"),
     _read(uid, "dividends"),
+    _read(uid, "liquidity"),
     _ref(uid, "settings").get().catch(function(){ return null; })
   ]).then(function(results) {
-    var inv  = results[0];
-    var loans = results[1];
-    var divs  = results[2];
-    var settingsSnap = results[3];
+    var inv          = results[0];
+    var loans        = results[1];
+    var divs         = results[2];
+    var liqCloud     = results[3];
+    var settingsSnap = results[4];
 
     // Investments
     if (inv && inv.length > 0) {
@@ -9213,7 +9358,6 @@ function _loadData(uid) {
       divs.forEach(function(r){ dividendsData.push(r); });
       window.dividendsData = dividendsData;
     } else {
-      // رفع البيانات المحلية إلى Firebase إذا كانت موجودة
       var localDivs = JSON.parse(localStorage.getItem('dividendsData') || '[]');
       if (localDivs.length > 0) {
         dividendsData.length = 0;
@@ -9222,6 +9366,22 @@ function _loadData(uid) {
         _write(uid, "dividends", localDivs);
       }
     }
+
+    // Liquidity (السيولة الخارجة)
+    if (liqCloud && liqCloud.length) {
+      liquidityData.length = 0;
+      liqCloud.forEach(function(r){ liquidityData.push(r); });
+      window.liquidityData = liquidityData;
+    } else {
+      var localLiq = JSON.parse(localStorage.getItem('liquidityData') || '[]');
+      if (localLiq.length > 0) {
+        liquidityData.length = 0;
+        localLiq.forEach(function(r){ liquidityData.push(r); });
+        window.liquidityData = liquidityData;
+        _write(uid, "liquidity", localLiq);
+      }
+    }
+    if (typeof renderLiquidityList === "function") renderLiquidityList();
 
     // Settings
     if (settingsSnap && settingsSnap.exists) {
@@ -9264,9 +9424,11 @@ function _clearData() {
   if (Array.isArray(window.__investments)) window.__investments.length = 0;
   if (Array.isArray(window.loansData))    { window.loansData.length = 0; loansData = window.loansData; }
   if (Array.isArray(window.dividendsData)) { window.dividendsData.length = 0; dividendsData.length = 0; }
+  if (Array.isArray(window.liquidityData)) { window.liquidityData.length = 0; liquidityData.length = 0; }
 
   _rerender();
-  if (typeof renderDividendsTab === "function") renderDividendsTab();
+  if (typeof renderDividendsTab  === "function") renderDividendsTab();
+  if (typeof renderLiquidityList === "function") renderLiquidityList();
   _gate(true);
 }
 
@@ -9284,6 +9446,11 @@ window.fbSaveLoans = function() {
 window.fbSaveDividends = function() {
   if (!_uid) return;
   _write(_uid, "dividends", Array.from(window.dividendsData || dividendsData));
+};
+
+window.fbSaveLiquidity = function() {
+  if (!_uid) return;
+  _write(_uid, "liquidity", Array.from(window.liquidityData || liquidityData));
 };
 
 //  Auth: popup on all platforms (redirect breaks on GitHub Pages / iOS Safari)
