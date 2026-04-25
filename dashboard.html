@@ -1259,27 +1259,10 @@
         <span class="nav-icon">📊</span> لوحة التحكم
       </div>
       <div class="nav-item" onclick="window.location.href='index.html#stocks'">
-        <span class="nav-icon">📈</span> الأسهم
+        <span class="nav-icon">📈</span> الرئيسية
       </div>
       
-      <div class="nav-item" onclick="window.location.href='index.html#sukuk'">
-        <span class="nav-icon">🏦</span> الفرص
-      </div>
-
-
-
-      <div class="nav-item nav-db" onclick="window.location.href='index.html#db'">
-        <span class="nav-icon">🗄️</span> قاعدة البيانات
-      </div>
-      <div class="nav-item nav-loans" onclick="window.location.href='index.html#loans'">
-        <span class="nav-icon">🏦</span> القروض البنكية
-      </div>
-      <div class="nav-item nav-debts" onclick="window.location.href='debts.html'">
-        <span class="nav-icon">💸</span> ديون وجمعيات
-      </div>
-      <div class="nav-item" onclick="window.location.href='index.html#reports'">
-        <span class="nav-icon">📊</span> التقارير والتحليل
-      </div>
+    
     </nav>
     <div class="sidebar-footer">
       <!-- Theme toggle compact -->
@@ -1637,37 +1620,6 @@
       </div>
       </div>
 
-      <!-- ── تبويب: التحليل المتقدم ── -->
-      <div 
-        
-          </div>
-        </div>
-        <div class="section-card fade-up" id="import-preview" style="display:none;margin-bottom:16px">
-          <div class="section-head">
-            <span class="section-title">📥 معاينة البيانات المستوردة</span>
-            <div style="display:flex;gap:8px">
-              <button onclick="confirmImport()" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:6px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">✓ استيراد الكل</button>
-              <button onclick="document.getElementById('import-preview').style.display='none'" style="background:none;border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:12px;color:var(--muted);cursor:pointer;font-family:inherit">إلغاء</button>
-            </div>
-          </div>
-          <div class="table-wrap" style="max-height:300px">
-            <table class="data-table"><thead id="import-thead"></thead><tbody id="import-tbody"></tbody></table>
-          </div>
-          <div style="padding:12px 16px;font-size:12px;color:var(--muted)" id="import-stats"></div>
-        </div>
-        <div class="section-card fade-up" id="pdf-preview-card">
-          <div class="section-head"><span class="section-title">📄 تقرير المحفظة PDF</span></div>
-          <div class="section-body">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-              <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);cursor:pointer"><input type="checkbox" id="pdf-inc-investments" checked style="accent-color:var(--gold)"> الاستثمارات</label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);cursor:pointer"><input type="checkbox" id="pdf-inc-loans" checked style="accent-color:var(--gold)"> القروض</label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);cursor:pointer"><input type="checkbox" id="pdf-inc-debts" checked style="accent-color:var(--gold)"> الديون</label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);cursor:pointer"><input type="checkbox" id="pdf-inc-cashflow" checked style="accent-color:var(--gold)"> التدفق النقدي</label>
-            </div>
-            <button onclick="exportPDF()" style="background:linear-gradient(135deg,#f87171,#ef4444);color:white;border:none;border-radius:10px;padding:12px 32px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:10px">📄 إنشاء وتنزيل التقرير</button>
-          </div>
-        </div>
-      </div>
 
       <!-- ── تبويب: توزيعات الأسهم ── -->
       
