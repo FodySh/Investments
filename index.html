@@ -298,8 +298,8 @@
   .analyst-text { font-size: 12px; color: var(--muted); line-height: 1.7; }
 
   /* ── TAB SYSTEM ──────────────────────────────────────── */
-  .page { display: none; }
-  .page.active { display: block; }
+  .page { display: none; overflow: hidden; max-height: 0; contain: layout; }
+  .page.active { display: block; overflow: visible; max-height: none; contain: none; }
   /* New feature pages: tighter top spacing */
   #page-calendar.active,
   #page-cashflow.active,
@@ -552,14 +552,15 @@
   @media (max-width: 768px) {
     .mobile-nav { display: flex !important; flex-direction: column; }
     .sidebar { display: none !important; }
-    .main { margin-right: 0 !important; padding: 16px 12px 80px !important; }
+    .main { margin-right: 0 !important; padding: 70px 12px 90px !important; }
   }
 
   /* ── MOBILE TOP BAR ────────────────────────────────── */
   .mobile-topbar {
     display: none;
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0; right: 0;
     z-index: 150;
     background: var(--sidebar-bg);
     border-bottom: 1px solid rgba(201,168,76,0.15);
@@ -568,7 +569,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    margin: 0 -14px 12px;
+    transition: top 0.2s ease;
   }
   .mobile-topbar-title {
     font-size: 15px;
@@ -1234,20 +1235,18 @@
   .step.active .step-num { background: rgba(201,168,76,0.3); color: var(--gold); }
   .step.done .step-num { background: rgba(0,230,118,0.3); color: var(--green); }
 
-8,0.3); color: var(--green); }
-
 </style>
 </head>
 <body>
 <!-- AUTH GATE — shown to unauthenticated users -->
-<div id="auth-gate" style="position:fixed;top:0;left:0;right:0;z-index:1001;background:linear-gradient(90deg,#0c1f18,#071510);border-bottom:1px solid rgba(201,168,76,0.3);display:flex;align-items:center;justify-content:space-between;padding:10px 20px;font-family:'IBM Plex Sans Arabic',sans-serif;gap:12px;flex-wrap:wrap;">
-  <div style="display:flex;align-items:center;gap:10px">
-    <span style="font-size:18px">🔒</span>
-    <span style="font-size:13px;color:var(--muted)">سجّل دخولك لحفظ بياناتك ومزامنتها — البيانات الحالية للعرض فقط</span>
+<div id="auth-gate" style="position:fixed;top:0;left:0;right:0;z-index:1001;background:linear-gradient(90deg,#0c1f18,#071510);border-bottom:1px solid rgba(201,168,76,0.3);display:flex;align-items:center;justify-content:space-between;padding:8px 14px;font-family:'IBM Plex Sans Arabic',sans-serif;gap:8px;flex-wrap:nowrap;overflow:hidden;">
+  <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1;overflow:hidden">
+    <span style="font-size:16px;flex-shrink:0">🔒</span>
+    <span style="font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">سجّل دخولك لحفظ بياناتك ومزامنتها</span>
   </div>
-  <button id="gate-signin-btn" onclick="googleSignIn()" style="display:flex;align-items:center;gap:8px;background:white;color:#1a2e24;border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:700;font-family:'IBM Plex Sans Arabic',sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
-    <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-    تسجيل الدخول بـ Google
+  <button id="gate-signin-btn" onclick="googleSignIn()" style="display:flex;align-items:center;gap:6px;background:white;color:#1a2e24;border:none;border-radius:10px;padding:7px 14px;font-size:12px;font-weight:700;font-family:'IBM Plex Sans Arabic',sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+    <svg width="14" height="14" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+    دخول بـ Google
   </button>
 </div>
 
@@ -1742,132 +1741,6 @@
         </div>
       </div>
 
-      <!-- KPI Cards -->
-      <div id="opps-kpi-row" class="fade-up" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px">
-        <div class="kpi-card" style="--accent:var(--gold)">
-          <div class="kpi-icon">💰</div>
-          <div class="kpi-label">قيمة الفرص النشطة</div>
-          <div class="kpi-value" id="opps-kpi-active-amt">—</div>
-          <div class="kpi-sub" id="opps-kpi-active-count">— فرصة نشطة</div>
-        </div>
-        <div class="kpi-card" style="--accent:var(--green)">
-          <div class="kpi-icon">📈</div>
-          <div class="kpi-label">إجمالي العوائد</div>
-          <div class="kpi-value" id="opps-kpi-returns">—</div>
-          <div class="kpi-sub">ر.س عوائد متوقعة</div>
-        </div>
-        <div class="kpi-card" style="--accent:var(--cyan)">
-          <div class="kpi-icon">🔮</div>
-          <div class="kpi-label">المجموع التقديري</div>
-          <div class="kpi-value" id="opps-kpi-total">—</div>
-          <div class="kpi-sub">أصل + عائد</div>
-        </div>
-        <div class="kpi-card" style="--accent:#a78bfa">
-          <div class="kpi-icon">✅</div>
-          <div class="kpi-label">مستلمة</div>
-          <div class="kpi-value" id="opps-kpi-done-amt">—</div>
-          <div class="kpi-sub" id="opps-kpi-done-count">— فرصة مستلمة</div>
-        </div>
-      </div>
-
-      <!-- Inline Edit Panel (hidden by default) -->
-      <div id="opps-inline-edit" style="display:none;margin-bottom:20px">
-        <div class="section-card" style="border-color:rgba(201,168,76,0.4)">
-          <div class="section-head" style="background:rgba(201,168,76,0.06)">
-            <span class="section-title" style="color:var(--gold)">✏️ تعديل الفرصة</span>
-            <button onclick="closeInlineEdit()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1">×</button>
-          </div>
-          <div class="section-body">
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px">
-              <div class="field-group" style="grid-column:span 2">
-                <label class="field-label">اسم الفرصة <span style="color:var(--gold)">*</span></label>
-                <input class="f-input" id="ied-name" type="text" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">النوع</label>
-                <select class="f-select" id="ied-type">
-                  <option>صك</option><option>مرابحة</option><option>صندوق</option>
-                  <option>سهم</option><option>سند</option><option>وديعة</option><option>أخرى</option>
-                </select>
-              </div>
-              <div class="field-group">
-                <label class="field-label">المنصة</label>
-                <select class="f-select" id="ied-platform">
-                  <option>ترميز</option><option>منافع</option><option>دراية</option><option>ابيان</option>
-                  <option>عوائد</option><option>منصة الأهلي</option><option>رياض المالية</option>
-                  <option>الراجحي المالية</option><option>بنك البلاد</option><option>أخرى</option>
-                </select>
-              </div>
-              <div class="field-group">
-                <label class="field-label">المبلغ المستثمر (ر.س)</label>
-                <input class="f-input" id="ied-amount" type="number" step="0.01" oninput="calcInlineEdit()" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">نسبة العائد %</label>
-                <input class="f-input" id="ied-ret-pct" type="number" step="0.01" oninput="calcInlineEdit()" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">قيمة العائد (ر.س)</label>
-                <input class="f-input" id="ied-ret-val" type="number" step="0.01" oninput="calcInlineEdit()" style="color:var(--green)" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">المجموع المتوقع (ر.س)</label>
-                <input class="f-input" id="ied-total" type="number" step="0.01" readonly style="color:var(--gold)" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">المخاطرة</label>
-                <select class="f-select" id="ied-risk">
-                  <option>منخفض</option><option>متوسط</option><option>عالي</option><option>عالي جداً</option>
-                </select>
-              </div>
-              <div class="field-group">
-                <label class="field-label">الحالة</label>
-                <select class="f-select" id="ied-status">
-                  <option>نشطة</option><option>مستلمة</option><option>مؤجلة</option><option>ملغاة</option>
-                </select>
-              </div>
-              <div class="field-group">
-                <label class="field-label">تاريخ الدخول</label>
-                <input class="f-input" id="ied-date-in" type="date" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">تاريخ الخروج / الاستحقاق</label>
-                <input class="f-input" id="ied-date-out" type="text" placeholder="مثال: 28/09/2026" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">المدة</label>
-                <input class="f-input" id="ied-duration" type="text" placeholder="مثال: 12 شهر" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">التوزيع</label>
-                <select class="f-select" id="ied-dist">
-                  <option>شهري</option><option>ربع سنوي</option><option>نصف سنوي</option>
-                  <option>سنوي</option><option>عند الاستحقاق</option><option>لا يوجد</option>
-                </select>
-              </div>
-              <div class="field-group">
-                <label class="field-label">مصدر رأس المال</label>
-                <input class="f-input" id="ied-capital-src" type="text" />
-              </div>
-              <div class="field-group" style="grid-column:span 2">
-                <label class="field-label">ملاحظات</label>
-                <textarea class="f-input" id="ied-notes" rows="2" style="resize:none"></textarea>
-              </div>
-            </div>
-            <!-- Live calc preview -->
-            <div style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);border-radius:10px;padding:14px;margin-bottom:14px;display:flex;gap:20px;flex-wrap:wrap">
-              <div><div style="font-size:10px;color:var(--muted)">قيمة العائد</div><div id="ied-c-ret" style="font-family:monospace;font-size:16px;font-weight:700;color:var(--green)">—</div></div>
-              <div><div style="font-size:10px;color:var(--muted)">المجموع المتوقع</div><div id="ied-c-total" style="font-family:monospace;font-size:16px;font-weight:700;color:var(--gold)">—</div></div>
-              <div><div style="font-size:10px;color:var(--muted)">ROI</div><div id="ied-c-roi" style="font-family:monospace;font-size:16px;font-weight:700;color:var(--cyan)">—</div></div>
-            </div>
-            <div style="display:flex;gap:10px">
-              <button onclick="saveInlineEdit()" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#0a1628;border:none;border-radius:10px;padding:10px 28px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit">💾 حفظ التعديلات</button>
-              <button onclick="closeInlineEdit()" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:10px 20px;font-size:13px;color:var(--muted);cursor:pointer;font-family:inherit">إلغاء</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- تبويبات + فلاتر -->
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:0">
         <div style="display:flex;gap:0">
@@ -1912,7 +1785,6 @@
               <thead><tr>
                 <th>اسم الصك</th><th>المنصة</th><th>المبلغ</th>
                 <th>العائد %</th><th>العائد ر.س</th>
-                <th style="color:var(--green)">المستلم</th>
                 <th>تاريخ الخروج</th><th>المخاطرة</th><th>الحالة</th><th></th>
               </tr></thead>
               <tbody id="sukuk-tbody"></tbody>
@@ -3158,9 +3030,55 @@
     </div><!-- end page-loans -->
 
     <!-- ═══════════════════════════════════════════════════════════════ -->
-    
+    <!-- PAGE: REPORTS — التقارير والتدفق المالي                        -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <div id="page-reports" class="page">
+      <div class="page-header fade-up">
+        <div>
+          <div class="page-title">📊 التقارير والتدفق المالي</div>
+          <div class="page-sub">نظرة شاملة على التدفقات الداخلة والخارجة</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <select id="cf-year-filter" onchange="renderCashflow()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--white);font-size:12px;font-family:inherit;outline:none"></select>
+        </div>
+      </div>
 
-<!-- PAGE: CALENDAR - تقويم الاستحقاقات -->
+      <!-- KPIs -->
+      <div id="cf-kpi-grid" class="kpi-grid fade-up" style="margin-bottom:20px"></div>
+
+      <!-- مخطط التدفق الشهري -->
+      <div class="section-card fade-up delay-1" style="margin-bottom:20px">
+        <div class="section-head">
+          <span class="section-title">📈 التدفق النقدي الشهري</span>
+          <div style="display:flex;gap:14px;align-items:center;font-size:11px">
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:50%;background:#4caf82;display:inline-block"></span>داخل</span>
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:50%;background:#f87171;display:inline-block"></span>خارج</span>
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:50%;background:#60a5fa;display:inline-block"></span>صافي</span>
+          </div>
+        </div>
+        <div class="section-body" id="cf-chart-wrap" style="overflow-x:auto;padding-bottom:8px">
+          <div style="text-align:center;padding:40px;color:var(--muted)">جاري التحميل...</div>
+        </div>
+      </div>
+
+      <!-- تفاصيل المصادر -->
+      <div class="two-col fade-up delay-2">
+        <div class="section-card">
+          <div class="section-head"><span class="section-title">🟢 مصادر الدخل</span></div>
+          <div class="section-body" id="cf-income-list"></div>
+        </div>
+        <div class="section-card">
+          <div class="section-head"><span class="section-title">🔴 مصادر الإنفاق</span></div>
+          <div class="section-body" id="cf-expense-list"></div>
+        </div>
+      </div>
+    </div><!-- end page-reports -->
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    
+</main>
+
+    <!-- PAGE: CALENDAR - تقويم الاستحقاقات -->
     <!-- ═══════════════════════════════════════════════ -->
 
     <!-- PAGE: ADD STOCK — شاشة إضافة سهم متخصصة       -->
@@ -3679,10 +3597,8 @@
 
 
     <!-- ═══════════════════════════════════════ -->
-
-  </main>
-
-  <nav class="mobile-nav">
+    
+<nav class="mobile-nav">
   <div class="mobile-nav-inner">
 
     <div class="mnav-item active" id="mnav-home" onclick="showPage('home',this,'🏠 الرئيسية')">
@@ -3807,527 +3723,9 @@
 
 <div class="toast" id="toast"></div>
 
-
-<!-- Firebase Compat SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" onerror="window._firebaseFailed=true"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" onerror="window._firebaseFailed=true"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js" onerror="window._firebaseFailed=true"></script>
-<script>
-// Firebase init — wrapped in try/catch so app works even if CDN fails
-try {
-if (typeof firebase === 'undefined') throw new Error('Firebase not loaded');
-firebase.initializeApp({
-  apiKey:            "AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME",
-  authDomain:        "investments-page.firebaseapp.com",
-  projectId:         "investments-page",
-  storageBucket:     "investments-page.firebasestorage.app",
-  messagingSenderId: "964948881361",
-  appId:             "1:964948881361:web:2801b8127489d953717af0"
-});
-
-var _auth     = firebase.auth();
-var _db       = firebase.firestore();
-var _provider = new firebase.auth.GoogleAuthProvider();
-_provider.setCustomParameters({ prompt: "select_account" });
-
-var _unsubSnap = null;
-var _syncing   = false;
-var _uid       = null;
-
-//  Helpers 
-function _ref(uid, col) {
-  return _db.collection("users").doc(uid)
-            .collection("portfolio").doc(col);
-}
-
-function _write(uid, col, data) {
-  if (!uid) return;
-  _badge("loading");
-  _ref(uid, col).set(
-    { data: data, uid: uid, ts: new Date().toISOString() },
-    { merge: true }
-  )
-  .then(function() { _badge("synced"); })
-  .catch(function(e) {
-    console.error("Firestore write error [" + col + "]:", e.code, e.message);
-    if (e.code === "permission-denied") {
-      _badge("rules");
-    } else {
-      _badge("error");
-    }
-  });
-}
-
-function _read(uid, col) {
-  return _ref(uid, col).get().then(function(snap) {
-    if (!snap.exists) return null;
-    var d = snap.data();
-    if (d.uid && d.uid !== uid) return null;
-    return d.data || null;
-  }).catch(function(e) { console.warn("read:", e.message); return null; });
-}
-
-function _badge(state) {
-  var labels = {
-    loading: "syncing...",
-    synced:  "synced",
-    error:   "error - check console",
-    rules:   "permission denied - set Firestore rules",
-    offline: "offline"
-  };
-  var colors = {
-    loading: "#38d9a9",
-    synced:  "var(--green)",
-    error:   "var(--red)",
-    rules:   "var(--orange)",
-    offline: "var(--orange)"
-  };
-  var b = document.getElementById("sync-badge");
-  var m = document.getElementById("mob-sync-status");
-  var t = labels[state] || state;
-  var k = colors[state] || "var(--orange)";
-  if (b) { b.textContent = t; b.style.color = k; b.style.display = "flex"; }
-  if (m) { m.textContent = t; m.style.color = k; }
-}
-
-function _gate(show) {
-  var g = document.getElementById("auth-gate");
-  if (g) g.style.display = show ? "flex" : "none";
-  // Adjust top offset of sidebar/main for banner
-  var sidebar = document.querySelector(".sidebar");
-  var main    = document.querySelector(".main");
-  var banner  = document.getElementById("auth-gate");
-  if (show && banner) {
-    var h = banner.offsetHeight || 48;
-    if (sidebar) sidebar.style.top = h + "px";
-    if (main)    main.style.paddingTop = (h + 8) + "px";
-  } else {
-    if (sidebar) sidebar.style.top = "0";
-    if (main)    main.style.paddingTop = "";
-  }
-}
-
-function _rerender() {
-  ["renderAll","renderSukuk","renderFunds","renderStocks",
-   "renderLoans","renderUsStocksTable","renderMetals","renderJamaa"].forEach(function(fn) {
-    if (typeof window[fn] === "function") window[fn]();
-  });
-}
-
-function _updateUI(user) {
-  function el(id)    { return document.getElementById(id); }
-  function show(id,d){ var e=el(id); if(e) e.style.display=d; }
-  function text(id,v){ var e=el(id); if(e) e.textContent=v; }
-  function html(id,v){ var e=el(id); if(e) e.innerHTML=v; }
-
-  if (user) {
-    var name  = user.displayName || "User";
-    var first = name.split(" ")[0];
-    var p     = user.photoURL;
-    var img   = function(s) {
-      return p
-        ? "<img src='"+p+"' style='width:"+s+"px;height:"+s+"px;border-radius:50%;object-fit:cover' referrerpolicy='no-referrer'/>"
-        : name[0];
-    };
-    show("auth-signin-btn","none");
-    var uc=el("auth-user-card"); if(uc) uc.classList.add("show");
-    text("auth-user-name",  name);
-    text("auth-user-email", user.email||"");
-    html("auth-avatar-initials", img(32));
-    show("mob-signin-btn","none");
-    show("mob-user-card","flex");
-    text("mob-user-name",  first);
-    text("mob-menu-email", user.email||"");
-    html("mob-avatar", img(30));
-    _gate(false);
-    if (typeof showToast === "function") showToast("Welcome " + first);
-  } else {
-    show("auth-signin-btn","flex");
-    var uc2=el("auth-user-card"); if(uc2) uc2.classList.remove("show");
-    var bd=el("sync-badge"); if(bd) bd.style.display="none";
-    show("mob-signin-btn","flex");
-    show("mob-user-card","none");
-  }
-}
-
-function _loadData(uid) {
-  _badge("loading");
-  _gate(false);
-
-  var user = window.__firebaseUser;
-  var isNewUser = false;
-  if (user && user.metadata) {
-    var created   = new Date(user.metadata.creationTime).getTime();
-    var lastLogin = new Date(user.metadata.lastSignInTime).getTime();
-    isNewUser = (lastLogin - created) < 120000;
-  }
-
-  // ✅ جميع الطلبات بالتوازي بدل التسلسل
-  Promise.all([
-    _read(uid, "investments"),
-    _read(uid, "loans"),
-    _read(uid, "dividends"),
-    _ref(uid, "settings").get().catch(function(){ return null; })
-  ]).then(function(results) {
-    var inv  = results[0];
-    var loans = results[1];
-    var divs  = results[2];
-    var settingsSnap = results[3];
-
-    // Investments
-    if (inv && inv.length > 0) {
-      window.__investments.length = 0;
-      inv.forEach(function(r){ window.__investments.push(r); });
-    } else {
-      window.__investments.length = 0;
-      investments.length = 0;
-      if (isNewUser) _write(uid, "investments", []);
-    }
-
-    // Loans
-    if (loans && loans.length) {
-      if (!Array.isArray(window.loansData)) window.loansData = [];
-      window.loansData.length = 0;
-      loans.forEach(function(r){ window.loansData.push(r); });
-      loansData = window.loansData;
-    } else if (isNewUser) {
-      window.loansData = []; loansData = [];
-      _write(uid, "loans", []);
-    }
-
-    // Dividends
-    if (divs && divs.length) {
-      dividendsData.length = 0;
-      divs.forEach(function(r){ dividendsData.push(r); });
-      window.dividendsData = dividendsData;
-    }
-
-    // Settings
-    if (settingsSnap && settingsSnap.exists) {
-      var L = settingsSnap.data().lists || {};
-      if (L.platforms && L.platforms.length) { window._settingsPlatforms = L.platforms; if (typeof populatePlatformSelects === "function") populatePlatformSelects(); }
-      if (L.banks && L.banks.length) { window._settingsBanks = L.banks; if (typeof populateBankSelect === "function") populateBankSelect(); }
-      if (L.capital && L.capital.length) { window._settingsCapital = L.capital; if (typeof populateCapitalSrcSelect === "function") populateCapitalSrcSelect(); }
-      if (L.types && L.types.length) { window._settingsTypes = L.types; if (typeof populateTypeSelect === "function") populateTypeSelect(); }
-    }
-
-    _rerender();
-    initDashboardYears();
-    renderDashboard();
-    if (typeof renderStocks === "function") renderStocks();
-    _badge("synced");
-
-    // Realtime listener على investments فقط
-    if (_unsubSnap) _unsubSnap();
-    _unsubSnap = _ref(uid, "investments").onSnapshot(function(snap) {
-      if (!snap.exists || _syncing) return;
-      var d = snap.data();
-      if (d.uid && d.uid !== uid) return;
-      if (!Array.isArray(d.data)) return;
-      window.__investments.length = 0;
-      d.data.forEach(function(r){ window.__investments.push(r); });
-      if (typeof renderAll    === "function") renderAll();
-      if (typeof renderSukuk  === "function") renderSukuk();
-      if (typeof renderStocks === "function") renderStocks();
-      if (typeof renderFunds  === "function") renderFunds();
-    });
-
-  }).catch(function(e){ console.error("loadData:", e); _badge("error"); });
-}
-
-
-function _clearData() {
-  if (_unsubSnap) { _unsubSnap(); _unsubSnap = null; }
-  _uid = null;
-  if (Array.isArray(window.__investments)) window.__investments.length = 0;
-  if (Array.isArray(window.loansData))    { window.loansData.length = 0; loansData = window.loansData; }
-
-  _rerender();
-  _gate(true);
-}
-
-//  Expose save functions 
-window.fbSaveInvestments = function() {
-  if (!_uid) return;
-  _syncing = true;
-  _write(_uid, "investments", Array.from(window.__investments));
-  setTimeout(function(){ _syncing = false; }, 2000);
-};
-window.fbSaveLoans = function() {
-  if (!_uid) return;
-  _write(_uid, "loans", Array.from(window.loansData));
-};
-window.fbSaveDividends = function() {
-  if (!_uid) return;
-  _write(_uid, "dividends", Array.from(window.dividendsData || dividendsData));
-};
-
-//  Auth: popup on all platforms (redirect breaks on GitHub Pages / iOS Safari)
-window.googleSignIn = function() {
-  _auth.signInWithPopup(_provider).then(function(result) {
-    // success handled by onAuthStateChanged
-  }).catch(function(e) {
-    if (e.code === "auth/popup-blocked") {
-      // Popup was blocked by browser — show guidance
-      if (typeof showToast === "function")
-        showToast("Please allow popups for this site");
-    } else if (e.code !== "auth/popup-closed-by-user"
-            && e.code !== "auth/cancelled-popup-request") {
-      console.error("SignIn error:", e.code, e.message);
-      if (typeof showToast === "function")
-        showToast("Login failed: " + e.code);
-    }
-  });
-};
-
-window.googleSignOut = function() {
-  _auth.signOut().then(function() {
-    if (typeof showToast === "function") showToast("Signed out");
-    if (typeof closeMobUserMenu === "function") closeMobUserMenu();
-  });
-};
-
-// Auth state listener
-_auth.onAuthStateChanged(function(user) {
-  window.__firebaseUser = user;
-  _updateUI(user);
-  if (user) {
-    _uid = user.uid;
-    _gate(false);  // Hide login banner
-    _loadData(user.uid);
-  } else {
-    _gate(true);  // Show login banner
-    // Clear any stale data shown before login
-    if (window.__investments) window.__investments.length = 0;
-    if (window.loansData)     window.loansData.length    = 0;
-
-    if (typeof renderAll      === 'function') renderAll();
-    if (typeof renderDashboard=== 'function') renderDashboard();
-  }
-});
-
-window.IS_FIREBASE_CONFIGURED = true;
-} catch(e) {
-  console.warn('Firebase init failed:', e.message);
-  window._firebaseFailed = true;
-  // Show login banner but app still works with local data
-  var g = document.getElementById('auth-gate');
-  if (g) g.style.display = 'flex';
-}
-</script>
-
-<!-- Return Payment Modal -->
-<div id="return-payment-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:600;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
-  <div style="background:var(--navy2);border:1px solid rgba(0,230,118,0.3);border-radius:18px;padding:28px;width:min(92vw,480px);max-height:85vh;overflow-y:auto;font-family:'IBM Plex Sans Arabic',sans-serif">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <div>
-        <div style="font-size:16px;font-weight:800;color:var(--white)">💰 تسجيل دفعة عائد</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:3px" id="rp-opp-name">—</div>
-      </div>
-      <button onclick="closeReturnPaymentModal()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1">×</button>
-    </div>
-
-    <!-- Add payment form -->
-    <div style="background:rgba(0,230,118,0.05);border:1px solid rgba(0,230,118,0.2);border-radius:12px;padding:18px;margin-bottom:20px">
-      <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:14px">➕ إضافة دفعة جديدة</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-        <div>
-          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;font-weight:600">المبلغ المحوّل (ر.س) *</label>
-          <input id="rp-amount" type="number" step="0.01" min="0" placeholder="0.00"
-            style="width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--white);font-family:inherit;font-size:13px;font-weight:700;color:var(--green);outline:none"
-            oninput="calcRpPreview()" />
-        </div>
-        <div>
-          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;font-weight:600">تاريخ التحويل *</label>
-          <input id="rp-date" type="date"
-            style="width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--white);font-family:inherit;font-size:13px;outline:none" />
-        </div>
-      </div>
-      <div style="margin-bottom:12px">
-        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;font-weight:600">نوع الدفعة</label>
-        <select id="rp-type" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--white);font-family:inherit;font-size:13px;outline:none;cursor:pointer">
-          <option value="عائد شهري">عائد شهري</option>
-          <option value="عائد ربع سنوي">عائد ربع سنوي</option>
-          <option value="عائد نصف سنوي">عائد نصف سنوي</option>
-          <option value="عائد سنوي">عائد سنوي</option>
-          <option value="جزء من الأصل">جزء من الأصل</option>
-          <option value="تحويل كامل">تحويل كامل (أصل + عائد)</option>
-          <option value="أخرى">أخرى</option>
-        </select>
-      </div>
-      <div style="margin-bottom:14px">
-        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;font-weight:600">ملاحظة</label>
-        <input id="rp-note" type="text" placeholder="رقم المرجع أو تفاصيل..."
-          style="width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--white);font-family:inherit;font-size:13px;outline:none" />
-      </div>
-      <!-- Preview -->
-      <div id="rp-preview" style="display:none;background:rgba(0,230,118,0.08);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--muted)">
-        إجمالي مستلم بعد الإضافة: <span id="rp-preview-total" style="color:var(--green);font-weight:700;font-family:monospace">—</span>
-      </div>
-      <button onclick="saveReturnPayment()" style="width:100%;background:linear-gradient(135deg,#00e676,#00b248);color:#0a1628;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit">
-        💾 حفظ الدفعة
-      </button>
-    </div>
-
-    <!-- Payment history -->
-    <div>
-      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px">📋 سجل الدفعات</div>
-      <div id="rp-history" style="max-height:220px;overflow-y:auto">
-        <div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">لا توجد دفعات مسجلة</div>
-      </div>
-      <div id="rp-totals" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(255,255,255,0.03);border-radius:8px;font-size:12px;display:flex;gap:20px;flex-wrap:wrap"></div>
-    </div>
-  </div>
-</div>
-</body>
-</html>
-      <span class="mnav-label">الرئيسية</span>
-    </div>
-
-    <div class="mnav-item" id="mnav-stocks" onclick="showPage('stocks',this,'📈 الأسهم')">
-      <div class="mnav-icon-wrap"><span class="mnav-icon">📈</span></div>
-      <span class="mnav-label">الأسهم</span>
-    </div>
-
-    <div class="mnav-item" id="mnav-sukuk" onclick="showPage('sukuk',this,'🏦 الفرص')">
-      <div class="mnav-icon-wrap"><span class="mnav-icon">🏦</span></div>
-      <span class="mnav-label">الفرص</span>
-    </div>
-
-    <div class="mnav-item" id="mnav-loans" onclick="showPage('loans',this,'🏦 القروض البنكية')">
-      <div class="mnav-icon-wrap"><span class="mnav-icon">💰</span></div>
-      <span class="mnav-label">القروض</span>
-    </div>
-
-    <div class="mnav-item" id="mnav-debts" onclick="window.location.href='debts.html'">
-      <div class="mnav-icon-wrap"><span class="mnav-icon">💸</span></div>
-      <span class="mnav-label">الديون</span>
-    </div>
-
-    <div class="mnav-item" id="mnav-reports" onclick="showPage('reports',this,'📊 التقارير والتحليل')">
-      <div class="mnav-icon-wrap"><span class="mnav-icon">📊</span></div>
-      <span class="mnav-label">التقارير</span>
-    </div>
-
-    <div class="mnav-item" id="mnav-more" onclick="toggleMobileMore()">
-      <div class="mnav-icon-wrap"><span class="mnav-icon">⋯</span></div>
-      <span class="mnav-label">المزيد</span>
-    </div>
-
-  </div>
-</nav>
-    <!-- جدول السداد الشهري -->
-    <div id="new-amort-section" style="display:none;margin-top:24px">
-      <div class="section-card">
-        <div class="section-head" onclick="toggleNewAmortTable()" style="cursor:pointer">
-          <span class="section-title">📅 جدول السداد الشهري</span>
-          <div style="display:flex;align-items:center;gap:10px">
-            <span id="namort-toggle-icon" style="font-size:12px;color:var(--muted)">▼ إخفاء</span>
-            <span class="section-count" id="namort-count">—</span>
-          </div>
-        </div>
-        <div id="namort-table-wrap">
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border)">
-            <div style="text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي المدفوعات</div><div id="namort-total-pay" style="font-size:15px;font-weight:800;font-family:monospace;color:var(--white)">—</div></div>
-            <div style="text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي الأصل</div><div id="namort-total-principal" style="font-size:15px;font-weight:800;font-family:monospace;color:var(--cyan)">—</div></div>
-            <div style="text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي الفوائد</div><div id="namort-total-interest" style="font-size:15px;font-weight:800;font-family:monospace;color:var(--red)">—</div></div>
-            <div style="text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">تكلفة الفائدة</div><div id="namort-cost-pct" style="font-size:15px;font-weight:800;font-family:monospace;color:var(--orange)">—</div></div>
-          </div>
-          <div class="table-wrap" style="max-height:420px;overflow-y:auto">
-            <table class="data-table" style="font-size:12px">
-              <thead style="position:sticky;top:0;z-index:2;background:var(--card)">
-                <tr>
-                  <th>#</th><th>تاريخ الدفعة</th>
-                  <th style="color:var(--gold)">القسط</th>
-                  <th style="color:var(--cyan)">الأصل</th>
-                  <th style="color:var(--red)">الفائدة</th>
-                  <th>الرصيد المتبقي</th>
-                  <th>نسبة الفائدة</th>
-                </tr>
-              </thead>
-              <tbody id="namort-tbody"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-<div id="mobile-more-overlay" onclick="closeMobileMore()" style="
-  display:none;position:fixed;inset:0;z-index:299;
-"></div>
-
-<div id="mobile-more-menu" style="
-  display:none;
-  position:fixed;
-  bottom:76px;
-  left:50%;
-  transform:translateX(-50%);
-  background:var(--sidebar-bg);
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:10px;
-  z-index:300;
-  box-shadow:0 -8px 40px rgba(0,0,0,0.4);
-  backdrop-filter:blur(20px);
-  min-width:230px;
-  animation:fadeUp .2s ease;
-">
-  <div style="font-size:10px;color:var(--muted);padding:6px 12px 8px;letter-spacing:.5px;text-transform:uppercase">صفحات إضافية</div>
-
-  <!-- قاعدة البيانات -->
-  <button onclick="showPage('db',document.getElementById('mnav-more'),'🗄️ قاعدة البيانات');closeMobileMore()" style="width:100%;display:flex;align-items:center;gap:12px;background:none;border:none;padding:10px 14px;color:var(--white);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;transition:background .15s;text-align:right" onmouseover="this.style.background='rgba(125,211,252,0.1)'" onmouseout="this.style.background='none'">
-    <span style="font-size:18px">🗄️</span> قاعدة البيانات
-  </button>
-
-  <!-- التقارير -->
-  <button onclick="showPage('reports',document.getElementById('mnav-more'),'📊 التقارير');closeMobileMore()" style="width:100%;display:flex;align-items:center;gap:12px;background:none;border:none;padding:10px 14px;color:var(--white);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;transition:background .15s;text-align:right" onmouseover="this.style.background='rgba(56,217,169,0.1)'" onmouseout="this.style.background='none'">
-    <span style="font-size:18px">📊</span> التقارير والتحليل
-  </button>
-
-  <div style="height:1px;background:var(--border);margin:6px 12px"></div>
-
-  <!-- إضافة فرصة -->
-  <button onclick="showPage('add',document.getElementById('mnav-more'),'➕ إضافة فرصة');closeMobileMore()" style="width:100%;display:flex;align-items:center;gap:12px;background:rgba(201,168,76,0.08);border:none;padding:10px 14px;color:var(--gold);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;border-radius:10px;transition:background .15s;text-align:right" onmouseover="this.style.background='rgba(201,168,76,0.18)'" onmouseout="this.style.background='rgba(201,168,76,0.08)'">
-    <span style="font-size:18px">➕</span> إضافة فرصة
-  </button>
-
-  <!-- إضافة سهم -->
-  <button onclick="showPage('add-stock',null,'📈 إضافة سهم');closeMobileMore()" style="width:100%;display:flex;align-items:center;gap:12px;background:rgba(201,168,76,0.05);border:none;padding:10px 14px;color:var(--gold);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;transition:background .15s;text-align:right" onmouseover="this.style.background='rgba(201,168,76,0.12)'" onmouseout="this.style.background='rgba(201,168,76,0.05)'">
-    <span style="font-size:18px">📈</span> إضافة سهم جديد
-  </button>
-
-</div>
-
-
-<div class="toast" id="toast"></div>
-
 <script>
 //  DATA 
 const investments = [];
-
-// ── Global Date Utilities ────────────────────────────────────────────────────
-function fmtDate(d) {
-  if (!d || d === '—') return '—';
-  var dt;
-  if (d instanceof Date) { dt = d; }
-  else {
-    var s = String(d).trim();
-    if (/^\d{4}-\d{2}-\d{2}/.test(s))           { dt = new Date(s.slice(0,10)); }
-    else if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) { var p=s.split('/'); dt=new Date(+p[2],+p[1]-1,+p[0]); }
-    else if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(s))  { var p2=s.split('-'); dt=new Date(+p2[2],+p2[1]-1,+p2[0]); }
-    else { return s; }
-  }
-  if (!dt || isNaN(dt.getTime())) return String(d);
-  return ('0'+dt.getDate()).slice(-2)+'-'+('0'+(dt.getMonth()+1)).slice(-2)+'-'+dt.getFullYear();
-}
-function fmtMonthYear(d) {
-  var MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  if (!d) return '—';
-  var dt = d instanceof Date ? d : new Date(String(d).slice(0,10));
-  if (isNaN(dt.getTime())) return String(d);
-  return MO[dt.getMonth()]+' '+dt.getFullYear();
-}
-
 
 // Expose globally so Firebase module can access and sync
 window.__investments = investments;
@@ -4513,185 +3911,8 @@ function toggleAnalystAuto() {
 // ─── ONE-TIME ANALYSIS PER SESSION ────────────────────────────────────────
 var _analysisUsed = false;
 
-function runAIAnalysisOnce() {
-  var today  = new Date().toDateString();
-  var stored = localStorage.getItem('analyst_last_date');
-  if (stored === today) {
-    var t = localStorage.getItem('analyst_last_time') || '';
-    showToast('تم التحليل اليوم في ' + t + ' — يمكنك التحليل مجدداً غداً');
-    return;
-  }
-  var now     = new Date();
-  var timeStr = now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
-  var dateStr = fmtDate(now);
-  localStorage.setItem('analyst_last_date', today);
-  localStorage.setItem('analyst_last_time', timeStr);
-  var lastUpd = document.getElementById('analyst-last-update');
-  if (lastUpd) lastUpd.textContent = 'آخر تحليل: ' + dateStr + ' — ' + timeStr;
-  var btn = document.getElementById('analyst-run-btn');
-  if (btn) { btn.disabled=true; btn.style.opacity='0.45'; btn.style.cursor='not-allowed'; }
-  var lbl = document.getElementById('analyst-btn-label');
-  if (lbl) lbl.textContent = 'تم التحليل ✅ (' + timeStr + ')';
-  runAIAnalysis();
-}
 
-(function() {
-  var today = new Date().toDateString();
-  if (localStorage.getItem('analyst_last_date') === today) {
-    var t = localStorage.getItem('analyst_last_time') || '';
-    setTimeout(function() {
-      var btn = document.getElementById('analyst-run-btn');
-      var lbl = document.getElementById('analyst-btn-label');
-      var lu  = document.getElementById('analyst-last-update');
-      if (btn) { btn.disabled=true; btn.style.opacity='0.45'; btn.style.cursor='not-allowed'; }
-      if (lbl) lbl.textContent = 'تم التحليل ✅ (' + t + ')';
-      if (lu)  lu.textContent  = 'آخر تحليل: ' + new Date().fmtDate + ' — ' + t;
-    }, 1200);
-  }
-})();
-
-async function runAIAnalysis() {
-  var btn       = document.getElementById('analyst-run-btn');
-  var btnIcon   = document.getElementById('analyst-btn-icon');
-  var btnLabel  = document.getElementById('analyst-btn-label');
-  var loading   = document.getElementById('analyst-loading');
-  var loadMsg   = document.getElementById('analyst-loading-msg');
-  var progress  = document.getElementById('analyst-progress');
-  var scoreCard = document.getElementById('analyst-score-card');
-  var boxes     = document.getElementById('analyst-boxes');
-  var staticDiv = document.getElementById('analyst-static');
-  var lastUpd   = document.getElementById('analyst-last-update');
-
-  if (btn)      btn.disabled = true;
-  if (btnIcon)  btnIcon.textContent = '\u23F3';
-  if (btnLabel) btnLabel.textContent = 'جاري التحليل...';
-  if (loading)  loading.style.display = 'block';
-  if (scoreCard)scoreCard.style.display = 'none';
-  if (boxes)    boxes.style.display = 'none';
-  if (staticDiv)staticDiv.style.display = 'none';
-
-  var prog = 0;
-  var progInterval = setInterval(function() {
-    prog = Math.min(prog + Math.random() * 8, 85);
-    if (progress) progress.style.width = prog + '%';
-    var msgs = ['يقرأ Claude بيانات محفظتك','يحسب الاحصائيات','يحلل المخاطر','يراجع الاستثمارات','يكتب التوصيات'];
-    if (loadMsg) loadMsg.textContent = msgs[Math.min(Math.floor(prog/20), 4)];
-  }, 600);
-
-  try {
-    var inv      = window.__investments || [];
-    var totalAmt = inv.reduce(function(s,x){ return s+(x.amount||0); }, 0);
-    var totalRet = inv.reduce(function(s,x){ return s+(x.ret_val||0); }, 0);
-    var active   = inv.filter(function(x){ return x.status==='نشطة'; }).length;
-    var done     = inv.filter(function(x){ return x.status==='مستلمة'; }).length;
-    var sukukAmt = inv.filter(function(x){ return x.type==='صك'; }).reduce(function(s,x){return s+(x.amount||0);},0);
-    var fundsAmt = inv.filter(function(x){ return x.type==='صندوق'; }).reduce(function(s,x){return s+(x.amount||0);},0);
-    var stksAmt  = inv.filter(function(x){ return x.type==='سهم'; }).reduce(function(s,x){return s+(x.amount||0);},0);
-    var roi      = totalAmt > 0 ? (totalRet/totalAmt*100).toFixed(2) : '0';
-    var sorted   = inv.slice().sort(function(a,b){ return (b.ret_pct||0)-(a.ret_pct||0); });
-    var topGain  = sorted[0] ? sorted[0].name+'('+(((sorted[0].ret_pct||0)*100).toFixed(1))+'%)' : '';
-    var topLoss  = sorted[sorted.length-1] ? sorted[sorted.length-1].name+'('+(((sorted[sorted.length-1].ret_pct||0)*100).toFixed(1))+'%)' : '';
-    var platforms = {};
-    inv.forEach(function(x){ platforms[x.platform]=(platforms[x.platform]||0)+(x.amount||0); });
-    var platStr  = Object.keys(platforms).map(function(k){return k+':'+(platforms[k]/1000).toFixed(0)+'k';}).join(', ');
-
-    var summary = 'المحفظة: ' + totalAmt.toLocaleString('en-US') + ' ر.س | عوائد: ' + totalRet.toLocaleString('en-US') + ' ر.س | ROI: '+roi+'% | الفرص: '+inv.length+' (نشطة:'+active+' مستلمة:'+done+') | صكوك:'+Math.round(sukukAmt/1000)+'k صناديق:'+Math.round(fundsAmt/1000)+'k اسهم:'+Math.round(stksAmt/1000)+'k | منصات: '+platStr+' | افضل: '+topGain+' | اسوا: '+topLoss+' | قروض:'+((window.loansData||[]).length);
-
-    var PROXY_URL = 'https://claude-proxy.shaheenhouse1.workers.dev'; // Cloudflare Worker — Claude API key is safe here
-
-    var payload = {
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
-      system: 'انت محلل مالي خبير في السوق السعودي. اجب فقط بـ JSON صالح بدون اي نص خارجه ابدا.',
-      messages: [{ role: 'user', content: 'حلل هذه المحفظة: ' + summary + '\n\nارجع JSON بالضبط:\n{"score":85,"rating":"جيد جداً","summary":"ملخص 2-3 جمل","structure":"تحليل الهيكل 3-4 جمل","strengths":"نقطة1\\nنقطة2\\nنقطة3","warnings":"نقطة1\\nنقطة2\\nنقطة3","tips":"توصية1\\nتوصية2\\nتوصية3","kpi1_label":"ROI الاجمالي","kpi1_value":"'+roi+'%","kpi2_label":"افضل عائد","kpi2_value":"'+(sorted[0]?((sorted[0].ret_pct||0)*100).toFixed(1)+'%':'—')+'","kpi3_label":"اسوا عائد","kpi3_value":"'+(sorted[sorted.length-1]?((sorted[sorted.length-1].ret_pct||0)*100).toFixed(1)+'%':'—')+'"}'  }]
-    };
-
-    var res = await fetch(PROXY_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    clearInterval(progInterval);
-    if (progress) progress.style.width = '100%';
-    if (!res.ok) {
-      var errText = await res.text().catch(function(){return res.status;});
-      throw new Error('API ' + res.status + ': ' + errText);
-    }
-
-    var data   = await res.json();
-    var text   = (data.content||[]).map(function(b){ return b.text||''; }).join('');
-    var result = JSON.parse(text.replace(/```json|```/g,'').trim());
-
-    var score  = Math.max(0, Math.min(100, result.score||70));
-    var dash   = (score/100)*314;
-    var circle = document.getElementById('analyst-score-circle');
-    var sNum   = document.getElementById('analyst-score-num');
-    var sLbl   = document.getElementById('analyst-score-label');
-    if (circle) circle.setAttribute('stroke-dasharray', dash + ' 314');
-    if (sNum)   sNum.textContent = score;
-    var stars  = score>=90?'5 نجوم':score>=75?'4 نجوم':score>=60?'3 نجوم':score>=40?'نجمتان':'نجمة';
-    if (sLbl)   sLbl.textContent = (result.rating||'') + ' - ' + stars;
-
-    var sumEl = document.getElementById('analyst-summary-text');
-    if (sumEl) sumEl.textContent = result.summary||'';
-
-    var kpisEl = document.getElementById('analyst-kpis');
-    if (kpisEl) {
-      kpisEl.innerHTML = [
-        {l:result.kpi1_label||'ROI', v:result.kpi1_value||roi+'%', c:'#00e676'},
-        {l:result.kpi2_label||'افضل', v:result.kpi2_value||'—', c:'#c9a84c'},
-        {l:result.kpi3_label||'اسوا', v:result.kpi3_value||'—', c:'#ff4444'}
-      ].map(function(k){
-        return '<div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:16px;font-weight:700;color:'+k.c+';font-family:monospace">'+k.v+'</div><div style="font-size:11px;color:var(--muted);margin-top:2px">'+k.l+'</div></div>';
-      }).join('');
-    }
-
-    if (boxes) {
-      boxes.innerHTML = [
-        {cls:'info', head:'💼 هيكل المحفظة', col:'#00d4ff', text:result.structure||''},
-        {cls:'good', head:'📊 نقاط القوة',   col:'#00e676', text:result.strengths||''},
-        {cls:'warn', head:'⚠ نقاط التحذير', col:'#ff4444', text:result.warnings||''},
-        {cls:'tip',  head:'🎯 التوصيات',     col:'#c9a84c', text:result.tips||''}
-      ].map(function(b){
-        return '<div class="analyst-box '+b.cls+'"><div class="analyst-head" style="color:'+b.col+'">'+b.head+'</div><div class="analyst-text" style="white-space:pre-line">'+b.text+'</div></div>';
-      }).join('');
-      boxes.style.display = 'grid';
-    }
-
-    if (scoreCard) scoreCard.style.display = 'block';
-    if (loading)   loading.style.display = 'none';
-    var now = new Date().toLocaleString('ar-SA', {day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
-    if (lastUpd) lastUpd.textContent = 'آخر تحليل: ' + now;
-
-  } catch(e) {
-    clearInterval(progInterval);
-    console.error('AI analysis:', e);
-    if (loading)   loading.style.display = 'none';
-    if (staticDiv) staticDiv.style.display = 'grid';
-    var errMsg = e.message || 'خطأ غير معروف';
-    if (errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError')) {
-      errMsg = 'تعذّر الاتصال بـ Cloudflare Worker — تحقق من اتصالك بالإنترنت';
-    } else if (errMsg.includes('403')) {
-      errMsg = 'الطلب مرفوض — تحقق من إعدادات Cloudflare Worker';
-    } else if (errMsg.includes('429')) {
-      errMsg = 'تجاوزت الحد المسموح (30 طلب/ساعة) — انتظر قليلاً';
-    } else if (errMsg.includes('API key')) {
-      errMsg = 'مفتاح Claude API غير صالح — تحقق من إعدادات Worker';
-    }
-    if (lastUpd)   lastUpd.textContent = '❌ ' + errMsg;
-    if (typeof showToast === 'function') showToast('❌ فشل التحليل: ' + errMsg);
-  } finally {
-    if (btn)      btn.disabled = false;
-    if (btnIcon)  btnIcon.textContent = '🤖';
-    if (btnLabel) btnLabel.textContent = 'تحليل الآن';
-    setTimeout(function(){ if(progress) progress.style.width='0%'; }, 1000);
-  }
-}
-
-//  AUTO-SYNC HOOK: called after every local change 
-var _syncTimer = {};
-function triggerSync(collection) {
+async function triggerSync(collection) {
   if (typeof window.fbSaveInvestments !== 'function') return;
   if (_syncTimer[collection]) clearTimeout(_syncTimer[collection]);
   _syncTimer[collection] = setTimeout(function() {
@@ -4821,52 +4042,125 @@ var _stockFetchInProgress = false;
 async function fetchLiveStockPrices() {
   if (_stockFetchInProgress) return;
   _stockFetchInProgress = true;
+
   var inv = window.__investments || investments;
   var saStocks = inv.filter(function(x){ return x.type==='سهم' && x.market !== 'us' && x.ticker; });
   if (!saStocks.length) { _stockFetchInProgress = false; return; }
-  saStocks.forEach(function(x){ if (!STOCK_PRICES[x.ticker]) STOCK_PRICES[x.ticker] = { price:null, chg:null, color:'' }; });
+
+  saStocks.forEach(function(x){
+    if (!STOCK_PRICES[x.ticker]) STOCK_PRICES[x.ticker] = { price:null, chg:null, color:'' };
+  });
+
   var icon = document.getElementById('sa-refresh-icon');
   var btn  = document.getElementById('sa-refresh-btn');
   if (icon) icon.style.animation = 'spin 1s linear infinite';
   if (btn)  btn.style.opacity = '0.6';
+
   var tickers = saStocks.map(function(x){ return x.ticker; });
   var updated = 0;
-  var PROXY = 'https://claude-proxy.shaheenhouse1.workers.dev';
-  var CHUNK = 15;
-  for (var ci = 0; ci < tickers.length; ci += CHUNK) {
-    var chunk = tickers.slice(ci, ci + CHUNK);
+
+  // تقسيم الأسهم لمجموعات من 10 لتجاوز حد Yahoo Finance
+  var CHUNK = 10;
+  var chunks = [];
+  for (var i = 0; i < tickers.length; i += CHUNK) {
+    chunks.push(tickers.slice(i, i + CHUNK));
+  }
+
+  for (var ci = 0; ci < chunks.length; ci++) {
+    var chunk = chunks[ci];
     var symbols = chunk.map(function(t){ return t + '.SR'; }).join(',');
+    var chunkUpdated = false;
+
+    // محاولة 1: Yahoo Finance v8
     try {
-      var res = await fetch(PROXY, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ _stockRequest: true, symbols: symbols })
-      });
+      var url = 'https://query1.finance.yahoo.com/v8/finance/quote?symbols=' + symbols
+              + '&fields=regularMarketPrice,regularMarketChangePercent';
+      var res = await fetch(url, { headers: { 'Accept': 'application/json' } });
       if (res.ok) {
         var data = await res.json();
-        (data.quotes || []).forEach(function(q) {
+        var quotes = ((data.quoteResponse || {}).result) || [];
+        quotes.forEach(function(q) {
           var ticker = (q.symbol || '').replace('.SR','');
           if (!ticker) return;
           STOCK_PRICES[ticker] = {
-            price: q.price || q.regularMarketPrice,
-            chg:   (q.changePercent || q.regularMarketChangePercent || 0) / 100,
-            color: (q.changePercent || 0) >= 0 ? 'up' : 'dn'
+            price: q.regularMarketPrice,
+            chg:   (q.regularMarketChangePercent || 0) / 100,
+            color: (q.regularMarketChangePercent || 0) >= 0 ? 'up' : 'dn'
           };
-          updated++;
+          updated++; chunkUpdated = true;
         });
       }
-    } catch(e) { console.warn('Worker SA chunk', ci, ':', e.message); }
+    } catch(e) { console.warn('Yahoo v8 chunk', ci, 'failed:', e.message); }
+
+    // محاولة 2: Yahoo Finance v7 fallback
+    if (!chunkUpdated) {
+      try {
+        var url2 = 'https://query2.finance.yahoo.com/v7/finance/quote?symbols=' + symbols;
+        var res2 = await fetch(url2);
+        if (res2.ok) {
+          var json2 = await res2.json();
+          ((json2.quoteResponse || {}).result || []).forEach(function(q) {
+            var ticker = (q.symbol || '').replace('.SR','');
+            STOCK_PRICES[ticker] = {
+              price: q.regularMarketPrice,
+              chg:   (q.regularMarketChangePercent || 0) / 100,
+              color: (q.regularMarketChangePercent || 0) >= 0 ? 'up' : 'dn'
+            };
+            updated++; chunkUpdated = true;
+          });
+        }
+      } catch(e2) { console.warn('Yahoo v7 chunk', ci, 'failed:', e2.message); }
+    }
+
+    // تحديث الجدول بعد كل مجموعة لإظهار النتائج تدريجياً
     renderStocks();
-    if (ci + CHUNK < tickers.length) await new Promise(function(r){ setTimeout(r, 200); });
+
+    // انتظر قليلاً بين الطلبات لتجنب rate limiting
+    if (ci < chunks.length - 1) {
+      await new Promise(function(r){ setTimeout(r, 300); });
+    }
   }
+
+  // محاولة 3: Cloudflare Worker للأسهم التي فشلت
+  var failedTickers = tickers.filter(function(t){ return !STOCK_PRICES[t] || !STOCK_PRICES[t].price; });
+  if (failedTickers.length) {
+    try {
+      var PROXY = 'https://claude-proxy.shaheenhouse1.workers.dev';
+      var failSymbols = failedTickers.map(function(t){ return t + '.SR'; }).join(',');
+      var res3 = await fetch(PROXY, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ _stockRequest: true, symbols: failSymbols })
+      });
+      if (res3.ok) {
+        var data3 = await res3.json();
+        (data3.quotes || []).forEach(function(q) {
+          var ticker = (q.symbol || '').replace('.SR','');
+          if (!STOCK_PRICES[ticker] || !STOCK_PRICES[ticker].price) {
+            STOCK_PRICES[ticker] = {
+              price: q.price,
+              chg:   (q.changePercent || 0) / 100,
+              color: (q.changePercent || 0) >= 0 ? 'up' : 'dn'
+            };
+            updated++;
+          }
+        });
+      }
+    } catch(e3) { console.warn('Worker fallback failed:', e3.message); }
+  }
+
   renderStocks();
-  var now2 = new Date();
-  var timeStr = now2.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+
+  var now = new Date();
+  var timeStr = now.toLocaleTimeString('ar-SA-u-nu-latn', {hour:'2-digit', minute:'2-digit'});
   var lastUpEl = document.getElementById('sa-last-update');
   if (lastUpEl) {
-    lastUpEl.textContent = updated > 0 ? '✅ ' + timeStr + ' — ' + updated + ' سهم' : '⚠️ تعذّر جلب الأسعار';
+    lastUpEl.textContent = updated > 0
+      ? '✅ ' + timeStr + ' — ' + updated + ' من ' + tickers.length + ' سهم'
+      : '⚠️ تعذّر جلب الأسعار';
     lastUpEl.style.color = updated > 0 ? 'var(--green)' : 'var(--orange)';
   }
+
   if (btn)  btn.style.opacity = '1';
   if (icon) icon.style.animation = '';
   _stockFetchInProgress = false;
@@ -4882,7 +4176,7 @@ function startStockPriceUpdater() {
 document.addEventListener('DOMContentLoaded', function() {
   setTimeout(startStockPriceUpdater, 1500);
   setTimeout(renderCalendar, 800);
-  setTimeout(renderCashflow, 900);
+  setTimeout(function(){ if(typeof renderCashflow==='function') renderCashflow(); }, 900);
   checkMaturityAlerts();
   setInterval(checkMaturityAlerts, 60 * 60 * 1000); // re-check every hour
 });
@@ -4891,7 +4185,7 @@ document.addEventListener('DOMContentLoaded', function() {
 var _origShowPage = showPage;
 showPage = function(id, navEl, mobileTitle, noScroll) {
   _origShowPage(id, navEl, mobileTitle, noScroll);
-  if (id === 'reports')  { renderCalendar(); renderCashflow(); renderDividendsTab(); }
+  if (id === 'reports')  { if(typeof renderCalendar==='function') renderCalendar(); renderCashflow(); if(typeof renderDividendsTab==='function') renderDividendsTab(); }
   if (id === 'analyst')  { id = 'reports'; window.__currentPage = 'reports'; setTimeout(function(){ switchReportsTab('analyst'); }, 80); }
   // Only scroll to top if NOT called from a form button
   if (!noScroll) {
@@ -4914,292 +4208,8 @@ function parseDate(str) {
   return null;
 }
 
-function renderCalendar() {
-  var months = parseInt((document.getElementById('cal-months')||{value:'6'}).value || 6);
-  var now    = new Date(); now.setHours(0,0,0,0);
-  var end    = new Date(now); end.setMonth(end.getMonth() + months);
-  var inv    = window.__investments || [];
 
-  // Group by month
-  var byMonth = {};
-  inv.forEach(function(x) {
-    var d = parseDate(x.date_out);
-    if (!d || d < now || d > end) return;
-    var key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
-    if (!byMonth[key]) byMonth[key] = [];
-    byMonth[key].push({inv:x, date:d});
-  });
 
-  var monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var keys = Object.keys(byMonth).sort();
-  var timeline = document.getElementById('cal-timeline');
-  var sub      = document.getElementById('cal-sub');
-  if (!timeline) return;
-
-  var totalExpected = 0;
-  keys.forEach(function(k) {
-    byMonth[k].forEach(function(e) { totalExpected += (e.inv.total || e.inv.amount || 0); });
-  });
-
-  if (sub) sub.textContent = keys.length + ' شهر بها استحقاقات — إجمالي متوقع: ' +
-    totalExpected.toLocaleString('en-US', {maximumFractionDigits:0}) + ' ر.س';
-
-  if (!keys.length) {
-    timeline.innerHTML = '<div style="text-align:center;padding:48px;color:var(--muted)">لا توجد استحقاقات خلال هذه الفترة</div>';
-    return;
-  }
-
-  timeline.innerHTML = keys.map(function(k) {
-    var parts  = k.split('-');
-    var mLabel = monthNames[+parts[1]-1] + ' ' + parts[0];
-    var items  = byMonth[k];
-    var mTotal = items.reduce(function(s,e){return s+(e.inv.total||e.inv.amount||0);},0);
-    var mRet   = items.reduce(function(s,e){return s+(e.inv.ret_val||0);},0);
-    var daysTo = Math.ceil((items[0].date - now) / 86400000);
-
-    var urgColor = daysTo <= 14 ? 'var(--red)' : daysTo <= 30 ? 'var(--orange)' : 'var(--gold)';
-
-    var rows = items.map(function(e) {
-      var d = e.inv;
-      var dDays = Math.ceil((e.date - now) / 86400000);
-      var riskC = d.risk==='منخفض'?'var(--green)':d.risk==='متوسط'?'var(--orange)':'var(--red)';
-      return '<tr>' +
-        '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis">' + d.name + '</td>' +
-        '<td style="color:var(--muted)">' + d.platform + '</td>' +
-        '<td class="mono">' + (d.amount||0).toLocaleString('en-US',{maximumFractionDigits:0}) + '</td>' +
-        '<td class="mono up">' + (d.ret_val>=0?'+':'') + (d.ret_val||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
-        '<td class="mono" style="color:var(--gold)">' + (d.total||0).toLocaleString('en-US',{maximumFractionDigits:0}) + '</td>' +
-        '<td><span style="font-size:11px;color:'+riskC+'">'+d.risk+'</span></td>' +
-        '<td><span style="font-size:11px;padding:2px 8px;border-radius:12px;background:rgba(201,168,76,0.12);color:var(--gold)">' + dDays + ' يوم</span></td>' +
-      '</tr>';
-    }).join('');
-
-    return '<div class="section-card">' +
-      '<div class="section-head" style="background:rgba(201,168,76,0.04)">' +
-        '<div style="display:flex;align-items:center;gap:12px">' +
-          '<span style="font-size:16px;font-weight:700;color:' + urgColor + '">' + mLabel + '</span>' +
-          '<span style="font-size:11px;color:var(--muted)">' + items.length + ' فرصة</span>' +
-        '</div>' +
-        '<div style="display:flex;gap:16px;font-family:monospace;font-size:12px">' +
-          '<span style="color:var(--green)">+' + mRet.toLocaleString('en-US',{maximumFractionDigits:0}) + '</span>' +
-          '<span style="color:var(--gold)">' + mTotal.toLocaleString('en-US',{maximumFractionDigits:0}) + ' ر.س</span>' +
-        '</div>' +
-      '</div>' +
-      '<div class="table-wrap">' +
-        '<table class="data-table">' +
-          '<thead><tr><th>الفرصة</th><th>المنصة</th><th>المبلغ</th><th>العائد</th><th>المجموع</th><th>المخاطرة</th><th>الأيام</th></tr></thead>' +
-          '<tbody>' + rows + '</tbody>' +
-        '</table>' +
-      '</div>' +
-    '</div>';
-  }).join('');
-}
-
-// 
-// 2. MATURITY ALERTS (toast + badge)
-// 
-function checkMaturityAlerts() {
-  var inv  = window.__investments || [];
-  var now  = new Date(); now.setHours(0,0,0,0);
-  var warn = inv.filter(function(x) {
-    var d = parseDate(x.date_out);
-    if (!d) return false;
-    var days = Math.ceil((d - now) / 86400000);
-    return days >= 0 && days <= 30 && x.status === 'نشطة';
-  });
-
-  if (!warn.length) return;
-
-  var alertDiv = document.getElementById('cal-alerts');
-  if (alertDiv) {
-    alertDiv.style.display = 'block';
-    alertDiv.innerHTML = warn.map(function(x) {
-      var days = Math.ceil((parseDate(x.date_out) - now) / 86400000);
-      var col  = days <= 7 ? '#f87171' : days <= 14 ? 'var(--orange)' : 'var(--gold)';
-      return '<div style="display:flex;align-items:center;gap:12px;background:rgba(255,152,0,0.08);border:1px solid rgba(255,152,0,0.25);border-radius:10px;padding:10px 16px;margin-bottom:6px">' +
-        '<span style="font-size:18px">' + (days<=7?'🚨':'⚠️') + '</span>' +
-        '<div style="flex:1">' +
-          '<div style="font-size:13px;font-weight:600;color:var(--white)">' + x.name + '</div>' +
-          '<div style="font-size:11px;color:var(--muted)">' + x.platform + ' • المجموع المتوقع: ' + (x.total||0).toLocaleString('en-US',{maximumFractionDigits:0}) + ' ر.س</div>' +
-        '</div>' +
-        '<span style="font-size:13px;font-weight:700;color:'+col+'">' + days + ' يوم</span>' +
-      '</div>';
-    }).join('');
-  }
-
-  // Toast once per session
-  if (!window._alertsShown && typeof showToast === 'function') {
-    window._alertsShown = true;
-    showToast('⚠️ ' + warn.length + ' فرصة تستحق خلال 30 يوماً');
-  }
-}
-
-// 
-// 3. CASH FLOW
-// 
-function renderCashflow() {
-  var months    = parseInt((document.getElementById('cf-months')||{value:'12'}).value || 12);
-  var inv       = window.__investments || [];
-  var divs      = window.dividendsData || dividendsData || [];
-  var now       = new Date(); now.setHours(0,0,0,0);
-  var monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var fmt = function(n){ return n.toLocaleString('en-US',{maximumFractionDigits:0}); };
-
-  // ── بناء شبكة الأشهر ────────────────────────────────────────────
-  var monthData = [];
-  for (var m = 0; m < months; m++) {
-    var dt = new Date(now.getFullYear(), now.getMonth() + m, 1);
-    var key = dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0');
-    monthData.push({
-      key:key, year:dt.getFullYear(), month:dt.getMonth(),
-      label: monthNames[dt.getMonth()] + ' ' + dt.getFullYear(),
-      shortLabel: monthNames[dt.getMonth()].slice(0,3),
-      distributions:0, capital:0, dividends:0, items:[]
-    });
-  }
-  var keyMap = {};
-  monthData.forEach(function(m){ keyMap[m.key] = m; });
-
-  // ── 1. استثمارات نشطة (توزيعات دورية + رأس مال عند الاستحقاق) ──
-  inv.forEach(function(x) {
-    if (x.status === 'مستلمة') return;
-    var matDate   = parseDate(x.date_out);
-    var distFreq  = x.dist || '';
-    var retVal    = Math.max(0, x.ret_val || 0);
-    var amt       = x.amount || 0;
-
-    // رأس المال عند الاستحقاق
-    if (matDate) {
-      var matKey = matDate.getFullYear() + '-' + String(matDate.getMonth()+1).padStart(2,'0');
-      if (keyMap[matKey]) {
-        keyMap[matKey].capital += (x.total || (amt + retVal));
-        keyMap[matKey].items.push(x.name || '');
-      }
-    }
-
-    // توزيعات دورية من الاستثمار
-    var monthsPerDist = distFreq==='شهري'?1:distFreq==='ربع سنوي'?3:
-                        distFreq==='نصف سنوي'?6:distFreq==='سنوي'?12:0;
-    if (monthsPerDist > 0 && retVal > 0) {
-      var periods = matDate
-        ? Math.max(1, Math.ceil((matDate - now) / (86400000 * 30 * monthsPerDist)))
-        : Math.floor(12 / monthsPerDist);
-      var distAmt = retVal / periods;
-      for (var i = 0; i < months; i += monthsPerDist) {
-        if (monthData[i]) monthData[i].distributions += distAmt;
-      }
-    }
-  });
-
-  // ── 1b. دفعات العوائد المسجلة يدوياً في الفرص ────────────────────────
-  inv.forEach(function(x) {
-    if (!Array.isArray(x.payments)) return;
-    x.payments.forEach(function(p) {
-      if (!p.date) return;
-      var dt = new Date(p.date);
-      if (dt.getFullYear() !== filterYear) return;
-      var m = dt.getMonth();
-      monthly[m].income += p.amount || 0;
-      monthly[m].incSrc.push({ name: '💰 ' + (x.name || 'فرصة'), amount: p.amount || 0 });
-    });
-  });
-
-  // ── 2. توزيعات فعلية من سجل التوزيعات ──────────────────────────
-  divs.forEach(function(d) {
-    if (!d.pay_date && !d.ex_date) return;
-    var dateStr = d.pay_date || d.ex_date;
-    var key = dateStr.slice(0,7); // YYYY-MM
-    if (keyMap[key] && d.total_amount) {
-      keyMap[key].dividends += (d.total_amount || 0);
-      if (!keyMap[key].items.includes(d.stock_name||d.ticker||''))
-        keyMap[key].items.push(d.stock_name || d.ticker || '');
-    }
-  });
-
-  // ── KPIs ────────────────────────────────────────────────────────
-  var totalDist = monthData.reduce(function(s,m){ return s + m.distributions; }, 0);
-  var totalDiv  = monthData.reduce(function(s,m){ return s + m.dividends; }, 0);
-  var totalCap  = monthData.reduce(function(s,m){ return s + m.capital; }, 0);
-  var grandTotal = totalDist + totalDiv + totalCap;
-  var maxFlow = Math.max.apply(null, monthData.map(function(m){
-    return m.distributions + m.dividends + m.capital;
-  })) || 1;
-
-  var kpiEl = document.getElementById('cf-kpis');
-  if (kpiEl) {
-    kpiEl.innerHTML =
-      '<div class="kpi-card" style="--accent:#34d399"><div class="kpi-icon">💧</div><div class="kpi-label">توزيعات الصكوك</div><div class="kpi-value">'+fmt(totalDist)+'</div><div class="kpi-sub">ر.س</div></div>' +
-      '<div class="kpi-card" style="--accent:#00e676"><div class="kpi-icon">💰</div><div class="kpi-label">توزيعات الأسهم</div><div class="kpi-value">'+fmt(totalDiv)+'</div><div class="kpi-sub">ر.س</div></div>' +
-      '<div class="kpi-card" style="--accent:#60a5fa"><div class="kpi-icon">🔄</div><div class="kpi-label">رأس المال العائد</div><div class="kpi-value">'+fmt(totalCap)+'</div><div class="kpi-sub">ر.س</div></div>' +
-      '<div class="kpi-card" style="--accent:#c9a84c"><div class="kpi-icon">📊</div><div class="kpi-label">الإجمالي الكلي</div><div class="kpi-value">'+fmt(grandTotal)+'</div><div class="kpi-sub">ر.س</div></div>';
-  }
-
-  // ── الرسم البياني ────────────────────────────────────────────────
-  var chartEl  = document.getElementById('cf-chart');
-  var labelsEl = document.getElementById('cf-chart-labels');
-  var cfLabel  = document.getElementById('cf-chart-label');
-  if (cfLabel) cfLabel.textContent = months + ' شهراً';
-
-  if (chartEl) {
-    chartEl.innerHTML = monthData.map(function(m) {
-      var total = m.distributions + m.dividends + m.capital;
-      var dPct  = total > 0 ? (m.distributions / maxFlow * 100).toFixed(1) : 0;
-      var divPct= total > 0 ? (m.dividends     / maxFlow * 100).toFixed(1) : 0;
-      var cPct  = total > 0 ? (m.capital       / maxFlow * 100).toFixed(1) : 0;
-      var label = total > 0 ? fmt(total) : '';
-      var color = total > 0 ? 'var(--white)' : 'var(--muted)';
-      var hasBot = m.capital > 0 || m.dividends > 0 ? '0' : '3px 3px 0 0';
-      var html = '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:28px">';
-      html += '<div style="font-size:9px;color:'+color+';text-align:center">'+label+'</div>';
-      html += '<div style="width:100%;display:flex;flex-direction:column;justify-content:flex-end;height:120px">';
-      html += '<div style="width:100%;height:'+cPct+'%;background:rgba(96,165,250,0.75);border-radius:3px 3px 0 0;min-height:'+(m.capital>0?3:0)+'px"></div>';
-      html += '<div style="width:100%;height:'+divPct+'%;background:rgba(0,230,118,0.75);min-height:'+(m.dividends>0?2:0)+'px"></div>';
-      html += '<div style="width:100%;height:'+dPct+'%;background:rgba(52,211,153,0.8);border-radius:'+hasBot+'"></div>';
-      html += '</div></div>';
-      return html;
-    }).join('');
-  }
-
-  if (labelsEl) {
-    labelsEl.innerHTML = monthData.map(function(m) {
-      return '<div style="flex:1;text-align:center;font-size:9px;color:var(--muted);min-width:28px;overflow:hidden">'+m.shortLabel+'</div>';
-    }).join('');
-  }
-
-  // ── جدول التفاصيل الشهرية ────────────────────────────────────────
-  var tbody = document.getElementById('cf-tbody');
-  if (tbody) {
-    var rows = monthData.filter(function(m){
-      return m.distributions + m.dividends + m.capital > 0;
-    });
-    if (!rows.length) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">لا توجد تدفقات متوقعة في هذه الفترة</td></tr>';
-    } else {
-      tbody.innerHTML = rows.map(function(m) {
-        var total = m.distributions + m.dividends + m.capital;
-        return '<tr id="cf-row-'+m.key+'">' +
-          '<td style="color:var(--muted)">'+m.label+'</td>' +
-          '<td class="mono '+(m.distributions>0?'up':'')+'">'+(m.distributions>0?'+'+fmt(m.distributions):'—')+'</td>' +
-          '<td class="mono '+(m.dividends>0?'up':'')+'">'+(m.dividends>0?'+'+fmt(m.dividends):'—')+'</td>' +
-          '<td class="mono '+(m.capital>0?'up':'')+'">'+(m.capital>0?fmt(m.capital):'—')+'</td>' +
-          '<td class="mono" style="color:var(--gold);font-weight:700">'+fmt(total)+'</td>' +
-          '<td style="font-size:11px;color:var(--muted)">'+([...new Set(m.items)].join('، ')).slice(0,60)+'</td>' +
-        '</tr>';
-      }).join('');
-    }
-  }
-}
-
-function highlightCfMonth(key) {
-  document.querySelectorAll('[id^="cf-row-"]').forEach(function(r){
-    r.style.background = '';
-  });
-  var row = document.getElementById('cf-row-' + key);
-  if (row) {
-    row.style.background = 'rgba(201,168,76,0.08)';
-    row.scrollIntoView({ behavior:'smooth', block:'nearest' });
-  }
-}
 
 
 function importPortfolioFile(event) {
@@ -5331,7 +4341,7 @@ function exportPDF() {
   var totalRet = inv.reduce(function(s,x){return s+(x.ret_val||0);},0);
   var roi      = totalAmt>0?(totalRet/totalAmt*100).toFixed(2):0;
   var active   = inv.filter(function(x){return x.status==='نشطة';}).length;
-  var now      = new Date().fmtDate(new Date());
+  var now      = new Date().toLocaleDateString('ar-SA');
 
   var rows = incInv ? inv.map(function(x,i){
     return '<tr style="border-bottom:1px solid #e5e7eb">' +
@@ -6029,31 +5039,7 @@ function switchOppsTab(tab) {
 }
 
 
-
-// ── Opportunities KPI Cards ──────────────────────────────────────────────────
-function renderOppsKPIs() {
-  var inv = window.__investments || investments;
-  var tab = _currentOppsTab || 'sukuk';
-  var types = tab === 'sukuk' ? ['صك','مرابحة','سند','وديعة'] : ['صندوق'];
-  var data = inv.filter(function(x){ return types.includes(x.type); });
-  var active = data.filter(function(x){ return x.status === 'نشطة'; });
-  var done   = data.filter(function(x){ return x.status === 'مستلمة'; });
-  var activeAmt = active.reduce(function(s,x){ return s+(x.amount||0); },0);
-  var returns   = active.reduce(function(s,x){ return s+(x.ret_val||0); },0);
-  var totalExp  = active.reduce(function(s,x){ return s+(x.total||x.amount||0); },0);
-  var doneAmt   = done.reduce(function(s,x){ return s+(x.total||x.amount||0); },0);
-  var fmt = function(n){ return n >= 1000000 ? (n/1000000).toFixed(2)+'م' : n.toLocaleString('en-US',{maximumFractionDigits:0}); };
-  var set = function(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; };
-  set('opps-kpi-active-amt',   fmt(activeAmt)+' ر.س');
-  set('opps-kpi-active-count', active.length+' فرصة نشطة');
-  set('opps-kpi-returns',      fmt(returns)+' ر.س');
-  set('opps-kpi-total',        fmt(totalExp)+' ر.س');
-  set('opps-kpi-done-amt',     fmt(doneAmt)+' ر.س');
-  set('opps-kpi-done-count',   done.length+' فرصة مستلمة');
-}
-
 function renderSukuk() {
-  renderOppsKPIs();
   const _inv = window.__investments || investments;
   const sukukData = _inv.filter(x => x.type === 'صك' || x.type === 'مرابحة');
   const fundsData = _inv.filter(x => x.type === 'صندوق');
@@ -6082,7 +5068,6 @@ function renderSukuk() {
 }
 
 function renderFunds() {
-  renderOppsKPIs();
   const _inv = window.__investments || investments;
   const fundsData = _inv.filter(x => x.type === 'صندوق');
   const totalAmt  = fundsData.reduce((s,x)=>s+(x.amount||0),0);
@@ -6162,7 +5147,7 @@ function closeMobileMore() {
   if (btn) btn.classList.remove('active');
 }
 
-const PAGE_TITLES = {
+var PAGE_TITLES = {
   'add-stock':  '📈 إضافة سهم',
   'add-loan':   '🏦 إضافة قرض',
   'add-debt':   '💸 إضافة دين',
@@ -6698,15 +5683,11 @@ function dbSaveAll() {
     window.__investments.forEach(function(r){ investments.push(r); });
   }
   triggerSync('investments');
-  // Also save loans if on loans tab
-  if (_currentDbTab === 'loans' && typeof saveLoansToStorage === 'function') {
-    saveLoansToStorage();
-  }
   renderAll(); renderStocks(); renderSukuk(); renderFunds();
   const count = dbModified.size;
   dbModified.clear();
   dbRender();
-  showToast('✅ تم حفظ التعديلات وتحديث قاعدة البيانات');
+  showToast(`✅ تم حفظ ${count} تعديل وتحديث جميع الصفحات`);
 }
 
 // ══════════════════════════════════════════════
@@ -6729,163 +5710,6 @@ function initOppsYearFilter() {
   });
   sel.innerHTML = opts;
 }
-
-
-// ── OPPORTUNITY RETURN PAYMENTS ───────────────────────────────────────────────
-var _rpOppIdx = null;
-
-function getOppTotalReceived(opp) {
-  if (!opp || !Array.isArray(opp.payments)) return 0;
-  return opp.payments.reduce(function(s, p) { return s + (p.amount || 0); }, 0);
-}
-
-function openReturnPaymentModal(idx) {
-  _rpOppIdx = idx;
-  var inv = window.__investments || investments;
-  var opp = inv[idx];
-  if (!opp) return;
-
-  // Set name
-  var nameEl = document.getElementById('rp-opp-name');
-  if (nameEl) nameEl.textContent = opp.name + ' — ' + opp.platform;
-
-  // Reset form
-  var amtEl = document.getElementById('rp-amount'); if (amtEl) amtEl.value = '';
-  var dateEl = document.getElementById('rp-date');
-  if (dateEl) dateEl.value = new Date().toISOString().split('T')[0];
-  var noteEl = document.getElementById('rp-note'); if (noteEl) noteEl.value = '';
-  var prevEl = document.getElementById('rp-preview'); if (prevEl) prevEl.style.display = 'none';
-
-  // Render history
-  renderRpHistory(opp);
-
-  // Show modal
-  var modal = document.getElementById('return-payment-modal');
-  if (modal) { modal.style.display = 'flex'; }
-}
-
-function closeReturnPaymentModal() {
-  var modal = document.getElementById('return-payment-modal');
-  if (modal) modal.style.display = 'none';
-  _rpOppIdx = null;
-}
-
-function calcRpPreview() {
-  if (_rpOppIdx === null) return;
-  var inv = window.__investments || investments;
-  var opp = inv[_rpOppIdx];
-  if (!opp) return;
-  var amt = parseFloat((document.getElementById('rp-amount') || {}).value) || 0;
-  if (!amt) { var p = document.getElementById('rp-preview'); if (p) p.style.display = 'none'; return; }
-  var prev = document.getElementById('rp-preview');
-  var prevTotal = document.getElementById('rp-preview-total');
-  var currentTotal = getOppTotalReceived(opp);
-  var newTotal = currentTotal + amt;
-  if (prevTotal) prevTotal.textContent = newTotal.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' ر.س';
-  if (prev) prev.style.display = 'block';
-}
-
-function saveReturnPayment() {
-  if (_rpOppIdx === null) return;
-  var inv = window.__investments || investments;
-  var opp = inv[_rpOppIdx];
-  if (!opp) return;
-
-  var amt  = parseFloat((document.getElementById('rp-amount') || {}).value) || 0;
-  var date = (document.getElementById('rp-date') || {}).value || '';
-  var type = (document.getElementById('rp-type') || {}).value || 'عائد';
-  var note = (document.getElementById('rp-note') || {}).value || '';
-
-  if (!amt)  { showToast('❌ أدخل المبلغ'); return; }
-  if (!date) { showToast('❌ أدخل تاريخ التحويل'); return; }
-
-  // Add payment
-  if (!Array.isArray(opp.payments)) opp.payments = [];
-  opp.payments.push({ amount: amt, date: date, type: type, note: note, created_at: new Date().toISOString() });
-
-  // Update dist_received field
-  opp.dist_received = getOppTotalReceived(opp);
-
-  // Sync
-  if (typeof triggerSync === 'function') triggerSync('investments');
-
-  // Refresh UI
-  renderRpHistory(opp);
-  calcRpPreview();
-  renderOppsFiltered();
-  renderOppsKPIs();
-  if (typeof renderCashflow === 'function') renderCashflow();
-
-  // Reset amount input
-  var amtEl = document.getElementById('rp-amount'); if (amtEl) amtEl.value = '';
-  var prevEl = document.getElementById('rp-preview'); if (prevEl) prevEl.style.display = 'none';
-  showToast('✅ تم تسجيل الدفعة: ' + amt.toLocaleString('en-US') + ' ر.س — ' + fmtDate(date));
-}
-
-function renderRpHistory(opp) {
-  var histEl  = document.getElementById('rp-history');
-  var totElWrap = document.getElementById('rp-totals');
-  if (!histEl) return;
-  var payments = opp.payments || [];
-  if (!payments.length) {
-    histEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">لا توجد دفعات مسجلة</div>';
-    if (totElWrap) totElWrap.style.display = 'none';
-    return;
-  }
-  var fmt = function(n) { return n.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}); };
-  histEl.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
-    '<thead><tr style="border-bottom:1px solid var(--border)">' +
-    '<th style="padding:5px 8px;color:var(--muted);text-align:right;font-weight:600">التاريخ</th>' +
-    '<th style="padding:5px 8px;color:var(--muted);font-weight:600">النوع</th>' +
-    '<th style="padding:5px 8px;color:var(--muted);font-weight:600">المبلغ</th>' +
-    '<th style="padding:5px 8px;color:var(--muted);font-weight:600">ملاحظة</th>' +
-    '<th style="padding:5px 8px;width:28px"></th>' +
-    '</tr></thead><tbody>' +
-    payments.slice().reverse().map(function(p, ri) {
-      var realI = payments.length - 1 - ri;
-      return '<tr style="border-bottom:1px solid rgba(255,255,255,0.04)">' +
-        '<td style="padding:5px 8px;color:var(--muted)">' + fmtDate(p.date) + '</td>' +
-        '<td style="padding:5px 8px;color:var(--gold);font-size:11px">' + (p.type || '—') + '</td>' +
-        '<td style="padding:5px 8px;font-family:monospace;font-weight:700;color:var(--green)">' + fmt(p.amount) + '</td>' +
-        '<td style="padding:5px 8px;color:var(--muted);font-size:11px">' + (p.note || '—') + '</td>' +
-        '<td style="padding:5px 4px;text-align:center">' +
-          '<button onclick="deleteRpPayment(' + realI + ')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;padding:2px 4px" title="حذف">×</button>' +
-        '</td>' +
-        '</tr>';
-    }).join('') + '</tbody></table>';
-
-  // Totals row
-  var total = getOppTotalReceived(opp);
-  if (totElWrap) {
-    totElWrap.style.display = 'flex';
-    totElWrap.innerHTML =
-      '<span style="color:var(--muted)">إجمالي المستلم:</span>' +
-      '<span style="font-family:monospace;font-weight:700;color:var(--green)">' + fmt(total) + ' ر.س</span>' +
-      '<span style="color:var(--muted);margin-right:12px">عدد الدفعات:</span>' +
-      '<span style="font-family:monospace;font-weight:700">' + payments.length + '</span>';
-  }
-}
-
-function deleteRpPayment(payIdx) {
-  if (_rpOppIdx === null) return;
-  var inv = window.__investments || investments;
-  var opp = inv[_rpOppIdx];
-  if (!opp || !opp.payments) return;
-  if (!confirm('حذف هذه الدفعة؟')) return;
-  opp.payments.splice(payIdx, 1);
-  opp.dist_received = getOppTotalReceived(opp);
-  if (typeof triggerSync === 'function') triggerSync('investments');
-  renderRpHistory(opp);
-  renderOppsFiltered();
-  renderOppsKPIs();
-  showToast('تم حذف الدفعة');
-}
-
-// Close modal on backdrop click
-document.addEventListener('click', function(e) {
-  var modal = document.getElementById('return-payment-modal');
-  if (modal && modal.style.display === 'flex' && e.target === modal) closeReturnPaymentModal();
-});
 
 function renderOppsFiltered() {
   var year   = (document.getElementById('opps-filter-year')   || {}).value   || '';
@@ -6927,40 +5751,30 @@ function renderOppsFiltered() {
     tbody.innerHTML = filtered.map(function(d) {
       var realIdx = inv.indexOf(d);
       return '<tr>' +
-        '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer" onclick="openInlineEdit(' + realIdx + ')" title="اضغط للتعديل">' + d.name + '</td>' +
+        '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + d.name + '</td>' +
         '<td style="color:#8899bb">' + d.platform + '</td>' +
         '<td class="mono">' + fmtNum(d.amount) + '</td>' +
         '<td>' + fmtPct(d.ret_pct) + '</td>' +
         '<td class="mono ' + (d.ret_val >= 0 ? 'up' : 'dn') + '">' + fmtNum(d.ret_val, 2) + '</td>' +
-        '<td class="mono" style="color:var(--green)">' + (getOppTotalReceived(d) > 0 ? fmtNum(getOppTotalReceived(d)) + ' ر.س' : '—') + '</td>' +
-        '<td style="color:#8899bb;font-size:11px">' + (d.date_out ? fmtDate(d.date_out) : '—') + '</td>' +
+        '<td style="color:#8899bb;font-size:11px">' + (d.date_out || '—') + '</td>' +
         '<td>' + riskPill(d.risk) + '</td>' +
         '<td>' + statusPill(d.status) + '</td>' +
-        '<td style="white-space:nowrap">' +
-          '<button class="loan-action-btn" onclick="openReturnPaymentModal(' + realIdx + ')" title="تسجيل دفعة عائد" style="background:rgba(0,230,118,0.1);border-color:rgba(0,230,118,0.3);color:var(--green);font-weight:700">💰</button> ' +
-          '<button class="loan-action-btn" onclick="openInlineEdit(' + realIdx + ')" title="تعديل سريع" style="background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.3);color:var(--gold)">✏️</button> ' +
-          '<button class="loan-action-btn" onclick="openEditOpp(' + realIdx + ')" title="تعديل كامل" style="color:var(--cyan);border-color:rgba(0,212,255,0.2)">⚙️</button>' +
-        '</td>' +
+        '<td><button class="loan-action-btn" onclick="openEditOpp(' + realIdx + ')">✏️</button></td>' +
         '</tr>';
     }).join('');
   } else {
     tbody.innerHTML = filtered.map(function(d) {
       var realIdx = inv.indexOf(d);
       return '<tr>' +
-        '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer" onclick="openInlineEdit(' + realIdx + ')" title="اضغط للتعديل">' + d.name + '</td>' +
+        '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + d.name + '</td>' +
         '<td style="color:#8899bb">' + d.platform + '</td>' +
         '<td class="mono">' + fmtNum(d.amount) + '</td>' +
         '<td>' + fmtPct(d.ret_pct) + '</td>' +
         '<td class="mono ' + (d.ret_val >= 0 ? 'up' : 'dn') + '">' + fmtNum(d.ret_val, 2) + '</td>' +
-        '<td class="mono" style="color:var(--green)">' + (getOppTotalReceived(d) > 0 ? fmtNum(getOppTotalReceived(d)) + ' ر.س' : '—') + '</td>' +
         '<td class="mono" style="color:var(--gold)">' + fmtNum(d.total, 2) + '</td>' +
         '<td>' + riskPill(d.risk) + '</td>' +
         '<td>' + statusPill(d.status) + '</td>' +
-        '<td style="white-space:nowrap">' +
-          '<button class="loan-action-btn" onclick="openReturnPaymentModal(' + realIdx + ')" title="تسجيل دفعة عائد" style="background:rgba(0,230,118,0.1);border-color:rgba(0,230,118,0.3);color:var(--green);font-weight:700">💰</button> ' +
-          '<button class="loan-action-btn" onclick="openInlineEdit(' + realIdx + ')" title="تعديل سريع" style="background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.3);color:var(--gold)">✏️</button> ' +
-          '<button class="loan-action-btn" onclick="openEditOpp(' + realIdx + ')" title="تعديل كامل" style="color:var(--cyan);border-color:rgba(0,212,255,0.2)">⚙️</button>' +
-        '</td>' +
+        '<td><button class="loan-action-btn" onclick="openEditOpp(' + realIdx + ')">✏️</button></td>' +
         '</tr>';
     }).join('');
   }
@@ -7550,7 +6364,7 @@ function calcAddLoan() {
   if (startVal && months > 0) {
     var endDate = new Date(startVal);
     endDate.setMonth(endDate.getMonth() + months);
-    set('al-d-end-date', endDate.fmtMonthYear);
+    set('al-d-end-date', endDate.toLocaleDateString('ar-SA-u-nu-latn',{year:'numeric',month:'long'}));
     // update end date field if visible
     var endFld = document.getElementById('al-end');
     if (endFld) endFld.value = endDate.toISOString().split('T')[0];
@@ -7566,13 +6380,6 @@ function calcAddLoan() {
 // ── جدول السداد (Amortization) ───────────────────────────────────────────────
 var _amortVisible = true;
 
-function toggleNewAmortTable() {
-  _amortVisible = !_amortVisible;
-  var wrap = document.getElementById('namort-table-wrap');
-  var icon = document.getElementById('namort-toggle-icon');
-  if (wrap) wrap.style.display = _amortVisible ? '' : 'none';
-  if (icon) icon.textContent  = _amortVisible ? '▼ إخفاء' : '▶ عرض';
-}
 
 function buildAmortTable(principal, annualRate, months, startDate) {
   var section = document.getElementById('new-amort-section');
@@ -7596,7 +6403,7 @@ function buildAmortTable(principal, annualRate, months, startDate) {
     var clr = intPct>50?'var(--red)':intPct>25?'var(--orange)':'var(--green)';
     rows.push('<tr>'
       +'<td style="color:var(--muted);font-size:11px">'+i+'</td>'
-      +'<td style="font-size:11px;color:var(--muted)">'+d.toLocaleDateString('en-GB',{year:'numeric',month:'short'})+'</td>'
+      +'<td style="font-size:11px;color:var(--muted)">'+d.toLocaleDateString('ar-SA-u-nu-latn',{year:'numeric',month:'short'})+'</td>'
       +'<td class="mono" style="color:var(--gold);font-weight:700">'+fmt2(pmt)+'</td>'
       +'<td class="mono" style="color:var(--cyan)">'+fmt2(princPart)+'</td>'
       +'<td class="mono" style="color:var(--red)">'+fmt2(interest)+'</td>'
@@ -7784,7 +6591,7 @@ function buildAmortSchedule(principal, annualRatePct, years, startDate) {
     // Advance date by 1 month
     date = new Date(date);
     date.setMonth(date.getMonth() + 1);
-    const dateStr = date.toLocaleDateString('en-GB', {year:'numeric', month:'short'});
+    const dateStr = date.toLocaleDateString('ar-SA-u-nu-latn', {year:'numeric', month:'2-digit'});
 
     rows.push({
       num:           i,
@@ -7843,7 +6650,7 @@ function calcLoan() {
   if (startDate) {
     const end = new Date(startDate);
     end.setMonth(end.getMonth() + n);
-    setVal('ln-end', end.fmtDate);
+    setVal('ln-end', end.toLocaleDateString('ar-SA-u-nu-latn', {year:'numeric', month:'2-digit', day:'2-digit'}));
   }
 
   // Progress stats (based on installments paid)
@@ -8261,43 +7068,68 @@ var US_STOCK_PRICES = {};
 
 async function fetchUsStockPrices() {
   var inv = window.__investments || investments;
-  var usStocks = inv.filter(function(x){ return x.type==='سهم' && x.market==='us' && x.ticker; });
+  var _sfUs = (_stockFilter && _stockFilter.us) ? _stockFilter.us : 'all';
+  var usStocks = inv.filter(function(x){
+    if (x.type !== 'سهم' || x.market !== 'us' || !x.ticker) return false;
+    if (_sfUs !== 'all' && x.status !== _sfUs) return false;
+    return true;
+  });
   if (!usStocks.length) return;
-  var icon = document.getElementById('us-refresh-icon');
-  var btn  = document.getElementById('us-refresh-btn');
+
+  var icon = document.getElementById('stocks-refresh-icon');
   if (icon) icon.style.animation = 'spin 1s linear infinite';
-  if (btn)  btn.style.opacity = '0.6';
-  var symbols = usStocks.map(function(x){ return x.ticker; }).join(',');
-  var PROXY = 'https://claude-proxy.shaheenhouse1.workers.dev';
+
+  var symbols = usStocks.map(function(s){ return s.ticker; }).join(',');
+  var PROXY   = 'https://claude-proxy.shaheenhouse1.workers.dev';
   var updated = 0;
+
+  // ── الطلب عبر Cloudflare Worker (يتجاوز CORS) ──────────────────
   try {
     var res = await fetch(PROXY, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ _stockRequest: true, symbols: symbols, market: 'us' })
     });
     if (res.ok) {
       var data = await res.json();
       (data.quotes || []).forEach(function(q) {
         US_STOCK_PRICES[q.symbol] = {
-          price: q.price || q.regularMarketPrice,
-          chg:   (q.changePercent || q.regularMarketChangePercent || 0) / 100,
+          price: q.price,
+          chg:   (q.changePercent || 0) / 100,
           color: (q.changePercent || 0) >= 0 ? 'up' : 'dn',
           name:  q.name || q.symbol
         };
         updated++;
       });
     }
-  } catch(e) { console.warn('Worker US:', e.message); }
+  } catch(e) { console.warn('Worker US fetch failed:', e.message); }
+
+  // ── Fallback: Yahoo Finance مباشرة (إذا فشل الـ Worker) ─────────
+  if (updated === 0) {
+    try {
+      var url = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + symbols
+              + '&fields=regularMarketPrice,regularMarketChangePercent,longName,shortName';
+      var res2 = await fetch(url);
+      if (res2.ok) {
+        var json2 = await res2.json();
+        (json2.quoteResponse?.result || []).forEach(function(q) {
+          US_STOCK_PRICES[q.symbol] = {
+            price: q.regularMarketPrice,
+            chg:   (q.regularMarketChangePercent || 0) / 100,
+            color: (q.regularMarketChangePercent || 0) >= 0 ? 'up' : 'dn',
+            name:  q.longName || q.shortName || q.symbol
+          };
+          updated++;
+        });
+      }
+    } catch(e2) { console.warn('Yahoo US direct failed:', e2.message); }
+  }
+
   renderUsStocksTable();
-  var now3 = new Date();
-  var ts3 = now3.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
-  var el3 = document.getElementById('us-last-update');
-  if (el3) { el3.textContent = updated > 0 ? '✅ '+ts3+' — '+updated+' سهم' : '⚠️ تعذّر جلب الأسعار'; el3.style.color = updated>0?'var(--green)":'var(--orange)'; }
   if (icon) icon.style.animation = '';
-  if (btn)  btn.style.opacity = '1';
 }
 
-
+// ── رندر جدول الأسهم الأمريكية ────────────────────────────────────────────────
 function renderUsStocksTable() {
   var inv = window.__investments || investments;
   var usStocks = inv.filter(function(x){ return x.type === 'سهم' && x.market === 'us'; });
@@ -8353,55 +7185,6 @@ function renderUsStocksTable() {
 
 }
 
-function switchReportsTab(tab) {
-  _currentReportsTab = tab;
-  var tabs = ['calendar','cashflow','analyst'];
-  tabs.forEach(function(t) {
-    var panel = document.getElementById('rtab-panel-' + t);
-    var btn   = document.getElementById('rtab-' + t);
-    if (panel) panel.style.display = t === tab ? 'block' : 'none';
-    if (btn) {
-      btn.style.borderBottomColor = t === tab ? 'var(--gold)' : 'transparent';
-      btn.style.color = t === tab ? 'var(--gold)' : 'var(--muted)';
-    }
-  });
-  if (tab === 'calendar')  renderCalendar();
-  if (tab === 'cashflow')  renderCashflow();
-  if (tab === 'analyst')   { /* AI analysis runs on button click */ }
-
-}
-
-// ══════════════════════════════════════════════
-// DIVIDENDS SYSTEM
-// ══════════════════════════════════════════════
-
-// قاعدة بيانات التوزيعات التاريخية للأسهم السعودية الشائعة
-var KNOWN_DIVIDENDS = {
-  '2222': { name:'أرامكو', history:[
-    { year:2024, per_share:0.35, ex_date:'2024-12-05', pay_date:'2025-01-05', type:'cash', q:'Q4' },
-    { year:2024, per_share:0.35, ex_date:'2024-09-04', pay_date:'2024-10-05', type:'cash', q:'Q3' },
-    { year:2024, per_share:0.35, ex_date:'2024-06-05', pay_date:'2024-07-07', type:'cash', q:'Q2' },
-    { year:2024, per_share:0.35, ex_date:'2024-03-06', pay_date:'2024-04-07', type:'cash', q:'Q1' },
-    { year:2023, per_share:0.35, ex_date:'2023-12-06', pay_date:'2024-01-07', type:'cash', q:'Q4' }
-  ]},
-  '2280': { name:'المراعي', history:[
-    { year:2024, per_share:0.375, ex_date:'2024-04-10', pay_date:'2024-05-05', type:'cash', q:'نصف سنوي' },
-    { year:2023, per_share:0.375, ex_date:'2023-10-11', pay_date:'2023-11-05', type:'cash', q:'نصف سنوي' }
-  ]},
-  '1120': { name:'مصرف الراجحي', history:[
-    { year:2024, per_share:1.00, ex_date:'2024-10-09', pay_date:'2024-11-04', type:'cash', q:'نصف سنوي' },
-    { year:2024, per_share:1.00, ex_date:'2024-04-10', pay_date:'2024-05-06', type:'cash', q:'نصف سنوي' }
-  ]},
-  '1180': { name:'البنك الأهلي السعودي', history:[
-    { year:2024, per_share:0.80, ex_date:'2024-09-11', pay_date:'2024-10-07', type:'cash', q:'نصف سنوي' }
-  ]},
-  '5110': { name:'السعودية للكهرباء', history:[
-    { year:2024, per_share:0.50, ex_date:'2024-06-12', pay_date:'2024-07-08', type:'cash', q:'سنوي' }
-  ]},
-  '1211': { name:'معادن', history:[
-    { year:2024, per_share:0.30, ex_date:'2024-03-27', pay_date:'2024-04-22', type:'cash', q:'سنوي' }
-  ]}
-};
 
 function saveDividendsToStorage() {
   localStorage.setItem('dividendsData', JSON.stringify(dividendsData));
@@ -8881,6 +7664,209 @@ function resetMetalForm() {
   var box = document.getElementById('m-calc-box'); if(box) box.style.display='none';
 }
 
+// ══════════════════════════════════════════════════════
+// التدفق المالي الشهري
+// ══════════════════════════════════════════════════════
+function renderCashflow() {
+  var inv   = window.__investments || investments || [];
+  var loans = window.loansData     || loansData   || [];
+  var liq   = window.liquidityData || liquidityData || [];
+  var divs  = window.dividendsData || dividendsData || [];
+
+  // ── بناء قائمة السنوات المتاحة ───────────────────────
+  var years = new Set();
+  var now   = new Date();
+  var curY  = now.getFullYear();
+  // أضف السنة الحالية والسنتين السابقتين دائماً
+  [curY-2, curY-1, curY, curY+1].forEach(function(y){ years.add(y); });
+  inv.forEach(function(x) {
+    if (x.date_in)  years.add(parseInt((x.date_in||'').slice(0,4)));
+    if (x.date_out) years.add(parseInt((x.date_out||'').slice(0,4)));
+  });
+  loans.forEach(function(l) {
+    if (l.start_date) years.add(parseInt((l.start_date||'').slice(0,4)));
+  });
+
+  var sortedYears = Array.from(years).filter(Boolean).sort();
+  var sel = document.getElementById('cf-year-filter');
+  if (sel) {
+    var prevVal = sel.value || String(curY);
+    sel.innerHTML = sortedYears.map(function(y){
+      return '<option value="'+y+'"'+(String(y)===prevVal?' selected':'')+'>'+y+'</option>';
+    }).join('');
+    if (!sel.value) sel.value = String(curY);
+  }
+  var filterYear = sel ? parseInt(sel.value) || curY : curY;
+
+  var MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+
+  // ── مصفوفة 12 شهر ────────────────────────────────────
+  var monthly = Array.from({length:12}, function(_, i) {
+    return { m: i, income: 0, expense: 0, incSrc: [], expSrc: [] };
+  });
+
+  // ── 1. عوائد الاستثمارات النشطة (موزّعة على أشهر المدة) ──
+  inv.forEach(function(x) {
+    if (!x.amount || !x.ret_val) return;
+    var dIn  = x.date_in  ? new Date(x.date_in)  : null;
+    var dOut = x.date_out ? new Date(x.date_out) : null;
+    if (!dIn) return;
+
+    // حدد أشهر تقاطع الاستثمار مع السنة المطلوبة
+    var yStart = new Date(filterYear, 0, 1);
+    var yEnd   = new Date(filterYear, 11, 31);
+    var start  = dIn  > yStart ? dIn  : yStart;
+    var end    = dOut && dOut < yEnd ? dOut : yEnd;
+    if (start > end) return;
+
+    // عدد الأشهر الكلية للاستثمار
+    var totalMonths = 1;
+    if (dOut) {
+      totalMonths = Math.max(1,
+        (dOut.getFullYear() - dIn.getFullYear()) * 12 +
+        (dOut.getMonth() - dIn.getMonth()) + 1
+      );
+    }
+    var monthlyReturn = x.ret_val / totalMonths;
+
+    for (var m = start.getMonth(); m <= end.getMonth() || (end.getFullYear() > filterYear && m < 12); m++) {
+      if (m > 11) break;
+      // تحقق أن الشهر ضمن نطاق البداية والنهاية في السنة المختارة
+      var mStart = new Date(filterYear, m, 1);
+      var mEnd   = new Date(filterYear, m+1, 0);
+      if (mStart > end || mEnd < start) continue;
+      monthly[m].income += monthlyReturn;
+      monthly[m].incSrc.push({ name: x.name || 'فرصة', amount: monthlyReturn });
+    }
+  });
+
+  // ── 2. توزيعات الأسهم المستلمة ─────────────────────────
+  divs.forEach(function(d) {
+    var payDate = d.pay_date || d.ex_date;
+    if (!payDate) return;
+    var dt = new Date(payDate);
+    if (dt.getFullYear() !== filterYear) return;
+    var m = dt.getMonth();
+    monthly[m].income += d.total_amount || 0;
+    monthly[m].incSrc.push({ name: '🏷️ ' + (d.ticker||'توزيعة'), amount: d.total_amount||0 });
+  });
+
+  // ── 3. أقساط القروض (خارجة) ─────────────────────────────
+  loans.forEach(function(l) {
+    if (!l.installment || l.installment <= 0) return;
+    var startD = l.start_date ? new Date(l.start_date) : null;
+    if (!startD) return;
+    var totalMonths = (l.years || 1) * 12;
+    var endD = new Date(startD);
+    endD.setMonth(endD.getMonth() + totalMonths);
+
+    for (var m = 0; m < 12; m++) {
+      var mDate = new Date(filterYear, m, 1);
+      if (mDate >= startD && mDate < endD) {
+        // تحقق لم يُسدَّد بالكامل
+        var paid = l.paid_amount || 0;
+        var total = l.total_amount || 0;
+        if (paid >= total && total > 0) continue;
+        monthly[m].expense += l.installment;
+        monthly[m].expSrc.push({ name: '🏦 ' + (l.name||'قرض'), amount: l.installment });
+      }
+    }
+  });
+
+  // ── 4. السيولة الخارجة ───────────────────────────────────
+  liq.forEach(function(r) {
+    if (!r.date) return;
+    var dt = new Date(r.date);
+    if (dt.getFullYear() !== filterYear) return;
+    var m = dt.getMonth();
+    monthly[m].expense += r.amount || 0;
+    monthly[m].expSrc.push({ name: '💸 ' + (r.note||'سيولة خارجة'), amount: r.amount||0 });
+  });
+
+  // ── KPIs ───────────────────────────────────────────────────
+  var totalIn  = monthly.reduce(function(s,m){ return s+m.income;  }, 0);
+  var totalOut = monthly.reduce(function(s,m){ return s+m.expense; }, 0);
+  var net      = totalIn - totalOut;
+  var fmt = function(v){ return v.toLocaleString('en-US',{maximumFractionDigits:0}); };
+
+  var kpiGrid = document.getElementById('cf-kpi-grid');
+  if (kpiGrid) {
+    kpiGrid.innerHTML =
+      '<div class="kpi-card" style="--accent:var(--green)"><div class="kpi-icon">📥</div><div class="kpi-label">إجمالي الداخل</div><div class="kpi-value">'+fmt(totalIn)+'</div><div class="kpi-sub">ر.س</div></div>' +
+      '<div class="kpi-card" style="--accent:var(--red)"><div class="kpi-icon">📤</div><div class="kpi-label">إجمالي الخارج</div><div class="kpi-value">'+fmt(totalOut)+'</div><div class="kpi-sub">ر.س</div></div>' +
+      '<div class="kpi-card" style="--accent:'+(net>=0?'var(--cyan)':'var(--red)')+'"><div class="kpi-icon">'+(net>=0?'✅':'⚠️')+'</div><div class="kpi-label">صافي التدفق</div><div class="kpi-value">'+fmt(Math.abs(net))+'</div><div class="kpi-sub">'+(net>=0?'فائض ▲':'عجز ▼')+'</div></div>' +
+      '<div class="kpi-card" style="--accent:var(--gold)"><div class="kpi-icon">📊</div><div class="kpi-label">متوسط الداخل الشهري</div><div class="kpi-value">'+fmt(totalIn/12)+'</div><div class="kpi-sub">ر.س / شهر</div></div>';
+  }
+
+  // ── رسم المخطط الشمعي ────────────────────────────────────
+  var maxVal = Math.max(1, Math.max.apply(null, monthly.map(function(m){ return Math.max(m.income, m.expense); })));
+  var chartH = 160; // ارتفاع أعمدة البار بالـ px
+
+  var chartWrap = document.getElementById('cf-chart-wrap');
+  if (chartWrap) {
+    chartWrap.innerHTML =
+      '<div style="display:flex;align-items:flex-end;gap:6px;padding:16px 8px 0;min-width:600px;direction:ltr">' +
+      monthly.map(function(mo, i) {
+        var inH  = mo.income  > 0 ? Math.max(4, Math.round(mo.income  / maxVal * chartH)) : 0;
+        var outH = mo.expense > 0 ? Math.max(4, Math.round(mo.expense / maxVal * chartH)) : 0;
+        var netM = mo.income - mo.expense;
+        var netColor = netM >= 0 ? '#4caf82' : '#f87171';
+        var netH = Math.max(2, Math.round(Math.abs(netM) / maxVal * chartH * 0.5));
+
+        return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px" title="'+MONTHS_AR[i]+'\nداخل: '+fmt(mo.income)+'\nخارج: '+fmt(mo.expense)+'\nصافي: '+fmt(netM)+'">' +
+          // قيمة الصافي
+          '<div style="font-size:9px;color:'+netColor+';font-family:monospace;white-space:nowrap">'+(netM>=0?'+':'')+fmt(netM)+'</div>' +
+          // الأعمدة
+          '<div style="display:flex;gap:2px;align-items:flex-end;height:'+chartH+'px">' +
+            '<div style="width:14px;height:'+inH+'px;background:#4caf82;border-radius:3px 3px 0 0;opacity:0.85" title="داخل: '+fmt(mo.income)+'"></div>' +
+            '<div style="width:14px;height:'+outH+'px;background:#f87171;border-radius:3px 3px 0 0;opacity:0.85" title="خارج: '+fmt(mo.expense)+'"></div>' +
+          '</div>' +
+          // خط الصافي
+          '<div style="width:100%;height:'+netH+'px;background:'+netColor+';border-radius:2px;opacity:0.5"></div>' +
+          // اسم الشهر
+          '<div style="font-size:9px;color:var(--muted);margin-top:4px;text-align:center">'+MONTHS_AR[i].slice(0,3)+'</div>' +
+        '</div>';
+      }).join('') +
+      '</div>';
+  }
+
+  // ── قوائم المصادر ────────────────────────────────────────
+  function buildSourceList(containerId, rows, color) {
+    var el = document.getElementById(containerId);
+    if (!el) return;
+    // تجميع حسب الاسم
+    var grouped = {};
+    rows.forEach(function(m) {
+      m.forEach(function(s) {
+        grouped[s.name] = (grouped[s.name]||0) + s.amount;
+      });
+    });
+    var entries = Object.keys(grouped).map(function(k){ return {name:k, amount:grouped[k]}; });
+    entries.sort(function(a,b){ return b.amount - a.amount; });
+
+    if (!entries.length) {
+      el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">لا توجد بيانات</div>';
+      return;
+    }
+    var maxA = entries[0].amount;
+    el.innerHTML = entries.map(function(e) {
+      var pct = maxA > 0 ? e.amount/maxA*100 : 0;
+      return '<div style="margin-bottom:10px">'+
+        '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">'+
+          '<span style="color:var(--white)">'+ e.name +'</span>'+
+          '<span style="color:'+color+';font-family:monospace;font-weight:700">'+fmt(e.amount)+' ر.س</span>'+
+        '</div>'+
+        '<div style="height:5px;background:rgba(255,255,255,0.07);border-radius:3px">'+
+          '<div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:3px;transition:width .6s ease"></div>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+
+  buildSourceList('cf-income-list',  monthly.map(function(m){ return m.incSrc; }), '#4caf82');
+  buildSourceList('cf-expense-list', monthly.map(function(m){ return m.expSrc; }), '#f87171');
+}
+
 function renderMetals() {
   var data = window.metalsData || metalsData || [];
   var goldW = data.filter(function(x){return x.type==='ذهب';}).reduce(function(s,x){return s+(x.weight||0);},0);
@@ -9015,7 +8001,7 @@ function calcJamaa() {
   if (turn && startDate && turn <= members) {
     var d = new Date(startDate);
     d.setMonth(d.getMonth() + turn - 1);
-    set('j-c-turn-date', d.fmtMonthYear);
+    set('j-c-turn-date', d.toLocaleDateString('ar-SA-u-nu-latn',{year:'numeric',month:'long'}));
   } else {
     set('j-c-turn-date','—');
   }
@@ -9316,7 +8302,7 @@ renderJamaa = function() {
           if (j.start_date && p.turn) {
             var d = new Date(j.start_date);
             d.setMonth(d.getMonth() + (p.turn||1) - 1);
-            turnDate = d.toLocaleDateString('en-GB',{month:'short',year:'2-digit'});
+            turnDate = d.toLocaleDateString('ar-SA-u-nu-latn',{month:'short',year:'2-digit'});
           }
           var fmt = function(n){return n.toLocaleString('en-US',{maximumFractionDigits:0});};
           return '<div style="padding:4px 6px;border-radius:4px;background:rgba(255,255,255,0.03);text-align:center;font-weight:700;color:' + (isMyTurn?'var(--gold)':'var(--white)') + '">' + (p.turn||'—') + '</div>'
@@ -9371,10 +8357,8 @@ function getCapitalSources() {
   return (s.capitalSources && s.capitalSources.length) ? s.capitalSources : _defaultCapitalSources.slice();
 }
 function getPlatforms() {
-  try {
-    var s = _getSettings();
-    return (s.platforms && s.platforms.length) ? s.platforms : _defaultPlatforms.slice();
-  } catch(e) { return _defaultPlatforms.slice(); }
+  var s = _getSettings();
+  return (s.platforms && s.platforms.length) ? s.platforms : _defaultPlatforms.slice();
 }
 function getDisplayName() {
   var s = _getSettings();
@@ -9910,22 +8894,642 @@ function filterStocks(market, status) {
 // ── جلب سعر سهم واحد (SA) ───────────────────────────────────────────────────
 async function fetchSingleStockPrice(ticker) {
   if (!ticker) return;
-  var PROXY = 'https://claude-proxy.shaheenhouse1.workers.dev';
+  var symbol = ticker + '.SR';
+  var price = null, chg = 0;
+  // Try v8 first
   try {
-    var res = await fetch(PROXY, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({_stockRequest:true, symbols:ticker+'.SR'}) });
-    if (res.ok) { var d=await res.json(); var q=(d.quotes||[])[0]; if(q&&q.price){ STOCK_PRICES[ticker]={price:q.price,chg:(q.changePercent||0)/100,color:(q.changePercent||0)>=0?'up':'dn'}; renderStocks(); showToast('✅ '+ticker+': '+q.price.toFixed(2)+' ر.س'); return; } }
+    var url = 'https://query1.finance.yahoo.com/v8/finance/quote?symbols=' + symbol + '&fields=regularMarketPrice,regularMarketChangePercent';
+    var res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    if (res.ok) {
+      var data = await res.json();
+      var q = ((data.quoteResponse || {}).result || [])[0];
+      if (q) { price = q.regularMarketPrice; chg = q.regularMarketChangePercent || 0; }
+    }
   } catch(e) {}
-  showToast('❌ تعذّر جلب سعر ' + ticker);
+  // Fallback: chart API
+  if (!price) {
+    try {
+      var url2 = 'https://query1.finance.yahoo.com/v8/finance/chart/' + symbol + '?interval=1d&range=1d';
+      var res2 = await fetch(url2);
+      if (res2.ok) {
+        var json2 = await res2.json();
+        var meta = ((json2.chart || {}).result || [{}])[0].meta || {};
+        price = meta.regularMarketPrice;
+        chg   = meta.regularMarketChangePercent || 0;
+      }
+    } catch(e2) {}
+  }
+  if (price) {
+    if (!window.STOCK_PRICES) window.STOCK_PRICES = {};
+    STOCK_PRICES[ticker] = { price: price, chg: chg/100, color: chg >= 0 ? 'up' : 'dn' };
+    renderStocks();
+    showToast('✅ ' + ticker + ': ' + price.toFixed(2) + ' ر.س');
+  } else {
+    showToast('❌ تعذّر جلب سعر ' + ticker);
+  }
 }
 
+// ── جلب سعر سهم واحد (US) ───────────────────────────────────────────────────
 async function fetchSingleUsStockPrice(ticker) {
   if (!ticker) return;
-  var PROXY = 'https://claude-proxy.shaheenhouse1.workers.dev';
   try {
-    var res = await fetch(PROXY, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({_stockRequest:true, symbols:ticker, market:'us'}) });
-    if (res.ok) { var d=await res.json(); var q=(d.quotes||[])[0]; if(q&&q.price){ US_STOCK_PRICES[ticker]={price:q.price,chg:(q.changePercent||0)/100,color:(q.changePercent||0)>=0?'up':'dn',name:q.name||ticker}; renderUsStocksTable(); showToast('✅ '+ticker+': $'+q.price.toFixed(2)); return; } }
-  } catch(e) {}
-  showToast('❌ فشل جلب ' + ticker);
+    var url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + ticker + '?interval=1d&range=1d';
+    var res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var json = await res.json();
+    var result = json?.chart?.result?.[0];
+    var price = result?.meta?.regularMarketPrice;
+    var chg   = result?.meta?.regularMarketChangePercent;
+    if (price) {
+      if (!window.US_STOCK_PRICES) window.US_STOCK_PRICES = {};
+      US_STOCK_PRICES[ticker] = { price: price, chg: (chg||0)/100, color: (chg||0) >= 0 ? 'up' : 'dn', name: ticker };
+      renderUsStocksTable();
+      showToast('✅ ' + ticker + ': $' + price.toFixed(2));
+    }
+  } catch(e) { showToast('❌ فشل جلب ' + ticker + ': ' + e.message); }
 }
 
->
+
+// ── تصدير الأسهم Excel ───────────────────────────────────────────────────────
+function exportStocksExcel(market) {
+  var inv = window.__investments || investments;
+  var data = inv.filter(function(x) {
+    return x.type === 'سهم' && (market === 'us' ? x.market === 'us' : x.market !== 'us');
+  });
+  if (!data.length) { showToast('لا توجد أسهم للتصدير'); return; }
+  var rows = [['الاسم','الرمز','عدد الأسهم','التكلفة (ر.س)','متوسط سعر الشراء','المنصة','المخاطرة','الحالة','تاريخ الشراء','السوق','اكتتاب']];
+  data.forEach(function(d) {
+    var avg = (d.shares && d.amount) ? (d.amount/d.shares).toFixed(2) : '';
+    rows.push([d.name, d.ticker||'', d.shares||'', d.amount||0, avg, d.platform||'', d.risk||'', d.status||'', d.date_in||'', market==='us'?'أمريكي':'سعودي', d.is_ipo?'نعم':'']);
+  });
+  var wb = XLSX.utils.book_new();
+  var ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = rows[0].map(function(){ return {wch:18}; });
+  XLSX.utils.book_append_sheet(wb, ws, market==='us'?'أسهم أمريكية':'أسهم سعودية');
+  XLSX.writeFile(wb, (market==='us'?'أسهم_أمريكية':'أسهم_سعودية')+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  showToast('✅ تم تصدير '+data.length+' سهم');
+}
+
+// ── استيراد الأسهم Excel ─────────────────────────────────────────────────────
+function importStocksExcel(event, market) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var wb = XLSX.read(e.target.result, {type:'array'});
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var rows = XLSX.utils.sheet_to_json(ws, {header:1});
+      if (rows.length < 2) { showToast('❌ الملف فارغ'); return; }
+      var headers = rows[0];
+      var inv = window.__investments || investments;
+      var imported = 0;
+      for (var i = 1; i < rows.length; i++) {
+        var row = {};
+        headers.forEach(function(h,idx){ row[h] = rows[i][idx]; });
+        var name = row['الاسم']||row['name']||'';
+        if (!name) continue;
+        var ticker = String(row['الرمز']||row['ticker']||'');
+        var exists = inv.some(function(x){ return x.name===name && x.ticker===ticker; });
+        if (exists) continue;
+        inv.push({
+          name: name, type: 'سهم', ticker: ticker,
+          shares: parseFloat(row['عدد الأسهم']||row['shares']||0)||null,
+          amount: parseFloat(row['التكلفة (ر.س)']||row['amount']||0)||0,
+          platform: row['المنصة']||row['platform']||'',
+          risk: row['المخاطرة']||row['risk']||'متوسط',
+          status: row['الحالة']||row['status']||'نشطة',
+          date_in: row['تاريخ الشراء']||row['date_in']||'',
+          market: market==='us'?'us':'',
+          is_ipo: (row['اكتتاب']||'').toString()==='نعم',
+          ret_pct:0, ret_val:0, total:0, dist:'لا يوجد',
+        });
+        imported++;
+      }
+      if (imported > 0) {
+        triggerSync('investments');
+        renderStocks(); renderAll();
+        showToast('✅ تم استيراد '+imported+' سهم');
+      } else { showToast('⚠️ لم يُضف شيء — قد تكون البيانات مكررة'); }
+    } catch(err) { showToast('❌ خطأ: '+err.message); }
+    event.target.value='';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+var isLightMode = localStorage.getItem('theme') === 'light';
+
+function applyTheme(light) {
+  isLightMode = light;
+  document.body.classList.toggle('light-mode', light);
+  const toggle = document.getElementById('theme-toggle');
+  const knob   = document.getElementById('theme-knob');
+  const label  = document.getElementById('theme-label');
+  if (toggle) toggle.classList.toggle('light', light);
+  if (knob)   knob.textContent  = light ? '☀️' : '🌙';
+  if (label)  label.textContent = light ? '☀️ نهاري' : '🌙 ليلي';
+  localStorage.setItem('theme', light ? 'light' : 'dark');
+}
+
+function toggleTheme() { applyTheme(!isLightMode); }
+
+// Apply saved theme on load
+applyTheme(isLightMode);
+
+//  DEMO AUTH (when Firebase not configured) 
+function demoSignIn() {
+  const name = 'فهد';
+  const email = 'fahad@example.com';
+  // Desktop
+  const signinBtn = document.getElementById('auth-signin-btn');
+  const userCard  = document.getElementById('auth-user-card');
+  if (signinBtn) signinBtn.style.display = 'none';
+  if (userCard)  userCard.classList.add('show');
+  const nameEl   = document.getElementById('auth-user-name');
+  const emailEl  = document.getElementById('auth-user-email');
+  const initials = document.getElementById('auth-avatar-initials');
+  if (nameEl)   nameEl.textContent   = name;
+  if (emailEl)  emailEl.textContent  = email;
+  if (initials) initials.textContent = 'ف';
+  // Mobile
+  const mobSignin = document.getElementById('mob-signin-btn');
+  const mobUser   = document.getElementById('mob-user-card');
+  const mobAvatar = document.getElementById('mob-avatar');
+  const mobName   = document.getElementById('mob-user-name');
+  const mobEmail  = document.getElementById('mob-menu-email');
+  if (mobSignin) mobSignin.style.display = 'none';
+  if (mobUser)   mobUser.style.display   = 'flex';
+  if (mobAvatar) mobAvatar.textContent   = 'ف';
+  if (mobName)   mobName.textContent     = name;
+  if (mobEmail)  mobEmail.textContent    = email;
+  showToast('✅ وضع تجريبي — سجّل Firebase لتفعيل Google');
+}
+
+function demoSignOut() {
+  // Desktop
+  const signinBtn = document.getElementById('auth-signin-btn');
+  const userCard  = document.getElementById('auth-user-card');
+  if (signinBtn) signinBtn.style.display = 'flex';
+  if (userCard)  userCard.classList.remove('show');
+  // Mobile
+  const mobSignin = document.getElementById('mob-signin-btn');
+  const mobUser   = document.getElementById('mob-user-card');
+  if (mobSignin) mobSignin.style.display = 'flex';
+  if (mobUser)   mobUser.style.display   = 'none';
+  closeMobUserMenu();
+  showToast('👋 تم تسجيل الخروج');
+}
+
+// Fallback if Firebase module failed
+if (!window.googleSignIn) window.googleSignIn = demoSignIn;
+if (!window.googleSignOut) window.googleSignOut = demoSignOut;
+
+function toggleDesktopUserMenu() {
+  var menu    = document.getElementById('desktop-user-menu');
+  var overlay = document.getElementById('desktop-menu-overlay');
+  if (!menu) return;
+  var open = menu.style.display === 'block';
+  menu.style.display = open ? 'none' : 'block';
+}
+// Close desktop menu on outside click
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('desktop-user-menu');
+  if (!menu || menu.style.display !== 'block') return;
+  if (!menu.contains(e.target) && !document.getElementById('auth-avatar-initials').contains(e.target)) {
+    menu.style.display = 'none';
+  }
+});
+
+function toggleMobUserMenu() {
+  const menu    = document.getElementById('mob-user-menu');
+  const overlay = document.getElementById('mob-user-overlay');
+  const isOpen  = menu.style.display === 'block';
+  if (isOpen) { closeMobUserMenu(); }
+  else {
+    menu.style.display    = 'block';
+    overlay.style.display = 'block';
+  }
+}
+
+function closeMobUserMenu() {
+  document.getElementById('mob-user-menu').style.display    = 'none';
+  document.getElementById('mob-user-overlay').style.display = 'none';
+}
+
+// Also update demoSignIn/demoSignOut to update mobile UI
+
+
+</script>
+
+<div class="db-modal" id="edit-opp-modal">
+        <div class="db-modal-box" style="min-width:min(90vw,540px);max-height:85vh;overflow-y:auto;text-align:right">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <div class="db-modal-title" style="margin:0">✏️ تعديل الفرصة</div>
+            <button onclick="closeEditModal()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;line-height:1">×</button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div class="field-group" style="grid-column:span 2">
+              <label class="field-label">اسم الفرصة</label>
+              <input class="f-input" id="edit-name" type="text" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">النوع</label>
+              <select class="f-select" id="edit-type">
+                <option>صك</option><option>صندوق</option><option>سهم</option>
+                <option>سند</option><option>مرابحة</option><option>وديعة</option><option>أخرى</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">المنصة</label>
+              <select class="f-select" id="edit-platform">
+                <option>ترميز</option><option>منافع</option><option>دراية</option><option>ابيان</option>
+                <option>عوائد</option><option>منصة الأهلي</option><option>رياض المالية</option><option>أخرى</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">المبلغ المستثمر (ر.س)</label>
+              <input class="f-input" id="edit-amount" type="number" step="0.01" oninput="calcEditOpp()" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">نسبة العائد %</label>
+              <input class="f-input" id="edit-ret-pct" type="number" step="0.01" oninput="calcEditOpp()" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">قيمة العائد (ر.س)</label>
+              <input class="f-input" id="edit-ret-val" type="number" step="0.01" oninput="calcEditOpp()" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">المجموع المتوقع (ر.س)</label>
+              <input class="f-input" id="edit-total" type="number" step="0.01" style="color:var(--gold)" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">المخاطرة</label>
+              <select class="f-select" id="edit-risk">
+                <option>منخفض</option><option>متوسط</option><option>عالي</option><option>عالي جداً</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">الحالة</label>
+              <select class="f-select" id="edit-status">
+                <option>نشطة</option><option>مستلمة</option><option>مؤجلة</option><option>ملغاة</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">تاريخ الخروج / الاستحقاق</label>
+              <input class="f-input" id="edit-date-out" type="text" placeholder="مثال: 28/09/2026" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">المدة</label>
+              <input class="f-input" id="edit-duration" type="text" placeholder="مثال: 12 شهر" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">رمز السهم (للأسهم)</label>
+              <input class="f-input" id="edit-ticker" type="text" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">عدد الأسهم</label>
+              <input class="f-input" id="edit-shares" type="number" />
+            </div>
+          </div>
+          <!-- live calc -->
+          <div style="background:rgba(76,175,130,0.06);border:1px solid rgba(76,175,130,0.2);border-radius:8px;padding:10px 14px;margin:14px 0;display:flex;gap:20px">
+            <div><div style="font-size:10px;color:var(--muted)">قيمة العائد</div><div id="eoc-ret" style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--gold)">—</div></div>
+            <div><div style="font-size:10px;color:var(--muted)">المجموع</div><div id="eoc-total" style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--gold)">—</div></div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
+            <button class="btn-submit" onclick="saveEditOpp()" style="padding:10px 28px;font-size:13px">💾 حفظ</button>
+            <button class="btn-reset" onclick="closeEditModal()">إلغاء</button>
+          </div>
+        </div>
+      </div>
+
+<div class="db-modal" id="delete-opp-modal">
+        <div class="db-modal-box" style="border-color:rgba(255,77,77,0.3)">
+          <div class="db-modal-title">🗑 حذف الفرصة</div>
+          <div class="db-modal-msg" id="delete-opp-msg"></div>
+          <div style="display:flex;gap:12px;justify-content:center;margin-top:20px">
+            <button class="db-btn db-btn-danger" id="delete-opp-confirm">نعم، احذف</button>
+            <button class="db-btn db-btn-save" onclick="document.getElementById('delete-opp-modal').classList.remove('open')">إلغاء</button>
+          </div>
+        </div>
+      </div>
+
+
+<div class="db-undo-bar" id="db-undo-bar">
+  <span id="db-undo-label">تراجع عن الحذف</span>
+  <button class="db-btn db-btn-export" onclick="dbUndo()" style="padding:5px 14px;font-size:11px">↩ تراجع</button>
+  <button onclick="dbCloseUndo()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px">×</button>
+</div>
+<!-- Firebase Compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" onerror="window._firebaseFailed=true"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" onerror="window._firebaseFailed=true"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js" onerror="window._firebaseFailed=true"></script>
+<script>
+// Firebase init — wrapped in try/catch so app works even if CDN fails
+try {
+if (typeof firebase === 'undefined') throw new Error('Firebase not loaded');
+firebase.initializeApp({
+  apiKey:            "AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME",
+  authDomain:        "investments-page.firebaseapp.com",
+  projectId:         "investments-page",
+  storageBucket:     "investments-page.firebasestorage.app",
+  messagingSenderId: "964948881361",
+  appId:             "1:964948881361:web:2801b8127489d953717af0"
+});
+
+var _auth     = firebase.auth();
+var _db       = firebase.firestore();
+var _provider = new firebase.auth.GoogleAuthProvider();
+_provider.setCustomParameters({ prompt: "select_account" });
+
+var _unsubSnap = null;
+var _syncing   = false;
+var _uid       = null;
+
+//  Helpers 
+function _ref(uid, col) {
+  return _db.collection("users").doc(uid)
+            .collection("portfolio").doc(col);
+}
+
+function _write(uid, col, data) {
+  if (!uid) return;
+  _badge("loading");
+  _ref(uid, col).set(
+    { data: data, uid: uid, ts: new Date().toISOString() },
+    { merge: true }
+  )
+  .then(function() { _badge("synced"); })
+  .catch(function(e) {
+    console.error("Firestore write error [" + col + "]:", e.code, e.message);
+    if (e.code === "permission-denied") {
+      _badge("rules");
+    } else {
+      _badge("error");
+    }
+  });
+}
+
+function _read(uid, col) {
+  return _ref(uid, col).get().then(function(snap) {
+    if (!snap.exists) return null;
+    var d = snap.data();
+    if (d.uid && d.uid !== uid) return null;
+    return d.data || null;
+  }).catch(function(e) { console.warn("read:", e.message); return null; });
+}
+
+function _badge(state) {
+  var labels = {
+    loading: "syncing...",
+    synced:  "synced",
+    error:   "error - check console",
+    rules:   "permission denied - set Firestore rules",
+    offline: "offline"
+  };
+  var colors = {
+    loading: "#38d9a9",
+    synced:  "var(--green)",
+    error:   "var(--red)",
+    rules:   "var(--orange)",
+    offline: "var(--orange)"
+  };
+  var b = document.getElementById("sync-badge");
+  var m = document.getElementById("mob-sync-status");
+  var t = labels[state] || state;
+  var k = colors[state] || "var(--orange)";
+  if (b) { b.textContent = t; b.style.color = k; b.style.display = "flex"; }
+  if (m) { m.textContent = t; m.style.color = k; }
+}
+
+function _gate(show) {
+  var g = document.getElementById("auth-gate");
+  if (g) g.style.display = show ? "flex" : "none";
+  // Adjust top offset for auth banner
+  var sidebar   = document.querySelector(".sidebar");
+  var main      = document.querySelector(".main");
+  var mobTopbar = document.querySelector(".mobile-topbar");
+  var banner    = document.getElementById("auth-gate");
+  if (show && banner) {
+    // Use a fixed height of 44px to avoid layout flicker on mobile
+    var h = 44;
+    if (sidebar)   sidebar.style.top   = h + "px";
+    if (mobTopbar) mobTopbar.style.top = h + "px";
+    if (main)      main.style.paddingTop = (h + 8) + "px";
+  } else {
+    if (sidebar)   sidebar.style.top   = "0";
+    if (mobTopbar) mobTopbar.style.top = "0";
+    if (main)      main.style.paddingTop = "";
+  }
+}
+
+function _rerender() {
+  ["renderAll","renderSukuk","renderFunds","renderStocks",
+   "renderLoans","renderUsStocksTable","renderMetals","renderJamaa"].forEach(function(fn) {
+    if (typeof window[fn] === "function") window[fn]();
+  });
+}
+
+function _updateUI(user) {
+  function el(id)    { return document.getElementById(id); }
+  function show(id,d){ var e=el(id); if(e) e.style.display=d; }
+  function text(id,v){ var e=el(id); if(e) e.textContent=v; }
+  function html(id,v){ var e=el(id); if(e) e.innerHTML=v; }
+
+  if (user) {
+    var name  = user.displayName || "User";
+    var first = name.split(" ")[0];
+    var p     = user.photoURL;
+    var img   = function(s) {
+      return p
+        ? "<img src='"+p+"' style='width:"+s+"px;height:"+s+"px;border-radius:50%;object-fit:cover' referrerpolicy='no-referrer'/>"
+        : name[0];
+    };
+    show("auth-signin-btn","none");
+    var uc=el("auth-user-card"); if(uc) uc.classList.add("show");
+    text("auth-user-name",  name);
+    text("auth-user-email", user.email||"");
+    html("auth-avatar-initials", img(32));
+    show("mob-signin-btn","none");
+    show("mob-user-card","flex");
+    text("mob-user-name",  first);
+    text("mob-menu-email", user.email||"");
+    html("mob-avatar", img(30));
+    _gate(false);
+    if (typeof showToast === "function") showToast("Welcome " + first);
+  } else {
+    show("auth-signin-btn","flex");
+    var uc2=el("auth-user-card"); if(uc2) uc2.classList.remove("show");
+    var bd=el("sync-badge"); if(bd) bd.style.display="none";
+    show("mob-signin-btn","flex");
+    show("mob-user-card","none");
+  }
+}
+
+function _loadData(uid) {
+  _badge("loading");
+  _gate(false);
+
+  var user = window.__firebaseUser;
+  var isNewUser = false;
+  if (user && user.metadata) {
+    var created   = new Date(user.metadata.creationTime).getTime();
+    var lastLogin = new Date(user.metadata.lastSignInTime).getTime();
+    isNewUser = (lastLogin - created) < 120000;
+  }
+
+  // ✅ جميع الطلبات بالتوازي بدل التسلسل
+  Promise.all([
+    _read(uid, "investments"),
+    _read(uid, "loans"),
+    _read(uid, "dividends"),
+    _ref(uid, "settings").get().catch(function(){ return null; })
+  ]).then(function(results) {
+    var inv  = results[0];
+    var loans = results[1];
+    var divs  = results[2];
+    var settingsSnap = results[3];
+
+    // Investments
+    if (inv && inv.length > 0) {
+      window.__investments.length = 0;
+      inv.forEach(function(r){ window.__investments.push(r); });
+    } else {
+      window.__investments.length = 0;
+      investments.length = 0;
+      if (isNewUser) _write(uid, "investments", []);
+    }
+
+    // Loans
+    if (loans && loans.length) {
+      if (!Array.isArray(window.loansData)) window.loansData = [];
+      window.loansData.length = 0;
+      loans.forEach(function(r){ window.loansData.push(r); });
+      loansData = window.loansData;
+    } else if (isNewUser) {
+      window.loansData = []; loansData = [];
+      _write(uid, "loans", []);
+    }
+
+    // Dividends
+    if (divs && divs.length) {
+      dividendsData.length = 0;
+      divs.forEach(function(r){ dividendsData.push(r); });
+      window.dividendsData = dividendsData;
+    }
+
+    // Settings
+    if (settingsSnap && settingsSnap.exists) {
+      var L = settingsSnap.data().lists || {};
+      if (L.platforms && L.platforms.length) { window._settingsPlatforms = L.platforms; if (typeof populatePlatformSelects === "function") populatePlatformSelects(); }
+      if (L.banks && L.banks.length) { window._settingsBanks = L.banks; if (typeof populateBankSelect === "function") populateBankSelect(); }
+      if (L.capital && L.capital.length) { window._settingsCapital = L.capital; if (typeof populateCapitalSrcSelect === "function") populateCapitalSrcSelect(); }
+      if (L.types && L.types.length) { window._settingsTypes = L.types; if (typeof populateTypeSelect === "function") populateTypeSelect(); }
+    }
+
+    _rerender();
+    initDashboardYears();
+    renderDashboard();
+    if (typeof renderStocks === "function") renderStocks();
+    _badge("synced");
+
+    // Realtime listener على investments فقط
+    if (_unsubSnap) _unsubSnap();
+    _unsubSnap = _ref(uid, "investments").onSnapshot(function(snap) {
+      if (!snap.exists || _syncing) return;
+      var d = snap.data();
+      if (d.uid && d.uid !== uid) return;
+      if (!Array.isArray(d.data)) return;
+      window.__investments.length = 0;
+      d.data.forEach(function(r){ window.__investments.push(r); });
+      if (typeof renderAll    === "function") renderAll();
+      if (typeof renderSukuk  === "function") renderSukuk();
+      if (typeof renderStocks === "function") renderStocks();
+      if (typeof renderFunds  === "function") renderFunds();
+    });
+
+  }).catch(function(e){ console.error("loadData:", e); _badge("error"); });
+}
+
+
+function _clearData() {
+  if (_unsubSnap) { _unsubSnap(); _unsubSnap = null; }
+  _uid = null;
+  if (Array.isArray(window.__investments)) window.__investments.length = 0;
+  if (Array.isArray(window.loansData))    { window.loansData.length = 0; loansData = window.loansData; }
+
+  _rerender();
+  _gate(true);
+}
+
+//  Expose save functions 
+window.fbSaveInvestments = function() {
+  if (!_uid) return;
+  _syncing = true;
+  _write(_uid, "investments", Array.from(window.__investments));
+  setTimeout(function(){ _syncing = false; }, 2000);
+};
+window.fbSaveLoans = function() {
+  if (!_uid) return;
+  _write(_uid, "loans", Array.from(window.loansData));
+};
+window.fbSaveDividends = function() {
+  if (!_uid) return;
+  _write(_uid, "dividends", Array.from(window.dividendsData || dividendsData));
+};
+
+//  Auth: popup on all platforms (redirect breaks on GitHub Pages / iOS Safari)
+window.googleSignIn = function() {
+  _auth.signInWithPopup(_provider).then(function(result) {
+    // success handled by onAuthStateChanged
+  }).catch(function(e) {
+    if (e.code === "auth/popup-blocked") {
+      // Popup was blocked by browser — show guidance
+      if (typeof showToast === "function")
+        showToast("Please allow popups for this site");
+    } else if (e.code !== "auth/popup-closed-by-user"
+            && e.code !== "auth/cancelled-popup-request") {
+      console.error("SignIn error:", e.code, e.message);
+      if (typeof showToast === "function")
+        showToast("Login failed: " + e.code);
+    }
+  });
+};
+
+window.googleSignOut = function() {
+  _auth.signOut().then(function() {
+    if (typeof showToast === "function") showToast("Signed out");
+    if (typeof closeMobUserMenu === "function") closeMobUserMenu();
+  });
+};
+
+// Auth state listener
+_auth.onAuthStateChanged(function(user) {
+  window.__firebaseUser = user;
+  _updateUI(user);
+  if (user) {
+    _uid = user.uid;
+    _gate(false);  // Hide login banner
+    _loadData(user.uid);
+  } else {
+    _gate(true);  // Show login banner
+    // Clear any stale data shown before login
+    if (window.__investments) window.__investments.length = 0;
+    if (window.loansData)     window.loansData.length    = 0;
+
+    if (typeof renderAll      === 'function') renderAll();
+    if (typeof renderDashboard=== 'function') renderDashboard();
+  }
+});
+
+window.IS_FIREBASE_CONFIGURED = true;
+} catch(e) {
+  console.warn('Firebase init failed:', e.message);
+  window._firebaseFailed = true;
+  // Show login banner but app still works with local data
+  var g = document.getElementById('auth-gate');
+  if (g) g.style.display = 'flex';
+}
+</script>
+</body>
+</html>
