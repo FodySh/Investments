@@ -5457,7 +5457,7 @@ function renderDebts() {
 
     var waPhone = d.contact ? '966' + d.contact.replace(/^0/,'').replace(/\D/g,'') : '';
     var waMsgOwe  = encodeURIComponent('السلام عليكم ' + d.person + '، أردت التذكير بالمبلغ المستحق: ' + remaining.toLocaleString('en-US') + ' ر.س');
-    var waMsgLend = encodeURIComponent('السلام عليكم ' + d.person + '، هل بالإمكان تسوية مبلغ ' + remaining.toLocaleString('en-US') + ' ر.س ؟     هذه رسالة آلية ترسل بشكل تلقائيًا و في حال تم تسوية المبلغ يرجى تجاهل هذه الرسالة و شكرًا ');
+    var waMsgLend = encodeURIComponent('السلام عليكم ' + d.person + '، هل بالإمكان تسوية مبلغ ' + remaining.toLocaleString('en-US') + ' ر.س ؟     هذه رسالة آلية ترسل بشكل تلقائي و في حال تم تسوية المبلغ يرجى تجاهل هذه الرسالة و شكرًا ');
     var waBtn = waPhone ? '<a href="https://wa.me/'+waPhone+'?text='+(isOwe?waMsgOwe:waMsgLend)+'" target="_blank" class="loan-action-btn" style="color:#25D366;text-decoration:none">📱 واتساب</a>' : '';
 
     return '<div class="debt-card" style="border-right:3px solid '+(isOwe?'#f87171':'#4caf82')+'">' +
