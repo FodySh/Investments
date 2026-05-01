@@ -7001,6 +7001,15 @@ async function fetchCompanyName(ticker) {
   var symbol = _currentStockMarket === 'sa' ? ticker + '.SR' : ticker;
   var PROXY  = 'https://claude-proxy.shaheenhouse1.workers.dev';
 
+  
+// ── جلب اسم الشركة تلقائياً عند إدخال الرمز ──────────────────────────────────
+function onTickerInput() {
+  var tickerEl = document.getElementById('as-ticker');
+  if (!tickerEl) return;
+  var raw = tickerEl.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  tickerEl.value = raw;
+  calcAddStock();
+
   // قاموس الأسهم السعودية الشائعة (fallback سريع)
   var saNames = {
     '2222':'أرامكو السعودية','2280':'المراعي','4017':'فقيه للرعاية الصحية',
