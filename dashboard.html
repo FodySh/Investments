@@ -4019,7 +4019,7 @@ function _loadData(uid) {
       var L = settingsSnap.data().lists || {};
       if (L.platforms && L.platforms.length) { window._settingsPlatforms = L.platforms; if (typeof populatePlatformSelects === "function") populatePlatformSelects(); }
       if (L.banks && L.banks.length) { window._settingsBanks = L.banks; if (typeof populateBankSelect === "function") populateBankSelect(); }
-      if (L.capital && L.capital.length) { window._settingsCapital = L.capital; if (typeof populateCapitalSrcSelect === "function") populateCapitalSrcSelect(); }
+      if (L.capital && L.capital.length) { window._settingsCapital = L.capital; if (typeof populateCapitalSrcSelect === "function") populateCapitalSrcSelect(); if (typeof populateCapitalSrcForStock === "function") populateCapitalSrcForStock([]); }
       if (L.types && L.types.length) { window._settingsTypes = L.types; if (typeof populateTypeSelect === "function") populateTypeSelect(); }
     }
 
@@ -9398,11 +9398,14 @@ function _getSettings() {
 function _saveSettings(s) { localStorage.setItem('appSettings', JSON.stringify(s)); }
 
 function getCapitalSources() {
+  // Check Firebase-loaded settings first (most up-to-date)
+  if (window._settingsCapital && window._settingsCapital.length) return window._settingsCapital;
   var s = _getSettings();
   return (s.capitalSources && s.capitalSources.length) ? s.capitalSources : _defaultCapitalSources.slice();
 }
 function getPlatforms() {
   try {
+    if (window._settingsPlatforms && window._settingsPlatforms.length) return window._settingsPlatforms;
     var s = _getSettings();
     return (s.platforms && s.platforms.length) ? s.platforms : _defaultPlatforms.slice();
   } catch(e) { return _defaultPlatforms.slice(); }
