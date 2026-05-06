@@ -51,9 +51,9 @@ body{font-family:'Cairo',sans-serif;background:var(--bg-base);color:var(--text-p
 .main{padding:20px 22px;max-width:1400px;margin:0 auto;}
 
 /* KPI STRIP */
-.kpi-strip{display:flex;gap:11px;margin-bottom:20px;overflow-x:auto;padding-bottom:4px;}
+.kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:11px;margin-bottom:20px;}
 .kpi-strip::-webkit-scrollbar{height:3px;}
-.kpi-card{flex-shrink:0;min-width:150px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px 18px 11px;position:relative;overflow:hidden;}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px 18px 11px;position:relative;overflow:hidden;}
 .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
 .kc-gold::before{background:linear-gradient(90deg,transparent,var(--gold),transparent);}
 .kc-teal::before{background:linear-gradient(90deg,transparent,var(--teal),transparent);}
@@ -137,6 +137,7 @@ tbody tr:last-child td{border-bottom:none;}
   .main{padding:12px;}
   .fg2{grid-template-columns:1fr!important;}
   .s2{grid-column:span 1!important;}
+  .kpi-strip{grid-template-columns:1fr 1fr;}
   .topnav{padding:0 12px;}
 }
 </style>
