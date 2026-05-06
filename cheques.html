@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شيكات وسندات الأمر</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧾</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Cairo:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg-base:#12110d;--bg-surface:#1a1810;--bg-elevated:#221f14;--bg-card:#27231a;
+  --border:rgba(201,185,140,0.09);--border-mid:rgba(201,185,140,0.15);--border-strong:rgba(201,185,140,0.22);
+  --text-primary:#f0f0ee;--text-secondary:#8e92a3;--text-muted:#555a6e;
+  --gold:#c9a96e;--gold-light:#e2c48a;--gold-dim:rgba(201,169,110,0.15);
+  --teal:#4ecdc4;--teal-dim:rgba(78,205,196,0.12);
+  --rose:#e07070;--rose-dim:rgba(224,112,112,0.12);
+  --green:#5cb98a;--green-dim:rgba(92,185,138,0.12);
+  --purple:#9b8cff;--purple-dim:rgba(155,140,255,0.12);
+  --amber:#f0a500;--radius:14px;--radius-sm:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Cairo',sans-serif;background:var(--bg-base);color:var(--text-primary);min-height:100vh;font-size:13px;}
+::-webkit-scrollbar{width:4px;height:4px;}::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:4px;}
+
+/* NAV */
+.topnav{position:sticky;top:0;z-index:100;background:rgba(26,24,16,0.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--border-mid);padding:0 22px;display:flex;align-items:center;height:54px;gap:0;}
+.nav-logo{display:flex;flex-direction:column;justify-content:center;padding-left:16px;border-left:1px solid var(--border-mid);margin-left:14px;flex-shrink:0;}
+.nav-logo-mark{font-size:8px;color:var(--gold);letter-spacing:2.5px;font-weight:700;text-transform:uppercase;}
+.nav-logo-title{font-size:12.5px;font-weight:700;color:var(--text-primary);white-space:nowrap;}
+.nav-tabs{display:flex;align-items:center;flex:1;height:100%;overflow-x:auto;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.nav-tab{display:flex;align-items:center;gap:6px;padding:0 16px;height:54px;font-size:12.5px;font-weight:500;white-space:nowrap;color:var(--text-secondary);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;flex-shrink:0;}
+.nav-tab:hover{color:var(--text-primary);}
+.nav-tab.active{color:var(--gold-light);border-bottom-color:var(--gold);}
+.nav-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+
+/* BTN */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:'Cairo',sans-serif;border:none;transition:all .15s;white-space:nowrap;}
+.btn-gold{background:var(--gold);color:#0d0f14;}.btn-gold:hover{background:var(--gold-light);}
+.btn-outline{background:transparent;border:1px solid var(--border-strong);color:var(--text-secondary);}.btn-outline:hover{border-color:var(--gold);color:var(--gold-light);background:var(--gold-dim);}
+.btn-green{background:var(--green-dim);border:1px solid rgba(92,185,138,0.3);color:var(--green);}.btn-green:hover{background:rgba(92,185,138,0.22);}
+.btn-teal{background:var(--teal-dim);border:1px solid rgba(78,205,196,0.3);color:var(--teal);}.btn-teal:hover{background:rgba(78,205,196,0.2);}
+.btn-rose{background:var(--rose-dim);border:1px solid rgba(224,112,112,0.3);color:var(--rose);}.btn-rose:hover{background:rgba(224,112,112,0.2);}
+.btn-sm{padding:5px 10px;font-size:11px;}.btn-icon{padding:5px 7px;}
+
+/* MAIN */
+.main{padding:20px 22px;max-width:1400px;margin:0 auto;}
+
+/* KPI STRIP */
+.kpi-strip{display:flex;gap:11px;margin-bottom:20px;overflow-x:auto;padding-bottom:4px;}
+.kpi-strip::-webkit-scrollbar{height:3px;}
+.kpi-card{flex-shrink:0;min-width:150px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px 18px 11px;position:relative;overflow:hidden;}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.kc-gold::before{background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.kc-teal::before{background:linear-gradient(90deg,transparent,var(--teal),transparent);}
+.kc-green::before{background:linear-gradient(90deg,transparent,var(--green),transparent);}
+.kc-rose::before{background:linear-gradient(90deg,transparent,var(--rose),transparent);}
+.kc-purple::before{background:linear-gradient(90deg,transparent,var(--purple),transparent);}
+.kpi-icon{font-size:18px;margin-bottom:7px;}
+.kpi-lbl{font-size:10px;color:var(--text-muted);margin-bottom:3px;}
+.kpi-val{font-family:'DM Serif Display',serif;font-size:24px;color:var(--text-primary);line-height:1;}
+.kpi-sub{font-size:9px;color:var(--text-muted);margin-top:3px;}
+
+/* PANEL */
+.panel{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:18px;}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--border);background:rgba(201,169,110,0.04);gap:10px;flex-wrap:wrap;}
+.panel-title{font-size:13px;font-weight:600;color:var(--gold-light);display:flex;align-items:center;gap:7px;}
+.panel-body{padding:18px;}
+
+/* FORM */
+.fg{display:grid;gap:12px;margin-bottom:12px;}
+.fg2{grid-template-columns:1fr 1fr;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.fl{font-size:10px;font-weight:600;color:var(--text-muted);letter-spacing:.4px;text-transform:uppercase;}
+.req{color:var(--gold);}
+.fi,.fs,.fta{background:rgba(18,16,11,0.9);border:1px solid var(--border-mid);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text-primary);font-size:12.5px;font-family:'Cairo',sans-serif;outline:none;width:100%;transition:border-color .15s,box-shadow .15s;}
+.fi:focus,.fs:focus,.fta:focus{border-color:rgba(201,169,110,0.5);box-shadow:0 0 0 3px rgba(201,169,110,0.07);}
+.fi::placeholder{color:rgba(136,153,187,0.4);}
+.fs{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238899bb' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 10px center;padding-left:28px;}
+.fs option{background:#221f14;color:#f0f0ee;}
+.fta{resize:vertical;min-height:62px;}
+.s2{grid-column:span 2;}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead th{background:var(--bg-elevated);padding:9px 13px;text-align:right;font-size:10.5px;font-weight:600;color:var(--text-muted);border-bottom:1px solid var(--border-mid);white-space:nowrap;}
+tbody td{padding:11px 13px;font-size:12.5px;border-bottom:1px solid rgba(201,185,140,0.05);color:var(--text-secondary);white-space:nowrap;text-align:right;}
+tbody tr:hover td{background:rgba(201,169,110,0.04);}
+tbody tr:last-child td{border-bottom:none;}
+.mono{font-family:'JetBrains Mono',monospace;font-size:11.5px;}
+.td-p{color:var(--text-primary)!important;font-weight:600;}
+
+/* PILL */
+.pill{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:600;}
+.pill::before{content:'';width:4px;height:4px;border-radius:50%;background:currentColor;display:block;}
+.pp-green{background:var(--green-dim);color:var(--green);border:1px solid rgba(92,185,138,0.25);}
+.pp-rose{background:var(--rose-dim);color:var(--rose);border:1px solid rgba(224,112,112,0.25);}
+.pp-gold{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(201,169,110,0.25);}
+.pp-teal{background:var(--teal-dim);color:var(--teal);border:1px solid rgba(78,205,196,0.25);}
+.pp-muted{background:rgba(255,255,255,.05);color:var(--text-muted);border:1px solid var(--border);}
+
+/* EMPTY */
+.empty{text-align:center;padding:44px 20px;color:var(--text-muted);}
+.empty-icon{font-size:36px;margin-bottom:10px;}.empty-text{font-size:13px;margin-bottom:4px;}.empty-sub{font-size:11px;}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.68);backdrop-filter:blur(6px);z-index:500;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--bg-elevated);border:1px solid var(--border-mid);border-radius:16px;padding:24px 26px;width:min(95vw,600px);max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.55);}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.modal-title{font-size:15px;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:7px;}
+.mc{background:none;border:none;color:var(--text-muted);font-size:22px;cursor:pointer;padding:2px 6px;border-radius:5px;line-height:1;}
+.mc:hover{color:var(--text-primary);background:rgba(255,255,255,.06);}
+
+/* PAGE */
+.page{display:none;}.page.active{display:block;}
+
+/* IMPORT DROP */
+.drop-zone{border:2px dashed var(--border-mid);border-radius:10px;padding:26px;text-align:center;cursor:pointer;transition:all .15s;}
+.drop-zone:hover,.drop-zone.dragging{border-color:var(--gold);background:var(--gold-dim);}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:linear-gradient(135deg,#1a3a26,#0d5c2d);color:#fff;padding:11px 22px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;transition:transform .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 32px rgba(0,0,0,.5);pointer-events:none;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* DUE */
+.du{color:var(--rose)!important;font-weight:700;}
+.ds{color:var(--amber)!important;font-weight:600;}
+.dok{color:var(--green)!important;}
+
+@media(max-width:768px){
+  .main{padding:12px;}
+  .fg2{grid-template-columns:1fr!important;}
+  .s2{grid-column:span 1!important;}
+  .topnav{padding:0 12px;}
+}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-logo">
+    <div class="nav-logo-mark">Portfolio</div>
+    <div class="nav-logo-title">🧾 شيكات وسندات الأمر</div>
+  </div>
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="switchTab('projects')">🗂️ المشاريع</div>
+    <div class="nav-tab" onclick="switchTab('schedule')">📅 جدول السداد</div>
+    <div class="nav-tab" onclick="switchTab('import')">📥 استيراد / تصدير</div>
+  </div>
+  <div class="nav-actions">
+    <span id="auth-badge" style="font-size:11px;color:var(--text-muted);">—</span>
+    <a href="index.html" class="btn btn-outline btn-sm">← الرئيسية</a>
+  </div>
+</nav>
+
+<div class="main">
+
+  <!-- KPIs -->
+  <div class="kpi-strip">
+    <div class="kpi-card kc-gold"><div class="kpi-icon">🗂️</div><div class="kpi-lbl">المشاريع</div><div class="kpi-val" id="k-proj">0</div><div class="kpi-sub">مشروع</div></div>
+    <div class="kpi-card kc-teal"><div class="kpi-icon">💰</div><div class="kpi-lbl">قيمة العقود</div><div class="kpi-val" id="k-total">0</div><div class="kpi-sub">ر.س</div></div>
+    <div class="kpi-card kc-green"><div class="kpi-icon">✅</div><div class="kpi-lbl">محصّلة</div><div class="kpi-val" id="k-paid">0</div><div class="kpi-sub">ر.س</div></div>
+    <div class="kpi-card kc-rose"><div class="kpi-icon">⏳</div><div class="kpi-lbl">متبقية</div><div class="kpi-val" id="k-pend">0</div><div class="kpi-sub">ر.س</div></div>
+    <div class="kpi-card kc-purple"><div class="kpi-icon">🔔</div><div class="kpi-lbl">مستحقة هذا الشهر</div><div class="kpi-val" id="k-month">0</div><div class="kpi-sub">ر.س</div></div>
+  </div>
+
+  <!-- PAGE: PROJECTS -->
+  <div id="page-projects" class="page active">
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">🗂️ سجل المشاريع</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <input class="fi" type="text" placeholder="🔍 بحث..." oninput="renderProjects(this.value)" style="width:150px;padding:6px 11px;">
+          <button class="btn btn-gold btn-sm" onclick="openProjModal()">➕ مشروع جديد</button>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>#</th><th>اسم المشروع</th><th>الجهة المستلمة</th><th>تاريخ البدء</th><th>المدة</th><th>قيمة العقد</th><th>محصّل</th><th>متبقي</th><th>التقدم</th><th>الحالة</th><th></th></tr></thead>
+          <tbody id="proj-tbody"><tr><td colspan="11"><div class="empty"><div class="empty-icon">🗂️</div><div class="empty-text">لا توجد مشاريع</div><div class="empty-sub">اضغط مشروع جديد للبدء</div></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: SCHEDULE -->
+  <div id="page-schedule" class="page">
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">📅 جدول السداد</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <select class="fs" id="sch-proj" onchange="renderSchedule()" style="width:170px;padding:6px 28px 6px 8px;font-size:11.5px;"><option value="">كل المشاريع</option></select>
+          <select class="fs" id="sch-st" onchange="renderSchedule()" style="width:130px;padding:6px 28px 6px 8px;font-size:11.5px;"><option value="">كل الحالات</option><option value="pending">معلقة</option><option value="paid">محصّلة</option><option value="overdue">متأخرة</option></select>
+          <button class="btn btn-gold btn-sm" onclick="openPayModal()">➕ دفعة جديدة</button>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>#</th><th>المشروع</th><th>مستحق إلى</th><th>تاريخ الاستحقاق</th><th>المبلغ</th><th>رقم الشيك / السند</th><th>نوع الدفع</th><th>الأيام المتبقية</th><th>الحالة</th><th></th></tr></thead>
+          <tbody id="sch-tbody"><tr><td colspan="10"><div class="empty"><div class="empty-icon">📅</div><div class="empty-text">لا توجد دفعات</div><div class="empty-sub">أضف دفعة أو استورد من Excel</div></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: IMPORT -->
+  <div id="page-import" class="page">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">📤 استيراد من Excel</div></div>
+        <div class="panel-body">
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:1.65;">
+            ارفع ملف Excel يحتوي على الأعمدة التالية:<br>
+            <span style="color:var(--gold);">تاريخ الاستحقاق · مبلغ الاستحقاق · مستحق إلى · المشروع · رقم الشيك · نوع الدفع · البنك · ملاحظات</span>
+          </p>
+          <div class="drop-zone" id="drop-zone" onclick="document.getElementById('xl-input').click()"
+            ondragover="event.preventDefault();this.classList.add('dragging')"
+            ondragleave="this.classList.remove('dragging')"
+            ondrop="handleDrop(event)">
+            <div style="font-size:30px;margin-bottom:8px;">📊</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">اسحب الملف هنا أو اضغط للاختيار</div>
+            <div style="font-size:10.5px;color:var(--text-muted);">.xlsx · .xls</div>
+          </div>
+          <input type="file" id="xl-input" accept=".xlsx,.xls" style="display:none" onchange="importExcel(event)">
+          <div id="imp-preview" style="display:none;margin-top:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <span style="font-size:11.5px;font-weight:700;color:var(--teal);" id="imp-stats">0 سجل</span>
+              <button class="btn btn-green btn-sm" onclick="confirmImport()">✅ استيراد الكل</button>
+            </div>
+            <div class="tbl-wrap" style="max-height:220px;overflow-y:auto;"><table><thead id="prev-thead"></thead><tbody id="prev-tbody"></tbody></table></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">⬇️ قالب Excel جاهز</div></div>
+          <div class="panel-body">
+            <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">حمّل القالب واملأه ثم ارفعه</p>
+            <button class="btn btn-outline btn-sm" onclick="downloadTemplate()">⬇️ تحميل القالب</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">📤 تصدير البيانات</div></div>
+          <div class="panel-body" style="display:flex;flex-direction:column;gap:9px;">
+            <button class="btn btn-outline btn-sm" onclick="exportProjects()">📁 تصدير المشاريع — Excel</button>
+            <button class="btn btn-outline btn-sm" onclick="exportSchedule()">📋 تصدير جدول السداد — Excel</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">⚠️ إدارة البيانات</div></div>
+          <div class="panel-body"><button class="btn btn-rose btn-sm" onclick="clearAll()">🗑 مسح جميع البيانات</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast-el"></div>
+
+<!-- MODAL: PROJECT -->
+<div class="modal-bg" id="proj-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">🗂️ <span id="pm-title">مشروع جديد</span></div>
+      <button class="mc" onclick="closeProjModal()">×</button>
+    </div>
+    <div class="fg fg2">
+      <div class="field s2"><label class="fl">اسم المشروع <span class="req">*</span></label><input class="fi" id="p-name" type="text" placeholder="مثال: مشروع تشييد المستشفى..."></div>
+      <div class="field"><label class="fl">الجهة المستلمة <span class="req">*</span></label><input class="fi" id="p-recipient" type="text" placeholder="اسم العميل أو الجهة"></div>
+      <div class="field"><label class="fl">جهة العقد / المُصدِر</label><input class="fi" id="p-issuer" type="text" placeholder="الشركة أو الجهة المصدرة"></div>
+      <div class="field"><label class="fl">تاريخ البدء <span class="req">*</span></label><input class="fi" id="p-start" type="date"></div>
+      <div class="field"><label class="fl">مدة المشروع</label><input class="fi" id="p-dur" type="text" placeholder="مثال: 18 شهراً / سنتان"></div>
+      <div class="field"><label class="fl">قيمة العقد (ر.س)</label><input class="fi mono" id="p-val" type="number" step="0.01" placeholder="0.00" oninput="calcPrev()"></div>
+      <div class="field"><label class="fl">نوع الضمان</label>
+        <select class="fs" id="p-type"><option value="cheque">شيك</option><option value="bond">سند أمر</option><option value="lc">خطاب ضمان</option><option value="mixed">مختلط</option><option value="other">أخرى</option></select>
+      </div>
+      <div class="field"><label class="fl">الحالة</label>
+        <select class="fs" id="p-status"><option value="active">نشط</option><option value="completed">مكتمل</option><option value="suspended">موقوف</option><option value="cancelled">ملغى</option></select>
+      </div>
+      <div class="field s2"><label class="fl">ملاحظات</label><textarea class="fta" id="p-notes" placeholder="شروط خاصة، رقم العقد..."></textarea></div>
+    </div>
+    <div id="p-prev" style="display:none;background:rgba(201,169,110,0.06);border:1px solid var(--border-mid);border-radius:8px;padding:12px;margin-bottom:12px;">
+      <div style="font-size:9px;color:var(--text-muted);margin-bottom:4px;font-weight:700;letter-spacing:.5px;">معاينة</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:800;color:var(--gold);" id="prev-val">—</div>
+    </div>
+    <div style="display:flex;gap:9px;">
+      <button class="btn btn-gold" onclick="saveProject()">💾 حفظ المشروع</button>
+      <button class="btn btn-outline" onclick="closeProjModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: PAYMENT -->
+<div class="modal-bg" id="pay-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">💳 <span id="paym-title">دفعة / شيك جديد</span></div>
+      <button class="mc" onclick="closePayModal()">×</button>
+    </div>
+    <div class="fg fg2">
+      <div class="field"><label class="fl">المشروع <span class="req">*</span></label><select class="fs" id="pay-proj"><option value="">— اختر المشروع —</option></select></div>
+      <div class="field"><label class="fl">مستحق إلى <span class="req">*</span></label><input class="fi" id="pay-to" type="text" placeholder="اسم المستفيد"></div>
+      <div class="field"><label class="fl">تاريخ الاستحقاق <span class="req">*</span></label><input class="fi" id="pay-due" type="date"></div>
+      <div class="field"><label class="fl">مبلغ الاستحقاق (ر.س) <span class="req">*</span></label><input class="fi mono" id="pay-amt" type="number" step="0.01" placeholder="0.00"></div>
+      <div class="field"><label class="fl">نوع الدفع</label>
+        <select class="fs" id="pay-type"><option value="cheque">شيك</option><option value="bond">سند أمر</option><option value="transfer">تحويل بنكي</option><option value="cash">نقداً</option><option value="lc">خطاب اعتماد</option></select>
+      </div>
+      <div class="field"><label class="fl">رقم الشيك / السند</label><input class="fi mono" id="pay-ref" type="text" placeholder="CHQ-001"></div>
+      <div class="field"><label class="fl">البنك</label><input class="fi" id="pay-bank" type="text" placeholder="اسم البنك"></div>
+      <div class="field"><label class="fl">الحالة</label>
+        <select class="fs" id="pay-status"><option value="pending">معلقة</option><option value="paid">محصّلة</option></select>
+      </div>
+      <div class="field s2"><label class="fl">ملاحظات</label><textarea class="fta" id="pay-notes" placeholder="..."></textarea></div>
+    </div>
+    <div style="display:flex;gap:9px;">
+      <button class="btn btn-gold" onclick="savePayment()">💾 حفظ الدفعة</button>
+      <button class="btn btn-outline" onclick="closePayModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── FIREBASE ──────────────────────────────────────────────────────────────────
+var _uid=null,_db=null;
+try{
+  firebase.initializeApp({apiKey:"AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME",authDomain:"investments-page.firebaseapp.com",projectId:"investments-page",storageBucket:"investments-page.firebasestorage.app",messagingSenderId:"964948881361",appId:"1:964948881361:web:2801b8127489d953717af0"});
+  _db=firebase.firestore();
+  firebase.auth().onAuthStateChanged(function(user){
+    var el=document.getElementById('auth-badge');
+    if(user){_uid=user.uid;if(el)el.textContent='☁️ '+(user.displayName||user.email||'').split(' ')[0];loadAll();}
+    else{_uid=null;if(el)el.textContent='🔒 غير مسجّل';loadAll();}
+  });
+}catch(e){loadAll();}
+
+function _ref(col){return _db.collection('users').doc(_uid).collection('portfolio').doc(col);}
+function _fbSave(col,data){if(!_uid||!_db)return;_ref(col).set({data:data,ts:new Date().toISOString()},{merge:true}).catch(console.warn);}
+async function _fbLoad(col){if(!_uid||!_db)return null;try{var s=await _ref(col).get();return s.exists?s.data().data:null;}catch(e){return null;}}
+function _ls(k,d){localStorage.setItem('chq_'+k,JSON.stringify(d));}
+function _lg(k){try{return JSON.parse(localStorage.getItem('chq_'+k)||'null');}catch(e){return null;}}
+
+// ── DATA ──────────────────────────────────────────────────────────────────────
+var projects=[],schedule=[],_iRows=[],_ePI=null,_eSI=null;
+
+async function loadAll(){
+  var p=await _fbLoad('cheques');
+  var s=await _fbLoad('payment_schedule');
+  projects=p||_lg('cheques')||[];
+  schedule=s||_lg('payment_schedule')||[];
+  renderAll();
+}
+function saveP(){_ls('cheques',projects);_fbSave('cheques',projects);}
+function saveS(){_ls('payment_schedule',schedule);_fbSave('payment_schedule',schedule);}
+function renderAll(){renderKPIs();renderProjects();renderSchedule();populateSels();}
+
+// ── KPIs ──────────────────────────────────────────────────────────────────────
+function renderKPIs(){
+  var today=new Date();today.setHours(0,0,0,0);
+  var nm=today.getMonth(),ny=today.getFullYear();
+  var fmt=function(n){return n>=1e6?(n/1e6).toFixed(1)+'م':n>=1000?(n/1000).toFixed(0)+'ك':n.toLocaleString('en-US',{maximumFractionDigits:0});};
+  var tV=projects.reduce(function(s,p){return s+(p.value||0);},0);
+  var tP=schedule.filter(function(r){return r.status==='paid';}).reduce(function(s,r){return s+(r.amount||0);},0);
+  var tN=schedule.filter(function(r){return r.status!=='paid';}).reduce(function(s,r){return s+(r.amount||0);},0);
+  var tM=schedule.filter(function(r){if(r.status==='paid')return false;var d=r.due_date?new Date(r.due_date):null;return d&&d.getMonth()===nm&&d.getFullYear()===ny;}).reduce(function(s,r){return s+(r.amount||0);},0);
+  _s('k-proj',projects.length);_s('k-total',fmt(tV));_s('k-paid',fmt(tP));_s('k-pend',fmt(tN));_s('k-month',fmt(tM));
+}
+
+// ── PROJECTS TABLE ─────────────────────────────────────────────────────────────
+function renderProjects(search){
+  var tbody=document.getElementById('proj-tbody');
+  var data=search?projects.filter(function(p){return JSON.stringify(p).toLowerCase().includes(search.toLowerCase());}):projects;
+  if(!data.length){tbody.innerHTML='<tr><td colspan="11"><div class="empty"><div class="empty-icon">🗂️</div><div class="empty-text">لا توجد مشاريع</div><div class="empty-sub">اضغط مشروع جديد للبدء</div></div></td></tr>';return;}
+  var sM={active:'نشط',completed:'مكتمل',suspended:'موقوف',cancelled:'ملغى'};
+  var sP={active:'pp-green',completed:'pp-teal',suspended:'pp-gold',cancelled:'pp-rose'};
+  var fmt=function(n){return(n||0).toLocaleString('en-US',{maximumFractionDigits:0});};
+  tbody.innerHTML=data.map(function(p,i){
+    var ri=projects.indexOf(p);
+    var paid=schedule.filter(function(r){return r.project_id===p.id&&r.status==='paid';}).reduce(function(s,r){return s+(r.amount||0);},0);
+    var pct=p.value>0?Math.min(100,paid/p.value*100):0;
+    var rem=Math.max(0,(p.value||0)-paid);
+    return '<tr>'+
+      '<td class="mono" style="color:var(--text-muted)">'+(i+1)+'</td>'+
+      '<td class="td-p" style="max-width:190px;overflow:hidden;text-overflow:ellipsis;" title="'+p.name+'">'+p.name+'</td>'+
+      '<td>'+(p.recipient||'—')+'</td>'+
+      '<td class="mono" style="font-size:10.5px">'+fmtD(p.start_date)+'</td>'+
+      '<td style="color:var(--text-muted)">'+(p.duration||'—')+'</td>'+
+      '<td class="mono" style="color:var(--gold-light)">'+fmt(p.value)+'</td>'+
+      '<td class="mono" style="color:var(--green)">'+fmt(paid)+'</td>'+
+      '<td class="mono" style="color:'+(rem>0?'var(--rose)':'var(--green)')+'">'+fmt(rem)+'</td>'+
+      '<td style="min-width:95px"><div style="display:flex;align-items:center;gap:5px"><div style="flex:1;height:4px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden"><div style="height:100%;width:'+pct.toFixed(0)+'%;background:linear-gradient(90deg,var(--gold),var(--gold-light))"></div></div><span style="font-size:9px;color:var(--text-muted);font-family:monospace">'+pct.toFixed(0)+'%</span></div></td>'+
+      '<td><span class="pill '+(sP[p.status]||'pp-muted')+'">'+(sM[p.status]||p.status)+'</span></td>'+
+      '<td style="white-space:nowrap">'+
+        '<button class="btn btn-teal btn-sm" onclick="addPayFor(\''+p.id+'\')" style="margin-left:4px">+ دفعة</button>'+
+        '<button class="btn btn-outline btn-sm btn-icon" onclick="editProj('+ri+')" style="margin-left:4px">✏️</button>'+
+        '<button class="btn btn-rose btn-sm btn-icon" onclick="delProj('+ri+')">🗑</button>'+
+      '</td></tr>';
+  }).join('');
+}
+
+// ── SCHEDULE TABLE ─────────────────────────────────────────────────────────────
+function renderSchedule(){
+  var tbody=document.getElementById('sch-tbody');
+  var fp=(document.getElementById('sch-proj')||{}).value||'';
+  var fs=(document.getElementById('sch-st')||{}).value||'';
+  var today=new Date();today.setHours(0,0,0,0);
+  var data=schedule.slice();
+  if(fp)data=data.filter(function(r){return r.project_id===fp;});
+  if(fs==='overdue')data=data.filter(function(r){var d=r.due_date?new Date(r.due_date):null;return r.status!=='paid'&&d&&d<today;});
+  else if(fs)data=data.filter(function(r){return r.status===fs;});
+  data.sort(function(a,b){return new Date(a.due_date||'9999')-new Date(b.due_date||'9999');});
+  if(!data.length){tbody.innerHTML='<tr><td colspan="10"><div class="empty"><div class="empty-icon">📅</div><div class="empty-text">لا توجد دفعات</div><div class="empty-sub">أضف دفعة أو استورد من Excel</div></div></td></tr>';return;}
+  var fmt=function(n){return(n||0).toLocaleString('en-US',{maximumFractionDigits:0});};
+  var tL={cheque:'🪙 شيك',bond:'📜 سند أمر',transfer:'🏦 تحويل',cash:'💵 نقد',lc:'📃 اعتماد'};
+  var sP={paid:'pp-green',pending:'pp-gold',overdue:'pp-rose'};
+  var sL={paid:'محصّلة',pending:'معلقة',overdue:'متأخرة'};
+  tbody.innerHTML=data.map(function(r,i){
+    var ri=schedule.indexOf(r);
+    var proj=projects.find(function(p){return p.id===r.project_id;});
+    var dDate=r.due_date?new Date(r.due_date):null;
+    var diff=dDate?Math.ceil((dDate-today)/86400000):null;
+    var dCell='—',dCls='';
+    if(diff!==null){
+      if(r.status==='paid'){dCell='✅ محصّلة';dCls='dok';}
+      else if(diff<0){dCell=Math.abs(diff)+' يوم تأخر';dCls='du';}
+      else if(diff<=7){dCell=diff+' يوم';dCls='du';}
+      else if(diff<=30){dCell=diff+' يوم';dCls='ds';}
+      else{dCell=diff+' يوم';dCls='dok';}
+    }
+    var st=r.status==='pending'&&dDate&&dDate<today?'overdue':r.status;
+    return '<tr>'+
+      '<td class="mono" style="color:var(--text-muted)">'+(i+1)+'</td>'+
+      '<td class="td-p" style="max-width:150px;overflow:hidden;text-overflow:ellipsis">'+(proj?proj.name:'—')+'</td>'+
+      '<td>'+(r.pay_to||'—')+'</td>'+
+      '<td class="mono" style="font-size:11px">'+fmtD(r.due_date)+'</td>'+
+      '<td class="mono" style="color:var(--gold-light);font-weight:700">'+fmt(r.amount)+' <span style="font-size:9px;color:var(--text-muted)">ر.س</span></td>'+
+      '<td class="mono" style="color:var(--teal)">'+(r.ref_no||'—')+'</td>'+
+      '<td style="font-size:12px">'+(tL[r.type]||r.type||'—')+'</td>'+
+      '<td class="mono '+dCls+'" style="font-weight:600">'+dCell+'</td>'+
+      '<td><span class="pill '+(sP[st]||'pp-muted')+'">'+(sL[st]||st)+'</span></td>'+
+      '<td style="white-space:nowrap">'+
+        (r.status!=='paid'?'<button class="btn btn-green btn-sm" onclick="markPaid('+ri+')" style="margin-left:4px">✅ تحصيل</button>':'')+
+        '<button class="btn btn-outline btn-sm btn-icon" onclick="editPay('+ri+')" style="margin-left:4px">✏️</button>'+
+        '<button class="btn btn-rose btn-sm btn-icon" onclick="delPay('+ri+')">🗑</button>'+
+      '</td></tr>';
+  }).join('');
+}
+
+// ── PROJECT CRUD ───────────────────────────────────────────────────────────────
+function openProjModal(idx){
+  _ePI=(idx!==undefined)?idx:null;
+  _s2('pm-title',_ePI!==null?'تعديل المشروع':'مشروع جديد');
+  if(_ePI!==null){var p=projects[_ePI];_sv('p-name',p.name);_sv('p-recipient',p.recipient);_sv('p-issuer',p.issuer||'');_sv('p-start',p.start_date);_sv('p-dur',p.duration||'');_sv('p-val',p.value||'');_sv('p-notes',p.notes||'');_g('p-type').value=p.type||'cheque';_g('p-status').value=p.status||'active';}
+  else{['p-name','p-recipient','p-issuer','p-dur','p-val','p-notes'].forEach(function(id){_sv(id,'');});_sv('p-start',new Date().toISOString().split('T')[0]);_g('p-type').value='cheque';_g('p-status').value='active';}
+  calcPrev();_g('proj-modal').classList.add('open');
+}
+function closeProjModal(){_g('proj-modal').classList.remove('open');_ePI=null;}
+function calcPrev(){var v=parseFloat(_gv('p-val'))||0;var el=_g('p-prev');if(v>0){el.style.display='block';_g('prev-val').textContent=v.toLocaleString('en-US',{maximumFractionDigits:0})+' ر.س';}else{el.style.display='none';}}
+function saveProject(){
+  var name=_gv('p-name').trim(),rec=_gv('p-recipient').trim();
+  if(!name){toast('❌ أدخل اسم المشروع');return;}
+  if(!rec){toast('❌ أدخل الجهة المستلمة');return;}
+  var p={id:_ePI!==null?projects[_ePI].id:'proj_'+Date.now(),name:name,recipient:rec,issuer:_gv('p-issuer'),start_date:_gv('p-start'),duration:_gv('p-dur'),value:parseFloat(_gv('p-val'))||0,type:_gv('p-type'),status:_gv('p-status'),notes:_gv('p-notes'),created_at:_ePI!==null?(projects[_ePI].created_at||new Date().toISOString()):new Date().toISOString()};
+  if(_ePI!==null)projects[_ePI]=p;else projects.push(p);
+  saveP();closeProjModal();renderAll();toast('✅ تم حفظ المشروع: '+name);
+}
+function editProj(idx){openProjModal(idx);}
+function delProj(idx){if(!confirm('حذف هذا المشروع؟'))return;var id=projects[idx].id;projects.splice(idx,1);for(var i=schedule.length-1;i>=0;i--){if(schedule[i].project_id===id)schedule.splice(i,1);}saveP();saveS();renderAll();toast('🗑 تم الحذف');}
+
+// ── PAYMENT CRUD ───────────────────────────────────────────────────────────────
+function openPayModal(projId){
+  _eSI=null;_s2('paym-title','دفعة / شيك جديد');
+  ['pay-to','pay-ref','pay-bank','pay-notes'].forEach(function(id){_sv(id,'');});
+  _sv('pay-amt','');_sv('pay-due','');_g('pay-type').value='cheque';_g('pay-status').value='pending';
+  _g('pay-proj').value=projId||'';_g('pay-modal').classList.add('open');
+}
+function addPayFor(projId){openPayModal(projId);}
+function closePayModal(){_g('pay-modal').classList.remove('open');_eSI=null;}
+function savePayment(){
+  var pid=_gv('pay-proj'),pt=_gv('pay-to').trim(),due=_gv('pay-due'),amt=parseFloat(_gv('pay-amt'))||0;
+  if(!pid){toast('❌ اختر المشروع');return;}
+  if(!pt){toast('❌ أدخل المستحق إليه');return;}
+  if(!due){toast('❌ أدخل تاريخ الاستحقاق');return;}
+  if(!amt){toast('❌ أدخل المبلغ');return;}
+  var r={id:_eSI!==null?schedule[_eSI].id:'pay_'+Date.now(),project_id:pid,pay_to:pt,due_date:due,amount:amt,type:_gv('pay-type'),ref_no:_gv('pay-ref'),bank:_gv('pay-bank'),status:_gv('pay-status'),notes:_gv('pay-notes'),created_at:_eSI!==null?(schedule[_eSI].created_at||new Date().toISOString()):new Date().toISOString()};
+  if(_eSI!==null)schedule[_eSI]=r;else schedule.push(r);
+  saveS();closePayModal();renderAll();toast('✅ تم حفظ الدفعة: '+amt.toLocaleString('en-US')+' ر.س');
+}
+function editPay(idx){
+  _eSI=idx;var r=schedule[idx];_s2('paym-title','تعديل الدفعة');
+  _g('pay-proj').value=r.project_id||'';_sv('pay-to',r.pay_to);_sv('pay-due',r.due_date);_sv('pay-amt',r.amount);_sv('pay-ref',r.ref_no||'');_sv('pay-bank',r.bank||'');_sv('pay-notes',r.notes||'');
+  _g('pay-type').value=r.type||'cheque';_g('pay-status').value=r.status||'pending';
+  _g('pay-modal').classList.add('open');
+}
+function delPay(idx){if(!confirm('حذف هذه الدفعة؟'))return;schedule.splice(idx,1);saveS();renderAll();toast('🗑 تم الحذف');}
+function markPaid(idx){schedule[idx].status='paid';schedule[idx].paid_at=new Date().toISOString();saveS();renderAll();toast('✅ تم التحصيل: '+(schedule[idx].amount||0).toLocaleString('en-US')+' ر.س');}
+
+// ── SELECTS ────────────────────────────────────────────────────────────────────
+function populateSels(){
+  var opts='<option value="">كل المشاريع</option>'+projects.map(function(p){return '<option value="'+p.id+'">'+p.name+'</option>';}).join('');
+  var payOpts='<option value="">— اختر المشروع —</option>'+projects.map(function(p){return '<option value="'+p.id+'">'+p.name+'</option>';}).join('');
+  var sp=_g('sch-proj');if(sp){var cv=sp.value;sp.innerHTML=opts;if(cv)sp.value=cv;}
+  var pp=_g('pay-proj');if(pp)pp.innerHTML=payOpts;
+}
+
+// ── EXCEL IMPORT ───────────────────────────────────────────────────────────────
+function handleDrop(e){e.preventDefault();_g('drop-zone').classList.remove('dragging');var f=e.dataTransfer.files[0];if(f)readXL(f);}
+function importExcel(ev){var f=ev.target.files[0];if(f)readXL(f);ev.target.value='';}
+function readXL(file){var r=new FileReader();r.onload=function(e){try{var wb=XLSX.read(e.target.result,{type:'array',cellDates:true});var ws=wb.Sheets[wb.SheetNames[0]];showPrev(XLSX.utils.sheet_to_json(ws,{defval:''}));}catch(err){toast('❌ خطأ: '+err.message);}};r.readAsArrayBuffer(file);}
+var CM={due_date:['تاريخ الاستحقاق','due_date','استحقاق','تاريخ'],amount:['مبلغ الاستحقاق','المبلغ','amount','مبلغ'],pay_to:['مستحق إلى','مستحق الى','pay_to','المستفيد'],project:['المشروع','مشروع','project'],ref_no:['رقم الشيك','رقم السند','ref_no','ref'],type:['نوع الدفع','نوع','type'],bank:['البنك','bank'],notes:['ملاحظات','notes']};
+function findC(hdrs,keys){for(var i=0;i<keys.length;i++){var m=hdrs.find(function(h){return h.toString().toLowerCase().includes(keys[i].toLowerCase());});if(m)return m;}return null;}
+function showPrev(data){
+  if(!data.length){toast('⚠️ الملف فارغ');return;}
+  _iRows=data;var keys=Object.keys(data[0]);
+  _g('prev-thead').innerHTML='<tr>'+keys.map(function(k){return '<th>'+k+'</th>';}).join('')+'</tr>';
+  _g('prev-tbody').innerHTML=data.slice(0,10).map(function(row){return '<tr>'+keys.map(function(k){return '<td style="font-size:11px;padding:6px 10px">'+String(row[k]!=null?row[k]:'')+'</td>';}).join('')+'</tr>';}).join('');
+  _g('imp-stats').textContent=data.length+' سجل — يعرض أول 10';
+  _g('imp-preview').style.display='block';toast('📊 تم قراءة '+data.length+' سجل');
+}
+function confirmImport(){
+  if(!_iRows.length)return;
+  var hdrs=Object.keys(_iRows[0]),cols={};
+  Object.keys(CM).forEach(function(f){cols[f]=findC(hdrs,CM[f]);});
+  var added=0;
+  _iRows.forEach(function(row){
+    var due=cols.due_date?parseXD(row[cols.due_date]):'';
+    var amt=cols.amount?parseFloat(String(row[cols.amount]).replace(/,/g,''))||0:0;
+    var pt=cols.pay_to?String(row[cols.pay_to]).trim():'';
+    if(!due&&!amt&&!pt)return;
+    var pN=cols.project?String(row[cols.project]).trim():'';
+    var proj=projects.find(function(p){return p.name.toLowerCase().includes(pN.toLowerCase())||pN.toLowerCase().includes(p.name.toLowerCase());});
+    schedule.push({id:'pay_'+Date.now()+'_'+added,project_id:proj?proj.id:(projects[0]?projects[0].id:''),pay_to:pt,due_date:due,amount:amt,ref_no:cols.ref_no?String(row[cols.ref_no]).trim():'',type:mapT(cols.type?String(row[cols.type]).trim():''),bank:cols.bank?String(row[cols.bank]).trim():'',notes:cols.notes?String(row[cols.notes]).trim():'',status:'pending',created_at:new Date().toISOString()});
+    added++;
+  });
+  saveS();renderAll();_g('imp-preview').style.display='none';_iRows=[];toast('✅ تم استيراد '+added+' دفعة');
+}
+function parseXD(v){if(!v)return'';if(v instanceof Date)return v.toISOString().split('T')[0];var s=String(v).trim();if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)){var p=s.split('/');return p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0');}if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;var n=parseInt(s);if(!isNaN(n)&&n>40000)return new Date(Math.round((n-25569)*86400*1000)).toISOString().split('T')[0];return s;}
+function mapT(t){var l=t.toLowerCase();if(l.includes('سند')||l.includes('bond'))return'bond';if(l.includes('تحويل')||l.includes('transfer'))return'transfer';if(l.includes('نقد')||l.includes('cash'))return'cash';if(l.includes('اعتماد')||l.includes('lc'))return'lc';return'cheque';}
+
+// ── EXCEL EXPORT ───────────────────────────────────────────────────────────────
+function downloadTemplate(){
+  var wb=XLSX.utils.book_new();
+  var ws=XLSX.utils.aoa_to_sheet([['تاريخ الاستحقاق','مبلغ الاستحقاق','مستحق إلى','المشروع','رقم الشيك','نوع الدفع','البنك','ملاحظات'],['01/06/2025',50000,'شركة البناء العربية','مشروع المستشفى','CHQ-001','شيك','الراجحي','دفعة أولى']]);
+  ws['!cols']=[{wch:18},{wch:16},{wch:26},{wch:26},{wch:14},{wch:12},{wch:16},{wch:22}];
+  XLSX.utils.book_append_sheet(wb,ws,'جدول السداد');XLSX.writeFile(wb,'قالب_جدول_السداد.xlsx');toast('⬇️ تم تحميل القالب');
+}
+function exportProjects(){
+  if(!projects.length){toast('⚠️ لا توجد مشاريع');return;}
+  var sM={active:'نشط',completed:'مكتمل',suspended:'موقوف',cancelled:'ملغى'};
+  var rows=projects.map(function(p){var paid=schedule.filter(function(r){return r.project_id===p.id&&r.status==='paid';}).reduce(function(s,r){return s+(r.amount||0);},0);return{'اسم المشروع':p.name,'الجهة المستلمة':p.recipient,'جهة العقد':p.issuer,'تاريخ البدء':p.start_date,'المدة':p.duration,'قيمة العقد':p.value,'المحصّل':paid,'المتبقي':Math.max(0,(p.value||0)-paid),'النوع':p.type,'الحالة':sM[p.status]||p.status,'ملاحظات':p.notes};});
+  var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'المشاريع');XLSX.writeFile(wb,'مشاريع_'+new Date().toISOString().slice(0,10)+'.xlsx');toast('✅ تم تصدير '+projects.length+' مشروع');
+}
+function exportSchedule(){
+  if(!schedule.length){toast('⚠️ لا توجد دفعات');return;}
+  var tL={cheque:'شيك',bond:'سند أمر',transfer:'تحويل بنكي',cash:'نقد',lc:'خطاب اعتماد'};
+  var sL={paid:'محصّلة',pending:'معلقة',overdue:'متأخرة'};
+  var rows=schedule.map(function(r){var pr=projects.find(function(p){return p.id===r.project_id;});return{'المشروع':pr?pr.name:'','مستحق إلى':r.pay_to,'تاريخ الاستحقاق':r.due_date,'المبلغ':r.amount,'رقم الشيك/السند':r.ref_no,'نوع الدفع':tL[r.type]||r.type,'البنك':r.bank,'الحالة':sL[r.status]||r.status,'ملاحظات':r.notes};});
+  var wb=XLSX.utils.book_new();var ws=XLSX.utils.json_to_sheet(rows);ws['!cols']=[{wch:26},{wch:24},{wch:16},{wch:14},{wch:14},{wch:14},{wch:18},{wch:12},{wch:24}];XLSX.utils.book_append_sheet(wb,ws,'جدول السداد');XLSX.writeFile(wb,'جدول_السداد_'+new Date().toISOString().slice(0,10)+'.xlsx');toast('✅ تم تصدير '+schedule.length+' دفعة');
+}
+function clearAll(){if(!confirm('مسح جميع البيانات؟ لا يمكن التراجع.'))return;projects=[];schedule=[];saveP();saveS();renderAll();toast('🗑 تم مسح جميع البيانات');}
+
+// ── TABS ────────────────────────────────────────────────────────────────────────
+function switchTab(tab){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('page-'+tab).classList.add('active');
+  var tabs=['projects','schedule','import'];
+  document.querySelectorAll('.nav-tab')[tabs.indexOf(tab)].classList.add('active');
+  if(tab==='schedule')renderSchedule();
+}
+
+// ── UTILS ────────────────────────────────────────────────────────────────────────
+function _g(id){return document.getElementById(id);}
+function _gv(id){var e=_g(id);return e?e.value:'';}
+function _sv(id,v){var e=_g(id);if(e)e.value=v!=null?v:'';}
+function _s(id,v){var e=_g(id);if(e)e.textContent=v;}
+function _s2(id,v){var e=_g(id);if(e)e.textContent=v;}
+function fmtD(s){if(!s)return'—';var d=new Date(s);if(isNaN(d.getTime()))return s;return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+var _tt;
+function toast(msg){var t=_g('toast-el');t.textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show');},3500);}
+['proj-modal','pay-modal'].forEach(function(id){var el=_g(id);if(el)el.addEventListener('click',function(e){if(e.target===el)el.classList.remove('open');});});
+</script>
+</body>
+</html>
