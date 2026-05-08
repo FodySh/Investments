@@ -6549,8 +6549,27 @@ function _saveAmortStatuses() {
   var loan = window.loansData[_amortLoanIdx];
   if (!loan) return;
   loan.amort_statuses = JSON.parse(JSON.stringify(_amortStatuses));
+
+  // إعادة حساب المسدَّد والمتبقي من الحالات الحالية
+  var truePaid = 0;
+  var tbody = document.getElementById('namort-tbody');
+  if (tbody) {
+    tbody.querySelectorAll('tr').forEach(function(tr, idx) {
+      var num = idx + 1;
+      if ((_amortStatuses[num] || 'pending') === 'paid') {
+        var pmtCell = tr.querySelectorAll('td')[2];
+        if (pmtCell) truePaid += parseFloat(pmtCell.textContent.replace(/,/g,'')) || 0;
+      }
+    });
+  }
+  loan.paid_amount = truePaid;
+  loan.remaining   = Math.max(0, (loan.total_amount || loan.principal || 0) - truePaid);
+  loan.inst_paid   = Object.values(_amortStatuses).filter(function(s){return s==='paid';}).length;
+
   loansData = window.loansData;
   saveLoansToStorage();
+  // حدّث الكروت فوراً
+  if (typeof renderLoans === 'function') renderLoans();
 }
 
 function _loadAmortStatuses(loanIdx) {
@@ -6697,6 +6716,37 @@ function saveAddLoan() {
   var pmt     = (r > 0 && months > 0) ? principal*(r*Math.pow(1+r,months))/(Math.pow(1+r,months)-1) : (months > 0 ? principal/months : 0);
   var totalAmt = pmt > 0 ? pmt * months : principal;
 
+  // ── الإجمالي الصحيح من جدول الأقساط ──────────────────────────────────
+  var validInstRows = (_installmentRows || []).filter(function(row) {
+    return parseFloat(row.fromYear) > 0
+      && parseFloat(row.toYear) >= parseFloat(row.fromYear)
+      && parseFloat(row.pmt) > 0;
+  });
+  var trueTotal = 0, trueMonths = 0;
+  if (validInstRows.length > 0) {
+    validInstRows.forEach(function(row) {
+      var mths = Math.round((parseFloat(row.toYear) - parseFloat(row.fromYear) + 1) * 12);
+      trueTotal  += parseFloat(row.pmt) * mths;
+      trueMonths += mths;
+    });
+  } else {
+    trueTotal  = totalAmt;
+    trueMonths = months;
+  }
+
+  // ── المسدَّد الصحيح من حالات جدول السداد ────────────────────────────
+  var truePaid = 0;
+  var tbody = document.getElementById('namort-tbody');
+  if (tbody && Object.keys(_amortStatuses).length > 0) {
+    tbody.querySelectorAll('tr').forEach(function(tr, idx) {
+      var num = idx + 1;
+      if ((_amortStatuses[num] || 'pending') === 'paid') {
+        var pmtCell = tr.querySelectorAll('td')[2];
+        if (pmtCell) truePaid += parseFloat(pmtCell.textContent.replace(/,/g,'')) || 0;
+      }
+    });
+  }
+
   var loan = {
     name:        name,
     bank:        bank,
@@ -6704,19 +6754,20 @@ function saveAddLoan() {
     status:      (document.getElementById('al-status')||{}).value || 'نشط',
     principal:   principal,
     rate:        rate,
-    years:       years,
-    total_amount: totalAmt,
-    installment: pmt,
-    inst_total:  months,
-    inst_paid:   paid > 0 && pmt > 0 ? Math.round(paid/pmt) : 0,
-    paid_amount: paid,
-    remaining:   Math.max(0, totalAmt - paid),
+    years:       trueMonths / 12,
+    total_amount: trueTotal,
+    installment: validInstRows.length > 0 ? parseFloat(validInstRows[0].pmt) : pmt,
+    inst_total:  trueMonths,
+    inst_paid:   Object.values(_amortStatuses).filter(function(s){return s==='paid';}).length,
+    paid_amount: truePaid,
+    remaining:   Math.max(0, trueTotal - truePaid),
     start_date:  (document.getElementById('al-start')||{}).value || '',
     next_date:   (document.getElementById('al-next-date')||{}).value || '',
     notes:       (document.getElementById('al-notes')||{}).value || '',
     collateral:  'بدون ضمان',
     created_at:  new Date().toISOString(),
     installment_rows: JSON.parse(JSON.stringify(_installmentRows)),
+    amort_statuses:   JSON.parse(JSON.stringify(_amortStatuses)),
   };
 
   // Ensure loansData is always a valid array
