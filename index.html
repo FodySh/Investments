@@ -6427,9 +6427,9 @@ function buildAmortTable(principal, annualRate, months, startDate) {
     periods.push({ pmt: pmtAuto, months: months });
   }
 
-  // ── بناء الجدول فترة بفترة ──────────────────────────────────────────────
-  var balance = principal, totalPay=0, totalPrinc=0, totalInt=0;
-  var rows = [], num = 0;
+  // ── المرور الأول: احسب كل الدفعات واحفظها ────────────────────────────────
+  var balance = principal, num = 0;
+  var allRows = []; // {actualPmt, princPart, interest, intPct, periodIdx, date, pmtAmt}
 
   for (var p = 0; p < periods.length; p++) {
     var period = periods[p];
@@ -6445,38 +6445,45 @@ function buildAmortTable(principal, annualRate, months, startDate) {
       var actualPmt = +(princPart + interest).toFixed(2);
       balance       = +Math.max(0, balance - princPart).toFixed(2);
 
-      totalPay   += actualPmt;
-      totalPrinc += princPart;
-      totalInt   += interest;
-
       var d = new Date(start); d.setMonth(d.getMonth() + num);
-      var intPct = pmtAmt > 0 ? interest/pmtAmt*100 : 0;
-      var clr = intPct>50?'var(--red)':intPct>25?'var(--orange)':'var(--green)';
-      var negWarn = interest > pmtAmt
-        ? ' title="⚠️ الفائدة أكبر من القسط — الرصيد يزيد"'
-        : '';
-
-      // لون مختلف لكل فترة لتمييزها بصرياً
-      var periodBg = p % 2 === 1 ? 'background:rgba(78,205,196,0.03)' : '';
-
-      rows.push('<tr style="'+periodBg+'"'+ negWarn +'>'
-        +'<td style="color:var(--muted);font-size:11px">'+num+'</td>'
-        +'<td style="font-size:11px;color:var(--muted)">'+d.toLocaleDateString('ar-SA-u-nu-latn',{year:'numeric',month:'short'})+'</td>'
-        +'<td class="mono" style="color:var(--gold);font-weight:700'+(interest>pmtAmt?';text-decoration:underline;text-decoration-color:var(--red)':'')+'">'+fmt2(actualPmt)+'</td>'
-        +'<td class="mono" style="color:var(--cyan)">'+fmt2(princPart)+'</td>'
-        +'<td class="mono" style="color:var(--red)">'+fmt2(interest)+'</td>'
-        +'<td class="mono">'+(balance>0.01?fmt2(balance):'<span style="color:var(--green)">✅ مسدَّد</span>')+'</td>'
-        +'<td><div style="display:flex;align-items:center;gap:4px">'
-          +'<div style="height:5px;width:40px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden">'
-            +'<div style="height:100%;width:'+Math.min(intPct,100).toFixed(0)+'%;background:'+clr+'"></div></div>'
-          +'<span style="font-size:10px;color:'+clr+'">'+intPct.toFixed(0)+'%</span>'
-        +'</div></td>'
-        +'</tr>');
-
+      allRows.push({ num: num, actualPmt: actualPmt, princPart: princPart,
+                     interest: interest, pmtAmt: pmtAmt, periodIdx: p,
+                     date: d.toLocaleDateString('ar-SA-u-nu-latn',{year:'numeric',month:'short'}) });
       if (balance <= 0) break;
     }
     if (balance <= 0) break;
   }
+
+  // ── المرور الثاني: احسب الرصيد المتبقي (أصل + فوائد مستقبلية) ─────────
+  var totalPay   = allRows.reduce(function(s,r){ return s+r.actualPmt; }, 0);
+  var totalPrinc = allRows.reduce(function(s,r){ return s+r.princPart; }, 0);
+  var totalInt   = allRows.reduce(function(s,r){ return s+r.interest;  }, 0);
+
+  var cumPay = 0;
+  var rows = [];
+  allRows.forEach(function(row) {
+    cumPay += row.actualPmt;
+    var remaining = +(totalPay - cumPay).toFixed(2); // إجمالي ما تبقى (أصل + فوائد)
+
+    var intPct  = row.pmtAmt > 0 ? row.interest/row.pmtAmt*100 : 0;
+    var clr     = intPct>50?'var(--red)':intPct>25?'var(--orange)':'var(--green)';
+    var negWarn = row.interest > row.pmtAmt ? ' title="⚠️ الفائدة أكبر من القسط"' : '';
+    var periodBg= row.periodIdx % 2 === 1 ? 'background:rgba(78,205,196,0.03)' : '';
+
+    rows.push('<tr style="'+periodBg+'"'+ negWarn +'>'
+      +'<td style="color:var(--muted);font-size:11px">'+row.num+'</td>'
+      +'<td style="font-size:11px;color:var(--muted)">'+row.date+'</td>'
+      +'<td class="mono" style="color:var(--gold);font-weight:700'+(row.interest>row.pmtAmt?';text-decoration:underline;text-decoration-color:var(--red)':'')+'">'+fmt2(row.actualPmt)+'</td>'
+      +'<td class="mono" style="color:var(--cyan)">'+fmt2(row.princPart)+'</td>'
+      +'<td class="mono" style="color:var(--red)">'+fmt2(row.interest)+'</td>'
+      +'<td class="mono">'+(remaining>0.01?fmt2(remaining):'<span style="color:var(--green)">✅ مسدَّد</span>')+'</td>'
+      +'<td><div style="display:flex;align-items:center;gap:4px">'
+        +'<div style="height:5px;width:40px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden">'
+          +'<div style="height:100%;width:'+Math.min(intPct,100).toFixed(0)+'%;background:'+clr+'"></div></div>'
+        +'<span style="font-size:10px;color:'+clr+'">'+intPct.toFixed(0)+'%</span>'
+      +'</div></td>'
+      +'</tr>');
+  });
 
   var setEl = function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
   setEl('namort-total-pay',       fmt2(totalPay)+' ر.س');
@@ -6569,10 +6576,10 @@ function openLoanEditPage(idx) {
     setsel('al-bank', l.bank); setsel('al-type', l.type); setsel('al-status', l.status);
     var titleEl=document.getElementById('add-loan-title');
     if(titleEl) titleEl.textContent='🏦 تعديل القرض: '+l.name;
-    calcAddLoan();
-    // Restore installment rows
+    // حمّل _installmentRows أولاً حتى يستخدمها buildAmortTable داخل calcAddLoan
     _installmentRows = Array.isArray(l && l.installment_rows) ? JSON.parse(JSON.stringify(l.installment_rows)) : [];
     renderInstallmentTable();
+    calcAddLoan();
   }, 100);
 }
 
