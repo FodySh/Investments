@@ -2951,6 +2951,24 @@
               <input type="hidden" id="ln-installments-rem" />
             </div>
 
+            <!-- Custom Payment Schedule -->
+            <div class="form-section" id="custom-sched-section">
+              <div class="form-section-title" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+                <span>📋 جدول الأقساط</span>
+                <button type="button" onclick="addCustomSchedRow()" style="background:rgba(92,185,138,0.12);border:1px solid rgba(92,185,138,0.3);border-radius:8px;padding:5px 14px;color:var(--green);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">+ إضافة فترة</button>
+              </div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6">
+                أدخل فترات الأقساط المختلفة إذا كان القسط يتغير خلال مدة القرض.<br>
+                <span style="color:var(--gold)">مثال: 5 سنوات بقسط 4,550 ر.س ثم 15 سنة بقسط 3,973 ر.س</span><br>
+                اتركه فارغاً لاستخدام حساب PMT التلقائي.
+              </div>
+              <div id="custom-sched-rows" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px"></div>
+              <div id="custom-sched-summary" style="display:none;background:rgba(201,169,110,0.06);border:1px solid rgba(201,169,110,0.2);border-radius:10px;padding:14px 16px;margin-top:10px">
+                <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:10px">ملخص جدول الأقساط المخصص</div>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:center" id="custom-sched-summary-grid"></div>
+              </div>
+            </div>
+
             <!-- Row 3: Timeline -->
             <div class="form-section">
               <div class="form-section-title">📅 الجدول الزمني</div>
@@ -3614,11 +3632,19 @@
     <!-- جدول السداد الشهري -->
     <div id="new-amort-section" style="display:none;margin-top:24px">
       <div class="section-card">
-        <div class="section-head" onclick="toggleNewAmortTable()" style="cursor:pointer">
-          <span class="section-title">📅 جدول السداد الشهري</span>
-          <div style="display:flex;align-items:center;gap:10px">
+        <div class="section-head" style="cursor:pointer">
+          <div onclick="toggleNewAmortTable()" style="display:flex;align-items:center;gap:8px;flex:1">
+            <span class="section-title">📅 جدول السداد الشهري</span>
             <span id="namort-toggle-icon" style="font-size:12px;color:var(--muted)">▼ إخفاء</span>
             <span class="section-count" id="namort-count">—</span>
+          </div>
+          <div style="display:flex;gap:8px" onclick="event.stopPropagation()">
+            <button onclick="exportAmortExcel()" style="background:rgba(92,185,138,0.12);border:1px solid rgba(92,185,138,0.3);border-radius:8px;padding:5px 12px;color:var(--green);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">
+              <span>📊</span> Excel
+            </button>
+            <button onclick="exportAmortPDF()" style="background:rgba(224,112,112,0.12);border:1px solid rgba(224,112,112,0.3);border-radius:8px;padding:5px 12px;color:var(--rose);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">
+              <span>📄</span> PDF
+            </button>
           </div>
         </div>
         <div id="namort-table-wrap">
@@ -6367,36 +6393,97 @@ function buildAmortTable(principal, annualRate, months, startDate) {
   if (!section || !tbody) return;
   if (!principal || !months || months <= 0) { section.style.display = 'none'; return; }
   section.style.display = 'block';
-  var r   = annualRate > 0 ? (annualRate/100)/12 : 0;
-  var pmt = r > 0 ? principal*(r*Math.pow(1+r,months))/(Math.pow(1+r,months)-1) : principal/months;
-  var balance = principal, totalPay=0, totalPrinc=0, totalInt=0;
+
+  var r    = annualRate > 0 ? (annualRate/100)/12 : 0;
   var fmt2 = function(n){ return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); };
   var start = startDate ? new Date(startDate) : new Date();
-  var rows = [];
-  for (var i=1; i<=months; i++) {
-    var interest  = balance * r;
-    var princPart = Math.min(pmt - interest, balance);
-    balance = Math.max(0, balance - princPart);
-    totalPay += pmt; totalPrinc += princPart; totalInt += interest;
-    var d = new Date(start); d.setMonth(d.getMonth()+i);
-    var intPct = pmt > 0 ? interest/pmt*100 : 0;
-    var clr = intPct>50?'var(--red)':intPct>25?'var(--orange)':'var(--green)';
-    rows.push('<tr>'
-      +'<td style="color:var(--muted);font-size:11px">'+i+'</td>'
-      +'<td style="font-size:11px;color:var(--muted)">'+d.toLocaleDateString('ar-SA-u-nu-latn',{year:'numeric',month:'short'})+'</td>'
-      +'<td class="mono" style="color:var(--gold);font-weight:700">'+fmt2(pmt)+'</td>'
-      +'<td class="mono" style="color:var(--cyan)">'+fmt2(princPart)+'</td>'
-      +'<td class="mono" style="color:var(--red)">'+fmt2(interest)+'</td>'
-      +'<td class="mono">'+(balance>0.01?fmt2(balance):'<span style="color:var(--green)">✅ مسدَّد</span>')+'</td>'
-      +'<td><div style="display:flex;align-items:center;gap:4px"><div style="height:5px;width:40px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+intPct.toFixed(0)+'%;background:'+clr+'"></div></div><span style="font-size:10px;color:'+clr+'">'+intPct.toFixed(0)+'%</span></div></td>'
-      +'</tr>');
+
+  // ── بناء قائمة الفترات ──────────────────────────────────────────────────
+  // الأولوية: _installmentRows (جدول الأقساط المدخل) ← ثم PMT تلقائي
+  var periods = [];
+
+  var validRows = (_installmentRows || []).filter(function(row) {
+    var from = parseFloat(row.fromYear);
+    var to   = parseFloat(row.toYear);
+    var pmt  = parseFloat(row.pmt);
+    return from > 0 && to >= from && pmt > 0;
+  });
+
+  if (validRows.length > 0) {
+    // رتّب الفترات تصاعدياً ثم حوّلها إلى {pmt, months}
+    validRows.sort(function(a,b){ return parseFloat(a.fromYear)-parseFloat(b.fromYear); });
+    validRows.forEach(function(row) {
+      var from  = parseFloat(row.fromYear);
+      var to    = parseFloat(row.toYear);
+      var pmt   = parseFloat(row.pmt);
+      var mths  = Math.round((to - from + 1) * 12);
+      periods.push({ pmt: pmt, months: mths });
+    });
+  } else {
+    // لا يوجد جدول مخصص — استخدم PMT موحّد
+    var pmtAuto = r > 0
+      ? principal * (r * Math.pow(1+r, months)) / (Math.pow(1+r, months) - 1)
+      : principal / months;
+    periods.push({ pmt: pmtAuto, months: months });
   }
+
+  // ── بناء الجدول فترة بفترة ──────────────────────────────────────────────
+  var balance = principal, totalPay=0, totalPrinc=0, totalInt=0;
+  var rows = [], num = 0;
+
+  for (var p = 0; p < periods.length; p++) {
+    var period = periods[p];
+    var pmtAmt = period.pmt;
+    var nMonths = period.months;
+
+    for (var i = 0; i < nMonths; i++) {
+      if (balance <= 0.005) break;
+      num++;
+      var interest  = +(balance * r).toFixed(2);
+      var isLast    = balance <= pmtAmt;
+      var princPart = isLast ? +balance.toFixed(2) : +Math.min(Math.max(pmtAmt - interest, 0), balance).toFixed(2);
+      var actualPmt = +(princPart + interest).toFixed(2);
+      balance       = +Math.max(0, balance - princPart).toFixed(2);
+
+      totalPay   += actualPmt;
+      totalPrinc += princPart;
+      totalInt   += interest;
+
+      var d = new Date(start); d.setMonth(d.getMonth() + num);
+      var intPct = pmtAmt > 0 ? interest/pmtAmt*100 : 0;
+      var clr = intPct>50?'var(--red)':intPct>25?'var(--orange)':'var(--green)';
+      var negWarn = interest > pmtAmt
+        ? ' title="⚠️ الفائدة أكبر من القسط — الرصيد يزيد"'
+        : '';
+
+      // لون مختلف لكل فترة لتمييزها بصرياً
+      var periodBg = p % 2 === 1 ? 'background:rgba(78,205,196,0.03)' : '';
+
+      rows.push('<tr style="'+periodBg+'"'+ negWarn +'>'
+        +'<td style="color:var(--muted);font-size:11px">'+num+'</td>'
+        +'<td style="font-size:11px;color:var(--muted)">'+d.toLocaleDateString('ar-SA-u-nu-latn',{year:'numeric',month:'short'})+'</td>'
+        +'<td class="mono" style="color:var(--gold);font-weight:700'+(interest>pmtAmt?';text-decoration:underline;text-decoration-color:var(--red)':'')+'">'+fmt2(actualPmt)+'</td>'
+        +'<td class="mono" style="color:var(--cyan)">'+fmt2(princPart)+'</td>'
+        +'<td class="mono" style="color:var(--red)">'+fmt2(interest)+'</td>'
+        +'<td class="mono">'+(balance>0.01?fmt2(balance):'<span style="color:var(--green)">✅ مسدَّد</span>')+'</td>'
+        +'<td><div style="display:flex;align-items:center;gap:4px">'
+          +'<div style="height:5px;width:40px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden">'
+            +'<div style="height:100%;width:'+Math.min(intPct,100).toFixed(0)+'%;background:'+clr+'"></div></div>'
+          +'<span style="font-size:10px;color:'+clr+'">'+intPct.toFixed(0)+'%</span>'
+        +'</div></td>'
+        +'</tr>');
+
+      if (balance <= 0) break;
+    }
+    if (balance <= 0) break;
+  }
+
   var setEl = function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
   setEl('namort-total-pay',       fmt2(totalPay)+' ر.س');
   setEl('namort-total-principal', fmt2(totalPrinc)+' ر.س');
   setEl('namort-total-interest',  fmt2(totalInt)+' ر.س');
   setEl('namort-cost-pct',        (totalInt/principal*100).toFixed(2)+'%');
-  setEl('namort-count', months+' قسط');
+  setEl('namort-count', num+' قسط');
   tbody.innerHTML = rows.join('');
 }
 
@@ -6530,6 +6617,9 @@ function showLoanForm(idx) {
     document.getElementById('ln-installments-paid').value  = l.inst_paid || '';
     document.getElementById('ln-next-date').value      = l.next_date || '';
     document.getElementById('ln-notes').value          = l.notes || '';
+    // تحميل جدول الأقساط المخصص إن وُجد
+    _customSched = (l.custom_sched && l.custom_sched.length) ? JSON.parse(JSON.stringify(l.custom_sched)) : [];
+    renderCustomSchedRows();
     calcLoan();
   } else {
     // Reset
@@ -6542,6 +6632,8 @@ function showLoanForm(idx) {
 function hideLoanForm() {
   document.getElementById('loan-form-wrap').style.display = 'none';
   editingLoanIdx = null;
+  _customSched = [];
+  renderCustomSchedRows();
 }
 
 //  PMT FORMULA 
@@ -6554,35 +6646,115 @@ function calcPMT(principal, annualRatePct, years) {
   return principal * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
 }
 
-// Build full amortization schedule array
+// ── جدول الأقساط المخصص ─────────────────────────────────────────────────────
+var _customSched = []; // [{pmt: 4550, months: 60}, ...]
+
+function addCustomSchedRow(pmt, months) {
+  _customSched.push({ pmt: pmt||0, months: months||12 });
+  renderCustomSchedRows();
+  calcLoan();
+}
+
+function removeCustomSchedRow(idx) {
+  _customSched.splice(idx, 1);
+  renderCustomSchedRows();
+  calcLoan();
+}
+
+function renderCustomSchedRows() {
+  var el = document.getElementById('custom-sched-rows');
+  if (!el) return;
+  if (!_customSched.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:11px;padding:6px 0;font-style:italic">لا توجد فترات — سيُستخدم PMT التلقائي</div>';
+    return;
+  }
+  el.innerHTML = _customSched.map(function(row, i) {
+    var total = row.pmt * row.months;
+    var yrs   = row.months / 12;
+    return '<div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:10px 12px">' +
+      '<div class="field-group">' +
+        '<label class="field-label">القسط الشهري (ر.س)</label>' +
+        '<input class="f-input" style="font-family:monospace;color:var(--gold)" type="number" step="0.01" value="'+row.pmt+'" placeholder="0.00" ' +
+          'oninput="_customSched['+i+'].pmt=parseFloat(this.value)||0;renderCustomSchedRows();calcLoan()" />' +
+      '</div>' +
+      '<div class="field-group">' +
+        '<label class="field-label">المدة (سنة)</label>' +
+        '<input class="f-input" type="number" step="0.5" min="0.5" value="'+yrs+'" placeholder="مثال: 5" ' +
+          'oninput="_customSched['+i+'].months=Math.round((parseFloat(this.value)||0)*12);renderCustomSchedRows();calcLoan()" />' +
+      '</div>' +
+      '<div class="field-group">' +
+        '<label class="field-label">إجمالي الفترة</label>' +
+        '<div style="font-family:monospace;font-size:13px;font-weight:700;color:var(--teal);padding:10px 14px;background:rgba(78,205,196,0.06);border:1px solid rgba(78,205,196,0.15);border-radius:10px">' +
+          row.months+' شهر · '+(total>0?total.toLocaleString('en-US',{maximumFractionDigits:0})+' ر.س':'—') +
+        '</div>' +
+      '</div>' +
+      '<button onclick="removeCustomSchedRow('+i+')" style="background:var(--rose-dim);border:1px solid rgba(224,112,112,0.3);border-radius:8px;padding:10px 12px;color:var(--rose);cursor:pointer;font-size:14px;align-self:end">🗑</button>' +
+    '</div>';
+  }).join('');
+}
+
+function getCustomSchedValid() {
+  return _customSched.filter(function(r){ return r.pmt>0 && r.months>0; });
+}
+
+// ── بناء جدول الإطفاء التلقائي (PMT موحّد) ───────────────────────────────
 function buildAmortSchedule(principal, annualRatePct, years, startDate) {
-  const n = years * 12;
-  const r = (annualRatePct / 100) / 12;
+  const n   = Math.round(years * 12);
   const pmt = calcPMT(principal, annualRatePct, years);
+  const schedule = [{ pmt: pmt, months: n }];
+  return _buildAmortFromSchedule(principal, annualRatePct, schedule, startDate);
+}
+
+// ── بناء جدول الإطفاء من جدول أقساط مخصص ───────────────────────────────
+function buildAmortScheduleCustom(principal, annualRatePct, customSched, startDate) {
+  return _buildAmortFromSchedule(principal, annualRatePct, customSched, startDate);
+}
+
+// ── الدالة المشتركة ──────────────────────────────────────────────────────
+function _buildAmortFromSchedule(principal, annualRatePct, periods, startDate) {
+  const r = (annualRatePct / 100) / 12;
   let balance = principal;
-  const rows = [];
-  let date = startDate ? new Date(startDate) : new Date();
+  const rows  = [];
+  let date    = startDate ? new Date(startDate) : new Date();
+  let num     = 0;
 
-  for (let i = 1; i <= n; i++) {
-    const interestPart  = balance * r;
-    const principalPart = pmt - interestPart;
-    balance = Math.max(0, balance - principalPart);
+  for (let p = 0; p < periods.length; p++) {
+    const period = periods[p];
+    const pmtAmt = period.pmt;
+    const nMonths = period.months;
 
-    // Advance date by 1 month
-    date = new Date(date);
-    date.setMonth(date.getMonth() + 1);
-    const dateStr = date.toLocaleDateString('ar-SA-u-nu-latn', {year:'numeric', month:'2-digit'});
+    for (let i = 0; i < nMonths; i++) {
+      if (balance <= 0.005) break;
+      num++;
+      const interestPart  = +(balance * r).toFixed(2);
+      // آخر دفعة: سدّد الرصيد كله
+      const isLastMonth   = (i === nMonths-1 && p === periods.length-1) || balance <= pmtAmt;
+      const principalPart = isLastMonth
+        ? +balance.toFixed(2)
+        : +(Math.min(Math.max(pmtAmt - interestPart, 0), balance)).toFixed(2);
+      const actualPmt     = +(principalPart + interestPart).toFixed(2);
+      balance = +Math.max(0, balance - principalPart).toFixed(2);
 
-    rows.push({
-      num:           i,
-      date:          dateStr,
-      pmt:           +pmt.toFixed(2),
-      principalPart: +principalPart.toFixed(2),
-      interestPart:  +interestPart.toFixed(2),
-      interestPct:   +(interestPart / pmt * 100).toFixed(1),
-      balance:       +balance.toFixed(2),
-      year:          date.getFullYear(),
-    });
+      date = new Date(date);
+      date.setMonth(date.getMonth() + 1);
+
+      rows.push({
+        num,
+        date:          date.toLocaleDateString('ar-SA-u-nu-latn', {year:'numeric', month:'2-digit'}),
+        pmt:           actualPmt,
+        scheduledPmt:  pmtAmt,
+        principalPart,
+        interestPart,
+        interestPct:   pmtAmt > 0 ? +(interestPart / pmtAmt * 100).toFixed(1) : 0,
+        balance,
+        year:          date.getFullYear(),
+        period:        p + 1,
+        negAmort:      interestPart > pmtAmt, // تحذير: الفائدة أكبر من القسط
+      });
+
+      if (balance <= 0) break;
+    }
+    if (balance <= 0) break;
   }
   return rows;
 }
@@ -6596,65 +6768,155 @@ function calcLoan() {
   const instPaid  = parseInt(document.getElementById('ln-installments-paid').value) || 0;
   const startDate = document.getElementById('ln-start').value;
 
-  const pmtBox = document.getElementById('pmt-box');
-  const amortSection = document.getElementById('amort-section');
+  const pmtBox      = document.getElementById('pmt-box');
+  const amortSection= document.getElementById('amort-section');
+  const schedSumEl  = document.getElementById('custom-sched-summary');
+  const schedSumGrid= document.getElementById('custom-sched-summary-grid');
 
-  if (principal <= 0 || rate <= 0 || years <= 0) {
-    if (pmtBox) pmtBox.style.display = 'none';
+  const validSched = getCustomSchedValid();
+  const hasCustom  = validSched.length > 0;
+
+  if (principal <= 0 || rate <= 0) {
+    if (pmtBox)       pmtBox.style.display = 'none';
     if (amortSection) amortSection.style.display = 'none';
+    if (schedSumEl)   schedSumEl.style.display = 'none';
     return;
   }
 
-  const n   = Math.round(years * 12);
-  const pmt = calcPMT(principal, rate, years);
-  const totalAmt  = pmt * n;
-  const totalInt  = totalAmt - principal;
-  const costPct   = (totalInt / principal * 100).toFixed(1);
-
-  // Update PMT display box
-  if (pmtBox) pmtBox.style.display = 'block';
-  const fmt = (v) => v.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-  const set = (id, v) => { const e = document.getElementById(id); if(e) e.textContent = v; };
-  set('pmt-monthly',  fmt(pmt));
-  set('pmt-total',    fmt(totalAmt));
-  set('pmt-interest', fmt(totalInt));
-  set('pmt-cost-pct', costPct + '%');
-
-  // Update readonly fields
+  const fmt    = (v) => (v||0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const fmt0   = (v) => Math.round(v||0).toLocaleString('en-US');
+  const set    = (id, v) => { const e = document.getElementById(id); if(e) e.textContent = v; };
   const setVal = (id, v) => { const e = document.getElementById(id); if(e) e.value = v; };
-  setVal('ln-installment',      fmt(pmt));
-  setVal('ln-total',            totalAmt.toFixed(2));
-  setVal('ln-installments-total', n);
 
-  // End date
-  if (startDate) {
-    const end = new Date(startDate);
-    end.setMonth(end.getMonth() + n);
-    setVal('ln-end', end.toLocaleDateString('ar-SA-u-nu-latn', {year:'numeric', month:'2-digit', day:'2-digit'}));
-  }
+  if (hasCustom) {
+    // ── وضع جدول الأقساط المخصص ───────────────────────
+    _currentAmortSchedule = buildAmortScheduleCustom(principal, rate, validSched, startDate);
 
-  // Progress stats (based on installments paid)
-  const instRem = Math.max(0, n - instPaid);
-  setVal('ln-installments-rem', instRem);
+    const totalN       = _currentAmortSchedule.length;
+    const totalPmtAmt  = _currentAmortSchedule.reduce(function(s,r){ return s+r.pmt; }, 0);
+    const totalInt     = _currentAmortSchedule.reduce(function(s,r){ return s+r.interestPart; }, 0);
+    const finalBalance = totalN > 0 ? _currentAmortSchedule[totalN-1].balance : principal;
+    const costPct      = principal > 0 ? (totalInt/principal*100).toFixed(1) : '0';
+    const negAmortRows = _currentAmortSchedule.filter(function(r){ return r.negAmort; });
 
-  // Build amortization
-  _currentAmortSchedule = buildAmortSchedule(principal, rate, years, startDate);
+    // تحديث pmt-box بملخص مخصص
+    if (pmtBox) {
+      pmtBox.style.display = 'block';
+      var pmtLabel = document.getElementById('pmt-monthly');
+      var pmtTotalEl = document.getElementById('pmt-total');
+      var pmtIntEl = document.getElementById('pmt-interest');
+      var pmtCostEl = document.getElementById('pmt-cost-pct');
+      if (pmtLabel)  pmtLabel.textContent  = validSched.map(function(s){ return fmt0(s.pmt)+' ر.س × '+(s.months/12)+' سنة'; }).join(' ثم ');
+      if (pmtTotalEl)pmtTotalEl.textContent = fmt(totalPmtAmt);
+      if (pmtIntEl)  pmtIntEl.textContent   = fmt(totalInt);
+      if (pmtCostEl) pmtCostEl.textContent  = costPct + '%';
+    }
 
-  // Calc what's been paid so far (principal + interest up to instPaid)
-  let paidPrincipal = 0, paidInterest = 0;
-  for (let i = 0; i < Math.min(instPaid, _currentAmortSchedule.length); i++) {
-    paidPrincipal += _currentAmortSchedule[i].principalPart;
-    paidInterest  += _currentAmortSchedule[i].interestPart;
-  }
-  const remaining = Math.max(0, principal - paidPrincipal);
-  const progress  = principal > 0 ? (paidPrincipal / principal * 100).toFixed(1) : 0;
+    // تحديث ملخص جدول الأقساط
+    if (schedSumEl && schedSumGrid) {
+      schedSumEl.style.display = 'block';
+      schedSumGrid.innerHTML =
+        '<div style="text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">عدد الأقساط الكلي</div><div style="font-family:monospace;font-size:20px;font-weight:800;color:var(--gold)">'+totalN+'</div><div style="font-size:10px;color:var(--muted)">شهر ('+Math.round(totalN/12)+' سنة)</div></div>' +
+        '<div style="text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي الأقساط</div><div style="font-family:monospace;font-size:20px;font-weight:800;color:var(--amber)">'+fmt(totalPmtAmt)+'</div><div style="font-size:10px;color:var(--muted)">ر.س</div></div>' +
+        '<div style="text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي الفائدة</div><div style="font-family:monospace;font-size:20px;font-weight:800;color:var(--rose)">'+fmt(totalInt)+'</div><div style="font-size:10px;color:var(--muted)">'+costPct+'% من القرض</div></div>' +
+        '<div style="text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">الرصيد بعد الجدول</div><div style="font-family:monospace;font-size:20px;font-weight:800;color:'+(finalBalance>100?'var(--rose)':'var(--green)')+'">'+fmt(finalBalance)+'</div><div style="font-size:10px;color:'+(finalBalance>100?'var(--rose)':'var(--muted)')+';">'+(finalBalance>100?'⚠️ رصيد متبقي':'✅ مسدَّد')+'</div></div>';
 
-  setVal('ln-remaining', remaining.toLocaleString('en-US', {maximumFractionDigits:2}));
+      // تحذير الاستهلاك السلبي
+      if (negAmortRows.length > 0) {
+        schedSumGrid.innerHTML += '<div style="grid-column:1/-1;background:rgba(224,112,112,0.1);border:1px solid rgba(224,112,112,0.3);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--rose)">⚠️ تحذير: في '+negAmortRows.length+' شهر القسط أقل من الفائدة — الرصيد سيزيد بدل ما ينقص. ارفع قيمة القسط.</div>';
+      }
+    }
 
-  set('lc-remaining',     remaining > 0 ? remaining.toLocaleString('en-US',{maximumFractionDigits:0}) + ' ر.س' : '✅ مسدَّد');
-  set('lc-progress',      progress + '%');
-  set('lc-interest-paid', paidInterest > 0 ? paidInterest.toLocaleString('en-US',{maximumFractionDigits:0}) + ' ر.س' : '—');
-  set('lc-months-left',   instRem > 0 ? instRem + ' قسط' : '✅');
+    // تحديث الحقول
+    const firstPmt = validSched[0].pmt;
+    setVal('ln-installment',        fmt(firstPmt));
+    setVal('ln-total',              totalPmtAmt.toFixed(2));
+    setVal('ln-installments-total', totalN);
+
+    // تاريخ الانتهاء
+    if (startDate && totalN > 0) {
+      const endD = new Date(startDate);
+      endD.setMonth(endD.getMonth() + totalN);
+      setVal('ln-end', endD.toLocaleDateString('ar-SA-u-nu-latn', {year:'numeric', month:'2-digit', day:'2-digit'}));
+    }
+
+    // التقدم
+    setVal('ln-installments-rem', Math.max(0, totalN - instPaid));
+
+    // تحديث pct paid
+    let paidPrincipal = 0, paidInterest = 0;
+    for (let i = 0; i < Math.min(instPaid, _currentAmortSchedule.length); i++) {
+      paidPrincipal += _currentAmortSchedule[i].principalPart;
+      paidInterest  += _currentAmortSchedule[i].interestPart;
+    }
+    const remaining = Math.max(0, principal - paidPrincipal);
+    const progress  = principal > 0 ? (paidPrincipal / principal * 100).toFixed(1) : 0;
+    setVal('ln-remaining', remaining.toLocaleString('en-US', {maximumFractionDigits:2}));
+    set('lc-remaining',     remaining > 0 ? Math.round(remaining).toLocaleString('en-US') + ' ر.س' : '✅ مسدَّد');
+    set('lc-progress',      progress + '%');
+    set('lc-interest-paid', paidInterest > 0 ? Math.round(paidInterest).toLocaleString('en-US') + ' ر.س' : '—');
+    set('lc-months-left',   Math.max(0, totalN - instPaid) > 0 ? Math.max(0, totalN - instPaid) + ' قسط' : '✅');
+
+  } else {
+    // ── وضع PMT التلقائي (الطريقة القديمة) ───────────────
+    if (!years || years <= 0) {
+      if (pmtBox)       pmtBox.style.display = 'none';
+      if (amortSection) amortSection.style.display = 'none';
+      if (schedSumEl)   schedSumEl.style.display = 'none';
+      return;
+    }
+    if (schedSumEl) schedSumEl.style.display = 'none';
+
+    const n        = Math.round(years * 12);
+    const pmt      = calcPMT(principal, rate, years);
+    const totalAmt = pmt * n;
+    const totalInt = totalAmt - principal;
+    const costPct  = (totalInt / principal * 100).toFixed(1);
+
+    if (pmtBox) pmtBox.style.display = 'block';
+    var pmtLabel  = document.getElementById('pmt-monthly');
+    var pmtTotalEl= document.getElementById('pmt-total');
+    var pmtIntEl  = document.getElementById('pmt-interest');
+    var pmtCostEl = document.getElementById('pmt-cost-pct');
+    if (pmtLabel)   pmtLabel.textContent   = fmt(pmt);
+    if (pmtTotalEl) pmtTotalEl.textContent = fmt(totalAmt);
+    if (pmtIntEl)   pmtIntEl.textContent   = fmt(totalInt);
+    if (pmtCostEl)  pmtCostEl.textContent  = costPct + '%';
+
+    setVal('ln-installment',        fmt(pmt));
+    setVal('ln-total',              totalAmt.toFixed(2));
+    setVal('ln-installments-total', n);
+
+    if (startDate) {
+      const end = new Date(startDate);
+      end.setMonth(end.getMonth() + n);
+      setVal('ln-end', end.toLocaleDateString('ar-SA-u-nu-latn', {year:'numeric', month:'2-digit', day:'2-digit'}));
+    }
+
+    const instRem = Math.max(0, n - instPaid);
+    setVal('ln-installments-rem', instRem);
+
+    // Build amortization
+    _currentAmortSchedule = buildAmortSchedule(principal, rate, years, startDate);
+
+    // تقدم السداد في وضع PMT
+    let paidPrincipalPMT = 0, paidInterestPMT = 0;
+    for (let i = 0; i < Math.min(instPaid, _currentAmortSchedule.length); i++) {
+      paidPrincipalPMT += _currentAmortSchedule[i].principalPart;
+      paidInterestPMT  += _currentAmortSchedule[i].interestPart;
+    }
+    const remainingPMT = Math.max(0, principal - paidPrincipalPMT);
+    const progressPMT  = principal > 0 ? (paidPrincipalPMT / principal * 100).toFixed(1) : 0;
+    setVal('ln-remaining', remainingPMT.toLocaleString('en-US', {maximumFractionDigits:2}));
+    set('lc-remaining',     remainingPMT > 0 ? Math.round(remainingPMT).toLocaleString('en-US') + ' ر.س' : '✅ مسدَّد');
+    set('lc-progress',      progressPMT + '%');
+    set('lc-interest-paid', paidInterestPMT > 0 ? Math.round(paidInterestPMT).toLocaleString('en-US') + ' ر.س' : '—');
+    set('lc-months-left',   Math.max(0, n - instPaid) > 0 ? Math.max(0, n - instPaid) + ' قسط' : '✅');
+  } // end else (PMT auto)
+
+  // ── جدول الإطفاء مشترك ────────────────────────────────
+  if (amortSection) amortSection.style.display = 'block';
+
 
   // Show amortization table
   if (amortSection) amortSection.style.display = 'block';
@@ -6772,6 +7034,161 @@ function renderYearSummary(yearsList) {
   }).join('');
 }
 
+// ── تصدير جدول السداد الشهري ────────────────────────────────────────────────
+function _getAmortRows() {
+  // اقرأ من tbody مباشرة لأنه المصدر الفعلي بعد buildAmortTable
+  var tbody = document.getElementById('namort-tbody');
+  if (!tbody) return [];
+  var rows = [];
+  tbody.querySelectorAll('tr').forEach(function(tr, idx) {
+    var cells = tr.querySelectorAll('td');
+    if (cells.length < 6) return;
+    rows.push({
+      num:      cells[0].textContent.trim(),
+      date:     cells[1].textContent.trim(),
+      pmt:      cells[2].textContent.trim(),
+      principal:cells[3].textContent.trim(),
+      interest: cells[4].textContent.trim(),
+      balance:  cells[5].textContent.replace('✅ مسدَّد','0').trim(),
+      intPct:   cells[6] ? cells[6].textContent.trim() : ''
+    });
+  });
+  return rows;
+}
+
+function _getAmortMeta() {
+  // اسم القرض من حقل الاسم المرئي في صفحة القروض
+  var nameEl = document.getElementById('al-name') || document.getElementById('ln-name');
+  var name   = nameEl ? (nameEl.value||nameEl.textContent||'').trim() : '';
+  if (!name) name = 'القرض';
+  return {
+    name:      name,
+    pay:       (document.getElementById('namort-total-pay')||{}).textContent||'',
+    principal: (document.getElementById('namort-total-principal')||{}).textContent||'',
+    interest:  (document.getElementById('namort-total-interest')||{}).textContent||'',
+    costPct:   (document.getElementById('namort-cost-pct')||{}).textContent||'',
+    count:     (document.getElementById('namort-count')||{}).textContent||''
+  };
+}
+
+function exportAmortExcel() {
+  var rows = _getAmortRows();
+  if (!rows.length) { showToast('⚠️ لا يوجد جدول لتصديره'); return; }
+  var meta = _getAmortMeta();
+
+  function loadXLSX(cb) {
+    if (typeof XLSX !== 'undefined') { cb(); return; }
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+    s.onload = cb; document.head.appendChild(s);
+  }
+
+  loadXLSX(function() {
+    var wb = XLSX.utils.book_new();
+
+    // ورقة الجدول
+    var headers = ['#','التاريخ','القسط الكلي (ر.س)','سداد الأصل (ر.س)','الفائدة (ر.س)','الرصيد المتبقي (ر.س)','نسبة الفائدة'];
+    var data = [headers];
+    rows.forEach(function(r) {
+      data.push([r.num, r.date, r.pmt, r.principal, r.interest, r.balance, r.intPct]);
+    });
+    // صف المجاميع
+    data.push(['','الإجمالي', meta.pay, meta.principal, meta.interest, '', meta.costPct]);
+
+    var ws = XLSX.utils.aoa_to_sheet(data);
+
+    // عرض الأعمدة
+    ws['!cols'] = [
+      {wch:6},{wch:14},{wch:18},{wch:18},{wch:16},{wch:20},{wch:14}
+    ];
+
+    XLSX.utils.book_append_sheet(wb, ws, 'جدول السداد');
+
+    // ورقة ملخص
+    var sumData = [
+      ['بيان','القيمة'],
+      ['اسم القرض', meta.name],
+      ['عدد الأقساط', meta.count],
+      ['إجمالي المدفوعات', meta.pay],
+      ['إجمالي الأصل', meta.principal],
+      ['إجمالي الفوائد', meta.interest],
+      ['تكلفة الفائدة', meta.costPct],
+    ];
+    var wsSummary = XLSX.utils.aoa_to_sheet(sumData);
+    wsSummary['!cols'] = [{wch:22},{wch:22}];
+    XLSX.utils.book_append_sheet(wb, wsSummary, 'ملخص');
+
+    XLSX.writeFile(wb, 'جدول_السداد_' + meta.name + '.xlsx');
+    showToast('📊 تم تصدير جدول السداد إلى Excel');
+  });
+}
+
+function exportAmortPDF() {
+  var rows = _getAmortRows();
+  if (!rows.length) { showToast('⚠️ لا يوجد جدول لتصديره'); return; }
+  var meta = _getAmortMeta();
+
+  var html = '<!DOCTYPE html><html dir="rtl" lang="ar">'
+    + '<head><meta charset="UTF-8">'
+    + '<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">'
+    + '<style>'
+    + 'body{font-family:Cairo,sans-serif;font-size:11px;color:#111;background:#fff;margin:0;padding:20px}'
+    + 'h2{font-size:16px;font-weight:800;margin-bottom:4px;color:#1a1a1a}'
+    + '.meta{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;background:#f7f5f0;border-radius:8px;padding:12px;margin-bottom:16px}'
+    + '.meta-item{text-align:center}'
+    + '.meta-label{font-size:9px;color:#888;margin-bottom:2px}'
+    + '.meta-value{font-size:13px;font-weight:800;color:#1a1a1a}'
+    + 'table{width:100%;border-collapse:collapse;font-size:10px}'
+    + 'thead th{background:#1a1810;color:#c9a96e;padding:7px 8px;text-align:right;font-weight:700;border:1px solid #ddd}'
+    + 'tbody tr:nth-child(even){background:#faf9f7}'
+    + 'tbody td{padding:5px 8px;border:1px solid #e5e5e5;text-align:right}'
+    + 'tfoot td{background:#1a1810;color:#e2c48a;padding:7px 8px;font-weight:800;border:1px solid #555;text-align:right}'
+    + '.num{font-family:monospace;direction:ltr;text-align:left}'
+    + '@media print{body{padding:10px}}'
+    + '@page{size:A4 landscape;margin:12mm}'
+    + '</style></head><body>'
+    + '<h2>📅 جدول السداد الشهري — ' + meta.name + '</h2>'
+    + '<p style="color:#888;font-size:10px;margin-bottom:12px">تاريخ الإنشاء: ' + new Date().toLocaleDateString('ar-SA-u-nu-latn',{year:'numeric',month:'long',day:'numeric'}) + '</p>'
+    + '<div class="meta">'
+    + '<div class="meta-item"><div class="meta-label">إجمالي المدفوعات</div><div class="meta-value">' + meta.pay + '</div></div>'
+    + '<div class="meta-item"><div class="meta-label">إجمالي الأصل</div><div class="meta-value">' + meta.principal + '</div></div>'
+    + '<div class="meta-item"><div class="meta-label">إجمالي الفوائد</div><div class="meta-value">' + meta.interest + '</div></div>'
+    + '<div class="meta-item"><div class="meta-label">تكلفة الفائدة</div><div class="meta-value">' + meta.costPct + '</div></div>'
+    + '</div>'
+    + '<table>'
+    + '<thead><tr><th>#</th><th>التاريخ</th><th>القسط الكلي</th><th>سداد الأصل</th><th>الفائدة</th><th>الرصيد المتبقي</th><th>% الفائدة</th></tr></thead>'
+    + '<tbody>'
+    + rows.map(function(r) {
+        return '<tr>'
+          + '<td class="num">' + r.num + '</td>'
+          + '<td>' + r.date + '</td>'
+          + '<td class="num" style="color:#8b6914;font-weight:700">' + r.pmt + '</td>'
+          + '<td class="num" style="color:#1a6b3a">' + r.principal + '</td>'
+          + '<td class="num" style="color:#8b1a1a">' + r.interest + '</td>'
+          + '<td class="num">' + r.balance + '</td>'
+          + '<td class="num">' + r.intPct + '</td>'
+          + '</tr>';
+      }).join('')
+    + '</tbody>'
+    + '<tfoot><tr><td colspan="2">الإجمالي</td>'
+    + '<td class="num">' + meta.pay + '</td>'
+    + '<td class="num">' + meta.principal + '</td>'
+    + '<td class="num">' + meta.interest + '</td>'
+    + '<td></td><td class="num">' + meta.costPct + '</td>'
+    + '</tr></tfoot>'
+    + '</table></body></html>';
+
+  var win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  win.onload = function() {
+    setTimeout(function() {
+      win.print();
+    }, 600);
+  };
+  showToast('📄 جارٍ فتح نافذة الطباعة...');
+}
+
 function exportAmortCSV() {
   if (!_currentAmortSchedule.length) { showToast('⚠️ لا يوجد جدول لتصديره'); return; }
   const header = ['#','التاريخ','القسط الكلي','سداد الأصل','الفائدة','% الفائدة','الرصيد المتبقي'];
@@ -6812,19 +7229,22 @@ function saveLoan() {
     paidInterest  += sched[i].interestPart;
   }
 
+  const validSched = getCustomSchedValid();
+  const hasCustom  = validSched.length > 0;
+
   const loan = {
     name, bank,
     type:          document.getElementById('ln-type').value,
     status:        document.getElementById('ln-status').value,
     collateral:    document.getElementById('ln-collateral').value,
-    principal, rate, years,
-    pmt:           +pmt.toFixed(2),
+    principal, rate, years: hasCustom ? (validSched.reduce(function(s,r){return s+r.months;},0)/12) : years,
+    pmt:           hasCustom ? validSched[0].pmt : +pmt.toFixed(2),
     total_amount:  +total_amt.toFixed(2),
     total_interest:+total_int.toFixed(2),
-    installment:   +pmt.toFixed(2),
+    installment:   hasCustom ? validSched[0].pmt : +pmt.toFixed(2),
     inst_total:    n,
     inst_paid:     instPaid,
-    paid_amount:   +(instPaid * pmt).toFixed(2),
+    paid_amount:   +(instPaid * (hasCustom?validSched[0].pmt:pmt)).toFixed(2),
     paid_principal:+paidPrincipal.toFixed(2),
     paid_interest: +paidInterest.toFixed(2),
     remaining:     +(principal - paidPrincipal).toFixed(2),
@@ -6832,6 +7252,7 @@ function saveLoan() {
     end_date:      document.getElementById('ln-end').value,
     next_date:     document.getElementById('ln-next-date').value,
     notes:         document.getElementById('ln-notes').value,
+    custom_sched:  hasCustom ? validSched : null,
     schedule:      sched,
     created_at:    new Date().toISOString(),
   };
@@ -8333,6 +8754,7 @@ document.addEventListener('DOMContentLoaded', function() {
   setTimeout(function() {
     populateCapitalSrcSelect();
     populatePlatformSelects();
+    renderCustomSchedRows();
   }, 600);
 });
 
