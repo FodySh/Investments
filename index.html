@@ -3466,13 +3466,15 @@
             <div style="font-size:10px;color:var(--muted);margin-bottom:6px">تاريخ الانتهاء المتوقع</div>
             <div id="ld-end-date" style="font-size:14px;font-weight:700;color:var(--white);line-height:1.3">—</div>
             <div style="font-size:10px;color:var(--muted);margin-top:4px" id="ld-months-left"></div>
-          <!-- أزرار الحفظ والمسح -->
-          <div style="display:flex;gap:10px;margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.07)">
-            <button onclick="saveAddLoan()" style="flex:1;background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#1a180e;border:none;border-radius:12px;padding:13px 20px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(201,169,110,0.3);transition:all .2s" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">💾 حفظ القرض</button>
-            <button onclick="resetAddLoan()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:13px 18px;font-size:13px;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">🔄 مسح</button>
-          </div>
+          </div><!-- end date card -->
+        </div><!-- end progress+date grid -->
+
+        <!-- أزرار الحفظ والمسح -->
+        <div style="display:flex;gap:10px;margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.07)">
+          <button onclick="saveAddLoan()" style="flex:1;background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#1a180e;border:none;border-radius:12px;padding:13px 20px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(201,169,110,0.3);transition:all .2s" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">💾 حفظ القرض</button>
+          <button onclick="resetAddLoan()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:13px 18px;font-size:13px;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">🔄 مسح</button>
         </div>
-      </div>
+      </div><!-- end loan-dashboard -->
 
       <div style="display:flex;flex-direction:column;gap:16px" class="add-form-grid">
 
@@ -3613,6 +3615,50 @@
         <div id="al-progress-bar" style="display:none"></div>
       </div>
 
+    <div id="new-amort-section" style="display:none;margin-top:24px">
+      <div class="section-card">
+        <div class="section-head" style="cursor:pointer">
+          <div onclick="toggleNewAmortTable()" style="display:flex;align-items:center;gap:8px;flex:1">
+            <span class="section-title">📅 جدول السداد الشهري</span>
+            <span id="namort-toggle-icon" style="font-size:12px;color:var(--muted)">▼ إخفاء</span>
+            <span class="section-count" id="namort-count">—</span>
+          </div>
+          <div style="display:flex;gap:8px" onclick="event.stopPropagation()">
+            <button onclick="exportAmortExcel()" style="background:rgba(92,185,138,0.12);border:1px solid rgba(92,185,138,0.3);border-radius:8px;padding:5px 12px;color:var(--green);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">
+              <span>📊</span> Excel
+            </button>
+            <button onclick="exportAmortPDF()" style="background:rgba(224,112,112,0.12);border:1px solid rgba(224,112,112,0.3);border-radius:8px;padding:5px 12px;color:var(--rose);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">
+              <span>📄</span> PDF
+            </button>
+          </div>
+        </div>
+        <div id="namort-table-wrap">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border)">
+            <div style="text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي المدفوعات</div><div id="namort-total-pay" style="font-size:15px;font-weight:800;font-family:monospace;color:var(--white)">—</div></div>
+            <div style="text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي الأصل</div><div id="namort-total-principal" style="font-size:15px;font-weight:800;font-family:monospace;color:var(--cyan)">—</div></div>
+            <div style="text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي الفوائد</div><div id="namort-total-interest" style="font-size:15px;font-weight:800;font-family:monospace;color:var(--red)">—</div></div>
+            <div style="text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">تكلفة الفائدة</div><div id="namort-cost-pct" style="font-size:15px;font-weight:800;font-family:monospace;color:var(--orange)">—</div></div>
+          </div>
+          <div class="table-wrap" style="max-height:420px;overflow-y:auto">
+            <table class="data-table" style="font-size:12px">
+              <thead style="position:sticky;top:0;z-index:2;background:var(--card)">
+                <tr>
+                  <th>#</th><th>تاريخ الدفعة</th>
+                  <th style="color:var(--gold)">القسط</th>
+                  <th style="color:var(--cyan)">الأصل</th>
+                  <th style="color:var(--red)">الفائدة</th>
+                  <th>الرصيد المتبقي</th>
+                  <th>نسبة الفائدة</th>
+                  <th>الحالة</th>
+                </tr>
+              </thead>
+              <tbody id="namort-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
       <style>@media(max-width:768px){.add-form-grid{grid-template-columns:1fr !important}#add-loan-summary{position:static !important}}</style>
     </div>
 
@@ -3666,49 +3712,6 @@
   </div>
 </nav>
     <!-- جدول السداد الشهري -->
-    <div id="new-amort-section" style="display:none;margin-top:24px">
-      <div class="section-card">
-        <div class="section-head" style="cursor:pointer">
-          <div onclick="toggleNewAmortTable()" style="display:flex;align-items:center;gap:8px;flex:1">
-            <span class="section-title">📅 جدول السداد الشهري</span>
-            <span id="namort-toggle-icon" style="font-size:12px;color:var(--muted)">▼ إخفاء</span>
-            <span class="section-count" id="namort-count">—</span>
-          </div>
-          <div style="display:flex;gap:8px" onclick="event.stopPropagation()">
-            <button onclick="exportAmortExcel()" style="background:rgba(92,185,138,0.12);border:1px solid rgba(92,185,138,0.3);border-radius:8px;padding:5px 12px;color:var(--green);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">
-              <span>📊</span> Excel
-            </button>
-            <button onclick="exportAmortPDF()" style="background:rgba(224,112,112,0.12);border:1px solid rgba(224,112,112,0.3);border-radius:8px;padding:5px 12px;color:var(--rose);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">
-              <span>📄</span> PDF
-            </button>
-          </div>
-        </div>
-        <div id="namort-table-wrap">
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border)">
-            <div style="text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي المدفوعات</div><div id="namort-total-pay" style="font-size:15px;font-weight:800;font-family:monospace;color:var(--white)">—</div></div>
-            <div style="text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي الأصل</div><div id="namort-total-principal" style="font-size:15px;font-weight:800;font-family:monospace;color:var(--cyan)">—</div></div>
-            <div style="text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي الفوائد</div><div id="namort-total-interest" style="font-size:15px;font-weight:800;font-family:monospace;color:var(--red)">—</div></div>
-            <div style="text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">تكلفة الفائدة</div><div id="namort-cost-pct" style="font-size:15px;font-weight:800;font-family:monospace;color:var(--orange)">—</div></div>
-          </div>
-          <div class="table-wrap" style="max-height:420px;overflow-y:auto">
-            <table class="data-table" style="font-size:12px">
-              <thead style="position:sticky;top:0;z-index:2;background:var(--card)">
-                <tr>
-                  <th>#</th><th>تاريخ الدفعة</th>
-                  <th style="color:var(--gold)">القسط</th>
-                  <th style="color:var(--cyan)">الأصل</th>
-                  <th style="color:var(--red)">الفائدة</th>
-                  <th>الرصيد المتبقي</th>
-                  <th>نسبة الفائدة</th>
-                  <th>الحالة</th>
-                </tr>
-              </thead>
-              <tbody id="namort-tbody"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
 
 <div id="mobile-more-overlay" onclick="closeMobileMore()" style="
   display:none;position:fixed;inset:0;z-index:299;
