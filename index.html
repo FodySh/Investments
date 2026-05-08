@@ -2759,9 +2759,6 @@
           <div class="page-sub">إدارة القروض والالتزامات البنكية بشكل شامل</div>
         </div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-          <a href="cheques.html" target="_blank" style="display:inline-flex;align-items:center;gap:7px;padding:10px 20px;background:rgba(78,205,196,0.12);border:1px solid rgba(78,205,196,0.3);border-radius:10px;color:#4ecdc4;font-size:13px;font-weight:600;text-decoration:none;font-family:inherit;transition:all .15s;" onmouseover="this.style.background='rgba(78,205,196,0.2)'" onmouseout="this.style.background='rgba(78,205,196,0.12)'">
-            🧾 شيكات وسندات الأمر
-          </a>
           <button class="btn-submit" onclick="showPage('add-loan',null,'🏦 إضافة قرض',true)" style="font-size:13px;padding:10px 22px">
             ➕ إضافة قرض
           </button>
@@ -6514,9 +6511,15 @@ function calcAddLoan() {
 var _amortVisible = true;
 
 
-// ── حالات أقساط جدول السداد ─────────────────────────────────────────────────
-var _amortStatuses = {}; // {rowNum: 'pending'|'paid'|'overdue'}
-var _amortLoanIdx  = null; // فهرس القرض الحالي
+// ══════════════════════════════════════════════════════════════════
+// حالات أقساط جدول السداد — مستقلة في Firebase (loan_payments)
+// ══════════════════════════════════════════════════════════════════
+var _amortStatuses = {}; // {rowNum: 'pending'|'paid'|'overdue'}  — للقرض الحالي فقط
+var _amortLoanIdx  = null;
+var _amortLoanKey  = null; // مفتاح فريد لكل قرض
+
+// جميع حالات جميع القروض — تُحمَّل من Firebase
+window.loanPaymentsData = window.loanPaymentsData || {};
 
 var _amortStatusCycle = ['pending', 'paid', 'overdue'];
 var _amortStatusLabel = { paid:'محصّلة', pending:'معلقة', overdue:'متأخرة' };
@@ -6526,13 +6529,18 @@ var _amortStatusStyle = {
   overdue: 'background:rgba(224,112,112,0.12);border:1px solid rgba(224,112,112,0.3);color:var(--rose)'
 };
 
+function _loanKey(loan, idx) {
+  // مفتاح فريد: اسم القرض + تاريخ البدء + المبلغ
+  if (!loan) return 'loan_' + idx;
+  return (loan.name || 'loan') + '|' + (loan.start_date || loan.created_at || idx);
+}
+
 function cycleAmortStatus(rowNum) {
-  var cur = _amortStatuses[rowNum] || 'pending';
-  var idx = _amortStatusCycle.indexOf(cur);
-  var next = _amortStatusCycle[(idx + 1) % _amortStatusCycle.length];
+  var cur  = _amortStatuses[rowNum] || 'pending';
+  var next = _amortStatusCycle[(_amortStatusCycle.indexOf(cur) + 1) % _amortStatusCycle.length];
   _amortStatuses[rowNum] = next;
 
-  // حدّث الـ pill مباشرة بدون إعادة بناء الجدول
+  // حدّث الـ pill مباشرة
   var pill = document.getElementById('amort-status-pill-' + rowNum);
   if (pill) {
     pill.textContent = _amortStatusLabel[next];
@@ -6541,44 +6549,51 @@ function cycleAmortStatus(rowNum) {
       + _amortStatusStyle[next]);
   }
 
-  // احفظ الحالات مع القرض
   _saveAmortStatuses();
-  // حدّث لوحة التحكم
   if (typeof calcAddLoan === 'function') calcAddLoan();
 }
 
 function _saveAmortStatuses() {
-  if (_amortLoanIdx === null || !Array.isArray(window.loansData)) return;
-  var loan = window.loansData[_amortLoanIdx];
-  if (!loan) return;
-  loan.amort_statuses = JSON.parse(JSON.stringify(_amortStatuses));
+  if (_amortLoanIdx === null || !_amortLoanKey) return;
 
-  // إعادة حساب المسدَّد والمتبقي من الحالات الحالية
+  // 1. حفّظ في الكائن العام
+  window.loanPaymentsData[_amortLoanKey] = JSON.parse(JSON.stringify(_amortStatuses));
+
+  // 2. احسب المبالغ من الجدول
   var truePaid = 0;
   var tbody = document.getElementById('namort-tbody');
   if (tbody) {
-    tbody.querySelectorAll('tr').forEach(function(tr, idx) {
-      var num = idx + 1;
+    tbody.querySelectorAll('tr').forEach(function(tr, i) {
+      var num = i + 1;
       if ((_amortStatuses[num] || 'pending') === 'paid') {
-        var pmtCell = tr.querySelectorAll('td')[2];
-        if (pmtCell) truePaid += parseFloat(pmtCell.textContent.replace(/,/g,'')) || 0;
+        var cell = tr.querySelectorAll('td')[2];
+        if (cell) truePaid += parseFloat(cell.textContent.replace(/,/g,'')) || 0;
       }
     });
   }
-  loan.paid_amount = truePaid;
-  loan.remaining   = Math.max(0, (loan.total_amount || loan.principal || 0) - truePaid);
-  loan.inst_paid   = Object.values(_amortStatuses).filter(function(s){return s==='paid';}).length;
 
-  loansData = window.loansData;
-  saveLoansToStorage();
-  // حدّث الكروت فوراً
-  if (typeof renderLoans === 'function') renderLoans();
+  // 3. حدّث بيانات القرض في الذاكرة
+  var loan = window.loansData && window.loansData[_amortLoanIdx];
+  if (loan) {
+    loan.paid_amount = truePaid;
+    loan.remaining   = Math.max(0, (loan.total_amount || loan.principal || 0) - truePaid);
+    loan.inst_paid   = Object.values(_amortStatuses).filter(function(s){return s==='paid';}).length;
+    saveLoansToStorage();
+    if (typeof renderLoans === 'function') renderLoans();
+  }
+
+  // 4. اكتب لـ Firebase
+  if (typeof window.fbSaveLoanPayments === 'function') window.fbSaveLoanPayments();
 }
 
 function _loadAmortStatuses(loanIdx) {
   _amortLoanIdx = loanIdx;
   var loan = window.loansData && window.loansData[loanIdx];
-  _amortStatuses = (loan && loan.amort_statuses) ? JSON.parse(JSON.stringify(loan.amort_statuses)) : {};
+  _amortLoanKey = _loanKey(loan, loanIdx);
+  // اقرأ من الكائن العام (مُحمَّل من Firebase)
+  _amortStatuses = window.loanPaymentsData[_amortLoanKey]
+    ? JSON.parse(JSON.stringify(window.loanPaymentsData[_amortLoanKey]))
+    : {};
 }
 
 function buildAmortTable(principal, annualRate, months, startDate) {
@@ -9882,12 +9897,22 @@ function _loadData(uid) {
     _read(uid, "investments"),
     _read(uid, "loans"),
     _read(uid, "dividends"),
-    _ref(uid, "settings").get().catch(function(){ return null; })
+    _ref(uid, "settings").get().catch(function(){ return null; }),
+    _ref(uid, "loan_payments").get().catch(function(){ return null; })
   ]).then(function(results) {
-    var inv  = results[0];
-    var loans = results[1];
-    var divs  = results[2];
+    var inv          = results[0];
+    var loans        = results[1];
+    var divs         = results[2];
     var settingsSnap = results[3];
+    var paymentsSnap = results[4];
+
+    // تحميل حالات الدفعات
+    if (paymentsSnap && paymentsSnap.exists) {
+      var pd = paymentsSnap.data();
+      if (pd && pd.data && typeof pd.data === 'object') {
+        window.loanPaymentsData = pd.data;
+      }
+    }
 
     // Investments
     if (inv && inv.length > 0) {
@@ -9956,6 +9981,7 @@ function _clearData() {
   _uid = null;
   if (Array.isArray(window.__investments)) window.__investments.length = 0;
   if (Array.isArray(window.loansData))    { window.loansData.length = 0; loansData = window.loansData; }
+  window.loanPaymentsData = {};
 
   _rerender();
   _gate(true);
@@ -9971,6 +9997,27 @@ window.fbSaveInvestments = function() {
 window.fbSaveLoans = function() {
   if (!_uid) return;
   _write(_uid, "loans", Array.from(window.loansData));
+};
+
+// حالات دفعات القروض — collection مستقل
+window.fbSaveLoanPayments = function() {
+  if (!_uid) return;
+  _badge("loading");
+  _ref(_uid, "loan_payments").set(
+    { data: window.loanPaymentsData, uid: _uid, ts: new Date().toISOString() },
+    { merge: true }
+  ).then(function(){ _badge("synced"); })
+   .catch(function(e){ console.error("loan_payments write:", e); _badge("error"); });
+};
+
+window.fbLoadLoanPayments = function(uid) {
+  return _ref(uid, "loan_payments").get().then(function(snap) {
+    if (!snap.exists) return;
+    var d = snap.data();
+    if (d && d.data && typeof d.data === 'object') {
+      window.loanPaymentsData = d.data;
+    }
+  }).catch(function(e){ console.warn("loan_payments read:", e); });
 };
 window.fbSaveDividends = function() {
   if (!_uid) return;
