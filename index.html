@@ -3466,11 +3466,15 @@
             <div style="font-size:10px;color:var(--muted);margin-bottom:6px">تاريخ الانتهاء المتوقع</div>
             <div id="ld-end-date" style="font-size:14px;font-weight:700;color:var(--white);line-height:1.3">—</div>
             <div style="font-size:10px;color:var(--muted);margin-top:4px" id="ld-months-left"></div>
+          <!-- أزرار الحفظ والمسح -->
+          <div style="display:flex;gap:10px;margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.07)">
+            <button onclick="saveAddLoan()" style="flex:1;background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#1a180e;border:none;border-radius:12px;padding:13px 20px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(201,169,110,0.3);transition:all .2s" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">💾 حفظ القرض</button>
+            <button onclick="resetAddLoan()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:13px 18px;font-size:13px;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">🔄 مسح</button>
           </div>
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" class="add-form-grid">
+      <div style="display:flex;flex-direction:column;gap:16px" class="add-form-grid">
 
         <!-- يمين: حقول الإدخال -->
         <div style="display:flex;flex-direction:column;gap:16px">
@@ -3597,64 +3601,16 @@
             </div>
           </div>
 
-                <!-- يسار: ملخص حسابي -->
-        <div style="display:flex;flex-direction:column;gap:16px">
-          <div class="section-card" style="position:sticky;top:72px;border:1px solid rgba(201,169,110,0.3)">
-            <div class="section-head" style="background:rgba(201,169,110,0.06)">
-              <span class="section-title" style="color:var(--gold)">📊 ملخص القرض</span>
-            </div>
-            <div class="section-body">
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-                <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;text-align:center">
-                  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">القسط الشهري</div>
-                  <div id="al-c-pmt" style="font-size:20px;font-weight:800;font-family:monospace;color:var(--gold)">—</div>
-                  <div style="font-size:10px;color:var(--muted);margin-top:2px">ر.س / شهر</div>
-                </div>
-                <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;text-align:center">
-                  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي الفوائد</div>
-                  <div id="al-c-interest" style="font-size:20px;font-weight:800;font-family:monospace;color:var(--red)">—</div>
-                  <div style="font-size:10px;color:var(--muted);margin-top:2px">ر.س</div>
-                </div>
-                <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;text-align:center">
-                  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">إجمالي المبلغ</div>
-                  <div id="al-c-total" style="font-size:20px;font-weight:800;font-family:monospace;color:var(--white)">—</div>
-                  <div style="font-size:10px;color:var(--muted);margin-top:2px">ر.س</div>
-                </div>
-                <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;text-align:center">
-                  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">المتبقي</div>
-                  <div id="al-c-remaining" style="font-size:20px;font-weight:800;font-family:monospace;color:var(--red)">—</div>
-                  <div style="font-size:10px;color:var(--muted);margin-top:2px">ر.س</div>
-                </div>
-              </div>
-              <div style="display:flex;flex-direction:column;gap:8px;font-size:12px">
-                <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
-                  <span style="color:var(--muted)">عدد الأقساط</span>
-                  <span id="al-d-months" style="font-family:monospace;font-weight:600">—</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
-                  <span style="color:var(--muted)">تكلفة الفائدة %</span>
-                  <span id="al-d-cost-pct" style="font-family:monospace;font-weight:600;color:var(--red)">—</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;padding:7px 0">
-                  <span style="color:var(--muted)">تاريخ الانتهاء المتوقع</span>
-                  <span id="al-d-end-date" style="font-family:monospace;font-weight:600">—</span>
-                </div>
-              </div>
-              <div style="margin-top:14px">
-                <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px">
-                  <span>نسبة السداد</span>
-                  <span id="al-progress-pct">0%</span>
-                </div>
-                <div style="height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden">
-                  <div id="al-progress-bar" style="height:100%;background:linear-gradient(90deg,var(--gold),#e8c97a);border-radius:4px;width:0%;transition:width .5s"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <button onclick="saveAddLoan()" style="background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#1a180e;border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:700;cursor:pointer;width:100%;font-family:inherit;box-shadow:0 4px 20px rgba(201,169,110,0.3);transition:all .2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">💾 حفظ القرض</button>
-          <button onclick="resetAddLoan()" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:14px;padding:12px;font-size:13px;color:var(--muted);cursor:pointer;width:100%;font-family:inherit">🔄 مسح</button>
-        </div>
+        <!-- hidden elements for JS compat -->
+        <span id="al-c-pmt" style="display:none"></span>
+        <span id="al-c-interest" style="display:none"></span>
+        <span id="al-c-total" style="display:none"></span>
+        <span id="al-c-remaining" style="display:none"></span>
+        <span id="al-d-months" style="display:none"></span>
+        <span id="al-d-cost-pct" style="display:none"></span>
+        <span id="al-d-end-date" style="display:none"></span>
+        <span id="al-progress-pct" style="display:none"></span>
+        <div id="al-progress-bar" style="display:none"></div>
       </div>
 
       <style>@media(max-width:768px){.add-form-grid{grid-template-columns:1fr !important}#add-loan-summary{position:static !important}}</style>
@@ -6470,28 +6426,82 @@ function calcAddLoan() {
     var nameEl = document.getElementById('al-name');
     var loanName = nameEl ? (nameEl.value || 'القرض').trim() : 'القرض';
     set('ld-loan-name', '📊 ملخص: ' + loanName);
-    set('ld-principal', fmt(principal));
-    set('ld-interest',  totalInt > 0 ? fmt(totalInt) : '—');
-    set('ld-total',     totalAmt > 0 ? fmt(totalAmt) : fmt(principal));
-    set('ld-paid',      paid > 0 ? fmt(paid) : '—');
-    set('ld-remaining', remaining > 0 ? fmt(remaining) : '✅');
-    set('ld-pct-text',  pct.toFixed(1) + '%');
-    set('ld-end-date',  document.getElementById('al-d-end-date') ?
-        document.getElementById('al-d-end-date').textContent : '—');
+
+    // ── الإجمالي الصحيح: من جدول الأقساط إن وُجد، وإلا PMT ──────────────
+    var validInstRows = (_installmentRows || []).filter(function(row) {
+      return parseFloat(row.fromYear) > 0
+        && parseFloat(row.toYear) >= parseFloat(row.fromYear)
+        && parseFloat(row.pmt) > 0;
+    });
+
+    var trueTotal, trueInterest, trueMonths, trueEndDate;
+    if (validInstRows.length > 0) {
+      trueTotal  = 0; trueMonths = 0;
+      validInstRows.forEach(function(row) {
+        var mths = Math.round((parseFloat(row.toYear) - parseFloat(row.fromYear) + 1) * 12);
+        trueTotal  += parseFloat(row.pmt) * mths;
+        trueMonths += mths;
+      });
+      trueInterest = Math.max(0, trueTotal - principal);
+    } else {
+      trueTotal    = totalAmt;
+      trueInterest = totalInt;
+      trueMonths   = months;
+    }
+
+    // تاريخ الانتهاء من trueMonths
+    if (startVal && trueMonths > 0) {
+      var endD = new Date(startVal);
+      endD.setMonth(endD.getMonth() + trueMonths);
+      trueEndDate = endD.toLocaleDateString('ar-SA-u-nu-latn',{year:'numeric',month:'long'});
+      var endFld = document.getElementById('al-end');
+      if (endFld) endFld.value = endD.toISOString().split('T')[0];
+      set('al-d-end-date', trueEndDate);
+    } else {
+      trueEndDate = '—';
+    }
+
+    // ── المسدَّد الصحيح: من حالات جدول السداد (paid فقط) ────────────────
+    var truePaid = 0;
+    // _amortStatuses: {rowNum: status} — نحسب مجموع الأقساط المحصّلة
+    // نحتاج الأقساط الفعلية من tbody
+    var tbody = document.getElementById('namort-tbody');
+    if (tbody && Object.keys(_amortStatuses).length > 0) {
+      tbody.querySelectorAll('tr').forEach(function(tr, idx) {
+        var num = idx + 1;
+        if ((_amortStatuses[num] || 'pending') === 'paid') {
+          var pmtCell = tr.querySelectorAll('td')[2];
+          if (pmtCell) {
+            var v = parseFloat(pmtCell.textContent.replace(/,/g,'')) || 0;
+            truePaid += v;
+          }
+        }
+      });
+    }
+
+    var trueRemaining = Math.max(0, trueTotal - truePaid);
+    var truePct = trueTotal > 0 ? Math.min(100, (truePaid / trueTotal) * 100) : 0;
+    // أشهر متبقية
+    var paidRows = Object.values(_amortStatuses).filter(function(s){return s==='paid';}).length;
+    var monthsLeft = Math.max(0, trueMonths - paidRows);
+
+    set('ld-principal',  fmt(principal));
+    set('ld-interest',   trueInterest > 0 ? fmt(trueInterest) : '—');
+    set('ld-total',      fmt(trueTotal));
+    set('ld-paid',       truePaid > 0 ? fmt(truePaid) : '—');
+    set('ld-remaining',  trueRemaining > 0.01 ? fmt(trueRemaining) : '✅');
+    set('ld-pct-text',   truePct.toFixed(1) + '%');
+    set('ld-end-date',   trueEndDate);
+    set('ld-months-left', monthsLeft > 0 ? monthsLeft + ' قسط متبقٍ' : '✅ مكتمل');
 
     // شريط السداد
     var barPaid = document.getElementById('ld-bar-paid');
     var barInt  = document.getElementById('ld-bar-int');
-    if (barPaid) barPaid.style.width = pct.toFixed(1) + '%';
-    // نسبة الفوائد المتبقية بصرياً (من المجموع الكلي)
-    var intRemPct = totalAmt > 0 ? Math.max(0, Math.min(100 - pct, (totalInt / totalAmt) * (100 - pct))) : 0;
+    if (barPaid) barPaid.style.width = truePct.toFixed(1) + '%';
+    var intRemPct = trueTotal > 0
+      ? Math.max(0, Math.min(100 - truePct, (trueInterest / trueTotal) * (100 - truePct)))
+      : 0;
     if (barInt) barInt.style.width = intRemPct.toFixed(1) + '%';
-
-    // الأشهر المتبقية
-    var monthsLeft = months > 0 && paid > 0 && pmt > 0
-      ? Math.max(0, Math.round((totalAmt - paid) / pmt))
-      : months;
-    set('ld-months-left', monthsLeft > 0 ? monthsLeft + ' قسط متبقٍ' : '✅ مكتمل');
   }
 
   if (typeof buildAmortTable === 'function') buildAmortTable(principal, rate, months, startVal);
@@ -6530,6 +6540,8 @@ function cycleAmortStatus(rowNum) {
 
   // احفظ الحالات مع القرض
   _saveAmortStatuses();
+  // حدّث لوحة التحكم
+  if (typeof calcAddLoan === 'function') calcAddLoan();
 }
 
 function _saveAmortStatuses() {
