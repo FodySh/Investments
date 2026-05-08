@@ -3390,6 +3390,86 @@
         <button onclick="showPage('loans',document.querySelector('.nav-loans')||document.getElementById('mnav-loans'),'🏦 القروض البنكية')" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:9px 18px;color:var(--muted);font-size:13px;cursor:pointer;font-family:inherit">← رجوع</button>
       </div>
 
+      <!-- ══ لوحة تحكم القرض ══ -->
+      <div id="loan-dashboard" style="display:none;margin-bottom:20px;background:rgba(201,169,110,0.04);border:1px solid rgba(201,169,110,0.22);border-radius:18px;padding:22px 24px;position:relative;overflow:hidden">
+        <!-- خلفية ديكورية -->
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 80% 50%,rgba(201,169,110,0.07) 0%,transparent 70%);pointer-events:none"></div>
+
+        <!-- العنوان -->
+        <div style="font-size:12px;font-weight:700;color:var(--gold);letter-spacing:.06em;text-transform:uppercase;margin-bottom:18px;opacity:.8" id="ld-loan-name">ملخص القرض</div>
+
+        <!-- صف الأرقام الرئيسية -->
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px" id="ld-kpi-grid">
+
+          <!-- قيمة القرض -->
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px 12px;text-align:center">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:6px">قيمة القرض</div>
+            <div id="ld-principal" style="font-size:18px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--white)">—</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:3px">ر.س</div>
+          </div>
+
+          <!-- إجمالي الفوائد -->
+          <div style="background:rgba(224,112,112,0.06);border:1px solid rgba(224,112,112,0.15);border-radius:12px;padding:14px 12px;text-align:center">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:6px">إجمالي الفوائد</div>
+            <div id="ld-interest" style="font-size:18px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--rose)">—</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:3px">ر.س</div>
+          </div>
+
+          <!-- الإجمالي -->
+          <div style="background:rgba(201,169,110,0.08);border:1px solid rgba(201,169,110,0.25);border-radius:12px;padding:14px 12px;text-align:center">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:6px">الإجمالي</div>
+            <div id="ld-total" style="font-size:18px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--gold)">—</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:3px">ر.س</div>
+          </div>
+
+          <!-- المدفوع -->
+          <div style="background:rgba(92,185,138,0.06);border:1px solid rgba(92,185,138,0.18);border-radius:12px;padding:14px 12px;text-align:center">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:6px">المسدَّد</div>
+            <div id="ld-paid" style="font-size:18px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--green)">—</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:3px">ر.س</div>
+          </div>
+
+          <!-- المتبقي -->
+          <div style="background:rgba(78,205,196,0.05);border:1px solid rgba(78,205,196,0.15);border-radius:12px;padding:14px 12px;text-align:center">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:6px">المتبقي</div>
+            <div id="ld-remaining" style="font-size:18px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--teal)">—</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:3px">ر.س</div>
+          </div>
+        </div>
+
+        <!-- نسبة السداد + تاريخ الانتهاء -->
+        <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center">
+
+          <!-- شريط التقدم -->
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+              <span style="font-size:11px;color:var(--muted)">نسبة السداد</span>
+              <span id="ld-pct-text" style="font-size:20px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--gold)">0%</span>
+            </div>
+            <!-- شريط مزدوج: مسدَّد (ذهبي) + فوائد متبقية (أحمر) + أصل متبقي (رمادي) -->
+            <div style="height:10px;background:rgba(255,255,255,0.07);border-radius:6px;overflow:hidden;display:flex">
+              <div id="ld-bar-paid" style="height:100%;background:linear-gradient(90deg,#5cb98a,#4ecdc4);border-radius:6px 0 0 6px;transition:width .6s cubic-bezier(.2,.8,.3,1);width:0%"></div>
+              <div id="ld-bar-int"  style="height:100%;background:rgba(224,112,112,0.5);transition:width .6s;width:0%"></div>
+            </div>
+            <div style="display:flex;gap:14px;margin-top:8px">
+              <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)">
+                <div style="width:8px;height:8px;border-radius:2px;background:linear-gradient(135deg,#5cb98a,#4ecdc4)"></div> مسدَّد
+              </div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)">
+                <div style="width:8px;height:8px;border-radius:2px;background:rgba(255,255,255,0.15)"></div> متبقي
+              </div>
+            </div>
+          </div>
+
+          <!-- تاريخ الانتهاء -->
+          <div style="text-align:center;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px 20px;min-width:130px">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:6px">تاريخ الانتهاء المتوقع</div>
+            <div id="ld-end-date" style="font-size:14px;font-weight:700;color:var(--white);line-height:1.3">—</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:4px" id="ld-months-left"></div>
+          </div>
+        </div>
+      </div>
+
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" class="add-form-grid">
 
         <!-- يمين: حقول الإدخال -->
@@ -3401,7 +3481,7 @@
               <div class="form-grid">
                 <div class="field-group" style="grid-column:span 2">
                   <label class="field-label">مسمى القرض <span class="req">*</span></label>
-                  <input class="f-input" id="al-name" type="text" placeholder="مثال: قرض سيارة، قرض شخصي..." />
+                  <input class="f-input" id="al-name" type="text" placeholder="مثال: قرض سيارة، قرض شخصي..." oninput="var e=document.getElementById('ld-loan-name');if(e)e.textContent='📊 ملخص: '+(this.value||'القرض')" />
                 </div>
                 <div class="field-group">
                   <label class="field-label">البنك / الجهة الممولة <span class="req">*</span></label>
@@ -3664,6 +3744,7 @@
                   <th style="color:var(--red)">الفائدة</th>
                   <th>الرصيد المتبقي</th>
                   <th>نسبة الفائدة</th>
+                  <th>الحالة</th>
                 </tr>
               </thead>
               <tbody id="namort-tbody"></tbody>
@@ -6334,12 +6415,14 @@ function calcAddLoan() {
   var fmt = function(n) { return n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); };
   var set = function(id, v) { var e=document.getElementById(id); if(e) e.textContent=v; };
 
+  var dash = document.getElementById('loan-dashboard');
   if (principal <= 0) {
     set('al-c-pmt','—'); set('al-c-interest','—'); set('al-c-total','—');
     set('al-c-remaining','—'); set('al-d-months','—'); set('al-d-cost-pct','—');
     set('al-d-end-date','—');
     var bar=document.getElementById('al-progress-bar'); if(bar) bar.style.width='0%';
     document.getElementById('al-progress-pct').textContent='0%';
+    if (dash) dash.style.display='none';
     return;
   }
 
@@ -6380,12 +6463,89 @@ function calcAddLoan() {
   var pctEl = document.getElementById('al-progress-pct');
   if (bar) bar.style.width = pct.toFixed(0) + '%';
   if (pctEl) pctEl.textContent = pct.toFixed(0) + '%';
+
+  // ── لوحة التحكم العلوية ────────────────────────────────────────────────
+  if (dash) {
+    dash.style.display = 'block';
+    var nameEl = document.getElementById('al-name');
+    var loanName = nameEl ? (nameEl.value || 'القرض').trim() : 'القرض';
+    set('ld-loan-name', '📊 ملخص: ' + loanName);
+    set('ld-principal', fmt(principal));
+    set('ld-interest',  totalInt > 0 ? fmt(totalInt) : '—');
+    set('ld-total',     totalAmt > 0 ? fmt(totalAmt) : fmt(principal));
+    set('ld-paid',      paid > 0 ? fmt(paid) : '—');
+    set('ld-remaining', remaining > 0 ? fmt(remaining) : '✅');
+    set('ld-pct-text',  pct.toFixed(1) + '%');
+    set('ld-end-date',  document.getElementById('al-d-end-date') ?
+        document.getElementById('al-d-end-date').textContent : '—');
+
+    // شريط السداد
+    var barPaid = document.getElementById('ld-bar-paid');
+    var barInt  = document.getElementById('ld-bar-int');
+    if (barPaid) barPaid.style.width = pct.toFixed(1) + '%';
+    // نسبة الفوائد المتبقية بصرياً (من المجموع الكلي)
+    var intRemPct = totalAmt > 0 ? Math.max(0, Math.min(100 - pct, (totalInt / totalAmt) * (100 - pct))) : 0;
+    if (barInt) barInt.style.width = intRemPct.toFixed(1) + '%';
+
+    // الأشهر المتبقية
+    var monthsLeft = months > 0 && paid > 0 && pmt > 0
+      ? Math.max(0, Math.round((totalAmt - paid) / pmt))
+      : months;
+    set('ld-months-left', monthsLeft > 0 ? monthsLeft + ' قسط متبقٍ' : '✅ مكتمل');
+  }
+
   if (typeof buildAmortTable === 'function') buildAmortTable(principal, rate, months, startVal);
 }
 
 // ── جدول السداد (Amortization) ───────────────────────────────────────────────
 var _amortVisible = true;
 
+
+// ── حالات أقساط جدول السداد ─────────────────────────────────────────────────
+var _amortStatuses = {}; // {rowNum: 'pending'|'paid'|'overdue'}
+var _amortLoanIdx  = null; // فهرس القرض الحالي
+
+var _amortStatusCycle = ['pending', 'paid', 'overdue'];
+var _amortStatusLabel = { paid:'محصّلة', pending:'معلقة', overdue:'متأخرة' };
+var _amortStatusStyle = {
+  paid:    'background:rgba(92,185,138,0.15);border:1px solid rgba(92,185,138,0.35);color:var(--green)',
+  pending: 'background:rgba(201,169,110,0.12);border:1px solid rgba(201,169,110,0.3);color:var(--gold)',
+  overdue: 'background:rgba(224,112,112,0.12);border:1px solid rgba(224,112,112,0.3);color:var(--rose)'
+};
+
+function cycleAmortStatus(rowNum) {
+  var cur = _amortStatuses[rowNum] || 'pending';
+  var idx = _amortStatusCycle.indexOf(cur);
+  var next = _amortStatusCycle[(idx + 1) % _amortStatusCycle.length];
+  _amortStatuses[rowNum] = next;
+
+  // حدّث الـ pill مباشرة بدون إعادة بناء الجدول
+  var pill = document.getElementById('amort-status-pill-' + rowNum);
+  if (pill) {
+    pill.textContent = _amortStatusLabel[next];
+    pill.setAttribute('style',
+      'cursor:pointer;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;user-select:none;transition:all .15s;'
+      + _amortStatusStyle[next]);
+  }
+
+  // احفظ الحالات مع القرض
+  _saveAmortStatuses();
+}
+
+function _saveAmortStatuses() {
+  if (_amortLoanIdx === null || !Array.isArray(window.loansData)) return;
+  var loan = window.loansData[_amortLoanIdx];
+  if (!loan) return;
+  loan.amort_statuses = JSON.parse(JSON.stringify(_amortStatuses));
+  loansData = window.loansData;
+  saveLoansToStorage();
+}
+
+function _loadAmortStatuses(loanIdx) {
+  _amortLoanIdx = loanIdx;
+  var loan = window.loansData && window.loansData[loanIdx];
+  _amortStatuses = (loan && loan.amort_statuses) ? JSON.parse(JSON.stringify(loan.amort_statuses)) : {};
+}
 
 function buildAmortTable(principal, annualRate, months, startDate) {
   var section = document.getElementById('new-amort-section');
@@ -6470,6 +6630,9 @@ function buildAmortTable(principal, annualRate, months, startDate) {
     var negWarn = row.interest > row.pmtAmt ? ' title="⚠️ الفائدة أكبر من القسط"' : '';
     var periodBg= row.periodIdx % 2 === 1 ? 'background:rgba(78,205,196,0.03)' : '';
 
+    var rowStatus = _amortStatuses[row.num] || 'pending';
+    var statusStyle = _amortStatusStyle[rowStatus] || _amortStatusStyle['pending'];
+    var statusLabel = _amortStatusLabel[rowStatus] || 'معلقة';
     rows.push('<tr style="'+periodBg+'"'+ negWarn +'>'
       +'<td style="color:var(--muted);font-size:11px">'+row.num+'</td>'
       +'<td style="font-size:11px;color:var(--muted)">'+row.date+'</td>'
@@ -6482,6 +6645,13 @@ function buildAmortTable(principal, annualRate, months, startDate) {
           +'<div style="height:100%;width:'+Math.min(intPct,100).toFixed(0)+'%;background:'+clr+'"></div></div>'
         +'<span style="font-size:10px;color:'+clr+'">'+intPct.toFixed(0)+'%</span>'
       +'</div></td>'
+      +'<td style="text-align:center">'
+        +'<span id="amort-status-pill-'+row.num+'" '
+          +'onclick="cycleAmortStatus('+row.num+')" '
+          +'style="cursor:pointer;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;user-select:none;transition:all .15s;'+statusStyle+'">'
+          +statusLabel
+        +'</span>'
+      +'</td>'
       +'</tr>');
   });
 
@@ -6555,6 +6725,8 @@ function saveAddLoan() {
 
 function resetAddLoan() {
   _editingLoanPageIdx = null;
+  _amortStatuses = {};
+  _amortLoanIdx  = null;
   ['al-name','al-principal','al-rate','al-years','al-paid','al-start','al-next-date','al-notes'].forEach(function(id){
     var e=document.getElementById(id); if(e) e.value='';
   });
@@ -6579,6 +6751,8 @@ function openLoanEditPage(idx) {
     // حمّل _installmentRows أولاً حتى يستخدمها buildAmortTable داخل calcAddLoan
     _installmentRows = Array.isArray(l && l.installment_rows) ? JSON.parse(JSON.stringify(l.installment_rows)) : [];
     renderInstallmentTable();
+    // حمّل حالات الأقساط
+    _loadAmortStatuses(idx);
     calcAddLoan();
   }, 100);
 }
