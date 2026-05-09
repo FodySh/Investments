@@ -6556,21 +6556,35 @@ function cycleAmortStatus(rowNum) {
 function _saveAmortStatuses() {
   if (_amortLoanIdx === null || !_amortLoanKey) return;
 
-  // 1. حفّظ في الكائن العام
-  window.loanPaymentsData[_amortLoanKey] = JSON.parse(JSON.stringify(_amortStatuses));
-
-  // 2. احسب المبالغ من الجدول
-  var truePaid = 0;
+  // 1. اقرأ بيانات كاملة من DOM + ادمجها مع الحالات
   var tbody = document.getElementById('namort-tbody');
+  var fullRows = [];
+  var truePaid = 0;
+
   if (tbody) {
     tbody.querySelectorAll('tr').forEach(function(tr, i) {
-      var num = i + 1;
-      if ((_amortStatuses[num] || 'pending') === 'paid') {
-        var cell = tr.querySelectorAll('td')[2];
-        if (cell) truePaid += parseFloat(cell.textContent.replace(/,/g,'')) || 0;
-      }
+      var cells = tr.querySelectorAll('td');
+      if (cells.length < 6) return;
+      var num     = i + 1;
+      var status  = _amortStatuses[num] || 'pending';
+      var pmtVal  = parseFloat((cells[2].textContent || '').replace(/,/g,'')) || 0;
+      var balVal  = parseFloat((cells[5].textContent || '').replace(/[^0-9.]/g,'')) || 0;
+      if (status === 'paid') truePaid += pmtVal;
+
+      fullRows.push({
+        num:     num,
+        date:    (cells[1].textContent || '').trim(),
+        pmt:     pmtVal,
+        principal: parseFloat((cells[3].textContent||'').replace(/,/g,'')) || 0,
+        interest:  parseFloat((cells[4].textContent||'').replace(/,/g,'')) || 0,
+        balance: balVal,
+        status:  status
+      });
     });
   }
+
+  // 2. حفظ في الكائن العام (مصفوفة كاملة)
+  window.loanPaymentsData[_amortLoanKey] = fullRows;
 
   // 3. حدّث بيانات القرض في الذاكرة
   var loan = window.loansData && window.loansData[_amortLoanIdx];
@@ -6590,10 +6604,19 @@ function _loadAmortStatuses(loanIdx) {
   _amortLoanIdx = loanIdx;
   var loan = window.loansData && window.loansData[loanIdx];
   _amortLoanKey = _loanKey(loan, loanIdx);
-  // اقرأ من الكائن العام (مُحمَّل من Firebase)
-  _amortStatuses = window.loanPaymentsData[_amortLoanKey]
-    ? JSON.parse(JSON.stringify(window.loanPaymentsData[_amortLoanKey]))
-    : {};
+
+  var stored = window.loanPaymentsData[_amortLoanKey];
+  _amortStatuses = {};
+
+  if (Array.isArray(stored)) {
+    // الشكل الجديد: مصفوفة كائنات كاملة
+    stored.forEach(function(row) {
+      if (row.num) _amortStatuses[row.num] = row.status || 'pending';
+    });
+  } else if (stored && typeof stored === 'object') {
+    // الشكل القديم: {rowNum: status} — للتوافق مع البيانات القديمة
+    _amortStatuses = JSON.parse(JSON.stringify(stored));
+  }
 }
 
 function buildAmortTable(principal, annualRate, months, startDate) {
@@ -6711,6 +6734,11 @@ function buildAmortTable(principal, annualRate, months, startDate) {
   setEl('namort-cost-pct',        (totalInt/principal*100).toFixed(2)+'%');
   setEl('namort-count', num+' قسط');
   tbody.innerHTML = rows.join('');
+
+  // حفظ كامل بيانات الجدول لـ Firebase عند أول بناء (أو إعادة بناء)
+  if (_amortLoanKey && typeof _saveAmortStatuses === 'function') {
+    setTimeout(_saveAmortStatuses, 100); // تأخير بسيط لضمان render الـ DOM
+  }
 }
 
 
