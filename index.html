@@ -2281,6 +2281,31 @@
                 <input class="f-input" id="f-ownership" type="number" step="0.01" min="0" max="100" placeholder="مثال: 5.5" />
               </div>
             </div>
+            <!-- تاريخ الدخول + الحالة هنا للوصول السريع -->
+            <div class="form-grid">
+              <div class="field-group">
+                <label class="field-label">تاريخ الدخول <span class="req">*</span></label>
+                <input class="f-input" id="f-date-in" type="date" oninput="calcDays()" />
+                <div class="field-error" id="err-date-in">يرجى إدخال تاريخ الدخول</div>
+              </div>
+              <div class="field-group">
+                <label class="field-label">تاريخ الاستحقاق / الخروج</label>
+                <input class="f-input" id="f-date-out" type="date" oninput="calcDays()" />
+              </div>
+              <div class="field-group">
+                <label class="field-label">حالة الاستثمار <span class="req">*</span></label>
+                <select class="f-select" id="f-status">
+                  <option value="">— اختر الحالة —</option>
+                  <option value="نشطة">🟢 نشطة</option>
+                  <option value="مستلمة">✅ مستلمة / مكتملة</option>
+                  <option value="مغلقة">🔒 مغلقة</option>
+                  <option value="مؤجلة">⏸ مؤجلة</option>
+                  <option value="ملغاة">❌ ملغاة</option>
+                  <option value="قيد الدراسة">🔍 قيد الدراسة</option>
+                </select>
+                <div class="field-error" id="err-status">يرجى اختيار الحالة</div>
+              </div>
+            </div>
           </div>
 
           <!-- LIVE CALC PREVIEW -->
@@ -2309,11 +2334,12 @@
           </div>
         </div>
 
-        <!-- ══ STEP 3: العوائد والتوزيعات ══ -->
+        <!-- ══ STEP 3: التوزيعات والأرباح ══ -->
         <div class="form-step" id="fstep-3" style="display:none">
-          <div class="form-section">
-            <div class="form-section-title">💰 توزيعات</div>
 
+          <!-- بطاقة نوع التوزيع -->
+          <div class="form-section">
+            <div class="form-section-title">💰 إعداد التوزيعات</div>
             <div class="form-grid">
               <div class="field-group">
                 <label class="field-label">نوع التوزيعات</label>
@@ -2338,13 +2364,6 @@
                   <option>لا يوجد</option>
                 </select>
               </div>
-
-            </div>
-            <div class="form-grid">
-              <div class="field-group">
-                <label class="field-label">إجمالي التوزيعات المستلمة حتى الآن (ر.س)</label>
-                <input class="f-input" id="f-dist-received" type="number" step="0.01" placeholder="0.00" />
-              </div>
               <div class="field-group">
                 <label class="field-label">تاريخ آخر توزيع</label>
                 <input class="f-input" id="f-last-dist" type="date" />
@@ -2352,28 +2371,60 @@
             </div>
           </div>
 
-          <!-- LIVE CALC -->
+          <!-- سجل الدفعات المحوّلة -->
+          <div class="form-section">
+            <div class="form-section-title" style="display:flex;justify-content:space-between;align-items:center">
+              <span>📋 سجل الدفعات المحوّلة</span>
+              <button type="button" onclick="addDistEntry()"
+                style="background:rgba(92,185,138,0.12);border:1px solid rgba(92,185,138,0.3);border-radius:8px;padding:6px 14px;color:var(--green);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">
+                + إضافة دفعة
+              </button>
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:12px">
+              أدخل كل دفعة محوّلة بتاريخها ومبلغها — يتم احتساب الإجمالي تلقائياً
+            </div>
+
+            <!-- جدول الدفعات -->
+            <div id="dist-entries-wrap" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
+              <div id="dist-entries-empty" style="text-align:center;padding:24px;color:var(--muted);font-size:12px;background:rgba(255,255,255,0.02);border:1px dashed var(--border);border-radius:10px">
+                لا توجد دفعات مسجّلة — اضغط "إضافة دفعة" لتسجيل أول تحويل
+              </div>
+            </div>
+
+            <!-- شريط الإجمالي -->
+            <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(201,169,110,0.08);border:1px solid rgba(201,169,110,0.25);border-radius:10px;padding:12px 16px">
+              <span style="font-size:13px;color:var(--muted)">إجمالي المبلغ المستلم</span>
+              <div style="display:flex;align-items:baseline;gap:6px">
+                <span id="dist-total-display" style="font-size:22px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--gold)">0.00</span>
+                <span style="font-size:11px;color:var(--muted)">ر.س</span>
+              </div>
+            </div>
+            <!-- hidden field يُرسل القيمة مع النموذج -->
+            <input type="hidden" id="f-dist-received" />
+          </div>
+
+          <!-- ملخص -->
           <div class="calc-box">
             <div class="calc-item">
-              <div class="calc-label">صافي المبلغ المستثمر</div>
-              <div class="calc-val" id="c-net2">—</div>
+              <div class="calc-label">عدد الدفعات</div>
+              <div class="calc-val" id="c-dist-count" style="color:var(--cyan)">0</div>
             </div>
             <div class="calc-item">
-              <div class="calc-label">قيمة العائد المحتسبة</div>
-              <div class="calc-val" id="c-ret2">—</div>
+              <div class="calc-label">إجمالي المستلم</div>
+              <div class="calc-val" id="c-dist-total" style="color:var(--gold)">—</div>
             </div>
             <div class="calc-item">
-              <div class="calc-label">المجموع المتوقع</div>
-              <div class="calc-val" id="c-total2">—</div>
+              <div class="calc-label">آخر دفعة</div>
+              <div class="calc-val" id="c-dist-last" style="color:var(--green)">—</div>
             </div>
             <div class="calc-item">
-              <div class="calc-label">ROI المحتسب</div>
-              <div class="calc-val" id="c-roi">—</div>
+              <div class="calc-label">العائد المتبقي المتوقع</div>
+              <div class="calc-val" id="c-dist-rem" style="color:var(--muted)">—</div>
             </div>
           </div>
 
           <div style="display:flex;justify-content:flex-start;gap:12px">
-            <button class="btn-submit" onclick="nextStep(3)">التالي ← التوقيت والمدة</button>
+            <button class="btn-submit" onclick="nextStep(3)">التالي ← التوقيت والتفاصيل</button>
             <button class="btn-reset" onclick="prevStep(3)">← رجوع</button>
           </div>
         </div>
@@ -2384,36 +2435,16 @@
             <div class="form-section-title">📅 التوقيت والمدة</div>
             <div class="form-grid">
               <div class="field-group">
-                <label class="field-label">تاريخ الدخول (الاستثمار) <span class="req">*</span></label>
-                <input class="f-input" id="f-date-in" type="date" oninput="calcDays()" />
-                <div class="field-error" id="err-date-in">يرجى إدخال تاريخ الدخول</div>
-              </div>
-              <div class="field-group">
-                <label class="field-label">تاريخ الاستحقاق / الخروج</label>
-                <input class="f-input" id="f-date-out" type="date" oninput="calcDays()" />
-              </div>
-
-            </div>
-            <div class="form-grid">
-              <div class="field-group">
-                <label class="field-label">الأيام المتبقية حتى الاستحقاق</label>
+                <label class="field-label">الأيام المتبقية حتى الاستحقاق <span class="hint">— تلقائي</span></label>
                 <input class="f-input" id="f-days-rem" type="text" placeholder="يُحسب تلقائياً" readonly style="color:var(--cyan)" />
-              </div>
-              <div class="field-group">
-                <label class="field-label">حالة الاستثمار <span class="req">*</span></label>
-                <select class="f-select" id="f-status">
-                  <option value="">— اختر الحالة —</option>
-                  <option value="نشطة">🟢 نشطة</option>
-                  <option value="مستلمة">✅ مستلمة / مكتملة</option>
-                  <option value="مؤجلة">⏸ مؤجلة</option>
-                  <option value="ملغاة">❌ ملغاة</option>
-                  <option value="قيد الدراسة">🔍 قيد الدراسة</option>
-                </select>
-                <div class="field-error" id="err-status">يرجى اختيار الحالة</div>
               </div>
               <div class="field-group">
                 <label class="field-label">تاريخ الاسترداد الفعلي <span class="hint">— للمستلمة فقط</span></label>
                 <input class="f-input" id="f-redeemed" type="date" />
+              </div>
+              <div class="field-group">
+                <label class="field-label">مدة الفرصة (بالأشهر)</label>
+                <input class="f-input" id="f-months" type="number" step="1" min="1" placeholder="مثال: 12" oninput="calcAuto()" />
               </div>
             </div>
           </div>
@@ -2472,16 +2503,6 @@
                 <input class="f-input" id="f-company" type="text" placeholder="الاسم الكامل للشركة أو الصندوق" />
               </div>
               <div class="field-group">
-                <label class="field-label">رمز التداول</label>
-                <input class="f-input" id="f-ticker" type="text" placeholder="مثال: 2222، 4300..." />
-              </div>
-            </div>
-            <div class="form-grid-4">
-              <div class="field-group">
-                <label class="field-label">عدد الأسهم / الوحدات</label>
-                <input class="f-input" id="f-shares" type="number" step="1" min="0" placeholder="0" oninput="calcStockPrice()" />
-              </div>
-              <div class="field-group">
                 <label class="field-label">سعر الشراء للسهم (ر.س)</label>
                 <input class="f-input" id="f-buy-price" type="number" step="0.01" placeholder="0.00" style="color:var(--gold)" oninput="calcStockPrice()" />
               </div>
@@ -2494,6 +2515,8 @@
                 <input class="f-input" id="f-pe" type="number" step="0.01" placeholder="مثال: 18.5" />
               </div>
             </div>
+            <!-- hidden fields for backward compat -->
+            <input type="hidden" id="f-ticker" /><input type="hidden" id="f-shares" />
             <div class="calc-box" id="stock-calc-box" style="display:none">
               <div class="calc-item">
                 <div class="calc-label">القيمة السوقية الحالية</div>
@@ -4912,6 +4935,97 @@ function updateSummary() {
 }
 
 // Save opportunity
+
+// ── سجل دفعات التوزيعات ──────────────────────────────────────────────────────
+var _distEntries = []; // [{date:'', amount:0, note:''}]
+
+function addDistEntry(date, amount, note) {
+  _distEntries.push({ date: date||'', amount: amount||0, note: note||'' });
+  renderDistEntries();
+  updateDistTotals();
+}
+
+function removeDistEntry(idx) {
+  _distEntries.splice(idx, 1);
+  renderDistEntries();
+  updateDistTotals();
+}
+
+function renderDistEntries() {
+  var wrap  = document.getElementById('dist-entries-wrap');
+  var empty = document.getElementById('dist-entries-empty');
+  if (!wrap) return;
+
+  // أزل الصفوف القديمة بدون مسح empty
+  wrap.querySelectorAll('.dist-entry-row').forEach(function(r){ r.remove(); });
+
+  if (!_distEntries.length) {
+    if (empty) empty.style.display = '';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  _distEntries.forEach(function(entry, i) {
+    var row = document.createElement('div');
+    row.className = 'dist-entry-row';
+    row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:8px;align-items:end;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:10px 12px';
+    row.innerHTML =
+      '<div class="field-group" style="margin:0">' +
+        '<label class="field-label" style="font-size:10px">تاريخ التحويل</label>' +
+        '<input class="f-input" type="date" value="'+entry.date+'" style="padding:8px 10px;font-size:12px" ' +
+          'oninput="_distEntries['+i+'].date=this.value;updateDistTotals()" />' +
+      '</div>' +
+      '<div class="field-group" style="margin:0">' +
+        '<label class="field-label" style="font-size:10px">المبلغ المحوّل (ر.س)</label>' +
+        '<input class="f-input" type="number" step="0.01" min="0" value="'+(entry.amount||'')+'" placeholder="0.00" style="padding:8px 10px;font-size:12px;color:var(--gold);font-family:monospace;font-weight:700" ' +
+          'oninput="_distEntries['+i+'].amount=parseFloat(this.value)||0;updateDistTotals()" />' +
+      '</div>' +
+      '<div class="field-group" style="margin:0">' +
+        '<label class="field-label" style="font-size:10px">ملاحظة (اختياري)</label>' +
+        '<input class="f-input" type="text" value="'+(entry.note||'')+'" placeholder="مثال: توزيع يناير 2025" style="padding:8px 10px;font-size:12px" ' +
+          'oninput="_distEntries['+i+'].note=this.value" />' +
+      '</div>' +
+      '<button onclick="removeDistEntry('+i+')" style="background:var(--rose-dim);border:1px solid rgba(224,112,112,0.3);border-radius:8px;padding:8px 11px;color:var(--red);cursor:pointer;font-size:13px;align-self:end;flex-shrink:0">🗑</button>';
+    wrap.appendChild(row);
+  });
+}
+
+function updateDistTotals() {
+  var total = _distEntries.reduce(function(s,e){ return s + (parseFloat(e.amount)||0); }, 0);
+  var fmt   = function(n){ return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+
+  // hidden field
+  var hf = document.getElementById('f-dist-received');
+  if (hf) hf.value = total.toFixed(2);
+
+  // display
+  var disp = document.getElementById('dist-total-display');
+  if (disp) disp.textContent = fmt(total);
+
+  // calc-box
+  var last = _distEntries.filter(function(e){ return e.date; }).sort(function(a,b){ return b.date.localeCompare(a.date); })[0];
+  var set  = function(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; };
+  set('c-dist-count', _distEntries.length + ' دفعة');
+  set('c-dist-total', total > 0 ? fmt(total) + ' ر.س' : '—');
+  set('c-dist-last',  last ? (last.date + (last.amount ? ' · '+fmt(last.amount) : '')) : '—');
+
+  // العائد المتبقي المتوقع
+  var retVal = parseFloat((document.getElementById('f-ret-val')||{}).value) || 0;
+  var rem    = Math.max(0, retVal - total);
+  set('c-dist-rem', retVal > 0 ? fmt(rem) + ' ر.س' : '—');
+
+  // آخر تاريخ للتوزيع
+  if (last && document.getElementById('f-last-dist')) {
+    document.getElementById('f-last-dist').value = last.date;
+  }
+}
+
+function resetDistEntries() {
+  _distEntries = [];
+  renderDistEntries();
+  updateDistTotals();
+}
+
 function saveOpportunity() {
   if (!validateStep(6)) return;
 
@@ -4945,6 +5059,7 @@ function saveOpportunity() {
     dist_freq: g('f-dist-freq'),
     dist_amt: gf('f-dist-amt'),
     dist_received: gf('f-dist-received'),
+    dist_entries: JSON.parse(JSON.stringify(_distEntries)),
     last_dist: g('f-last-dist'),
     date_in: g('f-date-in'),
     date_out: g('f-date-out'),
@@ -5126,6 +5241,7 @@ function renderFunds() {
 }
 
 function resetForm() {
+  resetDistEntries();
   // Reset all inputs
   document.querySelectorAll('.f-input, .f-select, .f-textarea').forEach(el => {
     el.value = '';
