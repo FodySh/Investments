@@ -1371,6 +1371,7 @@
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <select id="dash-year" onchange="buildDashboard()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--white);font-size:12px;font-family:inherit;outline:none">
+  renderYearlyChart(window.__allInv || allInv || []);
           <option value="all">كل السنوات</option>
         </select>
         <button onclick="buildDashboard()" style="background:rgba(201,169,110,0.1);border:1px solid rgba(201,169,110,0.3);border-radius:8px;padding:6px 13px;color:var(--gold);font-size:12px;cursor:pointer;font-family:inherit">🔄</button>
@@ -1422,6 +1423,26 @@
         <span style="font-size:11px;color:var(--muted)" id="db-cf-total">—</span>
       </div>
       <div style="padding:16px 20px" id="db-cf"></div>
+    </div>
+
+    <!-- ── الرسم العامودي السنوي ── -->
+    <div class="section-card" id="yearly-chart-card" style="margin-bottom:14px">
+      <div class="section-head" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <span class="section-title">📊 المستثمر والعائد سنوياً</span>
+        <div style="display:flex;gap:14px;align-items:center">
+          <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)">
+            <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#c9a96e"></span> المبلغ المستثمر
+          </span>
+          <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)">
+            <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#5cb98a"></span> العائد / التوزيعات
+          </span>
+        </div>
+      </div>
+      <div class="section-body" style="padding:8px 16px 16px;overflow-x:auto">
+        <div id="dash-yearly-chart" style="min-height:180px;display:flex;align-items:center;justify-content:center">
+          <span style="color:var(--muted);font-size:12px">لا توجد بيانات</span>
+        </div>
+      </div>
     </div>
 
     <!-- ── الصف 4: القروض + الديون + أفضل أداء ──── -->
@@ -3262,6 +3283,42 @@ window.__onDataLoaded = function() {
   buildDashboard();
 };
 
+
+
+// ── رسم عامودي سنوي: المستثمر والعائد ─────────────────────────────────────────
+function renderYearlyChart(allInv) {
+  var el = document.getElementById('dash-yearly-chart');
+  if (!el) return;
+  var byYear = {};
+  (allInv||[]).forEach(function(x) {
+    var raw = x.date_in || x.added_at || '';
+    var yr  = raw.split('-')[0] || raw.split('/')[2] || '';
+    if (!yr || yr.length !== 4) return;
+    if (!byYear[yr]) byYear[yr] = { amount: 0, ret: 0 };
+    byYear[yr].amount += x.amount || 0;
+    byYear[yr].ret    += (x.dist_received > 0 ? x.dist_received : (x.ret_val || 0));
+  });
+  var years = Object.keys(byYear).sort();
+  if (!years.length) { el.innerHTML='<span style="color:var(--muted);font-size:12px">لا توجد بيانات مصنّفة بالسنة</span>'; return; }
+  var barW=32,barGap=8,grpGap=28,padL=68,padR=20,padT=20,padB=44,chartH=200;
+  var grpW=barW*2+barGap, totalW=padL+years.length*(grpW+grpGap)-grpGap+padR, svgH=padT+chartH+padB;
+  var maxVal=0; years.forEach(function(y){maxVal=Math.max(maxVal,byYear[y].amount,byYear[y].ret);}); if(!maxVal)maxVal=1;
+  var fmtK=function(n){return n>=1000000?(n/1000000).toFixed(1)+'م':n>=1000?(n/1000).toFixed(0)+'K':Math.round(n).toString();};
+  var light=document.body.classList.contains('light-mode');
+  var gridLines='';
+  for(var g=0;g<=4;g++){var gy=padT+(g/4)*chartH,gv=maxVal*(1-g/4);gridLines+='<line x1="'+padL+'" y1="'+gy.toFixed(1)+'" x2="'+(totalW-padR)+'" y2="'+gy.toFixed(1)+'" stroke="'+(light?'rgba(0,0,0,0.07)':'rgba(255,255,255,0.06)')+'" stroke-width="1"/><text x="'+(padL-8)+'" y="'+(gy+4).toFixed(1)+'" text-anchor="end" fill="'+(light?'rgba(0,0,0,0.4)':'rgba(255,255,255,0.3)')+'" font-size="9" font-family="monospace">'+fmtK(gv)+'</text>';}
+  var bars='',labels='';
+  years.forEach(function(yr,i){
+    var d=byYear[yr],gx=padL+i*(grpW+grpGap);
+    var amtH=(d.amount/maxVal)*chartH,amtY=padT+chartH-amtH;
+    bars+='<rect x="'+gx+'" y="'+amtY.toFixed(1)+'" width="'+barW+'" height="'+amtH.toFixed(1)+'" rx="4" fill="url(#barGold)"/><text x="'+(gx+barW/2).toFixed(1)+'" y="'+(amtY-5).toFixed(1)+'" text-anchor="middle" fill="#c9a96e" font-size="9" font-family="monospace" font-weight="700">'+fmtK(d.amount)+'</text>';
+    var retH=(d.ret/maxVal)*chartH,retX=gx+barW+barGap,retY=padT+chartH-retH;
+    bars+='<rect x="'+retX+'" y="'+retY.toFixed(1)+'" width="'+barW+'" height="'+retH.toFixed(1)+'" rx="4" fill="url(#barGreen)"/><text x="'+(retX+barW/2).toFixed(1)+'" y="'+(retY-5).toFixed(1)+'" text-anchor="middle" fill="#5cb98a" font-size="9" font-family="monospace" font-weight="700">'+fmtK(d.ret)+'</text>';
+    var cx=gx+grpW/2;
+    labels+='<text x="'+cx.toFixed(1)+'" y="'+(padT+chartH+18)+'" text-anchor="middle" fill="'+(light?'rgba(0,0,0,0.5)':'rgba(255,255,255,0.5)')+'" font-size="11" font-family="Cairo,sans-serif" font-weight="600">'+yr+'</text><text x="'+cx.toFixed(1)+'" y="'+(padT+chartH+32)+'" text-anchor="middle" fill="rgba(92,185,138,0.7)" font-size="9" font-family="monospace">'+(d.amount>0?(d.ret/d.amount*100).toFixed(1)+'%':'')+'</text>';
+  });
+  el.innerHTML='<svg width="'+totalW+'" height="'+svgH+'" viewBox="0 0 '+totalW+' '+svgH+'" xmlns="http://www.w3.org/2000/svg" style="display:block;min-width:'+totalW+'px"><defs><linearGradient id="barGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e2c48a"/><stop offset="100%" stop-color="#c9a96e" stop-opacity="0.7"/></linearGradient><linearGradient id="barGreen" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7dd9a8"/><stop offset="100%" stop-color="#5cb98a" stop-opacity="0.7"/></linearGradient></defs><line x1="'+padL+'" y1="'+(padT+chartH)+'" x2="'+(totalW-padR)+'" y2="'+(padT+chartH)+'" stroke="'+(light?'rgba(0,0,0,0.12)':'rgba(255,255,255,0.1)')+'" stroke-width="1"/>'+gridLines+bars+labels+'</svg>';
+}
 
 </script>
 </body>
