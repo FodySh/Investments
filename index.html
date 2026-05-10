@@ -1436,7 +1436,27 @@
         </div>
       </div>
       <div class="kpi-grid fade-up delay-1" id="dash-kpi-grid"></div>
-      <div class="two-col fade-up delay-2">
+      <!-- عامود Chart: المستثمر vs العائد لكل سنة -->
+      <div class="section-card fade-up delay-2" id="yearly-chart-card" style="margin-bottom:0">
+        <div class="section-head" style="justify-content:space-between">
+          <span class="section-title">📊 المستثمر والعائد سنوياً</span>
+          <div style="display:flex;gap:14px;align-items:center">
+            <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)">
+              <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#c9a84c"></span> المبلغ المستثمر
+            </span>
+            <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)">
+              <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#5cb98a"></span> العائد / التوزيعات
+            </span>
+          </div>
+        </div>
+        <div class="section-body" style="padding:8px 16px 16px;overflow-x:auto">
+          <div id="dash-yearly-chart" style="min-height:180px;display:flex;align-items:center;justify-content:center">
+            <span style="color:var(--muted);font-size:12px">لا توجد بيانات</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col fade-up delay-3">
         <div class="section-card">
           <div class="section-head"><span class="section-title">📌 توزيع الأصول</span></div>
           <div class="section-body"><div id="dash-donut-wrap" style="display:flex;align-items:center;gap:24px;justify-content:center"><div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">لا توجد بيانات بعد</div></div></div>
@@ -1446,7 +1466,8 @@
           <div class="section-body"><div id="dash-platform-bars" class="bar-list"><div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">لا توجد بيانات بعد</div></div></div>
         </div>
       </div>
-      <div class="two-col fade-up delay-3">
+
+      <div class="two-col fade-up delay-4">
         <div id="dash-risk-by-year"></div>
         <div class="section-card">
           <div class="section-head"><span class="section-title">🏆 أفضل الاستثمارات أداءً</span></div>
@@ -2022,7 +2043,7 @@
                 stroke-dasharray="0 314" stroke-dashoffset="78" transform="rotate(-90 60 60)"
                 stroke-linecap="round" id="analyst-score-circle"/>
               <text x="60" y="55" text-anchor="middle" fill="#f0f4ff" font-size="28" font-weight="700"
-                font-family="'JetBrains Mono',monospace" id="analyst-score-num">—</text>
+                font-family="monospace" id="analyst-score-num">—</text>
               <text x="60" y="72" text-anchor="middle" fill="#8899bb" font-size="10">/ 100</text>
             </svg>
             <div id="analyst-score-label" style="font-size:13px;color:#c9a84c;font-weight:700;margin-top:8px">—</div>
@@ -3817,6 +3838,126 @@ function initDashboardYears() {
     sorted.map(function(y){ return '<option value="'+y+'">'+y+'</option>'; }).join('');
 }
 
+
+// ── رسم عامودي سنوي: المستثمر والعائد ─────────────────────────────────────────
+function renderYearlyChart(allInv) {
+  var el = document.getElementById('dash-yearly-chart');
+  if (!el) return;
+
+  // ── جمع البيانات لكل سنة ────────────────────────────────────────────────
+  var byYear = {};
+  allInv.forEach(function(x) {
+    // استخدم سنة الدخول
+    var raw = x.date_in || x.added_at || '';
+    var yr  = raw.split('-')[0] || raw.split('/')[2] || '';
+    if (!yr || yr.length !== 4) return;
+    if (!byYear[yr]) byYear[yr] = { amount: 0, ret: 0 };
+    byYear[yr].amount += x.amount || 0;
+    byYear[yr].ret    += (x.dist_received > 0 ? x.dist_received : (x.ret_val || 0));
+  });
+
+  var years = Object.keys(byYear).sort();
+  if (!years.length) {
+    el.innerHTML = '<span style="color:var(--muted);font-size:12px">لا توجد بيانات مصنّفة بالسنة</span>';
+    return;
+  }
+
+  // ── أبعاد الرسم ─────────────────────────────────────────────────────────
+  var barW    = 32;   // عرض كل عامود
+  var barGap  = 8;    // مسافة بين العامودين في نفس السنة
+  var grpGap  = 28;   // مسافة بين مجموعات السنوات
+  var padL    = 68;   // هامش يسار (للقيم)
+  var padR    = 20;
+  var padT    = 20;
+  var padB    = 44;   // هامش أسفل (للتسميات)
+  var chartH  = 200;  // ارتفاع منطقة الرسم
+
+  var grpW    = barW * 2 + barGap;
+  var totalW  = padL + years.length * (grpW + grpGap) - grpGap + padR;
+  var svgH    = padT + chartH + padB;
+
+  // ── أقصى قيمة ───────────────────────────────────────────────────────────
+  var maxVal  = 0;
+  years.forEach(function(y){ maxVal = Math.max(maxVal, byYear[y].amount, byYear[y].ret); });
+  if (!maxVal) maxVal = 1;
+
+  var scale   = function(v) { return chartH - (v / maxVal) * chartH; };
+  var fmtK    = function(n) {
+    if (n >= 1000000) return (n/1000000).toFixed(1) + 'م';
+    if (n >= 1000)    return (n/1000).toFixed(0) + 'K';
+    return Math.round(n).toString();
+  };
+
+  // ── خطوط الشبكة ─────────────────────────────────────────────────────────
+  var gridLines = '';
+  var gridCount = 4;
+  for (var g = 0; g <= gridCount; g++) {
+    var gy  = padT + (g / gridCount) * chartH;
+    var gv  = maxVal * (1 - g / gridCount);
+    gridLines +=
+      '<line x1="' + padL + '" y1="' + gy.toFixed(1) + '" x2="' + (totalW - padR) + '" y2="' + gy.toFixed(1) + '" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>' +
+      '<text x="' + (padL - 8) + '" y="' + (gy + 4).toFixed(1) + '" text-anchor="end" fill="rgba(255,255,255,0.3)" font-size="9" font-family="monospace">' + fmtK(gv) + '</text>';
+  }
+
+  // ── الأعمدة ─────────────────────────────────────────────────────────────
+  var bars = '';
+  var labels = '';
+  years.forEach(function(yr, i) {
+    var d  = byYear[yr];
+    var gx = padL + i * (grpW + grpGap);
+
+    // عامود المستثمر (ذهبي)
+    var amtH   = (d.amount / maxVal) * chartH;
+    var amtY   = padT + chartH - amtH;
+    bars +=
+      '<rect x="' + gx + '" y="' + amtY.toFixed(1) + '" width="' + barW + '" height="' + amtH.toFixed(1) + '"' +
+      ' rx="4" fill="url(#barGold)" />' +
+      // قيمة فوق العامود
+      '<text x="' + (gx + barW / 2).toFixed(1) + '" y="' + (amtY - 5).toFixed(1) + '"' +
+      ' text-anchor="middle" fill="#c9a84c" font-size="9" font-family="monospace" font-weight="700">' +
+      fmtK(d.amount) + '</text>';
+
+    // عامود العائد (أخضر)
+    var retH   = (d.ret / maxVal) * chartH;
+    var retX   = gx + barW + barGap;
+    var retY   = padT + chartH - retH;
+    bars +=
+      '<rect x="' + retX + '" y="' + retY.toFixed(1) + '" width="' + barW + '" height="' + retH.toFixed(1) + '"' +
+      ' rx="4" fill="url(#barGreen)" />' +
+      '<text x="' + (retX + barW / 2).toFixed(1) + '" y="' + (retY - 5).toFixed(1) + '"' +
+      ' text-anchor="middle" fill="#5cb98a" font-size="9" font-family="monospace" font-weight="700">' +
+      fmtK(d.ret) + '</text>';
+
+    // تسمية السنة في الأسفل
+    var cx = gx + grpW / 2;
+    labels +=
+      '<text x="' + cx.toFixed(1) + '" y="' + (padT + chartH + 18) + '"' +
+      ' text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="11" font-family="Cairo,sans-serif" font-weight="600">' + yr + '</text>' +
+      // ROI تحت السنة
+      '<text x="' + cx.toFixed(1) + '" y="' + (padT + chartH + 32) + '"' +
+      ' text-anchor="middle" fill="rgba(92,185,138,0.7)" font-size="9" font-family="monospace">' +
+      (d.amount > 0 ? (d.ret/d.amount*100).toFixed(1)+'%' : '') + '</text>';
+  });
+
+  // ── SVG ──────────────────────────────────────────────────────────────────
+  el.innerHTML =
+    '<svg width="' + totalW + '" height="' + svgH + '" viewBox="0 0 ' + totalW + ' ' + svgH + '" xmlns="http://www.w3.org/2000/svg" style="display:block;min-width:' + totalW + 'px">' +
+    '<defs>' +
+      '<linearGradient id="barGold" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0%" stop-color="#e2c48a"/>' +
+        '<stop offset="100%" stop-color="#c9a84c" stop-opacity="0.7"/>' +
+      '</linearGradient>' +
+      '<linearGradient id="barGreen" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0%" stop-color="#7dd9a8"/>' +
+        '<stop offset="100%" stop-color="#5cb98a" stop-opacity="0.7"/>' +
+      '</linearGradient>' +
+    '</defs>' +
+    // خط محور X
+    '<line x1="' + padL + '" y1="' + (padT + chartH) + '" x2="' + (totalW - padR) + '" y2="' + (padT + chartH) + '" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>' +
+    gridLines + bars + labels +
+    '</svg>';
+}
+
 function renderDashboard() {
   var yr   = (document.getElementById('dash-year-filter')||{}).value || 'all';
   var inv  = window.__investments || [];
@@ -3825,7 +3966,12 @@ function renderDashboard() {
     return y1===yr || y2===yr;
   });
   var totalAmt = data.reduce(function(s,x){return s+(x.amount||0);},0);
-  var totalRet = data.reduce(function(s,x){return s+(x.ret_val||0);},0);
+  // العوائد: للفرص التي فيها توزيعات مستلمة → استخدمها، وإلا → العائد المتوقع
+  var totalRet = data.reduce(function(s,x){
+    var realized = x.dist_received || 0;
+    return s + (realized > 0 ? realized : (x.ret_val||0));
+  }, 0);
+  var totalDistReceived = data.reduce(function(s,x){ return s+(x.dist_received||0); }, 0);
   var totalExp = data.reduce(function(s,x){return s+(x.total||0);},0);
   var active   = data.filter(function(x){return x.status==='نشطة';});
   var done     = data.filter(function(x){return x.status==='مستلمة';});
@@ -3854,6 +4000,8 @@ function renderDashboard() {
   renderPlatformBars(data, totalAmt, fmt);
   renderRiskSection(data, yr);
   renderTopPerformers(data, fmt);
+  // الرسم العامودي يستخدم دائماً كل البيانات (ليس المفلترة بالسنة)
+  renderYearlyChart(inv);
 }
 
 function renderDonutChart(data, totalAmt, fmt) {
@@ -4078,6 +4226,7 @@ function renderAll(){
       <td>${riskPill(d.risk)}</td>
       <td>${statusPill(d.status)}</td>
       <td style="text-align:center;white-space:nowrap">
+        <button onclick="openDistModal(${realIdx})" title="إضافة دفعة" style="background:rgba(92,185,138,0.1);border:1px solid rgba(92,185,138,0.25);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--green);cursor:pointer;font-family:inherit;transition:all .15s;margin-left:4px" onmouseover="this.style.background='rgba(92,185,138,0.2)'" onmouseout="this.style.background='rgba(92,185,138,0.1)'">💰</button>
         <button onclick="openEditOpp(${realIdx})" style="background:rgba(201,185,140,0.1);border:1px solid rgba(201,185,140,0.25);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--gold);cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.background='rgba(201,185,140,0.2)'" onmouseout="this.style.background='rgba(201,185,140,0.1)'">✏️</button>
         <button onclick="confirmDeleteOpp(${realIdx})" style="background:rgba(224,112,112,0.08);border:1px solid rgba(224,112,112,0.2);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--red);cursor:pointer;font-family:inherit;margin-right:4px;transition:all .15s" onmouseover="this.style.background='rgba(224,112,112,0.18)'" onmouseout="this.style.background='rgba(224,112,112,0.08)'">🗑</button>
       </td>
@@ -4402,7 +4551,10 @@ function exportPDF() {
   var incCF    = (document.getElementById('pdf-inc-cashflow')||{checked:true}).checked;
 
   var totalAmt = inv.reduce(function(s,x){return s+(x.amount||0);},0);
-  var totalRet = inv.reduce(function(s,x){return s+(x.ret_val||0);},0);
+  var totalRet = inv.reduce(function(s,x){
+    var realized = x.dist_received || 0;
+    return s + (realized > 0 ? realized : (x.ret_val||0));
+  }, 0);
   var roi      = totalAmt>0?(totalRet/totalAmt*100).toFixed(2):0;
   var active   = inv.filter(function(x){return x.status==='نشطة';}).length;
   var now      = new Date().toLocaleDateString('ar-SA');
@@ -5918,7 +6070,7 @@ function renderOppsFiltered() {
         '<td style="color:#8899bb;font-size:11px">' + (d.date_out || '—') + '</td>' +
         '<td>' + riskPill(d.risk) + '</td>' +
         '<td>' + statusPill(d.status) + '</td>' +
-        '<td><button class="loan-action-btn" onclick="openEditOpp(' + realIdx + ')">✏️</button></td>' +
+        '<td style="white-space:nowrap">' +'<button class="loan-action-btn" onclick="openDistModal(' + realIdx + ')" title="إضافة دفعة" style="color:var(--green);border-color:rgba(92,185,138,0.3)">💰</button>' +'<button class="loan-action-btn" onclick="openEditOpp(' + realIdx + ')" title="تعديل" style="margin-right:4px">✏️</button></td>' +
         '</tr>';
     }).join('');
   } else {
@@ -5933,7 +6085,7 @@ function renderOppsFiltered() {
         '<td class="mono" style="color:var(--gold)">' + fmtNum(d.total, 2) + '</td>' +
         '<td>' + riskPill(d.risk) + '</td>' +
         '<td>' + statusPill(d.status) + '</td>' +
-        '<td><button class="loan-action-btn" onclick="openEditOpp(' + realIdx + ')">✏️</button></td>' +
+        '<td style="white-space:nowrap">' +'<button class="loan-action-btn" onclick="openDistModal(' + realIdx + ')" title="إضافة دفعة" style="color:var(--green);border-color:rgba(92,185,138,0.3)">💰</button>' +'<button class="loan-action-btn" onclick="openEditOpp(' + realIdx + ')" title="تعديل" style="margin-right:4px">✏️</button></td>' +
         '</tr>';
     }).join('');
   }
@@ -6044,6 +6196,91 @@ function saveEditOpp() {
   renderAll(); renderSukuk(); renderFunds(); renderStocks();
   triggerSync('investments');
   showToast('✅ تم حفظ: ' + d.name);
+}
+
+
+// ── إضافة دفعة سريعة من صفحة الفرص ─────────────────────────────────────────
+var _distModalIdx = null;
+
+function openDistModal(idx) {
+  _distModalIdx = idx;
+  var opp = (window.__investments || investments)[idx];
+  if (!opp) return;
+
+  // اسم الفرصة
+  var nameEl = document.getElementById('dist-modal-name');
+  if (nameEl) nameEl.textContent = opp.name + (opp.platform ? ' — ' + opp.platform : '');
+
+  // تاريخ اليوم افتراضياً
+  var dateEl = document.getElementById('dist-modal-date');
+  if (dateEl) dateEl.value = new Date().toISOString().split('T')[0];
+
+  // صفر الحقول
+  var amtEl  = document.getElementById('dist-modal-amount');
+  var noteEl = document.getElementById('dist-modal-note');
+  if (amtEl)  amtEl.value  = '';
+  if (noteEl) noteEl.value = '';
+
+  updateDistModalPreview();
+  document.getElementById('dist-quick-modal').classList.add('open');
+  if (amtEl) setTimeout(function(){ amtEl.focus(); }, 150);
+}
+
+function closeDistModal() {
+  document.getElementById('dist-quick-modal').classList.remove('open');
+  _distModalIdx = null;
+}
+
+function updateDistModalPreview() {
+  var opp    = _distModalIdx !== null ? (window.__investments || investments)[_distModalIdx] : null;
+  var prev   = opp ? (opp.dist_received || 0) : 0;
+  var thisAmt= parseFloat((document.getElementById('dist-modal-amount')||{}).value) || 0;
+  var newTot = prev + thisAmt;
+  var fmt    = function(n){ return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+
+  var set = function(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; };
+  set('dist-prev-total', fmt(prev));
+  set('dist-this-amt',   fmt(thisAmt));
+  set('dist-new-total',  fmt(newTot));
+}
+
+function saveDistPayment() {
+  if (_distModalIdx === null) return;
+
+  var date   = (document.getElementById('dist-modal-date')  || {}).value || '';
+  var amount = parseFloat((document.getElementById('dist-modal-amount')||{}).value) || 0;
+  var note   = (document.getElementById('dist-modal-note')  || {}).value || '';
+
+  if (!amount || amount <= 0) {
+    showToast('⚠️ يرجى إدخال مبلغ صحيح');
+    return;
+  }
+
+  var inv = window.__investments || investments;
+  var opp = inv[_distModalIdx];
+  if (!opp) return;
+
+  // أضف الدفعة لمصفوفة dist_entries
+  if (!Array.isArray(opp.dist_entries)) opp.dist_entries = [];
+  opp.dist_entries.push({ date: date, amount: amount, note: note });
+
+  // حدّث الإجمالي المستلم
+  opp.dist_received = (opp.dist_received || 0) + amount;
+
+  // حدّث آخر تاريخ توزيع
+  if (date) opp.last_dist = date;
+
+  // احفظ في Firebase
+  if (typeof window.fbSaveInvestments === 'function') window.fbSaveInvestments();
+
+  // حدّث العروض
+  renderOppsFiltered();
+  if (typeof renderSukuk === 'function') renderSukuk();
+  if (typeof renderFunds === 'function') renderFunds();
+  if (typeof renderDashboard === 'function') renderDashboard();
+
+  closeDistModal();
+  showToast('✅ تم تسجيل الدفعة — ' + amount.toLocaleString('en-US',{minimumFractionDigits:2}) + ' ر.س');
 }
 
 function closeEditModal() {
@@ -9859,6 +10096,60 @@ function closeMobUserMenu() {
           </div>
         </div>
       </div>
+
+
+<div class="db-modal" id="dist-quick-modal">
+  <div class="db-modal-box" style="min-width:min(90vw,460px);text-align:right">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div class="db-modal-title" style="margin:0">💰 إضافة دفعة / توزيع</div>
+      <button onclick="closeDistModal()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;line-height:1">×</button>
+    </div>
+
+    <!-- اسم الفرصة -->
+    <div id="dist-modal-name" style="font-size:13px;font-weight:600;color:var(--gold);margin-bottom:16px;padding:10px 14px;background:rgba(201,169,110,0.08);border:1px solid rgba(201,169,110,0.2);border-radius:10px"></div>
+
+    <!-- حقول الدفعة -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+      <div class="field-group">
+        <label class="field-label">تاريخ التحويل <span class="req">*</span></label>
+        <input class="f-input" id="dist-modal-date" type="date" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">المبلغ المحوّل (ر.س) <span class="req">*</span></label>
+        <input class="f-input" id="dist-modal-amount" type="number" step="0.01" min="0.01" placeholder="0.00"
+          style="color:var(--gold);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:16px"
+          oninput="updateDistModalPreview()" />
+      </div>
+      <div class="field-group" style="grid-column:span 2">
+        <label class="field-label">ملاحظة (اختياري)</label>
+        <input class="f-input" id="dist-modal-note" type="text" placeholder="مثال: توزيع يناير 2025، كوبون Q1..." />
+      </div>
+    </div>
+
+    <!-- ملخص بعد الإضافة -->
+    <div id="dist-modal-summary" style="background:rgba(92,185,138,0.07);border:1px solid rgba(92,185,138,0.2);border-radius:10px;padding:12px 16px;margin-bottom:16px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center">
+        <div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px">إجمالي مستلم سابقاً</div>
+          <div id="dist-prev-total" style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--cyan)">0.00</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px">هذه الدفعة</div>
+          <div id="dist-this-amt" style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--gold)">0.00</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px">الإجمالي الجديد</div>
+          <div id="dist-new-total" style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--green)">0.00</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn-submit" onclick="saveDistPayment()" style="padding:10px 28px;font-size:13px">💾 حفظ الدفعة</button>
+      <button class="btn-reset" onclick="closeDistModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
 
 <div class="db-modal" id="delete-opp-modal">
         <div class="db-modal-box" style="border-color:rgba(224,112,112,0.3)">
