@@ -1814,7 +1814,7 @@
               <thead><tr>
                 <th>اسم الصك</th><th>المنصة</th><th>المبلغ</th>
                 <th>العائد %</th><th>العائد ر.س</th>
-                <th>تاريخ الخروج</th><th>المخاطرة</th><th>الحالة</th><th></th>
+                <th>تاريخ الدخول</th><th>تاريخ الخروج</th><th>المخاطرة</th><th>الحالة</th><th></th>
               </tr></thead>
               <tbody id="sukuk-tbody"></tbody>
             </table>
@@ -1842,7 +1842,7 @@
               <thead><tr>
                 <th>اسم الصندوق</th><th>المنصة</th><th>المبلغ</th>
                 <th>العائد %</th><th>العائد ر.س</th>
-                <th>المجموع المتوقع</th><th>المخاطرة</th><th>الحالة</th><th></th>
+                <th>تاريخ الدخول</th><th>المجموع المتوقع</th><th>المخاطرة</th><th>الحالة</th><th></th>
               </tr></thead>
               <tbody id="funds-tbody"></tbody>
             </table>
@@ -3839,125 +3839,6 @@ function initDashboardYears() {
 }
 
 
-// ── رسم عامودي سنوي: المستثمر والعائد ─────────────────────────────────────────
-function renderYearlyChart(allInv) {
-  var el = document.getElementById('dash-yearly-chart');
-  if (!el) return;
-
-  // ── جمع البيانات لكل سنة ────────────────────────────────────────────────
-  var byYear = {};
-  allInv.forEach(function(x) {
-    // استخدم سنة الدخول
-    var raw = x.date_in || x.added_at || '';
-    var yr  = raw.split('-')[0] || raw.split('/')[2] || '';
-    if (!yr || yr.length !== 4) return;
-    if (!byYear[yr]) byYear[yr] = { amount: 0, ret: 0 };
-    byYear[yr].amount += x.amount || 0;
-    byYear[yr].ret    += (x.dist_received > 0 ? x.dist_received : (x.ret_val || 0));
-  });
-
-  var years = Object.keys(byYear).sort();
-  if (!years.length) {
-    el.innerHTML = '<span style="color:var(--muted);font-size:12px">لا توجد بيانات مصنّفة بالسنة</span>';
-    return;
-  }
-
-  // ── أبعاد الرسم ─────────────────────────────────────────────────────────
-  var barW    = 32;   // عرض كل عامود
-  var barGap  = 8;    // مسافة بين العامودين في نفس السنة
-  var grpGap  = 28;   // مسافة بين مجموعات السنوات
-  var padL    = 68;   // هامش يسار (للقيم)
-  var padR    = 20;
-  var padT    = 20;
-  var padB    = 44;   // هامش أسفل (للتسميات)
-  var chartH  = 200;  // ارتفاع منطقة الرسم
-
-  var grpW    = barW * 2 + barGap;
-  var totalW  = padL + years.length * (grpW + grpGap) - grpGap + padR;
-  var svgH    = padT + chartH + padB;
-
-  // ── أقصى قيمة ───────────────────────────────────────────────────────────
-  var maxVal  = 0;
-  years.forEach(function(y){ maxVal = Math.max(maxVal, byYear[y].amount, byYear[y].ret); });
-  if (!maxVal) maxVal = 1;
-
-  var scale   = function(v) { return chartH - (v / maxVal) * chartH; };
-  var fmtK    = function(n) {
-    if (n >= 1000000) return (n/1000000).toFixed(1) + 'م';
-    if (n >= 1000)    return (n/1000).toFixed(0) + 'K';
-    return Math.round(n).toString();
-  };
-
-  // ── خطوط الشبكة ─────────────────────────────────────────────────────────
-  var gridLines = '';
-  var gridCount = 4;
-  for (var g = 0; g <= gridCount; g++) {
-    var gy  = padT + (g / gridCount) * chartH;
-    var gv  = maxVal * (1 - g / gridCount);
-    gridLines +=
-      '<line x1="' + padL + '" y1="' + gy.toFixed(1) + '" x2="' + (totalW - padR) + '" y2="' + gy.toFixed(1) + '" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>' +
-      '<text x="' + (padL - 8) + '" y="' + (gy + 4).toFixed(1) + '" text-anchor="end" fill="rgba(255,255,255,0.3)" font-size="9" font-family="monospace">' + fmtK(gv) + '</text>';
-  }
-
-  // ── الأعمدة ─────────────────────────────────────────────────────────────
-  var bars = '';
-  var labels = '';
-  years.forEach(function(yr, i) {
-    var d  = byYear[yr];
-    var gx = padL + i * (grpW + grpGap);
-
-    // عامود المستثمر (ذهبي)
-    var amtH   = (d.amount / maxVal) * chartH;
-    var amtY   = padT + chartH - amtH;
-    bars +=
-      '<rect x="' + gx + '" y="' + amtY.toFixed(1) + '" width="' + barW + '" height="' + amtH.toFixed(1) + '"' +
-      ' rx="4" fill="url(#barGold)" />' +
-      // قيمة فوق العامود
-      '<text x="' + (gx + barW / 2).toFixed(1) + '" y="' + (amtY - 5).toFixed(1) + '"' +
-      ' text-anchor="middle" fill="#c9a84c" font-size="9" font-family="monospace" font-weight="700">' +
-      fmtK(d.amount) + '</text>';
-
-    // عامود العائد (أخضر)
-    var retH   = (d.ret / maxVal) * chartH;
-    var retX   = gx + barW + barGap;
-    var retY   = padT + chartH - retH;
-    bars +=
-      '<rect x="' + retX + '" y="' + retY.toFixed(1) + '" width="' + barW + '" height="' + retH.toFixed(1) + '"' +
-      ' rx="4" fill="url(#barGreen)" />' +
-      '<text x="' + (retX + barW / 2).toFixed(1) + '" y="' + (retY - 5).toFixed(1) + '"' +
-      ' text-anchor="middle" fill="#5cb98a" font-size="9" font-family="monospace" font-weight="700">' +
-      fmtK(d.ret) + '</text>';
-
-    // تسمية السنة في الأسفل
-    var cx = gx + grpW / 2;
-    labels +=
-      '<text x="' + cx.toFixed(1) + '" y="' + (padT + chartH + 18) + '"' +
-      ' text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="11" font-family="Cairo,sans-serif" font-weight="600">' + yr + '</text>' +
-      // ROI تحت السنة
-      '<text x="' + cx.toFixed(1) + '" y="' + (padT + chartH + 32) + '"' +
-      ' text-anchor="middle" fill="rgba(92,185,138,0.7)" font-size="9" font-family="monospace">' +
-      (d.amount > 0 ? (d.ret/d.amount*100).toFixed(1)+'%' : '') + '</text>';
-  });
-
-  // ── SVG ──────────────────────────────────────────────────────────────────
-  el.innerHTML =
-    '<svg width="' + totalW + '" height="' + svgH + '" viewBox="0 0 ' + totalW + ' ' + svgH + '" xmlns="http://www.w3.org/2000/svg" style="display:block;min-width:' + totalW + 'px">' +
-    '<defs>' +
-      '<linearGradient id="barGold" x1="0" y1="0" x2="0" y2="1">' +
-        '<stop offset="0%" stop-color="#e2c48a"/>' +
-        '<stop offset="100%" stop-color="#c9a84c" stop-opacity="0.7"/>' +
-      '</linearGradient>' +
-      '<linearGradient id="barGreen" x1="0" y1="0" x2="0" y2="1">' +
-        '<stop offset="0%" stop-color="#7dd9a8"/>' +
-        '<stop offset="100%" stop-color="#5cb98a" stop-opacity="0.7"/>' +
-      '</linearGradient>' +
-    '</defs>' +
-    // خط محور X
-    '<line x1="' + padL + '" y1="' + (padT + chartH) + '" x2="' + (totalW - padR) + '" y2="' + (padT + chartH) + '" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>' +
-    gridLines + bars + labels +
-    '</svg>';
-}
-
 function renderDashboard() {
   var yr   = (document.getElementById('dash-year-filter')||{}).value || 'all';
   var inv  = window.__investments || [];
@@ -4000,8 +3881,6 @@ function renderDashboard() {
   renderPlatformBars(data, totalAmt, fmt);
   renderRiskSection(data, yr);
   renderTopPerformers(data, fmt);
-  // الرسم العامودي يستخدم دائماً كل البيانات (ليس المفلترة بالسنة)
-  renderYearlyChart(inv);
 }
 
 function renderDonutChart(data, totalAmt, fmt) {
@@ -6067,10 +5946,11 @@ function renderOppsFiltered() {
         '<td class="mono">' + fmtNum(d.amount) + '</td>' +
         '<td>' + fmtPct(d.ret_pct) + '</td>' +
         '<td class="mono ' + (d.ret_val >= 0 ? 'up' : 'dn') + '">' + fmtNum(d.ret_val, 2) + '</td>' +
+        '<td style="color:var(--cyan);font-size:11px;font-family:monospace">' + (d.date_in || '—') + '</td>' +
         '<td style="color:#8899bb;font-size:11px">' + (d.date_out || '—') + '</td>' +
         '<td>' + riskPill(d.risk) + '</td>' +
         '<td>' + statusPill(d.status) + '</td>' +
-        '<td style="white-space:nowrap">' +'<button class="loan-action-btn" onclick="openDistModal(' + realIdx + ')" title="إضافة دفعة" style="color:var(--green);border-color:rgba(92,185,138,0.3)">💰</button>' +'<button class="loan-action-btn" onclick="openEditOpp(' + realIdx + ')" title="تعديل" style="margin-right:4px">✏️</button></td>' +
+        '<td style="white-space:nowrap">' +'<button class="loan-action-btn" onclick="openDistModal(' + realIdx + ')" title="إضافة دفعة" style="color:var(--green);border-color:rgba(92,185,138,0.3)">💰</button>' +'<button class="loan-action-btn" onclick="openEditOpp(' + realIdx + ')" title="تعديل سريع" style="margin-right:4px">✏️</button>' +'<button class="loan-action-btn" onclick="openFullEditOpp(' + realIdx + ')" title="تعديل كامل" style="color:var(--cyan);border-color:rgba(78,205,196,0.3);margin-right:4px">🖊</button></td>' +
         '</tr>';
     }).join('');
   } else {
@@ -6082,10 +5962,11 @@ function renderOppsFiltered() {
         '<td class="mono">' + fmtNum(d.amount) + '</td>' +
         '<td>' + fmtPct(d.ret_pct) + '</td>' +
         '<td class="mono ' + (d.ret_val >= 0 ? 'up' : 'dn') + '">' + fmtNum(d.ret_val, 2) + '</td>' +
+        '<td style="color:var(--cyan);font-size:11px;font-family:monospace">' + (d.date_in || '—') + '</td>' +
         '<td class="mono" style="color:var(--gold)">' + fmtNum(d.total, 2) + '</td>' +
         '<td>' + riskPill(d.risk) + '</td>' +
         '<td>' + statusPill(d.status) + '</td>' +
-        '<td style="white-space:nowrap">' +'<button class="loan-action-btn" onclick="openDistModal(' + realIdx + ')" title="إضافة دفعة" style="color:var(--green);border-color:rgba(92,185,138,0.3)">💰</button>' +'<button class="loan-action-btn" onclick="openEditOpp(' + realIdx + ')" title="تعديل" style="margin-right:4px">✏️</button></td>' +
+        '<td style="white-space:nowrap">' +'<button class="loan-action-btn" onclick="openDistModal(' + realIdx + ')" title="إضافة دفعة" style="color:var(--green);border-color:rgba(92,185,138,0.3)">💰</button>' +'<button class="loan-action-btn" onclick="openEditOpp(' + realIdx + ')" title="تعديل سريع" style="margin-right:4px">✏️</button>' +'<button class="loan-action-btn" onclick="openFullEditOpp(' + realIdx + ')" title="تعديل كامل" style="color:var(--cyan);border-color:rgba(78,205,196,0.3);margin-right:4px">🖊</button></td>' +
         '</tr>';
     }).join('');
   }
@@ -6154,6 +6035,8 @@ function openEditOpp(idx) {
   set('edit-duration', d.duration || '');
   set('edit-ticker',   d.ticker || '');
   set('edit-shares',   d.shares || '');
+  set('edit-date-in',  d.date_in || '');
+  set('edit-notes',    d.notes || '');
   calcEditOpp();
   document.getElementById('edit-opp-modal').classList.add('open');
 }
@@ -6178,22 +6061,28 @@ function calcEditOpp() {
 function saveEditOpp() {
   if (_editingOppIdx === null) return;
   const d = investments[_editingOppIdx];
-  const g = id => document.getElementById(id)?.value;
-  d.name     = g('edit-name') || d.name;
-  d.type     = g('edit-type');
-  d.platform = g('edit-platform');
-  d.amount   = parseFloat(g('edit-amount')) || d.amount;
-  d.ret_pct  = (parseFloat(g('edit-ret-pct')) || 0) / 100;
-  d.ret_val  = parseFloat(g('edit-ret-val')) || 0;
-  d.total    = parseFloat(g('edit-total')) || d.total;
-  d.risk     = g('edit-risk');
-  d.status   = g('edit-status');
-  d.date_out = g('edit-date-out') || null;
-  d.duration = g('edit-duration') || null;
-  d.ticker   = g('edit-ticker') || d.ticker;
-  d.shares   = parseFloat(g('edit-shares')) || d.shares;
+  const gv = id => { const el = document.getElementById(id); return el ? el.value : null; };
+  const gf = id => parseFloat(gv(id)) || 0;
+
+  if (gv('edit-name'))     d.name     = gv('edit-name');
+  if (gv('edit-type'))     d.type     = gv('edit-type');
+  if (gv('edit-platform')) d.platform = gv('edit-platform');
+  if (gv('edit-amount'))   d.amount   = gf('edit-amount');
+  const rp = parseFloat(gv('edit-ret-pct'));
+  if (!isNaN(rp))          d.ret_pct  = rp / 100;
+  const rv = parseFloat(gv('edit-ret-val'));
+  if (!isNaN(rv))          d.ret_val  = rv;
+  const tot = parseFloat(gv('edit-total'));
+  if (!isNaN(tot))         d.total    = tot;
+  if (gv('edit-risk'))     d.risk     = gv('edit-risk');
+  if (gv('edit-status'))   d.status   = gv('edit-status');
+  if (gv('edit-date-in'))  d.date_in  = gv('edit-date-in');
+  d.date_out = gv('edit-date-out') || d.date_out;
+  d.duration = gv('edit-duration') || d.duration;
+  d.notes    = gv('edit-notes')    || d.notes;
+
   closeEditModal();
-  renderAll(); renderSukuk(); renderFunds(); renderStocks();
+  renderAll(); renderSukuk(); renderFunds(); renderStocks(); renderOppsFiltered();
   triggerSync('investments');
   showToast('✅ تم حفظ: ' + d.name);
 }
@@ -6282,6 +6171,170 @@ function saveDistPayment() {
   closeDistModal();
   showToast('✅ تم تسجيل الدفعة — ' + amount.toLocaleString('en-US',{minimumFractionDigits:2}) + ' ر.س');
 }
+
+
+// ── تعديل كامل — يملأ صفحة الإضافة بالبيانات الكاملة ─────────────────────────
+var _fullEditIdx = null;
+
+function openFullEditOpp(idx) {
+  var d = investments[idx];
+  if (!d) return;
+  _fullEditIdx = idx;
+  _editingOppIdx = null;
+  closeEditModal();
+
+  // انتقل لصفحة الإضافة
+  showPage('add', null, '✏️ تعديل فرصة');
+
+  // امنح الـ DOM وقتاً ليُرسم
+  setTimeout(function() {
+    var setV  = function(id, v) { var e=document.getElementById(id); if(e) e.value = v != null ? v : ''; };
+    var setS  = function(id, v) { var e=document.getElementById(id); if(e && v) { e.value = v; if(e.tagName==='SELECT'){for(var i=0;i<e.options.length;i++){if(e.options[i].value===v||e.options[i].text===v){e.selectedIndex=i;break;}}} } };
+
+    // Step 1
+    setV('f-name',     d.name);
+    setV('f-code',     d.code);
+    setS('f-type',     d.type);
+    setV('f-sector',   d.sector);
+    setS('f-platform', d.platform);
+    onTypeChange();
+
+    // Step 2 — المالية
+    setV('f-amount',    d.amount);
+    setS('f-currency',  d.currency || 'SAR');
+    setV('f-ret-pct',   d.ret_pct ? (d.ret_pct * 100).toFixed(2) : '');
+    setV('f-ret-val',   d.ret_val);
+    setV('f-fees',      d.fees);
+    setV('f-tax',       d.tax);
+    setV('f-market-val',d.market_val);
+    setV('f-ownership', d.ownership);
+    setV('f-date-in',   d.date_in || '');
+    setV('f-date-out',  d.date_out || '');
+    setS('f-status',    d.status);
+
+    // Step 3 — توزيعات
+    setS('f-dist-type', d.dist_type);
+    setS('f-dist-freq', d.dist_freq);
+    setV('f-last-dist', d.last_dist);
+    _distEntries = Array.isArray(d.dist_entries) ? JSON.parse(JSON.stringify(d.dist_entries)) : [];
+    renderDistEntries();
+    updateDistTotals();
+
+    // Step 4 — التوقيت
+    setV('f-months',    d.duration);
+    setV('f-redeemed',  d.redeemed);
+
+    // Sukuk panel
+    setV('f-isin',    d.isin);
+    setV('f-issuer',  d.issuer);
+    setS('f-sukuk-type', d.sukuk_type);
+    setV('f-coupon',  d.coupon);
+    setV('f-face-val',d.face_val);
+    setV('f-credit-rating', d.credit_rating);
+
+    // Stock panel
+    setV('f-company',   d.company);
+    setV('f-buy-price', d.buy_price);
+    setV('f-curr-price',d.curr_price);
+    setV('f-pe',        d.pe);
+
+    // Estate panel
+    setS('f-estate-type', d.estate_type);
+    setV('f-location',  d.location);
+    setV('f-area',      d.area);
+    setV('f-rent',      d.rent);
+
+    // Step 5 — المخاطر
+    setS('f-risk',        d.risk);
+    setV('f-risk-score',  d.risk_score);
+    setS('f-guarantee',   d.guarantee);
+    setV('f-guarantee-val',d.guarantee_val);
+    setV('f-notes',       d.notes);
+
+    // حساب الحقول التلقائية
+    calcAuto();
+
+    // تغيير نص الزر إلى "حفظ التعديل"
+    var saveBtn = document.querySelector('[onclick="saveOpportunity()"]');
+    if (saveBtn) saveBtn.textContent = '💾 حفظ التعديل';
+    var pageTitle = document.querySelector('#page-add .page-title, #page-add .step-title');
+    if (pageTitle) pageTitle.textContent = '✏️ تعديل فرصة: ' + d.name;
+
+    // اذهب لأول خطوة
+    showStep(1);
+    window.scrollTo(0, 0);
+  }, 300);
+}
+
+// تجاوز saveOpportunity عند التعديل الكامل
+var _origSaveOpportunity = null;
+(function() {
+  var origSave = null;
+  var patchSave = function() {
+    if (_fullEditIdx !== null) {
+      // نحدّث الفرصة الموجودة بدل إضافة جديدة
+      var inv = window.__investments || investments;
+      // استدعي saveOpportunity الأصلية لكن بدل push نحدّث
+      var idx = _fullEditIdx;
+      _fullEditIdx = null;
+    }
+  };
+})();
+
+// Patch saveOpportunity لدعم التعديل الكامل
+var _saveOpportunityOrig = saveOpportunity;
+saveOpportunity = function() {
+  if (_fullEditIdx === null) {
+    _saveOpportunityOrig();
+    return;
+  }
+  // تحقق من الصفحة
+  if (!validateStep(6)) return;
+  var idx = _fullEditIdx;
+  _fullEditIdx = null;
+
+  var net = parseFloat(document.getElementById('f-amount').value||0) - parseFloat(document.getElementById('f-fees').value||0) - parseFloat(document.getElementById('f-tax').value||0);
+  var retPct = parseFloat(document.getElementById('f-ret-pct').value||0) / 100;
+  var retVal = parseFloat(document.getElementById('f-ret-val').value||0);
+  var platform = document.getElementById('f-platform').value !== 'أخرى' ? document.getElementById('f-platform').value : (document.getElementById('f-platform-other')||{value:''}).value;
+
+  var d = investments[idx];
+  if (!d) { _saveOpportunityOrig(); return; }
+
+  // تحديث جميع الحقول
+  var fields = ['name','code','type','subtype','sector','currency','date_in','date_out','status','dist_type','dist_freq','last_dist','redeemed','isin','issuer','sukuk_type','credit_rating','company','estate_type','location','guarantee','guarantee_val','risk','notes','docs','doc_url'];
+  fields.forEach(function(k) {
+    var el = document.getElementById('f-'+k.replace('_','-'));
+    if (el) d[k] = el.value;
+  });
+  d.platform      = platform;
+  d.amount        = parseFloat(document.getElementById('f-amount').value)||0;
+  d.fees          = parseFloat(document.getElementById('f-fees').value)||0;
+  d.tax           = parseFloat(document.getElementById('f-tax').value)||0;
+  d.net           = net;
+  d.ret_pct       = retPct;
+  d.ret_val       = retVal;
+  d.total         = net + retVal;
+  d.market_val    = parseFloat(document.getElementById('f-market-val').value)||0;
+  d.ownership     = parseFloat(document.getElementById('f-ownership').value)||0;
+  d.dist_received = parseFloat(document.getElementById('f-dist-received').value)||d.dist_received||0;
+  d.dist_entries  = JSON.parse(JSON.stringify(_distEntries));
+  d.coupon        = parseFloat(document.getElementById('f-coupon').value)||0;
+  d.face_val      = parseFloat(document.getElementById('f-face-val').value)||0;
+  d.buy_price     = parseFloat(document.getElementById('f-buy-price').value)||0;
+  d.curr_price    = parseFloat(document.getElementById('f-curr-price').value)||0;
+  d.pe            = parseFloat(document.getElementById('f-pe').value)||0;
+  d.area          = parseFloat(document.getElementById('f-area').value)||0;
+  d.rent          = parseFloat(document.getElementById('f-rent').value)||0;
+  d.risk_score    = parseFloat(document.getElementById('f-risk-score').value)||0;
+  d.capital_src   = getCapitalSrcSelected ? getCapitalSrcSelected().join('، ') : d.capital_src;
+
+  resetForm();
+  renderAll(); renderSukuk(); renderFunds(); renderStocks(); renderOppsFiltered();
+  triggerSync('investments');
+  showToast('✅ تم تحديث الفرصة: ' + d.name);
+  showPage('sukuk', null, '📜 الفرص الاستثمارية');
+};
 
 function closeEditModal() {
   document.getElementById('edit-opp-modal').classList.remove('open');
@@ -10021,6 +10074,9 @@ function closeMobUserMenu() {
             <div class="db-modal-title" style="margin:0">✏️ تعديل الفرصة</div>
             <button onclick="closeEditModal()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;line-height:1">×</button>
           </div>
+          <!-- hidden compat fields -->
+          <input type="hidden" id="edit-ticker" /><input type="hidden" id="edit-shares" /><input type="hidden" id="edit-duration" />
+
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
             <div class="field-group" style="grid-column:span 2">
               <label class="field-label">اسم الفرصة</label>
@@ -10057,6 +10113,14 @@ function closeMobUserMenu() {
               <input class="f-input" id="edit-total" type="number" step="0.01" style="color:var(--gold)" />
             </div>
             <div class="field-group">
+              <label class="field-label">تاريخ الدخول</label>
+              <input class="f-input" id="edit-date-in" type="date" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">تاريخ الخروج / الاستحقاق</label>
+              <input class="f-input" id="edit-date-out" type="text" placeholder="مثال: 28/09/2026" />
+            </div>
+            <div class="field-group">
               <label class="field-label">المخاطرة</label>
               <select class="f-select" id="edit-risk">
                 <option>منخفض</option><option>متوسط</option><option>عالي</option><option>عالي جداً</option>
@@ -10065,24 +10129,12 @@ function closeMobUserMenu() {
             <div class="field-group">
               <label class="field-label">الحالة</label>
               <select class="f-select" id="edit-status">
-                <option>نشطة</option><option>مستلمة</option><option>مؤجلة</option><option>ملغاة</option>
+                <option>نشطة</option><option>مستلمة</option><option>مغلقة</option><option>مؤجلة</option><option>ملغاة</option>
               </select>
             </div>
-            <div class="field-group">
-              <label class="field-label">تاريخ الخروج / الاستحقاق</label>
-              <input class="f-input" id="edit-date-out" type="text" placeholder="مثال: 28/09/2026" />
-            </div>
-            <div class="field-group">
-              <label class="field-label">المدة</label>
-              <input class="f-input" id="edit-duration" type="text" placeholder="مثال: 12 شهر" />
-            </div>
-            <div class="field-group">
-              <label class="field-label">رمز السهم (للأسهم)</label>
-              <input class="f-input" id="edit-ticker" type="text" />
-            </div>
-            <div class="field-group">
-              <label class="field-label">عدد الأسهم</label>
-              <input class="f-input" id="edit-shares" type="number" />
+            <div class="field-group" style="grid-column:span 2">
+              <label class="field-label">ملاحظة</label>
+              <input class="f-input" id="edit-notes" type="text" placeholder="ملاحظات إضافية..." />
             </div>
           </div>
           <!-- live calc -->
@@ -10090,9 +10142,12 @@ function closeMobUserMenu() {
             <div><div style="font-size:10px;color:var(--muted)">قيمة العائد</div><div id="eoc-ret" style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--gold)">—</div></div>
             <div><div style="font-size:10px;color:var(--muted)">المجموع</div><div id="eoc-total" style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--gold)">—</div></div>
           </div>
-          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
-            <button class="btn-submit" onclick="saveEditOpp()" style="padding:10px 28px;font-size:13px">💾 حفظ</button>
-            <button class="btn-reset" onclick="closeEditModal()">إلغاء</button>
+          <div style="display:flex;gap:10px;justify-content:space-between;margin-top:4px;flex-wrap:wrap">
+            <button onclick="openFullEditOpp(_editingOppIdx)" style="background:rgba(78,205,196,0.1);border:1px solid rgba(78,205,196,0.3);border-radius:10px;padding:9px 16px;color:var(--cyan);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">🖊 تعديل كامل</button>
+            <div style="display:flex;gap:8px">
+              <button class="btn-submit" onclick="saveEditOpp()" style="padding:10px 28px;font-size:13px">💾 حفظ</button>
+              <button class="btn-reset" onclick="closeEditModal()">إلغاء</button>
+            </div>
           </div>
         </div>
       </div>
