@@ -1371,7 +1371,6 @@
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <select id="dash-year" onchange="buildDashboard()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--white);font-size:12px;font-family:inherit;outline:none">
-  renderYearlyChart(window.__allInv || allInv || []);
           <option value="all">كل السنوات</option>
         </select>
         <button onclick="buildDashboard()" style="background:rgba(201,169,110,0.1);border:1px solid rgba(201,169,110,0.3);border-radius:8px;padding:6px 13px;color:var(--gold);font-size:12px;cursor:pointer;font-family:inherit">🔄</button>
@@ -3281,6 +3280,14 @@ firebase.auth().onAuthStateChanged(function(user) {
 window.__onDataLoaded = function() {
   initYearFilter();
   buildDashboard();
+};
+
+// تأكد من استدعاء الرسم بعد بناء لوحة التحكم
+var _origBuildDashboard = buildDashboard;
+buildDashboard = function() {
+  _origBuildDashboard();
+  var inv = window.__investments || [];
+  renderYearlyChart(inv);
 };
 
 
