@@ -3290,13 +3290,29 @@ function renderYearlyChart(allInv) {
   var el = document.getElementById('dash-yearly-chart');
   if (!el) return;
   var byYear = {};
+  var currentYr = String(new Date().getFullYear());
   (allInv||[]).forEach(function(x) {
-    var raw = x.date_in || x.added_at || '';
-    var yr  = raw.split('-')[0] || raw.split('/')[2] || '';
-    if (!yr || yr.length !== 4) return;
-    if (!byYear[yr]) byYear[yr] = { amount: 0, ret: 0 };
+    // جرّب كل مصادر التاريخ المتاحة
+    var raw = x.date_in || x.added_at || x.date_out || '';
+    var yr  = '';
+
+    if (raw) {
+      // صيغة YYYY-MM-DD أو YYYY/MM/DD
+      yr = raw.split('-')[0] || raw.split('/')[0] || '';
+      // صيغة DD/MM/YYYY
+      if (!yr || yr.length !== 4) {
+        var parts = raw.split('/');
+        if (parts.length === 3 && parts[2].length === 4) yr = parts[2];
+      }
+    }
+
+    // إذا لم يُعثر على سنة → السنة الحالية
+    if (!yr || yr.length !== 4) yr = currentYr;
+
+    if (!byYear[yr]) byYear[yr] = { amount: 0, ret: 0, noDate: 0 };
     byYear[yr].amount += x.amount || 0;
     byYear[yr].ret    += (x.dist_received > 0 ? x.dist_received : (x.ret_val || 0));
+    if (!x.date_in && !x.added_at) byYear[yr].noDate++;
   });
   var years = Object.keys(byYear).sort();
   if (!years.length) { el.innerHTML='<span style="color:var(--muted);font-size:12px">لا توجد بيانات مصنّفة بالسنة</span>'; return; }
