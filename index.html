@@ -2089,11 +2089,26 @@
           <div class="page-title">➕ إضافة فرصة استثمارية</div>
           <div class="page-sub">أدخل جميع تفاصيل الفرصة — ستُحسب القيم التلقائية فوراً</div>
         </div>
-        <div style="display:flex;gap:10px;align-items:center">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
           <div id="saved-count-badge" class="date-badge" style="color:#5cb98a;border-color:rgba(92,185,138,0.3);display:none">
             ✅ <span id="saved-count">0</span> فرصة محفوظة
           </div>
+          <!-- زر تحليل الصورة -->
+          <label id="img-analyze-btn" style="display:inline-flex;align-items:center;gap:8px;padding:9px 18px;background:rgba(155,140,255,0.12);border:1px solid rgba(155,140,255,0.35);border-radius:10px;color:#9b8cff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;user-select:none" onmouseover="this.style.background='rgba(155,140,255,0.22)'" onmouseout="this.style.background='rgba(155,140,255,0.12)'" title="ارفع صورة وثيقة/كشف وسيقوم Claude بتعبئة البيانات تلقائياً">
+            📷 تحليل من صورة / صور
+            <input type="file" id="opp-img-input" accept="image/*,application/pdf" multiple style="display:none" onchange="analyzeOppImage(event)" />
+          </label>
         </div>
+      </div>
+
+      <!-- شريط حالة التحليل -->
+      <div id="img-analyze-status" style="display:none;margin-bottom:14px;padding:14px 18px;background:rgba(155,140,255,0.08);border:1px solid rgba(155,140,255,0.25);border-radius:12px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <div id="img-analyze-spinner" style="width:16px;height:16px;border:2px solid rgba(155,140,255,0.3);border-top-color:#9b8cff;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></div>
+          <span id="img-analyze-msg" style="font-size:13px;font-weight:600;color:#9b8cff">جارٍ تحليل الصورة...</span>
+        </div>
+        <div id="img-analyze-preview" style="display:none;font-size:11px;color:var(--muted);line-height:1.6;max-height:80px;overflow-y:auto"></div>
+        <div id="img-analyze-filled" style="display:none;margin-top:8px;display:flex;flex-wrap:wrap;gap:6px"></div>
       </div>
 
       <!-- STEP INDICATOR -->
@@ -5055,6 +5070,147 @@ function resetDistEntries() {
   _distEntries = [];
   renderDistEntries();
   updateDistTotals();
+}
+
+
+// ── تحليل صورة/صور الفرصة الاستثمارية بـ Claude Vision ───────────────────────
+function analyzeOppImage(event) {
+  var files = Array.from(event.target.files);
+  event.target.value = '';
+  if (!files.length) return;
+
+  var statusEl  = document.getElementById('img-analyze-status');
+  var spinnerEl = document.getElementById('img-analyze-spinner');
+  var msgEl     = document.getElementById('img-analyze-msg');
+  var filledEl  = document.getElementById('img-analyze-filled');
+
+  statusEl.style.display   = 'block';
+  spinnerEl.style.display  = 'block';
+  if (filledEl) filledEl.style.display = 'none';
+  msgEl.style.color   = '#9b8cff';
+  msgEl.textContent   = 'جارٍ قراءة ' + files.length + (files.length === 1 ? ' صورة...' : ' صور...');
+
+  // حوّل جميع الملفات لـ base64 بالتوازي
+  var readers = files.map(function(file) {
+    return new Promise(function(resolve, reject) {
+      var r = new FileReader();
+      r.onload  = function(e) {
+        resolve({ base64: e.target.result.split(',')[1], mediaType: file.type || 'image/jpeg', name: file.name });
+      };
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+  });
+
+  Promise.all(readers).then(function(imgs) {
+    msgEl.textContent = 'جارٍ تحليل ' + imgs.length + (imgs.length === 1 ? ' صورة' : ' صور') + ' بـ Claude...';
+
+    var PROXY = 'https://claude-proxy.shaheenhouse1.workers.dev';
+
+    var systemPrompt = 'أنت مساعد متخصص في قراءة وثائق الاستثمار السعودية.\n' +
+      'ستحصل على صورة واحدة أو أكثر من نفس الوثيقة أو وثائق مترابطة.\n' +
+      'مهمتك: استخرج أفضل البيانات الممكنة وأجب بـ JSON صرف فقط بدون نص خارجه.\n' +
+      'البنية: {"name":null,"type":null,"platform":null,"amount":null,' +
+      '"ret_pct":null,"ret_val":null,"total":null,"date_in":null,"date_out":null,' +
+      '"status":null,"risk":null,"currency":null,"isin":null,"issuer":null,' +
+      '"sukuk_type":null,"coupon":null,"face_val":null,"notes":null}\n' +
+      'type: صك|صندوق|سهم|سند|مرابحة|وديعة|عقار|أخرى\n' +
+      'status: نشطة|مستلمة|مغلقة\n' +
+      'risk: منخفض|متوسط|عالي\n' +
+      'currency: SAR|USD|EUR\n' +
+      'التواريخ: YYYY-MM-DD — اترك null لأي حقل غير واضح.';
+
+    // ابنِ محتوى الرسالة: صورة واحدة لكل ملف + طلب التحليل
+    var content = [];
+    imgs.forEach(function(img, i) {
+      if (imgs.length > 1) {
+        content.push({ type: 'text', text: 'الصورة ' + (i+1) + ' من ' + imgs.length + ' (' + img.name + '):' });
+      }
+      content.push({ type: 'image', source: { type: 'base64', media_type: img.mediaType, data: img.base64 } });
+    });
+    content.push({ type: 'text', text: 'حلّل هذه الوثيقة' + (imgs.length > 1 ? '/الوثائق' : '') + ' واستخرج البيانات بـ JSON.' });
+
+    return fetch(PROXY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-opus-4-5',
+        max_tokens: 1500,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: content }]
+      })
+    });
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.error) throw new Error(data.error.message || 'خطأ من API');
+    var raw = (data.content || []).map(function(b){ return b.text || ''; }).join('');
+    var m   = raw.replace(/```json|```/g, '').trim().match(/\{[\s\S]*\}/);
+    if (!m) throw new Error('لم يُعثر على JSON صالح في الرد');
+    fillOppFormFromAI(JSON.parse(m[0]), msgEl, spinnerEl, filledEl);
+  })
+  .catch(function(err) {
+    spinnerEl.style.display = 'none';
+    msgEl.textContent = 'فشل التحليل: ' + (err.message || err);
+    msgEl.style.color = 'var(--red)';
+    console.error('Image analysis error:', err);
+  });
+}
+
+function fillOppFormFromAI(data, msgEl, spinnerEl, filledEl) {
+  var filled = [];
+  var setF = function(id, val, label) {
+    if (val == null || val === '') return;
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.value = String(val);
+    if (el.tagName === 'SELECT') {
+      for (var i = 0; i < el.options.length; i++) {
+        if (el.options[i].value === String(val) || el.options[i].text === String(val)) { el.selectedIndex = i; break; }
+      }
+    }
+    filled.push(label + ': ' + String(val));
+    el.style.transition = 'border .3s';
+    el.style.border = '2px solid #9b8cff';
+    setTimeout(function(){ el.style.border = ''; }, 2500);
+  };
+
+  setF('f-name',      data.name,       'الاسم');
+  setF('f-type',      data.type,       'النوع');
+  setF('f-platform',  data.platform,   'المنصة');
+  setF('f-currency',  data.currency,   'العملة');
+  setF('f-amount',    data.amount,     'المبلغ');
+  setF('f-ret-pct',   data.ret_pct,    'العائد %');
+  setF('f-ret-val',   data.ret_val,    'قيمة العائد');
+  setF('f-date-in',   data.date_in,    'تاريخ الدخول');
+  setF('f-date-out',  data.date_out,   'تاريخ الخروج');
+  setF('f-status',    data.status,     'الحالة');
+  setF('f-risk',      data.risk,       'المخاطرة');
+  setF('f-isin',      data.isin,       'ISIN');
+  setF('f-issuer',    data.issuer,     'جهة الإصدار');
+  setF('f-sukuk-type',data.sukuk_type, 'نوع الصك');
+  setF('f-coupon',    data.coupon,     'الكوبون');
+  setF('f-face-val',  data.face_val,   'القيمة الاسمية');
+  setF('f-notes',     data.notes,      'ملاحظات');
+
+  try { onTypeChange(); } catch(e){}
+  try { calcAuto(); }     catch(e){}
+  try { goStep(1); }      catch(e){}
+
+  spinnerEl.style.display = 'none';
+  if (filled.length > 0) {
+    msgEl.textContent = 'تمّ تعبئة ' + filled.length + ' حقل تلقائياً';
+    msgEl.style.color = '#5cb98a';
+    if (filledEl) {
+      filledEl.style.display = 'flex';
+      filledEl.innerHTML = filled.map(function(f) {
+        return '<span style="background:rgba(155,140,255,0.1);border:1px solid rgba(155,140,255,0.25);border-radius:20px;padding:2px 10px;font-size:10px;color:#9b8cff">' + f + '</span>';
+      }).join('');
+    }
+  } else {
+    msgEl.textContent = 'لم يتم التعرف على بيانات — راجع الحقول يدوياً';
+    msgEl.style.color = 'var(--orange)';
+  }
 }
 
 function saveOpportunity() {
