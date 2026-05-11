@@ -4232,7 +4232,7 @@ async function fetchLiveStockPrices() {
   var failedTickers = tickers.filter(function(t){ return !STOCK_PRICES[t] || !STOCK_PRICES[t].price; });
   if (failedTickers.length) {
     try {
-      var PROXY = 'https://claude-proxy.shaheenhouse1.workers.dev';
+      var PROXY = 'https://claude-proxy-2.shaheenhouse1.workers.dev';
       var failSymbols = failedTickers.map(function(t){ return t + '.SR'; }).join(',');
       var res3 = await fetch(PROXY, {
         method: 'POST',
