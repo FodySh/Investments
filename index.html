@@ -5095,7 +5095,13 @@ function analyzeOppImage(event) {
     return new Promise(function(resolve, reject) {
       var r = new FileReader();
       r.onload  = function(e) {
-        resolve({ base64: e.target.result.split(',')[1], mediaType: file.type || 'image/jpeg', name: file.name });
+        var isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+        resolve({
+          base64:    e.target.result.split(',')[1],
+          mediaType: file.type || 'image/jpeg',
+          isPDF:     isPDF,
+          name:      file.name
+        });
       };
       r.onerror = reject;
       r.readAsDataURL(file);
@@ -5120,13 +5126,19 @@ function analyzeOppImage(event) {
       'currency: SAR|USD|EUR\n' +
       'التواريخ: YYYY-MM-DD — اترك null لأي حقل غير واضح.';
 
-    // ابنِ محتوى الرسالة: صورة واحدة لكل ملف + طلب التحليل
+    // ابنِ محتوى الرسالة — PDF → document block، الصور → image block
+    var validImgTypes = ['image/jpeg','image/png','image/gif','image/webp'];
     var content = [];
     imgs.forEach(function(img, i) {
       if (imgs.length > 1) {
-        content.push({ type: 'text', text: 'الصورة ' + (i+1) + ' من ' + imgs.length + ' (' + img.name + '):' });
+        content.push({ type: 'text', text: 'الملف ' + (i+1) + ' من ' + imgs.length + ' (' + img.name + '):' });
       }
-      content.push({ type: 'image', source: { type: 'base64', media_type: img.mediaType, data: img.base64 } });
+      if (img.isPDF) {
+        content.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: img.base64 } });
+      } else {
+        var mt = validImgTypes.includes(img.mediaType) ? img.mediaType : 'image/jpeg';
+        content.push({ type: 'image', source: { type: 'base64', media_type: mt, data: img.base64 } });
+      }
     });
     content.push({ type: 'text', text: 'حلّل هذه الوثيقة' + (imgs.length > 1 ? '/الوثائق' : '') + ' واستخرج البيانات بـ JSON.' });
 
