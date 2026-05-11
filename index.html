@@ -4279,6 +4279,19 @@ function startStockPriceUpdater() {
   setInterval(fetchLiveStockPrices, 5 * 60 * 1000); // every 5 min
 }
 
+
+// ── Stubs للدوال الموجودة في dashboard.html ─────────────────────────────────
+// هذه الدوال تُستدعى من index.html لكنها مُعرَّفة في dashboard.html المنفصل
+if (typeof renderCalendar === 'undefined') {
+  window.renderCalendar = function() {};
+}
+if (typeof renderCashflow === 'undefined') {
+  window.renderCashflow = function() {};
+}
+if (typeof renderDividendsTab === 'undefined') {
+  window.renderDividendsTab = function() {};
+}
+
 // Start after DOM ready
 document.addEventListener('DOMContentLoaded', function() {
   setTimeout(startStockPriceUpdater, 1500);
