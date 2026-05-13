@@ -4162,7 +4162,7 @@ async function fetchLiveStockPrices() {
 
   var tickers = saStocks.map(function(x){ return x.ticker; });
   var updated  = 0;
-  var PROXY    = 'https://stockprice.shaheenhouse1.workers.dev/ev';
+  var PROXY    = 'https://stockprice.shaheenhouse1.workers.dev';
 
   // تقسيم لمجموعات من 15
   var CHUNK  = 15;
@@ -5077,7 +5077,7 @@ function analyzeOppImage(event) {
   Promise.all(readers).then(function(imgs) {
     msgEl.textContent = 'جارٍ تحليل ' + imgs.length + (imgs.length === 1 ? ' صورة' : ' صور') + ' بـ Claude...';
 
-    var PROXY = 'https://stockprice.shaheenhouse1.workers.dev/ev';
+    var PROXY = 'https://stockprice.shaheenhouse1.workers.dev';
 
     var systemPrompt = 'أنت مساعد متخصص في قراءة وثائق الاستثمار السعودية.\n' +
       'ستحصل على صورة واحدة أو أكثر من نفس الوثيقة أو وثائق مترابطة.\n' +
@@ -8292,7 +8292,7 @@ async function fetchCompanyName(ticker) {
   if (fetchingEl) fetchingEl.style.display = 'block';
 
   var symbol = _currentStockMarket === 'sa' ? ticker + '.SR' : ticker;
-  var PROXY  = 'https://stockprice.shaheenhouse1.workers.dev/ev';
+  var PROXY  = 'https://stockprice.shaheenhouse1.workers.dev';
 
   // قاموس الأسهم السعودية الشائعة (fallback سريع)
   var saNames = {
@@ -8373,7 +8373,7 @@ async function fetchUsStockPrices() {
   if (icon) icon.style.animation = 'spin 1s linear infinite';
 
   var symbols = usStocks.map(function(s){ return s.ticker; }).join(',');
-  var PROXY   = 'https://stockprice.shaheenhouse1.workers.dev/ev';
+  var PROXY   = 'https://stockprice.shaheenhouse1.workers.dev';
   var updated = 0;
 
   // ── الطلب عبر Cloudflare Worker (يتجاوز CORS) ──────────────────
