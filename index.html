@@ -4150,13 +4150,9 @@ async function fetchLiveStockPrices() {
   if (_stockFetchInProgress) return;
   _stockFetchInProgress = true;
 
-  var inv = window.__investments || investments;
+  var inv      = window.__investments || investments;
   var saStocks = inv.filter(function(x){ return x.type==='سهم' && x.market !== 'us' && x.ticker; });
   if (!saStocks.length) { _stockFetchInProgress = false; return; }
-
-  saStocks.forEach(function(x){
-    if (!STOCK_PRICES[x.ticker]) STOCK_PRICES[x.ticker] = { price:null, chg:null, color:'' };
-  });
 
   var icon = document.getElementById('sa-refresh-icon');
   var btn  = document.getElementById('sa-refresh-btn');
@@ -4164,27 +4160,29 @@ async function fetchLiveStockPrices() {
   if (btn)  btn.style.opacity = '0.6';
 
   var tickers = saStocks.map(function(x){ return x.ticker; });
-  var updated = 0;
+  var updated  = 0;
+  var PROXY    = 'https://claude-proxy.shaheenhouse1.workers.dev';
 
-  // تقسيم الأسهم لمجموعات من 10 لتجاوز حد Yahoo Finance
-  var CHUNK = 10;
+  // تقسيم لمجموعات من 15
+  var CHUNK  = 15;
   var chunks = [];
   for (var i = 0; i < tickers.length; i += CHUNK) {
     chunks.push(tickers.slice(i, i + CHUNK));
   }
 
   for (var ci = 0; ci < chunks.length; ci++) {
-    var chunk = chunks[ci];
-    var symbols = chunk.map(function(t){ return t + '.SR'; }).join(',');
-    var chunkUpdated = false;
+    var symbols = chunks[ci].map(function(t){ return t + '.SR'; }).join(',');
 
-    // محاولة 1: Yahoo Finance v8
     try {
-      var url = 'https://query1.finance.yahoo.com/v8/finance/quote?symbols=' + symbols
-              + '&fields=regularMarketPrice,regularMarketChangePercent';
-      var res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      // الطلب يمر عبر الـ Worker الذي يوكّل Yahoo Finance (لا CORS)
+      var res = await fetch(PROXY, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ _yahoo: true, symbols: symbols })
+      });
+
       if (res.ok) {
-        var data = await res.json();
+        var data   = await res.json();
         var quotes = ((data.quoteResponse || {}).result) || [];
         quotes.forEach(function(q) {
           var ticker = (q.symbol || '').replace('.SR','');
@@ -4194,77 +4192,28 @@ async function fetchLiveStockPrices() {
             chg:   (q.regularMarketChangePercent || 0) / 100,
             color: (q.regularMarketChangePercent || 0) >= 0 ? 'up' : 'dn'
           };
-          updated++; chunkUpdated = true;
+          updated++;
         });
       }
-    } catch(e) { console.warn('Yahoo v8 chunk', ci, 'failed:', e.message); }
-
-    // محاولة 2: Yahoo Finance v7 fallback
-    if (!chunkUpdated) {
-      try {
-        var url2 = 'https://query2.finance.yahoo.com/v7/finance/quote?symbols=' + symbols;
-        var res2 = await fetch(url2);
-        if (res2.ok) {
-          var json2 = await res2.json();
-          ((json2.quoteResponse || {}).result || []).forEach(function(q) {
-            var ticker = (q.symbol || '').replace('.SR','');
-            STOCK_PRICES[ticker] = {
-              price: q.regularMarketPrice,
-              chg:   (q.regularMarketChangePercent || 0) / 100,
-              color: (q.regularMarketChangePercent || 0) >= 0 ? 'up' : 'dn'
-            };
-            updated++; chunkUpdated = true;
-          });
-        }
-      } catch(e2) { console.warn('Yahoo v7 chunk', ci, 'failed:', e2.message); }
+    } catch(e) {
+      console.warn('Stock fetch chunk', ci, 'failed:', e.message);
     }
 
-    // تحديث الجدول بعد كل مجموعة لإظهار النتائج تدريجياً
     renderStocks();
-
-    // انتظر قليلاً بين الطلبات لتجنب rate limiting
     if (ci < chunks.length - 1) {
-      await new Promise(function(r){ setTimeout(r, 300); });
+      await new Promise(function(r){ setTimeout(r, 200); });
     }
-  }
-
-  // محاولة 3: Cloudflare Worker للأسهم التي فشلت
-  var failedTickers = tickers.filter(function(t){ return !STOCK_PRICES[t] || !STOCK_PRICES[t].price; });
-  if (failedTickers.length) {
-    try {
-      var PROXY = 'https://claude-proxy.shaheenhouse1.workers.dev';
-      var failSymbols = failedTickers.map(function(t){ return t + '.SR'; }).join(',');
-      var res3 = await fetch(PROXY, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ _stockRequest: true, symbols: failSymbols })
-      });
-      if (res3.ok) {
-        var data3 = await res3.json();
-        (data3.quotes || []).forEach(function(q) {
-          var ticker = (q.symbol || '').replace('.SR','');
-          if (!STOCK_PRICES[ticker] || !STOCK_PRICES[ticker].price) {
-            STOCK_PRICES[ticker] = {
-              price: q.price,
-              chg:   (q.changePercent || 0) / 100,
-              color: (q.changePercent || 0) >= 0 ? 'up' : 'dn'
-            };
-            updated++;
-          }
-        });
-      }
-    } catch(e3) { console.warn('Worker fallback failed:', e3.message); }
   }
 
   renderStocks();
 
-  var now = new Date();
+  var now     = new Date();
   var timeStr = now.toLocaleTimeString('ar-SA-u-nu-latn', {hour:'2-digit', minute:'2-digit'});
-  var lastUpEl = document.getElementById('sa-last-update');
+  var lastUpEl= document.getElementById('sa-last-update');
   if (lastUpEl) {
     lastUpEl.textContent = updated > 0
       ? '✅ ' + timeStr + ' — ' + updated + ' من ' + tickers.length + ' سهم'
-      : '⚠️ تعذّر جلب الأسعار';
+      : '⚠️ تعذّر جلب الأسعار — تحقق من إعداد الـ Worker';
     lastUpEl.style.color = updated > 0 ? 'var(--green)' : 'var(--orange)';
   }
 
