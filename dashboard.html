@@ -1855,12 +1855,19 @@ function _loadData(uid) {
     _read(uid, "investments"),
     _read(uid, "loans"),
     _read(uid, "dividends"),
-    _ref(uid, "settings").get().catch(function(){ return null; })
+    _ref(uid, "settings").get().catch(function(){ return null; }),
+    _read(uid, "debts").catch(function(){ return []; })
   ]).then(function(results) {
-    var inv  = results[0];
-    var loans = results[1];
-    var divs  = results[2];
+    var inv          = results[0];
+    var loans        = results[1];
+    var divs         = results[2];
     var settingsSnap = results[3];
+    var debtsArr     = results[4] || [];
+
+    // Debts
+    if (!Array.isArray(window.debtsData)) window.debtsData = [];
+    window.debtsData.length = 0;
+    debtsArr.forEach(function(r){ window.debtsData.push(r); });
 
     // Investments
     if (inv && inv.length > 0) {
@@ -2227,12 +2234,19 @@ function _loadData(uid) {
     _read(uid, "investments"),
     _read(uid, "loans"),
     _read(uid, "dividends"),
-    _ref(uid, "settings").get().catch(function(){ return null; })
+    _ref(uid, "settings").get().catch(function(){ return null; }),
+    _read(uid, "debts").catch(function(){ return []; })
   ]).then(function(results) {
-    var inv  = results[0];
-    var loans = results[1];
-    var divs  = results[2];
+    var inv          = results[0];
+    var loans        = results[1];
+    var divs         = results[2];
     var settingsSnap = results[3];
+    var debtsArr     = results[4] || [];
+
+    // Debts
+    if (!Array.isArray(window.debtsData)) window.debtsData = [];
+    window.debtsData.length = 0;
+    debtsArr.forEach(function(r){ window.debtsData.push(r); });
 
     // Investments
     if (inv && inv.length > 0) {
