@@ -2656,6 +2656,11 @@ function triggerSync(collection) {
 function _rerender() {
   if (typeof renderDebts  === 'function') renderDebts();
   if (typeof renderJamaa  === 'function') renderJamaa();
+  // فتح فورم إضافة الدين إذا طُلب من index.html
+  if (window.__openAddDebtOnLoad) {
+    window.__openAddDebtOnLoad = false;
+    setTimeout(function() { showPage('add-debt', null, '💸 إضافة دين', true); }, 100);
+  }
 }
 
 // ══ Auth ═══════════════════════════════════════════════════════
@@ -4289,12 +4294,10 @@ function deleteCapitalSrc(i) {
 
 // استدعاء تعبئة القائمة عند فتح صفحة الإضافة
 document.addEventListener('DOMContentLoaded', function() {
-  // إذا وصل من index.html بـ #add → افتح فورم إضافة الدين مباشرة
-  if (window.location.hash === '#add') {
-    setTimeout(function() {
-      showPage('add-debt', null, '💸 إضافة دين');
-      history.replaceState(null, '', window.location.pathname);
-    }, 400);
+  // إذا وصل من index.html بـ #add → افتح فورم إضافة الدين بعد تحميل البيانات
+  window.__openAddDebtOnLoad = window.location.hash === '#add';
+  if (window.__openAddDebtOnLoad) {
+    history.replaceState(null, '', window.location.pathname);
   }
   setTimeout(populateCapitalSrcSelect, 500);
 });
