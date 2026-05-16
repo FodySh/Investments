@@ -4289,6 +4289,13 @@ function deleteCapitalSrc(i) {
 
 // استدعاء تعبئة القائمة عند فتح صفحة الإضافة
 document.addEventListener('DOMContentLoaded', function() {
+  // إذا وصل من index.html بـ #add → افتح فورم إضافة الدين مباشرة
+  if (window.location.hash === '#add') {
+    setTimeout(function() {
+      showPage('add-debt', null, '💸 إضافة دين');
+      history.replaceState(null, '', window.location.pathname);
+    }, 400);
+  }
   setTimeout(populateCapitalSrcSelect, 500);
 });
 
