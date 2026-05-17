@@ -4775,6 +4775,130 @@ function fillOppFormFromAI(data, msgEl, spinnerEl, filledEl) {
   }
 }
 
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ADMIN SYSTEM — لوحة إدارة المدير
+// ══════════════════════════════════════════════════════════════════════════════
+var ADMIN_EMAIL = 'fody.mashakel@gmail.com';
+
+var ADMIN_PAGES_CONFIG = [
+  { key: 'home',      label: '🏠 الرئيسية',               navIds: ['mnav-home'] },
+  { key: 'stocks',    label: '📈 الأسهم',                 navIds: ['mnav-stocks'] },
+  { key: 'sukuk',     label: '📜 الفرص الاستثمارية',       navIds: ['mnav-sukuk', 'mnav-add'] },
+  { key: 'db',        label: '🗄️ قاعدة البيانات',          navIds: [] },
+  { key: 'loans',     label: '🏦 القروض',                 navIds: ['mnav-loans'] },
+  { key: 'debts',     label: '💸 الديون والجمعيات',        navIds: ['mnav-debts'] },
+  { key: 'cheques',   label: '📝 الشيكات والسندات',        navIds: [] },
+  { key: 'dashboard', label: '📊 لوحة التحكم الكاملة',    navIds: [] },
+  { key: 'analyst',   label: '🤖 المحلل الذكي',           navIds: [] },
+];
+
+var _adminCfg = { pages: {} };
+
+function isAdmin() {
+  var u = window.__firebaseUser;
+  return !!(u && u.email && u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
+}
+
+function initAdminNav() {
+  var navEl = document.getElementById('nav-admin');
+  if (!navEl) return;
+  if (isAdmin()) {
+    navEl.style.display = '';
+    var loggedAs = document.getElementById('admin-logged-as');
+    if (loggedAs && window.__firebaseUser) loggedAs.textContent = window.__firebaseUser.email;
+  } else {
+    navEl.style.display = 'none';
+  }
+}
+
+function loadAdminSettings() {
+  if (!_db) return;
+  _db.collection('admin').doc('settings').get()
+    .then(function(snap) {
+      if (snap && snap.exists) {
+        var d = snap.data();
+        _adminCfg = d || { pages: {} };
+      }
+      applyPageVisibility();
+      initAdminNav();
+    })
+    .catch(function() {
+      applyPageVisibility();
+      initAdminNav();
+    });
+}
+
+function applyPageVisibility() {
+  var pages = _adminCfg.pages || {};
+  ADMIN_PAGES_CONFIG.forEach(function(pg) {
+    var visible = pages[pg.key] !== false; // default: visible
+    pg.navIds.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = visible ? '' : 'none';
+    });
+    // Desktop nav items
+    var deskSel = document.querySelector('.nav-item[onclick*="' + pg.key + '"]');
+    if (deskSel && pg.key !== 'home') deskSel.style.display = visible ? '' : 'none';
+  });
+}
+
+function renderAdminPage() {
+  var loggedAs = document.getElementById('admin-logged-as');
+  if (loggedAs && window.__firebaseUser) loggedAs.textContent = window.__firebaseUser.email;
+
+  var list = document.getElementById('admin-pages-list');
+  if (!list) return;
+
+  var pages = _adminCfg.pages || {};
+
+  list.innerHTML = ADMIN_PAGES_CONFIG.map(function(pg, i) {
+    var on = pages[pg.key] !== false;
+    var borderB = i < ADMIN_PAGES_CONFIG.length - 1 ? 'border-bottom:1px solid var(--border);' : '';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;' +
+      'padding:14px 18px;' + borderB + '">' +
+      '<div style="font-size:13px;font-weight:600;color:var(--white)">' + pg.label + '</div>' +
+      '<label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">' +
+        '<input type="checkbox" data-pg="' + pg.key + '" ' + (on ? 'checked' : '') +
+          ' onchange="_adminCfg.pages[this.dataset.pg] = this.checked; applyPageVisibility()"' +
+          ' style="opacity:0;width:0;height:0">' +
+        '<span style="position:absolute;inset:0;border-radius:12px;transition:.2s;' +
+          'background:' + (on ? '#9b8cff' : 'rgba(255,255,255,0.1)') + ';"></span>' +
+        '<span style="position:absolute;top:3px;' + (on ? 'right:3px' : 'left:3px') +
+          ';width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s;"></span>' +
+      '</label>' +
+    '</div>';
+  }).join('');
+
+  // Fix toggle visual on change
+  list.querySelectorAll('input[type=checkbox]').forEach(function(inp) {
+    inp.addEventListener('change', function() {
+      var track = this.nextElementSibling;
+      var thumb = track.nextElementSibling;
+      track.style.background = this.checked ? '#9b8cff' : 'rgba(255,255,255,0.1)';
+      thumb.style.right = this.checked ? '3px' : '';
+      thumb.style.left  = this.checked ? '' : '3px';
+    });
+  });
+}
+
+function saveAdminSettings() {
+  if (!isAdmin()) return;
+  if (!_db) { showToast('❌ Firebase غير متصل'); return; }
+
+  _db.collection('admin').doc('settings').set(_adminCfg)
+    .then(function() {
+      applyPageVisibility();
+      var msg = document.getElementById('admin-save-msg');
+      if (msg) {
+        msg.style.display = 'block';
+        setTimeout(function(){ msg.style.display = 'none'; }, 4000);
+      }
+      showToast('✅ تم حفظ إعدادات الإدارة');
+    })
+    .catch(function(e) { showToast('❌ خطأ: ' + e.message); });
+}
+
 function saveOpportunity() {
   if (!validateStep(6)) return;
 
@@ -10590,37 +10714,54 @@ document.getElementById('app-guide-modal').addEventListener('click', function(e)
 </script>
 
 
-<!-- ══ PAGE: ADMIN ═══════════════════════════════════════════════════ -->
+
+
+<!-- ══ PAGE: ADMIN ══════════════════════════════════════════════════════════ -->
 <div id="page-admin" class="page" style="display:none">
-  <div class="page-header">
-    <div class="page-title">&#x1F6E1;&#xFE0F; &#x644;&#x648;&#x62D;&#x629; &#x627;&#x644;&#x625;&#x62F;&#x627;&#x631;&#x629;</div>
-    <div class="page-subtitle">&#x62A;&#x62D;&#x643;&#x651;&#x645; &#x641;&#x64A; &#x627;&#x644;&#x635;&#x641;&#x62D;&#x627;&#x62A; &#x627;&#x644;&#x645;&#x631;&#x626;&#x64A;&#x629; &#x644;&#x62C;&#x645;&#x64A;&#x639; &#x627;&#x644;&#x645;&#x633;&#x62A;&#x62E;&#x62F;&#x645;&#x64A;&#x646;</div>
-  </div>
-  <div style="max-width:640px;margin:0 auto;padding:16px">
-    <div style="display:flex;align-items:center;gap:10px;background:rgba(155,140,255,0.1);border:1px solid rgba(155,140,255,0.3);border-radius:12px;padding:14px 18px;margin-bottom:24px">
-      <span style="font-size:20px">&#x1F451;</span>
+  <div class="page-header" style="background:linear-gradient(135deg,rgba(155,140,255,0.08),rgba(78,205,196,0.05));border-bottom:1px solid rgba(155,140,255,0.2)">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="width:44px;height:44px;border-radius:12px;background:rgba(155,140,255,0.15);border:1px solid rgba(155,140,255,0.3);display:flex;align-items:center;justify-content:center;font-size:22px">🛡️</div>
       <div>
-        <div style="font-size:13px;font-weight:700;color:#9b8cff">&#x648;&#x635;&#x648;&#x644; &#x627;&#x644;&#x645;&#x62F;&#x64A;&#x631;</div>
-        <div style="font-size:11px;color:var(--muted)" id="admin-email-display"></div>
-      </div>
-      <div style="margin-right:auto">
-        <div id="admin-save-indicator" style="font-size:11px;color:var(--green);display:none">&#x2705; &#x62A;&#x645; &#x627;&#x644;&#x62D;&#x641;&#x638;</div>
+        <div class="page-title" style="color:#9b8cff">لوحة الإدارة</div>
+        <div class="page-subtitle" id="admin-logged-as" style="color:rgba(155,140,255,0.7)">Admin Access</div>
       </div>
     </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px">
-      <div style="padding:14px 20px;border-bottom:1px solid var(--border);font-size:13px;font-weight:700;color:var(--white)">
-        &#x1F4C4; &#x635;&#x641;&#x62D;&#x627;&#x62A; &#x627;&#x644;&#x62A;&#x637;&#x628;&#x64A;&#x642; &mdash; &#x627;&#x644;&#x62A;&#x62D;&#x643;&#x645; &#x641;&#x64A; &#x627;&#x644;&#x638;&#x647;&#x648;&#x631;
+  </div>
+
+  <div style="padding:20px;max-width:700px;display:flex;flex-direction:column;gap:16px">
+
+    <!-- بطاقة الصفحات -->
+    <div class="section-card" style="border-color:rgba(155,140,255,0.2)">
+      <div class="section-head" style="justify-content:space-between;align-items:center">
+        <span class="section-title" style="font-size:14px">📄 التحكم في الصفحات</span>
+        <span style="font-size:11px;color:var(--muted)">تفعيل/إخفاء للجميع</span>
       </div>
-      <div id="admin-pages-list"></div>
+      <div class="section-body" style="padding:0">
+        <div id="admin-pages-list" style="display:flex;flex-direction:column"></div>
+      </div>
     </div>
-    <button onclick="saveAdminSettings()" style="width:100%;padding:14px;background:var(--gold);border:none;border-radius:10px;font-size:14px;font-weight:800;color:#0b0c0e;cursor:pointer;font-family:inherit">
-      &#x1F4BE; &#x62D;&#x641;&#x638; &#x648;&#x62A;&#x637;&#x628;&#x64A;&#x642; &#x639;&#x644;&#x649; &#x62C;&#x645;&#x64A;&#x639; &#x627;&#x644;&#x645;&#x633;&#x62A;&#x62E;&#x62F;&#x645;&#x64A;&#x646;
+
+    <!-- زر الحفظ -->
+    <button onclick="saveAdminSettings()"
+      style="padding:14px;background:linear-gradient(135deg,#9b8cff,#7c6ff7);border:none;border-radius:12px;font-size:14px;font-weight:800;color:#fff;cursor:pointer;font-family:inherit;transition:opacity .15s;display:flex;align-items:center;justify-content:center;gap:8px"
+      onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+      💾 حفظ وتطبيق على جميع المستخدمين
     </button>
-    <div style="margin-top:14px;font-size:11px;color:var(--muted);text-align:center">
-      &#x627;&#x644;&#x62A;&#x63A;&#x64A;&#x64A;&#x631;&#x627;&#x62A; &#x62A;&#x646;&#x637;&#x628;&#x642; &#x639;&#x644;&#x649; &#x62C;&#x645;&#x64A;&#x639; &#x627;&#x644;&#x645;&#x633;&#x62A;&#x62E;&#x62F;&#x645;&#x64A;&#x646; &#x641;&#x648;&#x631; &#x627;&#x644;&#x62D;&#x641;&#x638;
+
+    <div id="admin-save-msg" style="display:none;text-align:center;font-size:12px;color:var(--green);padding:6px">
+      ✅ تم الحفظ — التغييرات مطبّقة على جميع المستخدمين
     </div>
+
+    <!-- بطاقة الإحصاء -->
+    <div class="section-card" style="border-color:rgba(78,205,196,0.2)">
+      <div class="section-head">
+        <span class="section-title" style="font-size:14px">📊 إحصاء المستخدمين</span>
+      </div>
+      <div style="padding:14px 16px;font-size:13px;color:var(--muted)">
+        لا يوجد نظام متعدد المستخدمين حالياً — التطبيق للاستخدام الشخصي.
+      </div>
+    </div>
+
   </div>
 </div>
-
 </body>
-</html>
