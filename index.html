@@ -10263,6 +10263,7 @@ function _loadData(uid) {
       if (typeof renderSukuk  === "function") renderSukuk();
       if (typeof renderStocks === "function") renderStocks();
       if (typeof renderFunds  === "function") renderFunds();
+      if (typeof loadAdminSettings === "function") loadAdminSettings();
     });
 
   }).catch(function(e){ console.error("loadData:", e); _badge("error"); });
