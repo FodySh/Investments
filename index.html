@@ -1291,6 +1291,9 @@
       <div class="nav-item nav-debts" onclick="window.location.href='debts.html'">
         <span class="nav-icon">💸</span> ديون وجمعيات
       </div>
+      <div class="nav-item" id="nav-admin" onclick="showPage('admin',this,'🛡️ الإدارة')" style="display:none;color:#9b8cff;margin-top:4px">
+        <span>🛡️</span><span>الإدارة</span>
+      </div>
       <div class="nav-item" onclick="openAppGuide()" style="color:#8e92a3;margin-top:8px;border-top:1px solid rgba(201,185,140,0.08);padding-top:12px">
         <span class="nav-icon">📖</span> دليل التطبيق
       </div>
@@ -5141,6 +5144,7 @@ function showPage(id, navEl, mobileTitle, noScroll){
   if (id === 'add-loan')  { calcAddLoan(); }
   if (id === 'add')       { setTimeout(function(){ populateCapitalSrcSelect(); populatePlatformSelects(); }, 100); }
   if (id === 'add-debt')  { window.location.href = 'debts.html#add'; return; }
+  if (id === 'admin')     { if (!isAdmin()) return; renderAdminPage(); }
   if (id === 'loans') renderLoans();
   if (id === 'home') { initDashboardYears(); renderDashboard(); }
 }
@@ -10545,6 +10549,39 @@ document.getElementById('app-guide-modal').addEventListener('click', function(e)
   if (e.target === this) closeAppGuide();
 });
 </script>
+
+
+<!-- ══ PAGE: ADMIN ═══════════════════════════════════════════════════ -->
+<div id="page-admin" class="page" style="display:none">
+  <div class="page-header">
+    <div class="page-title">&#x1F6E1;&#xFE0F; &#x644;&#x648;&#x62D;&#x629; &#x627;&#x644;&#x625;&#x62F;&#x627;&#x631;&#x629;</div>
+    <div class="page-subtitle">&#x62A;&#x62D;&#x643;&#x651;&#x645; &#x641;&#x64A; &#x627;&#x644;&#x635;&#x641;&#x62D;&#x627;&#x62A; &#x627;&#x644;&#x645;&#x631;&#x626;&#x64A;&#x629; &#x644;&#x62C;&#x645;&#x64A;&#x639; &#x627;&#x644;&#x645;&#x633;&#x62A;&#x62E;&#x62F;&#x645;&#x64A;&#x646;</div>
+  </div>
+  <div style="max-width:640px;margin:0 auto;padding:16px">
+    <div style="display:flex;align-items:center;gap:10px;background:rgba(155,140,255,0.1);border:1px solid rgba(155,140,255,0.3);border-radius:12px;padding:14px 18px;margin-bottom:24px">
+      <span style="font-size:20px">&#x1F451;</span>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#9b8cff">&#x648;&#x635;&#x648;&#x644; &#x627;&#x644;&#x645;&#x62F;&#x64A;&#x631;</div>
+        <div style="font-size:11px;color:var(--muted)" id="admin-email-display"></div>
+      </div>
+      <div style="margin-right:auto">
+        <div id="admin-save-indicator" style="font-size:11px;color:var(--green);display:none">&#x2705; &#x62A;&#x645; &#x627;&#x644;&#x62D;&#x641;&#x638;</div>
+      </div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px">
+      <div style="padding:14px 20px;border-bottom:1px solid var(--border);font-size:13px;font-weight:700;color:var(--white)">
+        &#x1F4C4; &#x635;&#x641;&#x62D;&#x627;&#x62A; &#x627;&#x644;&#x62A;&#x637;&#x628;&#x64A;&#x642; &mdash; &#x627;&#x644;&#x62A;&#x62D;&#x643;&#x645; &#x641;&#x64A; &#x627;&#x644;&#x638;&#x647;&#x648;&#x631;
+      </div>
+      <div id="admin-pages-list"></div>
+    </div>
+    <button onclick="saveAdminSettings()" style="width:100%;padding:14px;background:var(--gold);border:none;border-radius:10px;font-size:14px;font-weight:800;color:#0b0c0e;cursor:pointer;font-family:inherit">
+      &#x1F4BE; &#x62D;&#x641;&#x638; &#x648;&#x62A;&#x637;&#x628;&#x64A;&#x642; &#x639;&#x644;&#x649; &#x62C;&#x645;&#x64A;&#x639; &#x627;&#x644;&#x645;&#x633;&#x62A;&#x62E;&#x62F;&#x645;&#x64A;&#x646;
+    </button>
+    <div style="margin-top:14px;font-size:11px;color:var(--muted);text-align:center">
+      &#x627;&#x644;&#x62A;&#x63A;&#x64A;&#x64A;&#x631;&#x627;&#x62A; &#x62A;&#x646;&#x637;&#x628;&#x642; &#x639;&#x644;&#x649; &#x62C;&#x645;&#x64A;&#x639; &#x627;&#x644;&#x645;&#x633;&#x62A;&#x62E;&#x62F;&#x645;&#x64A;&#x646; &#x641;&#x648;&#x631; &#x627;&#x644;&#x62D;&#x641;&#x638;
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
