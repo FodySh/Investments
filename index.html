@@ -3836,7 +3836,7 @@ var dividendsData = JSON.parse(localStorage.getItem('dividendsData') || '[]');
 window.dividendsData = dividendsData;
 
 var _stockFilter = { sa: 'all', us: 'all' };
-var _currentStockMarket = 'sa'; // السوق الافتراضي: السعودي
+var _currentStockMarket = 'sa';
 
 var currentDebtFilter = 'all';
 
@@ -6243,6 +6243,16 @@ function saveAddStock() {
   var cost      = shares * buyPrice + fees;
   var mktVal    = currPrice > 0 ? shares * currPrice : 0;
   var pnl       = mktVal > 0 ? mktVal - cost : 0;
+
+  // تأكد من السوق من زر الواجهة
+  var mktBtnUs = document.getElementById('mkt-btn-us');
+  if (mktBtnUs && mktBtnUs.style.background && mktBtnUs.style.background.includes('rgba(96')) {
+    _currentStockMarket = 'us';
+  }
+  var mktBtnSa = document.getElementById('mkt-btn-sa');
+  if (mktBtnSa && mktBtnSa.style.background && mktBtnSa.style.background.includes('rgba(201')) {
+    _currentStockMarket = 'sa';
+  }
 
   var newStock = {
     name:     shares + ' سهم في ' + name,
