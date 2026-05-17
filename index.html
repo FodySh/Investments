@@ -3144,7 +3144,7 @@
             <div class="section-head">
               <span class="section-title">🏢 بيانات الشركة</span>
               <div style="display:flex;gap:8px">
-                <button onclick="setStockMarket('sa')" id="mkt-btn-sa" style="padding:4px 12px;font-size:11px;font-weight:700;font-family:inherit;border-radius:8px;cursor:pointer;border:1px solid var(--gold);background:rgba(201,169,110,0.15);color:var(--gold)">🇸🇦 سعودي</button>
+                <button onclick="setStockMarket('sa')" id="mkt-btn-sa" data-active="1" style="padding:4px 12px;font-size:11px;font-weight:700;font-family:inherit;border-radius:8px;cursor:pointer;border:1px solid var(--gold);background:rgba(201,169,110,0.15);color:var(--gold)">🇸🇦 سعودي</button>
                 <button onclick="setStockMarket('us')" id="mkt-btn-us" style="padding:4px 12px;font-size:11px;font-weight:700;font-family:inherit;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted)">🇺🇸 أمريكي</button>
               </div>
             </div>
@@ -3836,6 +3836,8 @@ var dividendsData = JSON.parse(localStorage.getItem('dividendsData') || '[]');
 window.dividendsData = dividendsData;
 
 var _stockFilter = { sa: 'all', us: 'all' };
+var _tickerFetchTimer = null;
+var _syncTimer = {};
 var _currentStockMarket = 'sa';
 
 var currentDebtFilter = 'all';
@@ -6244,16 +6246,6 @@ function saveAddStock() {
   var mktVal    = currPrice > 0 ? shares * currPrice : 0;
   var pnl       = mktVal > 0 ? mktVal - cost : 0;
 
-  // تأكد من السوق من زر الواجهة
-  var mktBtnUs = document.getElementById('mkt-btn-us');
-  if (mktBtnUs && mktBtnUs.style.background && mktBtnUs.style.background.includes('rgba(96')) {
-    _currentStockMarket = 'us';
-  }
-  var mktBtnSa = document.getElementById('mkt-btn-sa');
-  if (mktBtnSa && mktBtnSa.style.background && mktBtnSa.style.background.includes('rgba(201')) {
-    _currentStockMarket = 'sa';
-  }
-
   var newStock = {
     name:     shares + ' سهم في ' + name,
     type:     'سهم',
@@ -7840,10 +7832,13 @@ function setStockMarket(mkt) {
   _currentStockMarket = mkt;
   var btnSa = document.getElementById('mkt-btn-sa');
   var btnUs = document.getElementById('mkt-btn-us');
+  if (btnSa) btnSa.setAttribute('data-active', mkt === 'sa' ? '1' : '0');
+  if (btnUs) btnUs.setAttribute('data-active', mkt === 'us' ? '1' : '0');
   var tickerEl = document.getElementById('as-ticker');
 
   if (mkt === 'sa') {
-    if (btnSa) { btnSa.style.borderColor='var(--gold)'; btnSa.style.background='rgba(201,169,110,0.15)'; btnSa.style.color='var(--gold)'; }
+    if (btnSa) { btnSa.setAttribute('data-active','1'); btnSa.style.borderColor='var(--gold)'; btnSa.style.background='rgba(201,169,110,0.15)'; btnSa.style.color='var(--gold)'; }
+    if (btnUs) btnUs.setAttribute('data-active','0');
     if (btnUs) { btnUs.style.borderColor='var(--border)'; btnUs.style.background='transparent'; btnUs.style.color='var(--muted)'; }
     if (tickerEl) { tickerEl.maxLength=6; tickerEl.placeholder='مثال: 2222'; tickerEl.style.direction='ltr'; }
   } else {
