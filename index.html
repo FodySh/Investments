@@ -5137,7 +5137,7 @@ function showPage(id, navEl, mobileTitle, noScroll){
   if (id === 'stocks') { renderStocks(); renderUsStocksTable(); }
   if (id === 'sukuk')  { renderSukuk(); renderFunds(); }
   if (id === 'funds')  { renderSukuk(); renderFunds(); setTimeout(function(){ switchOppsTab('funds'); }, 50); }
-  if (id === 'add-stock') { resetAddStock(); calcAddStock(); }
+  if (id === 'add-stock') { if (_editingStockIdx === null) setStockMarket('sa'); resetAddStock(); calcAddStock(); }
   if (id === 'add-loan')  { calcAddLoan(); }
   if (id === 'add')       { setTimeout(function(){ populateCapitalSrcSelect(); populatePlatformSelects(); }, 100); }
   if (id === 'add-debt')  { window.location.href = 'debts.html#add'; return; }
@@ -9465,7 +9465,6 @@ function _parseCSVLine(line) {
 
 // ── فلتر الأسهم ──────────────────────────────────────────────────────────────
 var _stockFilter = { sa: 'all', us: 'all' };
-var _currentStockMarket = 'sa'; // السوق الافتراضي: السعودي
 
 
 // ── فلتر الأسهم بالمنصة والبحث ─────────────────────────────────────────────
