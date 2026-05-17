@@ -4173,29 +4173,47 @@ async function fetchLiveStockPrices() {
     chunks.push(tickers.slice(i, i + CHUNK));
   }
 
+  var tdKey = localStorage.getItem('td_key') || '';
   for (var ci = 0; ci < chunks.length; ci++) {
-    // الأسهم السعودية: أرقام فقط بدون .SR — الـ Worker يضيف :XSAU تلقائياً
-    var symbols = chunks[ci].join(',');
+    // الأسهم السعودية: أضف :XSAU لـ Twelve Data
+    var symbols = chunks[ci].map(function(t){ return t + ':XSAU'; }).join(',');
 
     try {
-      var res = await fetch(PROXY, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ _stocks: true, symbols: symbols })
-      });
+      var url, res, data, quotes;
 
-      if (res.ok) {
-        var data = await res.json();
-        (data.quotes || []).forEach(function(q) {
-          var ticker = (q.symbol || '').replace(':XSAU','').replace('.SR','');
-          if (!ticker) return;
-          STOCK_PRICES[ticker] = {
-            price: q.price,
-            chg:   (q.changePercent || 0) / 100,
-            color: (q.changePercent || 0) >= 0 ? 'up' : 'dn'
-          };
-          updated++;
+      if (tdKey) {
+        // Twelve Data مباشرة (يدعم CORS)
+        url = 'https://api.twelvedata.com/quote?symbol=' + encodeURIComponent(symbols) + '&apikey=' + tdKey + '&dp=2';
+        res = await fetch(url);
+        if (res.ok) {
+          data = await res.json();
+          // Twelve Data يرجع object مفرد أو object بمفاتيح
+          var entries = (data.symbol && data.close) ? [data] : Object.values(data);
+          entries.forEach(function(q) {
+            if (!q || !q.symbol) return;
+            var ticker = (q.symbol || '').replace(':XSAU','').replace('.SR','');
+            var price  = parseFloat(q.close || 0);
+            var prev   = parseFloat(q.previous_close || 0);
+            var chgPct = prev > 0 ? (price - prev) / prev : parseFloat(q.percent_change || 0) / 100;
+            STOCK_PRICES[ticker] = { price: price, chg: chgPct, color: chgPct >= 0 ? 'up' : 'dn' };
+            updated++;
+          });
+        }
+      } else {
+        // بدون مفتاح — جرّب عبر الـ Worker
+        res = await fetch(PROXY, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ _stocks: true, symbols: chunks[ci].join(',') })
         });
+        if (res.ok) {
+          data = await res.json();
+          (data.quotes || []).forEach(function(q) {
+            var ticker = (q.symbol||'').replace(':XSAU','').replace('.SR','');
+            if (!ticker) return;
+            STOCK_PRICES[ticker] = { price: q.price, chg: (q.changePercent||0)/100, color: (q.changePercent||0)>=0?'up':'dn' };
+            updated++;
+          });
+        }
       }
     } catch(e) {
       console.warn('Stock fetch chunk', ci, 'failed:', e.message);
@@ -7937,46 +7955,31 @@ async function fetchUsStockPrices() {
   var PROXY   = 'https://stockprice.shaheenhouse1.workers.dev';
   var updated = 0;
 
-  // ── الطلب عبر Cloudflare Worker (يتجاوز CORS) ──────────────────
-  try {
-    var res = await fetch(PROXY, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ _stockRequest: true, symbols: symbols, market: 'us' })
-    });
-    if (res.ok) {
-      var data = await res.json();
-      (data.quotes || []).forEach(function(q) {
-        US_STOCK_PRICES[q.symbol] = {
-          price: q.price,
-          chg:   (q.changePercent || 0) / 100,
-          color: (q.changePercent || 0) >= 0 ? 'up' : 'dn',
-          name:  q.name || q.symbol
-        };
-        updated++;
-      });
-    }
-  } catch(e) { console.warn('Worker US fetch failed:', e.message); }
-
-  // ── Fallback: Yahoo Finance مباشرة (إذا فشل الـ Worker) ─────────
-  if (updated === 0) {
+  // ── Twelve Data مباشرة للأسهم الأمريكية (يدعم CORS) ────────────
+  var tdKey = localStorage.getItem('td_key') || '';
+  if (tdKey) {
     try {
-      var url = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + symbols
-              + '&fields=regularMarketPrice,regularMarketChangePercent,longName,shortName';
-      var res2 = await fetch(url);
-      if (res2.ok) {
-        var json2 = await res2.json();
-        (json2.quoteResponse?.result || []).forEach(function(q) {
+      var tdUrl = 'https://api.twelvedata.com/quote?symbol=' + encodeURIComponent(symbols) + '&apikey=' + tdKey + '&dp=2';
+      var tdRes = await fetch(tdUrl);
+      if (tdRes.ok) {
+        var tdData = await tdRes.json();
+        // Twelve Data: رمز واحد → object مباشر، أكثر → object بمفاتيح
+        var entries = (tdData.symbol && tdData.close) ? [tdData] : Object.values(tdData);
+        entries.forEach(function(q) {
+          if (!q || !q.symbol || q.status === 'error') return;
+          var price  = parseFloat(q.close || 0);
+          var prev   = parseFloat(q.previous_close || 0);
+          var chgPct = prev > 0 ? (price - prev) / prev : parseFloat(q.percent_change || 0) / 100;
           US_STOCK_PRICES[q.symbol] = {
-            price: q.regularMarketPrice,
-            chg:   (q.regularMarketChangePercent || 0) / 100,
-            color: (q.regularMarketChangePercent || 0) >= 0 ? 'up' : 'dn',
-            name:  q.longName || q.shortName || q.symbol
+            price: price,
+            chg:   chgPct,
+            color: chgPct >= 0 ? 'up' : 'dn',
+            name:  q.name || q.symbol
           };
           updated++;
         });
       }
-    } catch(e2) { console.warn('Yahoo US direct failed:', e2.message); }
+    } catch(e) { console.warn('Twelve Data US failed:', e.message); }
   }
 
   renderUsStocksTable();
@@ -9656,22 +9659,20 @@ async function fetchSingleStockPrice(ticker) {
 
 // ── جلب سعر سهم واحد (US) ───────────────────────────────────────────────────
 async function fetchSingleUsStockPrice(ticker) {
-  if (!ticker) return;
+  var tdKey = localStorage.getItem('td_key') || '';
+  if (!tdKey) { showToast('⚠️ أضف مفتاح Twelve Data في Console'); return; }
   try {
-    var url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + ticker + '?interval=1d&range=1d';
-    var res = await fetch(url);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    var json = await res.json();
-    var result = json?.chart?.result?.[0];
-    var price = result?.meta?.regularMarketPrice;
-    var chg   = result?.meta?.regularMarketChangePercent;
-    if (price) {
-      if (!window.US_STOCK_PRICES) window.US_STOCK_PRICES = {};
-      US_STOCK_PRICES[ticker] = { price: price, chg: (chg||0)/100, color: (chg||0) >= 0 ? 'up' : 'dn', name: ticker };
+    var r = await fetch('https://api.twelvedata.com/quote?symbol=' + ticker + '&apikey=' + tdKey + '&dp=2');
+    var d = await r.json();
+    if (d.close) {
+      var price = parseFloat(d.close);
+      var prev  = parseFloat(d.previous_close || 0);
+      var chg   = prev > 0 ? (price - prev) / prev : parseFloat(d.percent_change || 0) / 100;
+      US_STOCK_PRICES[ticker] = { price: price, chg: chg, color: chg >= 0 ? 'up' : 'dn', name: d.name || ticker };
       renderUsStocksTable();
       showToast('✅ ' + ticker + ': $' + price.toFixed(2));
     }
-  } catch(e) { showToast('❌ فشل جلب ' + ticker + ': ' + e.message); }
+  } catch(e) { showToast('❌ فشل جلب ' + ticker); }
 }
 
 
