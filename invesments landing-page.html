@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>محفظتي — نسخة الإطلاق</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+/* ── RESET & VARS ─────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:       #0b0c0e;
+  --surface:  #111318;
+  --raised:   #171a22;
+  --line:     rgba(255,255,255,0.06);
+  --line2:    rgba(255,255,255,0.12);
+  --gold:     #c8a45a;
+  --gold-lt:  #e8c97a;
+  --gold-glow:rgba(200,164,90,0.18);
+  --cyan:     #3ecfbf;
+  --green:    #52c77e;
+  --muted:    #596070;
+  --dim:      #8a95a8;
+  --body:     #c8d2e0;
+  --white:    #f2f2ef;
+  --serif:    'Cairo', sans-serif;
+  --sans:     'Cairo', sans-serif;
+  --mono:     'JetBrains Mono', monospace;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--body);
+  font-family:var(--sans);
+  font-size:15px;
+  line-height:1.7;
+  overflow-x:hidden;
+}
+
+/* ── TEXTURE OVERLAY ──────────────────────────────── */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:.6;
+}
+
+/* ── LAYOUT ───────────────────────────────────────── */
+.wrap{max-width:860px;margin:0 auto;padding:0 28px;position:relative;z-index:1}
+
+/* ── NAV ──────────────────────────────────────────── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:18px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--line);
+  background:rgba(11,12,14,0.85);
+  backdrop-filter:blur(20px);
+}
+.nav-logo{
+  font-family:var(--serif);font-size:22px;font-weight:700;
+  color:var(--gold);letter-spacing:.04em;
+}
+.nav-cta{
+  padding:9px 22px;
+  background:var(--gold);border-radius:8px;
+  font-size:13px;font-weight:700;color:#0b0c0e;
+  cursor:pointer;border:none;font-family:var(--sans);
+  transition:background .15s,transform .1s;
+  text-decoration:none;
+}
+.nav-cta:hover{background:var(--gold-lt);transform:translateY(-1px)}
+
+/* ── HERO ─────────────────────────────────────────── */
+.hero{
+  padding:160px 0 100px;
+  text-align:center;
+  position:relative;
+}
+.hero::before{
+  content:'';
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:700px;height:500px;
+  background:radial-gradient(ellipse at center top, rgba(200,164,90,0.1) 0%, transparent 70%);
+  pointer-events:none;
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gold);
+  border:1px solid rgba(200,164,90,0.3);
+  padding:5px 16px;border-radius:30px;
+  background:rgba(200,164,90,0.07);
+  margin-bottom:36px;
+  animation:fadeUp .6s ease both;
+}
+.hero-eyebrow::before{
+  content:'';width:5px;height:5px;border-radius:50%;
+  background:var(--gold);display:block;
+  animation:blink 2s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.hero h1{
+  font-family:var(--serif);
+  font-size:clamp(40px,7vw,70px);
+  font-weight:700;
+  color:var(--white);
+  line-height:1.18;
+  margin-bottom:22px;
+  animation:fadeUp .7s .1s ease both;
+}
+.hero h1 em{
+  font-style:normal;
+  color:var(--gold);
+}
+.hero-sub{
+  font-size:clamp(15px,2vw,18px);
+  color:var(--dim);
+  max-width:560px;
+  margin:0 auto 48px;
+  line-height:1.8;
+  animation:fadeUp .7s .2s ease both;
+}
+.hero-actions{
+  display:flex;gap:14px;justify-content:center;flex-wrap:wrap;
+  animation:fadeUp .7s .3s ease both;
+}
+.btn-primary{
+  padding:15px 36px;
+  background:var(--gold);border-radius:10px;
+  font-size:15px;font-weight:800;color:#0b0c0e;
+  border:none;cursor:pointer;font-family:var(--sans);
+  transition:all .15s;text-decoration:none;display:inline-block;
+}
+.btn-primary:hover{background:var(--gold-lt);transform:translateY(-2px);
+  box-shadow:0 12px 40px rgba(200,164,90,0.25)}
+.btn-ghost{
+  padding:15px 28px;
+  background:transparent;border:1px solid var(--line2);border-radius:10px;
+  font-size:14px;font-weight:600;color:var(--dim);
+  cursor:pointer;font-family:var(--sans);
+  transition:all .15s;text-decoration:none;display:inline-block;
+}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+
+.hero-note{
+  margin-top:22px;font-size:12px;color:var(--muted);
+  animation:fadeIn .8s .5s ease both;
+}
+
+/* ── METRICS STRIP ────────────────────────────────── */
+.metrics{
+  display:flex;justify-content:center;gap:0;flex-wrap:wrap;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  margin:0 0 100px;
+  animation:fadeIn .9s .4s ease both;
+}
+.metric{
+  flex:1;min-width:160px;
+  padding:32px 24px;
+  text-align:center;
+  border-left:1px solid var(--line);
+}
+.metric:last-child{border-left:none}
+.metric-val{
+  font-family:'JetBrains Mono',monospace;font-size:38px;
+  color:var(--gold-lt);font-weight:700;
+  display:block;line-height:1;margin-bottom:6px;
+}
+.metric-lbl{font-size:12px;color:var(--muted);font-weight:500}
+
+/* ── SECTION COMMONS ──────────────────────────────── */
+section{padding:80px 0}
+.section-label{
+  font-size:10px;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--gold);
+  margin-bottom:14px;display:block;
+}
+.section-title{
+  font-family:var(--serif);
+  font-size:clamp(28px,4vw,42px);
+  color:var(--white);font-weight:700;
+  line-height:1.25;margin-bottom:18px;
+}
+.section-body{font-size:15px;color:var(--dim);line-height:1.85;max-width:640px}
+
+/* ── BENEFITS ─────────────────────────────────────── */
+.benefits-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:16px;margin-top:48px;
+}
+.benefit-card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:14px;padding:28px;
+  transition:border-color .2s,transform .2s;
+  position:relative;overflow:hidden;
+}
+.benefit-card:hover{border-color:var(--line2);transform:translateY(-3px)}
+.benefit-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(200,164,90,0.4),transparent);
+  opacity:0;transition:opacity .2s;
+}
+.benefit-card:hover::before{opacity:1}
+.benefit-icon{
+  width:44px;height:44px;border-radius:10px;
+  background:var(--gold-glow);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;margin-bottom:18px;
+}
+.benefit-title{
+  font-size:16px;font-weight:700;color:var(--white);
+  margin-bottom:8px;
+}
+.benefit-desc{font-size:13px;color:var(--muted);line-height:1.7}
+
+/* ── FEATURES LIST ────────────────────────────────── */
+.features{
+  display:flex;flex-direction:column;gap:0;
+  margin-top:48px;
+  border:1px solid var(--line);border-radius:16px;overflow:hidden;
+}
+.feature{
+  display:flex;align-items:flex-start;gap:20px;
+  padding:24px 28px;
+  border-bottom:1px solid var(--line);
+  transition:background .15s;
+}
+.feature:last-child{border-bottom:none}
+.feature:hover{background:var(--surface)}
+.feature-check{
+  width:22px;height:22px;border-radius:50%;
+  background:rgba(82,199,126,0.12);border:1px solid rgba(82,199,126,0.3);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:3px;
+  font-size:11px;color:var(--green);
+}
+.feature-text strong{
+  display:block;font-size:14px;font-weight:700;
+  color:var(--white);margin-bottom:3px;
+}
+.feature-text span{font-size:13px;color:var(--muted)}
+
+/* ── SOCIAL PROOF ─────────────────────────────────── */
+.proof-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:14px;margin-top:48px;
+}
+.proof-card{
+  background:var(--surface);
+  border:1px solid var(--line);border-radius:14px;
+  padding:24px;
+}
+.proof-stars{color:var(--gold);font-size:13px;letter-spacing:2px;margin-bottom:12px}
+.proof-text{
+  font-size:13px;color:var(--dim);line-height:1.75;
+  margin-bottom:18px;font-style:italic;
+}
+.proof-text::before{content:'"';font-family:var(--serif);font-size:22px;color:var(--gold);line-height:0;vertical-align:-.3em;margin-left:3px}
+.proof-text::after{content:'"';font-family:var(--serif);font-size:22px;color:var(--gold);line-height:0;vertical-align:-.3em;margin-right:3px}
+.proof-author{
+  display:flex;align-items:center;gap:10px;
+  border-top:1px solid var(--line);padding-top:14px;
+}
+.proof-avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold),#7a5c20);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:13px;color:#0b0c0e;flex-shrink:0;
+}
+.proof-name{font-size:13px;font-weight:700;color:var(--white)}
+.proof-role{font-size:11px;color:var(--muted)}
+
+/* ── LOGOS / TRUST STRIP ──────────────────────────── */
+.trust-strip{
+  display:flex;align-items:center;justify-content:center;
+  gap:32px;flex-wrap:wrap;padding:40px 0;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  margin:60px 0;
+}
+.trust-item{
+  font-size:12px;font-weight:700;letter-spacing:.06em;
+  color:var(--muted);text-transform:uppercase;
+  display:flex;align-items:center;gap:8px;
+}
+.trust-icon{font-size:16px}
+
+/* ── FAQ ──────────────────────────────────────────── */
+.faq{display:flex;flex-direction:column;gap:0;margin-top:48px}
+.faq-item{border-bottom:1px solid var(--line)}
+.faq-q{
+  padding:22px 0;
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;
+  font-size:15px;font-weight:600;color:var(--white);
+  list-style:none;
+  transition:color .15s;
+}
+.faq-q:hover{color:var(--gold)}
+.faq-q::marker,.faq-q::-webkit-details-marker{display:none}
+.faq-toggle{
+  width:28px;height:28px;border-radius:50%;
+  border:1px solid var(--line2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;color:var(--dim);flex-shrink:0;
+  transition:all .2s;
+}
+details[open] .faq-toggle{
+  background:var(--gold-glow);border-color:rgba(200,164,90,0.4);
+  color:var(--gold);transform:rotate(45deg);
+}
+.faq-a{
+  padding:0 0 22px;
+  font-size:14px;color:var(--muted);line-height:1.8;
+  max-width:680px;
+}
+
+/* ── CTA SECTION ──────────────────────────────────── */
+.cta-section{
+  text-align:center;padding:100px 0;
+  position:relative;
+}
+.cta-section::before{
+  content:'';
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:600px;height:300px;
+  background:radial-gradient(ellipse, rgba(200,164,90,0.08) 0%, transparent 70%);
+  pointer-events:none;
+}
+.cta-badge{
+  display:inline-block;
+  font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--cyan);margin-bottom:24px;
+}
+.cta-title{
+  font-family:var(--serif);
+  font-size:clamp(32px,5vw,52px);
+  color:var(--white);font-weight:700;
+  line-height:1.2;margin-bottom:16px;
+}
+.cta-sub{
+  font-size:15px;color:var(--dim);
+  max-width:480px;margin:0 auto 40px;
+}
+.cta-variations{
+  display:flex;flex-direction:column;gap:10px;
+  max-width:420px;margin:0 auto;
+}
+.cta-btn{
+  padding:15px 28px;border-radius:10px;
+  font-size:14px;font-weight:700;font-family:var(--sans);
+  cursor:pointer;border:none;transition:all .15s;
+  text-decoration:none;display:block;
+}
+.cta-btn.v1{background:var(--gold);color:#0b0c0e}
+.cta-btn.v1:hover{background:var(--gold-lt);transform:translateY(-2px);box-shadow:0 12px 40px rgba(200,164,90,0.25)}
+.cta-btn.v2{background:transparent;border:1px solid var(--line2);color:var(--dim)}
+.cta-btn.v2:hover{border-color:var(--gold);color:var(--gold)}
+.cta-btn.v3{background:var(--raised);border:1px solid var(--line2);color:var(--white)}
+.cta-btn.v3:hover{border-color:var(--gold-lt);background:var(--gold-glow)}
+.cta-label{
+  font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--muted);
+  text-transform:uppercase;margin-top:4px;text-align:center;
+}
+
+/* ── FOOTER ───────────────────────────────────────── */
+footer{
+  text-align:center;padding:36px 24px;
+  border-top:1px solid var(--line);
+  color:var(--muted);font-size:12px;
+}
+
+/* ── DIVIDER ──────────────────────────────────────── */
+.divider{
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--line2),transparent);
+  margin:0;
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">محفظتي</div>
+  <a href="#cta" class="nav-cta">ابدأ مجاناً</a>
+</nav>
+
+
+<!-- ══════════════════════════════════════════════════
+     HERO
+═══════════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-eyebrow">إدارة ذكية · استثمار واضح</div>
+
+    <h1>
+      محفظتك بالكامل<br/>
+      في <em>مكان واحد</em>
+    </h1>
+
+    <p class="hero-sub">
+      صكوك، صناديق، أسهم، قروض، ديون — كل أصولك في لوحة تحكم واحدة. تتبّع العوائد، حلّل الأداء، واتخذ قرارات أفضل.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#" class="btn-primary">افتح محفظتك الآن — مجاناً</a>
+      <a href="#features" class="btn-ghost">شاهد كيف يعمل ↓</a>
+    </div>
+
+    <p class="hero-note">لا بطاقة ائتمان · لا تعقيد · يعمل على جميع الأجهزة</p>
+  </div>
+</section>
+
+
+<!-- METRICS -->
+<div class="metrics">
+  <div class="metric">
+    <span class="metric-val">+٩</span>
+    <span class="metric-lbl">فئات أصول مدعومة</span>
+  </div>
+  <div class="metric">
+    <span class="metric-val">٢٤/٧</span>
+    <span class="metric-lbl">أسعار حية للأسهم</span>
+  </div>
+  <div class="metric">
+    <span class="metric-val">٠ ر.س</span>
+    <span class="metric-lbl">تكلفة البداية</span>
+  </div>
+  <div class="metric">
+    <span class="metric-val">🔒</span>
+    <span class="metric-lbl">بياناتك خاصة ومشفّرة</span>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     BENEFITS
+═══════════════════════════════════════════════════ -->
+<section id="features">
+  <div class="wrap">
+    <span class="section-label">لماذا محفظتي؟</span>
+    <h2 class="section-title">كل ما تحتاجه لإدارة ثروتك</h2>
+    <p class="section-body">صُمّم للمستثمر السعودي الذي يوزّع أمواله بين منصات متعددة ويريد رؤية واحدة شاملة.</p>
+
+    <div class="benefits-grid">
+
+      <div class="benefit-card">
+        <div class="benefit-icon">📊</div>
+        <div class="benefit-title">لوحة تحكم لحظية</div>
+        <div class="benefit-desc">شاهد إجمالي محفظتك، العوائد المحققة، ونسبة الـ ROI في ثوانٍ. مع رسوم بيانية تفاعلية سنوية.</div>
+      </div>
+
+      <div class="benefit-card">
+        <div class="benefit-icon">📈</div>
+        <div class="benefit-title">أسعار الأسهم الحية</div>
+        <div class="benefit-desc">تتبّع أسهمك السعودية والأمريكية بأسعار لحظية مع نسب التغيير اليومي والأرباح والخسائر.</div>
+      </div>
+
+      <div class="benefit-card">
+        <div class="benefit-icon">💰</div>
+        <div class="benefit-title">تتبّع الصكوك والصناديق</div>
+        <div class="benefit-desc">سجّل كل فرصة استثمارية — صكوك، مرابحة، صناديق عقارية — مع تاريخ الدخول والعائد المتوقع وحالة التوزيع.</div>
+      </div>
+
+      <div class="benefit-card">
+        <div class="benefit-icon">🏦</div>
+        <div class="benefit-title">جدول سداد القروض</div>
+        <div class="benefit-desc">أدخل قرضك مرة واحدة واحصل على جدول سداد شهري كامل مع تتبّع الأقساط المدفوعة والمتبقية.</div>
+      </div>
+
+      <div class="benefit-card">
+        <div class="benefit-icon">🤖</div>
+        <div class="benefit-title">محلّل ذكاء اصطناعي</div>
+        <div class="benefit-desc">Claude AI يحلّل محفظتك ويقدّم توصيات مخصّصة — ويقرأ وثائقك الاستثمارية ويعبّئ البيانات تلقائياً.</div>
+      </div>
+
+      <div class="benefit-card">
+        <div class="benefit-icon">📋</div>
+        <div class="benefit-title">إدارة الديون والجمعيات</div>
+        <div class="benefit-desc">تتبّع ديونك الشخصية مع تذكيرات واتساب، وسجّل جمعياتك مع متابعة دورك ومواعيد الاستلام.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════════════════════════════
+     FEATURES LIST
+═══════════════════════════════════════════════════ -->
+<section>
+  <div class="wrap">
+    <span class="section-label">الميزات التفصيلية</span>
+    <h2 class="section-title">كل شيء ترتّب فيه وقتك</h2>
+
+    <div class="features">
+
+      <div class="feature">
+        <div class="feature-check">✓</div>
+        <div class="feature-text">
+          <strong>تحليل صور الوثائق بالذكاء الاصطناعي</strong>
+          <span>ارفع صورة أو PDF لعقد الصك — يُعبّئ كل الحقول تلقائياً في ثوانٍ</span>
+        </div>
+      </div>
+
+      <div class="feature">
+        <div class="feature-check">✓</div>
+        <div class="feature-text">
+          <strong>تصدير Excel وPDF</strong>
+          <span>صدّر جدول السداد أو سجل المحفظة بضغطة زر واحدة</span>
+        </div>
+      </div>
+
+      <div class="feature">
+        <div class="feature-check">✓</div>
+        <div class="feature-text">
+          <strong>رسوم بيانية سنوية مقارِنة</strong>
+          <span>شاهد المبلغ المستثمر مقابل العائد لكل سنة مع نسبة ROI محسوبة تلقائياً</span>
+        </div>
+      </div>
+
+      <div class="feature">
+        <div class="feature-check">✓</div>
+        <div class="feature-text">
+          <strong>تقويم الاستحقاقات</strong>
+          <span>تنبيهات بالصكوك والفرص القريبة من موعد الاستحقاق — أسبوعياً وشهرياً</span>
+        </div>
+      </div>
+
+      <div class="feature">
+        <div class="feature-check">✓</div>
+        <div class="feature-text">
+          <strong>قاعدة بيانات سحابية</strong>
+          <span>بياناتك محفوظة على Firebase وتتزامن تلقائياً بين كل أجهزتك</span>
+        </div>
+      </div>
+
+      <div class="feature">
+        <div class="feature-check">✓</div>
+        <div class="feature-text">
+          <strong>مصادر رأس المال المخصّصة</strong>
+          <span>عرّف مصادرك (راتب، إرث، توفير...) وصنّف كل استثمار حسبها</span>
+        </div>
+      </div>
+
+      <div class="feature">
+        <div class="feature-check">✓</div>
+        <div class="feature-text">
+          <strong>سندات أمر بالتنسيق السعودي</strong>
+          <span>إنشاء سند أمر رسمي بتاريخ هجري، قابل للطباعة، وفق نظام وزارة العدل</span>
+        </div>
+      </div>
+
+      <div class="feature">
+        <div class="feature-check">✓</div>
+        <div class="feature-text">
+          <strong>دعم كامل للغة العربية وRTL</strong>
+          <span>واجهة عربية أصيلة — ليست مترجمة، مبنية من الأساس للمستخدم العربي</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════
+     TRUST STRIP
+═══════════════════════════════════════════════════ -->
+<div class="wrap">
+  <div class="trust-strip">
+    <div class="trust-item"><span class="trust-icon">🔐</span> Firebase Auth</div>
+    <div class="trust-item"><span class="trust-icon">🏦</span> متوافق مع تداول</div>
+    <div class="trust-item"><span class="trust-icon">📱</span> يعمل على الجوال</div>
+    <div class="trust-item"><span class="trust-icon">🌙</span> وضع ليلي/نهاري</div>
+    <div class="trust-item"><span class="trust-icon">🇸🇦</span> للسوق السعودي</div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     SOCIAL PROOF
+═══════════════════════════════════════════════════ -->
+<section>
+  <div class="wrap">
+    <span class="section-label">آراء المستخدمين</span>
+    <h2 class="section-title">ماذا يقول المستثمرون</h2>
+
+    <div class="proof-grid">
+
+      <div class="proof-card">
+        <div class="proof-stars">★★★★★</div>
+        <p class="proof-text">أخيراً أقدر أشوف كل استثماراتي في مكان واحد. الصكوك والصناديق والأسهم مع بعض وبدون تشويش.</p>
+        <div class="proof-author">
+          <div class="proof-avatar">م</div>
+          <div>
+            <div class="proof-name">م. خالد</div>
+            <div class="proof-role">مستثمر في منصات التمويل الجماعي</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="proof-card">
+        <div class="proof-stars">★★★★★</div>
+        <p class="proof-text">ميزة رفع صورة العقد وتعبئة البيانات تلقائياً وفّرت عليّ ساعات. ما توقعت إن الذكاء الاصطناعي يقرأ وثائق تداول!</p>
+        <div class="proof-author">
+          <div class="proof-avatar">ف</div>
+          <div>
+            <div class="proof-name">فهد</div>
+            <div class="proof-role">مستثمر في الأسهم والصكوك</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="proof-card">
+        <div class="proof-stars">★★★★★</div>
+        <p class="proof-text">جدول سداد القرض دقيق مئة بالمئة، ويبيّن لي تمام كم دفعت وكم باقي — أفضل من تطبيق البنك نفسه!</p>
+        <div class="proof-author">
+          <div class="proof-avatar">ع</div>
+          <div>
+            <div class="proof-name">عبدالله</div>
+            <div class="proof-role">موظف يدير قرضاً عقارياً</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════════════════════════════
+     FAQ
+═══════════════════════════════════════════════════ -->
+<section>
+  <div class="wrap">
+    <span class="section-label">أسئلة شائعة</span>
+    <h2 class="section-title">كل ما يخطر في بالك</h2>
+
+    <div class="faq">
+
+      <details>
+        <summary class="faq-q">
+          هل التطبيق مجاني تماماً؟
+          <span class="faq-toggle">+</span>
+        </summary>
+        <p class="faq-a">نعم، التطبيق مجاني بالكامل للاستخدام الشخصي. ميزة المحلّل بالذكاء الاصطناعي تستهلك رصيد بسيط جداً من Claude API (أقل من ريال في الشهر للاستخدام العادي)، لكن الباقي — اللوحة، الرسوم البيانية، الصكوك، القروض — مجاني 100%.</p>
+      </details>
+
+      <details>
+        <summary class="faq-q">
+          هل بياناتي آمنة؟
+          <span class="faq-toggle">+</span>
+        </summary>
+        <p class="faq-a">بياناتك محفوظة على Firebase (Google Cloud) ومشفّرة ومرتبطة بحسابك الشخصي فقط. لا أحد آخر يرى بياناتك — حتى المطوّر. يمكنك تصدير كل شيء متى أردت.</p>
+      </details>
+
+      <details>
+        <summary class="faq-q">
+          ما المنصات الاستثمارية التي يدعمها؟
+          <span class="faq-toggle">+</span>
+        </summary>
+        <p class="faq-a">يدعم أي منصة تضيفها يدوياً: تريم، مناع، الأهلي، درايف، ابيان، عوائد، ومنصات التداول السعودية والأمريكية. قائمة المنصات قابلة للتخصيص من الإعدادات.</p>
+      </details>
+
+      <details>
+        <summary class="faq-q">
+          كيف تعمل ميزة قراءة الوثائق بالذكاء الاصطناعي؟
+          <span class="faq-toggle">+</span>
+        </summary>
+        <p class="faq-a">ارفع صورة أو PDF لعقد الصك أو وثيقة الاستثمار — Claude يقرأ المستند ويستخرج الاسم، المبلغ، العائد، التواريخ، ومعلومات المُصدِر تلقائياً ويعبّئها في الفورم. يدعم صوراً متعددة لنفس الوثيقة.</p>
+      </details>
+
+      <details>
+        <summary class="faq-q">
+          هل يعمل على الجوال؟
+          <span class="faq-toggle">+</span>
+        </summary>
+        <p class="faq-a">نعم، التطبيق متجاوب بالكامل مع الجوال مع قائمة سفلية مخصّصة للتنقل السريع. يمكنك إضافته كـ PWA لشاشة هاتفك للوصول الفوري.</p>
+      </details>
+
+      <details>
+        <summary class="faq-q">
+          هل يدعم الأسهم الأمريكية؟
+          <span class="faq-toggle">+</span>
+        </summary>
+        <p class="faq-a">نعم، يدعم تتبّع الأسهم الأمريكية مع أسعار لحظية عبر Twelve Data API. للأسهم السعودية، يتم التكامل مع RapidAPI Tadawul. كلا السوقين في لوحة واحدة.</p>
+      </details>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════
+     CTA SECTION
+═══════════════════════════════════════════════════ -->
+<section class="cta-section" id="cta">
+  <div class="wrap">
+    <div class="cta-badge">ابدأ اليوم</div>
+    <h2 class="cta-title">
+      محفظتك تستحق<br/>وضوحاً أفضل
+    </h2>
+    <p class="cta-sub">
+      آلاف الريالات موزّعة على منصات مختلفة تحتاج إلى مكان واحد تُديرها منه.
+    </p>
+
+    <!-- 5 CTA VARIATIONS -->
+    <div class="cta-variations">
+
+      <a href="#" class="cta-btn v1">🚀 افتح محفظتك الآن — مجاناً</a>
+      <div class="cta-label">الرئيسي · Primary CTA</div>
+
+      <a href="#" class="cta-btn v2">📊 اكتشف كيف تُقيّم محفظتك</a>
+      <div class="cta-label">فضولي · Curiosity CTA</div>
+
+      <a href="#" class="cta-btn v3">📋 ابدأ بتسجيل أول فرصة استثمارية</a>
+      <div class="cta-label">إجراء محدد · Specific Action CTA</div>
+
+      <a href="#" class="cta-btn v2">⚡ جرّبه الآن بدون تسجيل</a>
+      <div class="cta-label">بدون احتكاك · Zero Friction CTA</div>
+
+      <a href="#" class="cta-btn v3">💼 أنا مستعد لتنظيم استثماراتي</a>
+      <div class="cta-label">هوية المستخدم · Identity CTA</div>
+
+    </div>
+
+    <p style="margin-top:32px;font-size:12px;color:var(--muted)">
+      لا رسوم خفية · لا اشتراك إلزامي · بياناتك ملكك
+    </p>
+  </div>
+</section>
+
+
+<!-- FOOTER -->
+<footer>
+  <div style="font-family:var(--serif);font-size:20px;color:var(--gold);margin-bottom:8px">محفظتي</div>
+  <div>إدارة ذكية لثروتك الشخصية</div>
+  <div style="margin-top:10px;color:rgba(255,255,255,0.15)">
+    مبني بـ Firebase · Claude AI · GitHub Pages
+  </div>
+</footer>
+
+</body>
+</html>
