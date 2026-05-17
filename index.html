@@ -9123,26 +9123,36 @@ function getCapitalSrcSelected() {
 
 function populatePlatformSelects() {
   var platforms = getPlatforms();
-  var opts = '<option value="">— اختر المنصة —</option>'
-    + platforms.map(function(p){ return '<option>' + p + '</option>'; }).join('');
 
-  // كل select الخاصة بالمنصة في التطبيق
-  ['f-platform', 'al-bank', 'as-platform'].forEach(function(id) {
-    var sel = document.getElementById(id);
-    if (!sel) return;
-    var cur = sel.value;
-    // f-platform لها optgroups — نبقيها كما هي
-    if (id === 'f-platform') return;
-    if (id === 'al-bank') return; // للقروض لها قائمة خاصة
-    // as-platform: نحدّث optgroups
-    if (id === 'as-platform') {
-      var saOpts = platforms.filter(function(p){ return !['Interactive Brokers','Alpaca','Robinhood','TD Ameritrade','Charles Schwab'].includes(p); })
-        .map(function(p){ return '<option>' + p + '</option>'; }).join('');
-      var existingSa = sel.querySelector('#as-platform-sa-group');
-      if (existingSa) existingSa.innerHTML = saOpts;
-      return;
-    }
-  });
+  // 1. f-platform (فرص) — نبني من جديد كقائمة بسيطة
+  var fpl = document.getElementById('f-platform');
+  if (fpl) {
+    var cur = fpl.value;
+    fpl.innerHTML = '<option value="">— اختر المنصة —</option>'
+      + platforms.map(function(p){ return '<option value="'+p+'">'+p+'</option>'; }).join('');
+    if (cur) fpl.value = cur;
+  }
+
+  // 2. edit-platform (تعديل سريع)
+  var epl = document.getElementById('edit-platform');
+  if (epl) {
+    var ecur = epl.value;
+    epl.innerHTML = '<option value="">— اختر المنصة —</option>'
+      + platforms.map(function(p){ return '<option value="'+p+'">'+p+'</option>'; }).join('');
+    if (ecur) epl.value = ecur;
+  }
+
+  // 3. as-platform (أسهم سعودية) — نحدّث المجموعة الخاصة
+  var apl = document.getElementById('as-platform');
+  if (apl) {
+    var acur = apl.value;
+    var usNames = ['Interactive Brokers','Alpaca','Robinhood','TD Ameritrade','Charles Schwab'];
+    var saOpts = platforms.filter(function(p){ return !usNames.includes(p); })
+      .map(function(p){ return '<option>'+p+'</option>'; }).join('');
+    var saGrp = apl.querySelector('#as-platform-sa-group') || apl.querySelector('optgroup');
+    if (saGrp) saGrp.innerHTML = saOpts;
+    if (acur) apl.value = acur;
+  }
 }
 
 // ── فتح/إغلاق الـ Modal ──────────────────────────────────────────────────────
@@ -10170,13 +10180,20 @@ function _loadData(uid) {
     _read(uid, "loans"),
     _read(uid, "dividends"),
     _ref(uid, "settings").get().catch(function(){ return null; }),
-    _ref(uid, "loan_payments").get().catch(function(){ return null; })
+    _ref(uid, "loan_payments").get().catch(function(){ return null; }),
+    _read(uid, "sa_stocks").catch(function(){ return []; }),
+    _read(uid, "us_stocks").catch(function(){ return []; })
   ]).then(function(results) {
     var inv          = results[0];
     var loans        = results[1];
     var divs         = results[2];
     var settingsSnap = results[3];
     var paymentsSnap = results[4];
+    var saStocks     = results[5] || [];
+    var usStocks     = results[6] || [];
+
+    // دمج كل الاستثمارات في مصفوفة واحدة
+    inv = (inv || []).concat(saStocks).concat(usStocks);
 
     // تحميل حالات الدفعات
     if (paymentsSnap && paymentsSnap.exists) {
@@ -10263,8 +10280,21 @@ function _clearData() {
 window.fbSaveInvestments = function() {
   if (!_uid) return;
   _syncing = true;
-  _write(_uid, "investments", Array.from(window.__investments));
-  setTimeout(function(){ _syncing = false; }, 2000);
+
+  var all      = Array.from(window.__investments);
+  var sukuk    = all.filter(function(x){ return x.type !== 'سهم'; });
+  var saStocks = all.filter(function(x){ return x.type === 'سهم' && x.market !== 'us'; });
+  var usStocks = all.filter(function(x){ return x.type === 'سهم' && x.market === 'us'; });
+
+  Promise.all([
+    _write(_uid, "investments", sukuk),
+    _write(_uid, "sa_stocks",   saStocks),
+    _write(_uid, "us_stocks",   usStocks)
+  ]).then(function() {
+    setTimeout(function(){ _syncing = false; }, 500);
+  }).catch(function() {
+    _syncing = false;
+  });
 };
 window.fbSaveLoans = function() {
   if (!_uid) return;
