@@ -10264,6 +10264,8 @@ function _loadData(uid) {
       if (typeof renderStocks === "function") renderStocks();
       if (typeof renderFunds  === "function") renderFunds();
       if (typeof loadAdminSettings === "function") loadAdminSettings();
+      // جلب الأسهم من collections المنفصلة
+      if (typeof loadStocksFromCollections === "function") loadStocksFromCollections();
     });
 
   }).catch(function(e){ console.error("loadData:", e); _badge("error"); });
@@ -10282,6 +10284,42 @@ function _clearData() {
 }
 
 //  Expose save functions 
+
+// ── جلب الأسهم من collections المنفصلة مباشرةً ────────────────────────────────
+function loadStocksFromCollections() {
+  if (!_uid || !_db) return;
+
+  Promise.all([
+    _read(_uid, 'sa_stocks'),
+    _read(_uid, 'us_stocks')
+  ]).then(function(res) {
+    var saStocks = res[0] || [];
+    var usStocks = res[1] || [];
+    var newStocks = saStocks.concat(usStocks);
+    if (!newStocks.length) return;
+
+    // أضف بدون تكرار (بناءً على ticker + name)
+    var inv = window.__investments || [];
+    var existing = new Set(inv.map(function(x){ return (x.ticker||'') + '|' + (x.name||''); }));
+    var added = 0;
+    newStocks.forEach(function(s) {
+      var key = (s.ticker||'') + '|' + (s.name||'');
+      if (!existing.has(key)) {
+        inv.push(s);
+        existing.add(key);
+        added++;
+      }
+    });
+
+    if (added > 0) {
+      if (typeof renderStocks      === 'function') renderStocks();
+      if (typeof renderUsStocksTable === 'function') renderUsStocksTable();
+    }
+  }).catch(function(e) {
+    console.warn('loadStocksFromCollections error:', e);
+  });
+}
+
 window.fbSaveInvestments = function() {
   if (!_uid) return;
   _syncing = true;
