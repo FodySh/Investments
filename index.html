@@ -4844,31 +4844,61 @@ function applyPageVisibility() {
 }
 
 function renderAdminPage() {
+  // تحديث البريد
   var loggedAs = document.getElementById('admin-logged-as');
-  if (loggedAs && window.__firebaseUser) loggedAs.textContent = window.__firebaseUser.email;
+  if (loggedAs) {
+    var u = window.__firebaseUser;
+    loggedAs.textContent = u ? u.email : ADMIN_EMAIL;
+  }
 
   var list = document.getElementById('admin-pages-list');
   if (!list) return;
 
   var pages = (_adminCfg && _adminCfg.pages) ? _adminCfg.pages : {};
 
-  list.innerHTML = ADMIN_PAGES_CONFIG.map(function(pg, i) {
-    var on  = pages[pg.key] !== false;
-    var sep = i < ADMIN_PAGES_CONFIG.length - 1
-      ? 'border-bottom:1px solid rgba(255,255,255,0.06);' : '';
+  var rows = [
+    { key:'home',      icon:'🏠', label:'الرئيسية',               desc:'الصفحة الرئيسية ولوحة الملخص' },
+    { key:'stocks',    icon:'📈', label:'الأسهم',                 desc:'أسهم سعودية وأمريكية' },
+    { key:'sukuk',     icon:'📜', label:'الفرص الاستثمارية',       desc:'صكوك وصناديق وفرص' },
+    { key:'loans',     icon:'🏦', label:'القروض البنكية',          desc:'إدارة القروض وجداول السداد' },
+    { key:'debts',     icon:'💸', label:'الديون والجمعيات',        desc:'الديون الشخصية والجمعيات' },
+    { key:'db',        icon:'🗄️', label:'قاعدة البيانات',          desc:'عرض كل البيانات' },
+    { key:'cheques',   icon:'📝', label:'الشيكات والسندات',        desc:'صفحة الشيكات' },
+    { key:'dashboard', icon:'📊', label:'لوحة التحكم الكاملة',    desc:'التحليلات والرسوم البيانية' },
+    { key:'analyst',   icon:'🤖', label:'المحلل الذكي',           desc:'تحليل المحفظة بالذكاء الاصطناعي' },
+    { key:'add',       icon:'➕', label:'إضافة فرصة',             desc:'نموذج إضافة فرصة جديدة' },
+  ];
 
-    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;' + sep + '">' +
-      '<div style="font-size:13px;font-weight:600;color:#e2e8f0">' + pg.label + '</div>' +
-      '<button onclick="adminTogglePage(\'' + pg.key + '\',this)" ' +
-        'data-on="' + (on ? '1' : '0') + '" ' +
-        'style="width:48px;height:26px;border-radius:13px;border:none;cursor:pointer;position:relative;flex-shrink:0;' +
-        'background:' + (on ? '#9b8cff' : 'rgba(255,255,255,0.12)') + ';transition:background .2s">' +
-        '<span style="position:absolute;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .2s,right .2s;' +
-          (on ? 'right:3px;left:auto;' : 'left:3px;right:auto;') + '"></span>' +
+  list.innerHTML = rows.map(function(pg, i) {
+    var on  = pages[pg.key] !== false;
+    var sep = i < rows.length - 1 ? 'border-bottom:1px solid rgba(255,255,255,0.05);' : '';
+
+    return '<div style="display:flex;align-items:center;gap:14px;padding:14px 18px;' + sep + 'transition:background .15s" ' +
+      'onmouseover="this.style.background=\'rgba(255,255,255,0.02)\'" onmouseout="this.style.background=\'\'">' +
+
+      // أيقونة
+      '<div style="width:36px;height:36px;border-radius:9px;background:rgba(255,255,255,0.06);' +
+        'display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">' +
+        pg.icon + '</div>' +
+
+      // نص
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:13px;font-weight:700;color:#e2e8f0">' + pg.label + '</div>' +
+        '<div style="font-size:11px;color:#596070;margin-top:2px">' + pg.desc + '</div>' +
+      '</div>' +
+
+      // toggle
+      '<button onclick="adminTogglePage(\'' + pg.key + '\',this)" data-on="' + (on?'1':'0') + '" ' +
+        'style="width:50px;height:28px;border-radius:14px;border:none;cursor:pointer;position:relative;flex-shrink:0;' +
+        'background:' + (on ? '#9b8cff' : 'rgba(255,255,255,0.1)') + ';transition:background .25s">' +
+        '<span style="position:absolute;top:4px;' + (on?'right:4px':'left:4px') + ';' +
+          'width:20px;height:20px;border-radius:50%;background:#fff;transition:.25s"></span>' +
       '</button>' +
+
     '</div>';
   }).join('');
 }
+
 
 
 
@@ -5274,7 +5304,7 @@ function showPage(id, navEl, mobileTitle, noScroll){
   if (id === 'add-loan')  { calcAddLoan(); }
   if (id === 'add')       { setTimeout(function(){ populateCapitalSrcSelect(); populatePlatformSelects(); }, 100); }
   if (id === 'add-debt')  { window.location.href = 'debts.html#add'; return; }
-  if (id === 'admin')     { if (!isAdmin()) return; renderAdminPage(); }
+  if (id === 'admin')     { renderAdminPage(); }
   if (id === 'loans') renderLoans();
   if (id === 'home') { initDashboardYears(); renderDashboard(); }
 }
@@ -10759,4 +10789,3 @@ document.getElementById('app-guide-modal').addEventListener('click', function(e)
 </div>
 
 </body>
-            
