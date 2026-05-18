@@ -4850,36 +4850,42 @@ function renderAdminPage() {
   var list = document.getElementById('admin-pages-list');
   if (!list) return;
 
-  var pages = _adminCfg.pages || {};
+  var pages = (_adminCfg && _adminCfg.pages) ? _adminCfg.pages : {};
 
   list.innerHTML = ADMIN_PAGES_CONFIG.map(function(pg, i) {
-    var on = pages[pg.key] !== false;
-    var borderB = i < ADMIN_PAGES_CONFIG.length - 1 ? 'border-bottom:1px solid var(--border);' : '';
-    return '<div style="display:flex;align-items:center;justify-content:space-between;' +
-      'padding:14px 18px;' + borderB + '">' +
-      '<div style="font-size:13px;font-weight:600;color:var(--white)">' + pg.label + '</div>' +
-      '<label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">' +
-        '<input type="checkbox" data-pg="' + pg.key + '" ' + (on ? 'checked' : '') +
-          ' onchange="_adminCfg.pages[this.dataset.pg] = this.checked; applyPageVisibility()"' +
-          ' style="opacity:0;width:0;height:0">' +
-        '<span style="position:absolute;inset:0;border-radius:12px;transition:.2s;' +
-          'background:' + (on ? '#9b8cff' : 'rgba(255,255,255,0.1)') + ';"></span>' +
-        '<span style="position:absolute;top:3px;' + (on ? 'right:3px' : 'left:3px') +
-          ';width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s;"></span>' +
-      '</label>' +
+    var on  = pages[pg.key] !== false;
+    var sep = i < ADMIN_PAGES_CONFIG.length - 1
+      ? 'border-bottom:1px solid rgba(255,255,255,0.06);' : '';
+
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;' + sep + '">' +
+      '<div style="font-size:13px;font-weight:600;color:#e2e8f0">' + pg.label + '</div>' +
+      '<button onclick="adminTogglePage(\'' + pg.key + '\',this)" ' +
+        'data-on="' + (on ? '1' : '0') + '" ' +
+        'style="width:48px;height:26px;border-radius:13px;border:none;cursor:pointer;position:relative;flex-shrink:0;' +
+        'background:' + (on ? '#9b8cff' : 'rgba(255,255,255,0.12)') + ';transition:background .2s">' +
+        '<span style="position:absolute;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .2s,right .2s;' +
+          (on ? 'right:3px;left:auto;' : 'left:3px;right:auto;') + '"></span>' +
+      '</button>' +
     '</div>';
   }).join('');
+}
 
-  // Fix toggle visual on change
-  list.querySelectorAll('input[type=checkbox]').forEach(function(inp) {
-    inp.addEventListener('change', function() {
-      var track = this.nextElementSibling;
-      var thumb = track.nextElementSibling;
-      track.style.background = this.checked ? '#9b8cff' : 'rgba(255,255,255,0.1)';
-      thumb.style.right = this.checked ? '3px' : '';
-      thumb.style.left  = this.checked ? '' : '3px';
-    });
-  });
+
+
+function adminTogglePage(key, btn) {
+  var on = btn.getAttribute('data-on') === '1';
+  var newOn = !on;
+  btn.setAttribute('data-on', newOn ? '1' : '0');
+  btn.style.background = newOn ? '#9b8cff' : 'rgba(255,255,255,0.12)';
+  var thumb = btn.querySelector('span');
+  if (thumb) {
+    thumb.style.right = newOn ? '3px' : 'auto';
+    thumb.style.left  = newOn ? 'auto' : '3px';
+  }
+  if (!_adminCfg) _adminCfg = {};
+  if (!_adminCfg.pages) _adminCfg.pages = {};
+  _adminCfg.pages[key] = newOn;
+  applyPageVisibility();
 }
 
 function saveAdminSettings() {
@@ -10718,50 +10724,39 @@ document.getElementById('app-guide-modal').addEventListener('click', function(e)
 
 <!-- ══ PAGE: ADMIN ══════════════════════════════════════════════════════════ -->
 <div id="page-admin" class="page" style="display:none">
-  <div class="page-header" style="background:linear-gradient(135deg,rgba(155,140,255,0.08),rgba(78,205,196,0.05));border-bottom:1px solid rgba(155,140,255,0.2)">
-    <div style="display:flex;align-items:center;gap:14px">
-      <div style="width:44px;height:44px;border-radius:12px;background:rgba(155,140,255,0.15);border:1px solid rgba(155,140,255,0.3);display:flex;align-items:center;justify-content:center;font-size:22px">🛡️</div>
-      <div>
-        <div class="page-title" style="color:#9b8cff">لوحة الإدارة</div>
-        <div class="page-subtitle" id="admin-logged-as" style="color:rgba(155,140,255,0.7)">Admin Access</div>
-      </div>
+  <!-- Header -->
+  <div style="padding:20px 20px 16px;background:linear-gradient(135deg,rgba(155,140,255,0.1),rgba(78,205,196,0.05));border-bottom:1px solid rgba(155,140,255,0.25);display:flex;align-items:center;gap:14px;flex-shrink:0">
+    <div style="width:42px;height:42px;border-radius:12px;background:rgba(155,140,255,0.2);border:1px solid rgba(155,140,255,0.4);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🛡️</div>
+    <div>
+      <div style="font-size:16px;font-weight:800;color:#c5baff">لوحة الإدارة</div>
+      <div id="admin-logged-as" style="font-size:11px;color:rgba(155,140,255,0.6);margin-top:2px"></div>
     </div>
   </div>
 
-  <div style="padding:20px;max-width:700px;display:flex;flex-direction:column;gap:16px">
+  <!-- Content -->
+  <div style="padding:20px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:16px">
 
-    <!-- بطاقة الصفحات -->
-    <div class="section-card" style="border-color:rgba(155,140,255,0.2)">
-      <div class="section-head" style="justify-content:space-between;align-items:center">
-        <span class="section-title" style="font-size:14px">📄 التحكم في الصفحات</span>
-        <span style="font-size:11px;color:var(--muted)">تفعيل/إخفاء للجميع</span>
+    <!-- Pages card -->
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(155,140,255,0.2);border-radius:14px;overflow:hidden">
+      <div style="padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:13px;font-weight:700;color:var(--white,#f0f0ee)">📄 التحكم في الصفحات</span>
+        <span style="font-size:11px;color:var(--muted,#6b7280)">تفعيل / إخفاء لجميع المستخدمين</span>
       </div>
-      <div class="section-body" style="padding:0">
-        <div id="admin-pages-list" style="display:flex;flex-direction:column"></div>
-      </div>
+      <div id="admin-pages-list"></div>
     </div>
 
-    <!-- زر الحفظ -->
+    <!-- Save -->
     <button onclick="saveAdminSettings()"
-      style="padding:14px;background:linear-gradient(135deg,#9b8cff,#7c6ff7);border:none;border-radius:12px;font-size:14px;font-weight:800;color:#fff;cursor:pointer;font-family:inherit;transition:opacity .15s;display:flex;align-items:center;justify-content:center;gap:8px"
-      onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-      💾 حفظ وتطبيق على جميع المستخدمين
+      style="padding:14px;background:linear-gradient(135deg,#9b8cff,#7c6ff7);border:none;border-radius:12px;font-size:14px;font-weight:800;color:#fff;cursor:pointer;font-family:inherit;letter-spacing:.02em">
+      💾 &nbsp; حفظ وتطبيق على الجميع
     </button>
 
-    <div id="admin-save-msg" style="display:none;text-align:center;font-size:12px;color:var(--green);padding:6px">
-      ✅ تم الحفظ — التغييرات مطبّقة على جميع المستخدمين
-    </div>
-
-    <!-- بطاقة الإحصاء -->
-    <div class="section-card" style="border-color:rgba(78,205,196,0.2)">
-      <div class="section-head">
-        <span class="section-title" style="font-size:14px">📊 إحصاء المستخدمين</span>
-      </div>
-      <div style="padding:14px 16px;font-size:13px;color:var(--muted)">
-        لا يوجد نظام متعدد المستخدمين حالياً — التطبيق للاستخدام الشخصي.
-      </div>
+    <div id="admin-save-msg" style="display:none;text-align:center;font-size:12px;color:#5cb98a;padding:4px">
+      ✅ تم الحفظ بنجاح
     </div>
 
   </div>
 </div>
+
 </body>
+            
