@@ -10449,8 +10449,12 @@ function _clearData() {
 
 // ── تطبيق صلاحيات المستخدم الحالي ────────────────────────────────────────────
 function applyMyPermissions() {
-  if (isAdmin()) return; // الأدمن يرى كل شيء
-  var perms = window.__myPermissions || {};
+  if (isAdmin()) return; // الأدمن يرى كل شيء دائماً
+
+  // الإعدادات العامة من الأدمن (admin/settings)
+  var globalPages = (_adminCfg && _adminCfg.pages) ? _adminCfg.pages : {};
+  // صلاحيات هذا المستخدم تحديداً (users_permissions/{uid})
+  var userPerms = window.__myPermissions || {};
 
   var pageNavMap = {
     'home':      ['mnav-home'],
@@ -10466,10 +10470,14 @@ function applyMyPermissions() {
   };
 
   Object.keys(pageNavMap).forEach(function(key) {
-    var allowed = perms[key] !== false; // مرئي افتراضياً إلا لو مقيّد
+    // الصفحة مرئية إذا: الإعداد العام مفعّل (أو غير محدد) + صلاحية المستخدم مفعّلة (أو غير محددة)
+    var globalOk = globalPages[key] !== false;
+    var userOk   = userPerms[key]   !== false;
+    var visible  = globalOk && userOk;
+
     pageNavMap[key].forEach(function(id) {
       var el = document.getElementById(id);
-      if (el) el.style.display = allowed ? '' : 'none';
+      if (el) el.style.display = visible ? '' : 'none';
     });
   });
 }
