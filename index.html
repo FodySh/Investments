@@ -1263,29 +1263,29 @@
       <div class="logo-title">محفظتي المالية</div>
     </div>
     <nav>
-      <div class="nav-item active" onclick="showPage('home',this)">
+      <div class="nav-item active" data-nav-page="home" onclick="showPage('home',this)">
         <span class="nav-icon">🏠</span> الرئيسية
       </div>
-      <div class="nav-item" onclick="showPage('stocks',this)">
+      <div class="nav-item" data-nav-page="stocks" onclick="showPage('stocks',this)">
         <span class="nav-icon">📈</span> الأسهم
       </div>
-      <a class="nav-item" href="dashboard.html" style="text-decoration:none;display:flex;align-items:center;gap:10px;background:rgba(201,169,110,0.06);border:1px solid rgba(201,169,110,0.2);border-radius:10px;margin:2px 8px;padding:10px 12px">
+      <a class="nav-item" data-nav-page="dashboard" href="dashboard.html" style="text-decoration:none;display:flex;align-items:center;gap:10px;background:rgba(201,169,110,0.06);border:1px solid rgba(201,169,110,0.2);border-radius:10px;margin:2px 8px;padding:10px 12px">
         <span class="nav-icon">📊</span> لوحة التحكم
       </a>
       
-      <div class="nav-item" onclick="showPage('sukuk',this)">
+      <div class="nav-item" data-nav-page="sukuk" onclick="showPage('sukuk',this)">
         <span class="nav-icon">🏦</span> الفرص
       </div>
 
 
 
-      <div class="nav-item nav-db" onclick="showPage('db',this)">
+      <div class="nav-item nav-db" data-nav-page="db" onclick="showPage('db',this)">
         <span class="nav-icon">🗄️</span> قاعدة البيانات
       </div>
-      <div class="nav-item nav-loans" onclick="showPage('loans',this)">
+      <div class="nav-item nav-loans" data-nav-page="loans" onclick="showPage('loans',this)">
         <span class="nav-icon">🏦</span> القروض البنكية
       </div>
-      <div class="nav-item" onclick="window.open('cheques.html','_blank')" style="color:#4ecdc4;">
+      <div class="nav-item" data-nav-page="cheques" onclick="window.open('cheques.html','_blank')" style="color:#4ecdc4;">
         <span class="nav-icon">🧾</span> شيكات وسندات الأمر
       </div>
       <div class="nav-item nav-debts" onclick="window.location.href='debts.html'">
@@ -3730,22 +3730,22 @@
 <nav class="mobile-nav">
   <div class="mobile-nav-inner">
 
-    <div class="mnav-item active" id="mnav-home" onclick="showPage('home',this,'🏠 الرئيسية')">
+    <div class="mnav-item active" id="mnav-home" data-nav-page="home" onclick="showPage('home',this,'🏠 الرئيسية')">
       <div class="mnav-icon-wrap"><span class="mnav-icon">🏠</span></div>
       <span class="mnav-label">الرئيسية</span>
     </div>
 
-    <div class="mnav-item" id="mnav-stocks" onclick="showPage('stocks',this,'📈 الأسهم')">
+    <div class="mnav-item" id="mnav-stocks" data-nav-page="stocks" onclick="showPage('stocks',this,'📈 الأسهم')">
       <div class="mnav-icon-wrap"><span class="mnav-icon">📈</span></div>
       <span class="mnav-label">الأسهم</span>
     </div>
 
-    <div class="mnav-item" id="mnav-sukuk" onclick="showPage('sukuk',this,'🏦 الفرص')">
+    <div class="mnav-item" id="mnav-sukuk" data-nav-page="sukuk" onclick="showPage('sukuk',this,'🏦 الفرص')">
       <div class="mnav-icon-wrap"><span class="mnav-icon">🏦</span></div>
       <span class="mnav-label">الفرص</span>
     </div>
 
-    <div class="mnav-item" id="mnav-loans" onclick="showPage('loans',this,'💰 القروض')">
+    <div class="mnav-item" id="mnav-loans" data-nav-page="loans" onclick="showPage('loans',this,'💰 القروض')">
       <div class="mnav-icon-wrap"><span class="mnav-icon">💰</span></div>
       <span class="mnav-label">القروض</span>
     </div>
@@ -3755,12 +3755,12 @@
       <span class="mnav-label">شيكات</span>
     </div>
 
-    <div class="mnav-item" id="mnav-debts" onclick="window.location.href='debts.html'">
+    <div class="mnav-item" id="mnav-debts" data-nav-page="debts" onclick="window.location.href='debts.html'">
       <div class="mnav-icon-wrap"><span class="mnav-icon">💸</span></div>
       <span class="mnav-label">الديون</span>
     </div>
 
-    <div class="mnav-item" id="mnav-reports" onclick="window.location.href='dashboard.html'">
+    <div class="mnav-item" id="mnav-reports" data-nav-page="dashboard" onclick="window.location.href='dashboard.html'">
       <div class="mnav-icon-wrap"><span class="mnav-icon">📊</span></div>
       <span class="mnav-label">التقارير</span>
     </div>
@@ -4832,15 +4832,13 @@ function loadAdminSettings() {
 function applyPageVisibility() {
   var pages = _adminCfg.pages || {};
   ADMIN_PAGES_CONFIG.forEach(function(pg) {
-    var visible = pages[pg.key] !== false; // default: visible
-    pg.navIds.forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.style.display = visible ? '' : 'none';
+    var visible = pages[pg.key] !== false;
+    document.querySelectorAll('[data-nav-page="' + pg.key + '"]').forEach(function(el) {
+      el.style.display = visible ? '' : 'none';
     });
-    // Desktop nav items
-    var deskSel = document.querySelector('.nav-item[onclick*="' + pg.key + '"]');
-    if (deskSel && pg.key !== 'home') deskSel.style.display = visible ? '' : 'none';
   });
+  // أعِد تطبيق صلاحيات المستخدم فوق الإعدادات العامة
+  if (!isAdmin()) applyMyPermissions();
 }
 
 function renderAdminPage() {
@@ -10451,33 +10449,19 @@ function _clearData() {
 function applyMyPermissions() {
   if (isAdmin()) return; // الأدمن يرى كل شيء دائماً
 
-  // الإعدادات العامة من الأدمن (admin/settings)
   var globalPages = (_adminCfg && _adminCfg.pages) ? _adminCfg.pages : {};
-  // صلاحيات هذا المستخدم تحديداً (users_permissions/{uid})
-  var userPerms = window.__myPermissions || {};
+  var userPerms   = window.__myPermissions || {};
 
-  var pageNavMap = {
-    'home':      ['mnav-home'],
-    'stocks':    ['mnav-stocks'],
-    'sukuk':     ['mnav-sukuk', 'mnav-add'],
-    'loans':     ['mnav-loans'],
-    'debts':     ['mnav-debts'],
-    'db':        [],
-    'cheques':   [],
-    'dashboard': [],
-    'analyst':   [],
-    'add':       [],
-  };
+  var keys = ['home','stocks','sukuk','loans','debts','db','cheques','dashboard','analyst','add'];
 
-  Object.keys(pageNavMap).forEach(function(key) {
-    // الصفحة مرئية إذا: الإعداد العام مفعّل (أو غير محدد) + صلاحية المستخدم مفعّلة (أو غير محددة)
+  keys.forEach(function(key) {
     var globalOk = globalPages[key] !== false;
     var userOk   = userPerms[key]   !== false;
     var visible  = globalOk && userOk;
 
-    pageNavMap[key].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.style.display = visible ? '' : 'none';
+    // استخدم data-nav-page لإيجاد جميع عناصر الـ nav المرتبطة
+    document.querySelectorAll('[data-nav-page="' + key + '"]').forEach(function(el) {
+      el.style.display = visible ? '' : 'none';
     });
   });
 }
