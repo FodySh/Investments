@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>المصاريف الشهرية — محفظتي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<style>
+/* ── VARS ── */
+:root {
+  --bg:      #12110d;
+  --bg2:     #1a1810;
+  --bg3:     #221f14;
+  --card:    rgba(39,35,26,0.9);
+  --border:  rgba(201,185,140,0.18);
+  --border2: rgba(201,185,140,0.32);
+  --gold:    #c9a96e;
+  --gold2:   #e2c48a;
+  --cyan:    #4ecdc4;
+  --green:   #5cb98a;
+  --red:     #e07070;
+  --orange:  #f0a500;
+  --purple:  #9b8cff;
+  --white:   #f0f0ee;
+  --muted:   rgba(240,240,238,0.45);
+  --mono:    'JetBrains Mono', monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow-x:hidden}
+body{
+  background:var(--bg);
+  color:var(--white);
+  font-family:'Cairo',sans-serif;
+  font-size:14px;
+  line-height:1.6;
+}
+
+/* ── TOP NAV ── */
+.topnav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(18,17,13,0.95);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:0 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:52px;
+  flex-shrink:0;
+}
+.topnav-logo{
+  display:flex;align-items:center;gap:10px;
+  font-size:15px;font-weight:800;color:var(--gold);
+  text-decoration:none;
+}
+.topnav-month{
+  display:flex;align-items:center;gap:8px;
+}
+.month-btn{
+  width:30px;height:30px;border-radius:8px;
+  background:var(--card);border:1px solid var(--border);
+  color:var(--muted);cursor:pointer;font-size:14px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.month-btn:hover{border-color:var(--gold);color:var(--gold)}
+.month-label{
+  font-size:13px;font-weight:700;color:var(--white);
+  min-width:90px;text-align:center;
+}
+.topnav-user{
+  display:flex;align-items:center;gap:8px;
+  font-size:11px;color:var(--muted);
+}
+.user-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:block}
+
+/* ── LAYOUT ── */
+.layout{
+  display:flex;
+  height:calc(100vh - 52px);
+  overflow:hidden;
+}
+
+/* ── MAIN CONTENT ── */
+.main{
+  flex:1;overflow-y:auto;
+  padding:20px;
+  display:flex;flex-direction:column;gap:16px;
+}
+.main::-webkit-scrollbar{width:4px}
+.main::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+/* ── SALARY SECTION ── */
+.salary-card{
+  background:linear-gradient(135deg,rgba(201,169,110,0.08),rgba(78,205,196,0.04));
+  border:1px solid var(--border2);
+  border-radius:16px;padding:20px;
+  position:relative;overflow:hidden;
+}
+.salary-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--gold),var(--cyan),var(--gold));
+}
+.salary-row{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:14px;margin-bottom:20px;
+}
+.salary-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.salary-input-wrap{
+  display:flex;align-items:center;gap:0;
+  background:rgba(0,0,0,0.3);border:1px solid var(--border2);
+  border-radius:10px;overflow:hidden;
+}
+.salary-input{
+  background:transparent;border:none;outline:none;
+  font-family:var(--mono);font-size:20px;font-weight:600;
+  color:var(--gold2);padding:10px 14px;
+  width:180px;text-align:left;direction:ltr;
+}
+.salary-unit{
+  padding:10px 14px;color:var(--muted);font-size:12px;font-weight:600;
+  background:rgba(255,255,255,0.03);border-left:1px solid var(--border);
+}
+
+/* الشريط التنازلي */
+.waterfall-bar{
+  height:10px;border-radius:10px;
+  background:rgba(255,255,255,0.06);
+  overflow:hidden;position:relative;
+  margin-bottom:10px;
+}
+.waterfall-segments{
+  display:flex;height:100%;gap:1px;
+  transition:all .5s cubic-bezier(.16,1,.3,1);
+}
+.wf-seg{
+  height:100%;border-radius:0;
+  transition:width .5s cubic-bezier(.16,1,.3,1);
+}
+.waterfall-legend{
+  display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;
+}
+.wf-legend-item{
+  display:flex;align-items:center;gap:5px;
+  font-size:10px;color:var(--muted);font-weight:600;
+}
+.wf-legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* المتبقي */
+.remaining-row{
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(0,0,0,0.25);border-radius:10px;padding:12px 16px;
+  margin-top:12px;border:1px solid var(--border);
+}
+.remaining-label{font-size:12px;color:var(--muted);font-weight:600}
+.remaining-val{font-family:var(--mono);font-size:22px;font-weight:700}
+.remaining-val.positive{color:var(--green)}
+.remaining-val.negative{color:var(--red)}
+.remaining-val.warning{color:var(--orange)}
+
+/* ── SECTION CARDS ── */
+.section-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;overflow:hidden;
+}
+.section-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;border-bottom:1px solid var(--border);
+}
+.section-title{
+  display:flex;align-items:center;gap:8px;
+  font-size:13px;font-weight:700;color:var(--white);
+}
+.section-badge{
+  font-size:11px;font-family:var(--mono);
+  color:var(--muted);font-weight:600;
+}
+.add-btn{
+  display:flex;align-items:center;gap:5px;
+  padding:6px 14px;border-radius:8px;font-size:11px;font-weight:700;
+  cursor:pointer;border:1px solid;font-family:'Cairo',sans-serif;
+  transition:all .15s;
+}
+.add-btn.gold{background:rgba(201,169,110,0.12);border-color:rgba(201,169,110,0.3);color:var(--gold)}
+.add-btn.gold:hover{background:rgba(201,169,110,0.22)}
+.add-btn.cyan{background:rgba(78,205,196,0.1);border-color:rgba(78,205,196,0.3);color:var(--cyan)}
+.add-btn.cyan:hover{background:rgba(78,205,196,0.2)}
+.add-btn.purple{background:rgba(155,140,255,0.1);border-color:rgba(155,140,255,0.3);color:var(--purple)}
+.add-btn.purple:hover{background:rgba(155,140,255,0.2)}
+
+/* ── EXPENSE ITEMS ── */
+.expense-list{display:flex;flex-direction:column;gap:0}
+.expense-item{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 18px;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  transition:background .12s;
+}
+.expense-item:last-child{border-bottom:none}
+.expense-item:hover{background:rgba(255,255,255,0.02)}
+
+.exp-icon{
+  width:34px;height:34px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;
+}
+.exp-name{flex:1;font-size:13px;font-weight:600;color:var(--white)}
+.exp-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.exp-amount{
+  font-family:var(--mono);font-size:13px;font-weight:600;
+  color:var(--gold2);text-align:left;white-space:nowrap;
+}
+.exp-unit{font-size:10px;color:var(--muted);margin-top:1px;text-align:left}
+.exp-actions{display:flex;gap:4px}
+.exp-btn{
+  width:26px;height:26px;border-radius:6px;
+  background:rgba(255,255,255,0.04);border:1px solid var(--border);
+  color:var(--muted);cursor:pointer;font-size:11px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .12s;
+}
+.exp-btn:hover{border-color:var(--red);color:var(--red);background:rgba(224,112,112,0.08)}
+
+/* ── ACCRUAL ITEMS ── */
+.accrual-item{
+  padding:14px 18px;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.accrual-item:last-child{border-bottom:none}
+.accrual-top{
+  display:flex;align-items:center;gap:12px;margin-bottom:10px;
+}
+.accrual-info{flex:1}
+.accrual-name{font-size:13px;font-weight:700;color:var(--white)}
+.accrual-meta{font-size:10px;color:var(--muted);margin-top:2px}
+.accrual-monthly{
+  font-family:var(--mono);font-size:13px;font-weight:600;color:var(--purple);
+  text-align:left;white-space:nowrap;
+}
+.accrual-monthly-label{font-size:9px;color:var(--muted);text-align:left}
+
+.accrual-progress-wrap{
+  background:rgba(0,0,0,0.3);border-radius:6px;
+  height:6px;overflow:hidden;margin-bottom:5px;
+}
+.accrual-progress{
+  height:100%;border-radius:6px;
+  background:linear-gradient(90deg,var(--purple),var(--cyan));
+  transition:width .6s cubic-bezier(.16,1,.3,1);
+}
+.accrual-bottom{
+  display:flex;justify-content:space-between;
+  font-size:10px;color:var(--muted);
+}
+.accrual-bottom b{color:var(--purple)}
+
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:16px;padding:24px;
+  width:100%;max-width:420px;
+  transform:translateY(20px);transition:transform .25s cubic-bezier(.16,1,.3,1);
+}
+.modal-overlay.open .modal{transform:none}
+.modal-title{
+  font-size:16px;font-weight:800;color:var(--white);
+  margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;
+}
+.modal-close{
+  background:none;border:none;color:var(--muted);cursor:pointer;
+  font-size:20px;line-height:1;transition:color .12s;
+}
+.modal-close:hover{color:var(--white)}
+
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.field label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em}
+.field input,.field select,.field textarea{
+  background:rgba(0,0,0,0.3);border:1px solid var(--border);
+  border-radius:9px;padding:10px 14px;
+  font-family:'Cairo',sans-serif;font-size:13px;
+  color:var(--white);outline:none;transition:border .15s;
+  width:100%;
+}
+.field input:focus,.field select:focus{border-color:var(--gold)}
+.field select option{background:var(--bg2)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.btn-save{
+  width:100%;padding:12px;margin-top:6px;
+  background:var(--gold);border:none;border-radius:10px;
+  font-size:14px;font-weight:800;color:#0d0c09;
+  cursor:pointer;font-family:'Cairo',sans-serif;
+  transition:opacity .15s;
+}
+.btn-save:hover{opacity:.88}
+
+/* ── EMPTY STATE ── */
+.empty{
+  padding:32px;text-align:center;
+  color:var(--muted);font-size:12px;
+}
+.empty-icon{font-size:28px;margin-bottom:8px;display:block}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--bg3);border:1px solid var(--border2);
+  border-radius:10px;padding:10px 20px;font-size:13px;font-weight:600;
+  color:var(--white);z-index:999;opacity:0;transition:all .25s;
+  pointer-events:none;white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── SUMMARY GRID ── */
+.summary-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:10px;
+}
+.summary-kpi{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:14px;
+}
+.kpi-label{font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+.kpi-val{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--gold2)}
+.kpi-sub{font-size:10px;color:var(--muted);margin-top:3px}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<div class="topnav">
+  <a href="index.html" class="topnav-logo">
+    ← <span style="margin-right:6px">💳</span> المصاريف
+  </a>
+  <div class="topnav-month">
+    <button class="month-btn" onclick="changeMonth(-1)">‹</button>
+    <div class="month-label" id="month-label">—</div>
+    <button class="month-btn" onclick="changeMonth(1)">›</button>
+  </div>
+  <div class="topnav-user">
+    <span class="user-dot"></span>
+    <span id="user-email-display"></span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- ══ SALARY CARD ══ -->
+  <div class="salary-card">
+    <div class="salary-row">
+      <div>
+        <div class="salary-label">الراتب الشهري</div>
+        <div class="salary-input-wrap" style="margin-top:6px">
+          <input class="salary-input" id="salary-input" type="number"
+            placeholder="0" oninput="onSalaryChange()" />
+          <div class="salary-unit">ر.س</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start">
+        <div class="salary-label">مصادر إضافية (اختياري)</div>
+        <div style="display:flex;gap:6px" id="extra-incomes-chips"></div>
+        <button class="add-btn gold" onclick="openModal('income')" style="font-size:10px;padding:4px 10px">+ مصدر دخل آخر</button>
+      </div>
+    </div>
+
+    <!-- شريط الراتب التنازلي -->
+    <div class="salary-label" style="margin-bottom:6px">توزيع الراتب</div>
+    <div class="waterfall-bar">
+      <div class="waterfall-segments" id="waterfall-segs"></div>
+    </div>
+    <div class="waterfall-legend" id="waterfall-legend"></div>
+
+    <!-- المتبقي -->
+    <div class="remaining-row">
+      <div>
+        <div class="remaining-label">المتبقي بعد المصاريف</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px" id="remaining-pct">—</div>
+      </div>
+      <div style="text-align:left">
+        <div class="remaining-val positive" id="remaining-val">0 ر.س</div>
+        <div style="font-size:10px;color:var(--muted)">صافي التصرف الحر</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SUMMARY KPIS ══ -->
+  <div class="summary-grid" id="summary-grid">
+    <div class="summary-kpi">
+      <div class="kpi-label">إجمالي المصاريف</div>
+      <div class="kpi-val" id="kpi-total">0</div>
+      <div class="kpi-sub">ر.س / شهر</div>
+    </div>
+    <div class="summary-kpi">
+      <div class="kpi-label">مصاريف ثابتة</div>
+      <div class="kpi-val" id="kpi-fixed" style="color:var(--gold)">0</div>
+      <div class="kpi-sub">ر.س</div>
+    </div>
+    <div class="summary-kpi">
+      <div class="kpi-label">مصاريف متغيرة</div>
+      <div class="kpi-val" id="kpi-variable" style="color:var(--cyan)">0</div>
+      <div class="kpi-sub">ر.س هذا الشهر</div>
+    </div>
+    <div class="summary-kpi">
+      <div class="kpi-label">Accrual Buffer</div>
+      <div class="kpi-val" id="kpi-accrual" style="color:var(--purple)">0</div>
+      <div class="kpi-sub">ر.س / شهر</div>
+    </div>
+  </div>
+
+  <!-- ══ FIXED EXPENSES ══ -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-title">
+        🔒 مصاريف ثابتة
+        <span class="section-badge" id="fixed-total-badge">0 ر.س</span>
+      </div>
+      <button class="add-btn gold" onclick="openModal('fixed')">+ إضافة</button>
+    </div>
+    <div class="expense-list" id="fixed-list">
+      <div class="empty"><span class="empty-icon">🔒</span>لا توجد مصاريف ثابتة</div>
+    </div>
+  </div>
+
+  <!-- ══ VARIABLE EXPENSES ══ -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-title">
+        🔄 مصاريف متغيرة — <span id="current-month-short" style="color:var(--cyan)"></span>
+        <span class="section-badge" id="variable-total-badge">0 ر.س</span>
+      </div>
+      <button class="add-btn cyan" onclick="openModal('variable')">+ تسجيل</button>
+    </div>
+    <div class="expense-list" id="variable-list">
+      <div class="empty"><span class="empty-icon">🔄</span>لا توجد مصاريف متغيرة هذا الشهر</div>
+    </div>
+  </div>
+
+  <!-- ══ ACCRUAL ══ -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-title">
+        📅 Accrual — مصاريف دورية
+        <span class="section-badge" id="accrual-total-badge">0 ر.س/شهر</span>
+      </div>
+      <button class="add-btn purple" onclick="openModal('accrual')">+ إضافة</button>
+    </div>
+    <div style="padding:10px 18px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)">
+      كل مصروف سنوي أو ربع سنوي يُجزَّأ شهرياً — ترى كم يجب أن تحجز كل شهر في وعاء منفصل
+    </div>
+    <div id="accrual-list">
+      <div class="empty"><span class="empty-icon">📅</span>لا توجد مصاريف دورية</div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- ══ MODALS ══ -->
+
+<!-- Modal إضافة مصروف ثابت -->
+<div class="modal-overlay" id="modal-fixed">
+  <div class="modal">
+    <div class="modal-title">
+      🔒 مصروف ثابت
+      <button class="modal-close" onclick="closeModal('fixed')">×</button>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>الأيقونة</label>
+        <input id="f-icon" type="text" placeholder="🏠" maxlength="2" style="font-size:20px;text-align:center"/>
+      </div>
+      <div class="field" style="grid-column:span 1">
+        <label>الاسم</label>
+        <input id="f-name" type="text" placeholder="مثال: قسط السيارة"/>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>المبلغ الشهري (ر.س)</label>
+        <input id="f-amount" type="number" step="1" placeholder="0" style="font-family:var(--mono);font-size:16px;color:var(--gold2)"/>
+      </div>
+      <div class="field">
+        <label>الفئة</label>
+        <select id="f-cat">
+          <option value="سكن">🏠 سكن</option>
+          <option value="مواصلات">🚗 مواصلات</option>
+          <option value="تأمين">🛡️ تأمين</option>
+          <option value="اتصالات">📱 اتصالات</option>
+          <option value="اشتراكات">📺 اشتراكات</option>
+          <option value="قروض">🏦 قروض</option>
+          <option value="أخرى">📌 أخرى</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>ملاحظة (اختياري)</label>
+      <input id="f-note" type="text" placeholder="مثال: قسط البنك الأهلي"/>
+    </div>
+    <button class="btn-save" onclick="saveFixed()">💾 حفظ</button>
+  </div>
+</div>
+
+<!-- Modal مصروف متغير -->
+<div class="modal-overlay" id="modal-variable">
+  <div class="modal">
+    <div class="modal-title">
+      🔄 مصروف متغير
+      <button class="modal-close" onclick="closeModal('variable')">×</button>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>الأيقونة</label>
+        <input id="v-icon" type="text" placeholder="🛒" maxlength="2" style="font-size:20px;text-align:center"/>
+      </div>
+      <div class="field">
+        <label>الاسم</label>
+        <input id="v-name" type="text" placeholder="مثال: تسوق، مطعم..."/>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>المبلغ (ر.س)</label>
+        <input id="v-amount" type="number" step="0.01" placeholder="0.00" style="font-family:var(--mono);font-size:16px;color:var(--cyan)"/>
+      </div>
+      <div class="field">
+        <label>الفئة</label>
+        <select id="v-cat">
+          <option value="طعام">🍽️ طعام ومطاعم</option>
+          <option value="تسوق">🛒 تسوق</option>
+          <option value="ترفيه">🎬 ترفيه</option>
+          <option value="صحة">💊 صحة</option>
+          <option value="تعليم">📚 تعليم</option>
+          <option value="وقود">⛽ وقود</option>
+          <option value="هدايا">🎁 هدايا</option>
+          <option value="أخرى">📌 أخرى</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>التاريخ</label>
+      <input id="v-date" type="date"/>
+    </div>
+    <button class="btn-save" onclick="saveVariable()">💾 حفظ</button>
+  </div>
+</div>
+
+<!-- Modal Accrual -->
+<div class="modal-overlay" id="modal-accrual">
+  <div class="modal">
+    <div class="modal-title">
+      📅 مصروف دوري (Accrual)
+      <button class="modal-close" onclick="closeModal('accrual')">×</button>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>الأيقونة</label>
+        <input id="a-icon" type="text" placeholder="🏋️" maxlength="2" style="font-size:20px;text-align:center"/>
+      </div>
+      <div class="field">
+        <label>الاسم</label>
+        <input id="a-name" type="text" placeholder="مثال: النادي، التأمين السنوي"/>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>المبلغ الإجمالي (ر.س)</label>
+        <input id="a-total" type="number" step="1" placeholder="0" oninput="calcAccrualPreview()"
+          style="font-family:var(--mono);font-size:16px;color:var(--purple)"/>
+      </div>
+      <div class="field">
+        <label>الدورة</label>
+        <select id="a-cycle" onchange="calcAccrualPreview()">
+          <option value="12">سنوي (12 شهر)</option>
+          <option value="6">نصف سنوي</option>
+          <option value="3">ربع سنوي</option>
+          <option value="2">كل شهرين</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>تاريخ الدفع القادم</label>
+      <input id="a-next-date" type="date"/>
+    </div>
+    <div id="accrual-preview" style="background:rgba(155,140,255,0.08);border:1px solid rgba(155,140,255,0.25);border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--muted);display:none">
+      تحجز شهرياً: <b id="a-monthly-preview" style="color:var(--purple);font-family:var(--mono)">0</b> ر.س
+    </div>
+    <div class="field">
+      <label>ملاحظة (اختياري)</label>
+      <input id="a-note" type="text" placeholder="تفاصيل إضافية"/>
+    </div>
+    <button class="btn-save" onclick="saveAccrual()">💾 حفظ</button>
+  </div>
+</div>
+
+<!-- Modal مصدر دخل إضافي -->
+<div class="modal-overlay" id="modal-income">
+  <div class="modal">
+    <div class="modal-title">
+      ➕ مصدر دخل إضافي
+      <button class="modal-close" onclick="closeModal('income')">×</button>
+    </div>
+    <div class="field">
+      <label>المصدر</label>
+      <input id="i-name" type="text" placeholder="مثال: بدل سكن، عمولة..."/>
+    </div>
+    <div class="field">
+      <label>المبلغ الشهري (ر.س)</label>
+      <input id="i-amount" type="number" step="1" placeholder="0"
+        style="font-family:var(--mono);font-size:16px;color:var(--green)"/>
+    </div>
+    <button class="btn-save" onclick="saveIncome()">💾 حفظ</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ══ FIREBASE + LOGIC ══ -->
+<script>
+// ── Firebase ──────────────────────────────────────────────────────────────────
+firebase.initializeApp({
+  apiKey:            "AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME",
+  authDomain:        "investments-page.firebaseapp.com",
+  projectId:         "investments-page",
+  storageBucket:     "investments-page.firebasestorage.app",
+  messagingSenderId: "964948881361",
+  appId:             "1:964948881361:web:2801b8127489d953717af0"
+});
+var _auth = firebase.auth();
+var _db   = firebase.firestore();
+var _uid  = null;
+
+// ── State ─────────────────────────────────────────────────────────────────────
+var _currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+var _data = {
+  salary:   0,
+  incomes:  [],   // مصادر دخل إضافية
+  fixed:    [],   // مصاريف ثابتة
+  variable: {},   // { 'YYYY-MM': [{...}] }
+  accrual:  [],   // مصاريف دورية
+};
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+_auth.onAuthStateChanged(function(user) {
+  if (user) {
+    _uid = user.uid;
+    var emailEl = document.getElementById('user-email-display');
+    if (emailEl) emailEl.textContent = user.email || '';
+    loadData();
+  } else {
+    window.location.href = 'index.html';
+  }
+});
+
+// ── Firebase CRUD ─────────────────────────────────────────────────────────────
+function docRef() {
+  return _db.collection('users').doc(_uid).collection('portfolio').doc('expenses');
+}
+
+function loadData() {
+  docRef().get().then(function(snap) {
+    if (snap.exists) {
+      var d = snap.data();
+      _data.salary   = d.salary   || 0;
+      _data.incomes  = d.incomes  || [];
+      _data.fixed    = d.fixed    || [];
+      _data.variable = d.variable || {};
+      _data.accrual  = d.accrual  || [];
+    }
+    renderAll();
+  }).catch(function(e) { showToast('❌ خطأ في التحميل'); });
+}
+
+function saveData(quiet) {
+  if (!_uid) return;
+  docRef().set(_data).then(function() {
+    if (!quiet) showToast('✅ تم الحفظ');
+    renderAll();
+  }).catch(function() { showToast('❌ خطأ في الحفظ'); });
+}
+
+// ── Month Navigation ──────────────────────────────────────────────────────────
+var MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+
+function changeMonth(dir) {
+  var parts = _currentMonth.split('-');
+  var d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1 + dir, 1);
+  _currentMonth = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  renderAll();
+}
+
+function monthLabel(ym) {
+  var p = ym.split('-');
+  return MONTHS_AR[parseInt(p[1]) - 1] + ' ' + p[0];
+}
+
+// ── Totals ────────────────────────────────────────────────────────────────────
+function totalIncome()   { return _data.salary + _data.incomes.reduce(function(s,x){ return s+(x.amount||0); }, 0); }
+function totalFixed()    { return _data.fixed.reduce(function(s,x){ return s+(x.amount||0); }, 0); }
+function totalVariable() { return (_data.variable[_currentMonth]||[]).reduce(function(s,x){ return s+(x.amount||0); }, 0); }
+function totalAccrual()  { return _data.accrual.reduce(function(s,x){ return s+(Math.ceil((x.total||0)/(x.cycle||12))); }, 0); }
+function totalExpenses() { return totalFixed() + totalVariable() + totalAccrual(); }
+
+// ── Render All ────────────────────────────────────────────────────────────────
+function renderAll() {
+  var lbl = document.getElementById('month-label');
+  if (lbl) lbl.textContent = monthLabel(_currentMonth);
+  var ms  = document.getElementById('current-month-short');
+  if (ms)  ms.textContent  = MONTHS_AR[parseInt(_currentMonth.split('-')[1])-1];
+
+  // salary input
+  var si = document.getElementById('salary-input');
+  if (si && document.activeElement !== si) si.value = _data.salary || '';
+
+  renderExtraIncomes();
+  renderWaterfall();
+  renderFixed();
+  renderVariable();
+  renderAccrual();
+  renderKPIs();
+}
+
+// ── Extra Incomes ─────────────────────────────────────────────────────────────
+function renderExtraIncomes() {
+  var el = document.getElementById('extra-incomes-chips');
+  if (!el) return;
+  el.innerHTML = _data.incomes.map(function(inc, i) {
+    return '<div style="display:flex;align-items:center;gap:5px;background:rgba(92,185,138,0.1);border:1px solid rgba(92,185,138,0.25);border-radius:20px;padding:4px 10px">' +
+      '<span style="font-size:11px;font-weight:700;color:var(--green)">' + (inc.name||'—') + ': +' + fmtNum(inc.amount) + '</span>' +
+      '<button onclick="deleteIncome('+i+')" style="background:none;border:none;color:rgba(92,185,138,0.5);cursor:pointer;font-size:12px;padding:0;line-height:1">×</button>' +
+    '</div>';
+  }).join('');
+}
+
+// ── Waterfall Bar ─────────────────────────────────────────────────────────────
+var WF_COLORS = {
+  fixed:    '#c9a96e',
+  variable: '#4ecdc4',
+  accrual:  '#9b8cff',
+  free:     '#5cb98a',
+};
+
+function renderWaterfall() {
+  var total    = totalIncome();
+  var fixed    = totalFixed();
+  var variable = totalVariable();
+  var accrual  = totalAccrual();
+  var free     = Math.max(0, total - fixed - variable - accrual);
+  var segsEl   = document.getElementById('waterfall-segs');
+  var legendEl = document.getElementById('waterfall-legend');
+  var remEl    = document.getElementById('remaining-val');
+  var remPct   = document.getElementById('remaining-pct');
+
+  if (!total) {
+    if (segsEl)   segsEl.innerHTML   = '<div style="width:100%;background:rgba(255,255,255,0.04);border-radius:10px"></div>';
+    if (legendEl) legendEl.innerHTML = '';
+    if (remEl)    remEl.textContent  = '0 ر.س';
+    return;
+  }
+
+  var segs = [
+    { key: 'fixed',    label: 'ثابت',     val: fixed,    color: WF_COLORS.fixed },
+    { key: 'variable', label: 'متغير',    val: variable, color: WF_COLORS.variable },
+    { key: 'accrual',  label: 'Accrual',  val: accrual,  color: WF_COLORS.accrual },
+    { key: 'free',     label: 'متبقي',    val: free,     color: WF_COLORS.free },
+  ].filter(function(s){ return s.val > 0; });
+
+  if (segsEl) {
+    segsEl.innerHTML = segs.map(function(s) {
+      var pct = (s.val / total * 100).toFixed(1);
+      return '<div class="wf-seg" style="width:' + pct + '%;background:' + s.color + ';border-radius:0" title="' + s.label + ': ' + fmtNum(s.val) + ' ر.س"></div>';
+    }).join('');
+  }
+
+  if (legendEl) {
+    legendEl.innerHTML = segs.map(function(s) {
+      return '<div class="wf-legend-item">' +
+        '<div class="wf-legend-dot" style="background:' + s.color + '"></div>' +
+        s.label + ': ' + fmtNum(s.val) + ' ر.س' +
+      '</div>';
+    }).join('');
+  }
+
+  var remaining = total - fixed - variable - accrual;
+  if (remEl) {
+    remEl.textContent = fmtNum(remaining) + ' ر.س';
+    remEl.className = 'remaining-val ' + (remaining < 0 ? 'negative' : remaining < total * 0.1 ? 'warning' : 'positive');
+  }
+  if (remPct && total > 0) {
+    remPct.textContent = (remaining / total * 100).toFixed(1) + '% من الدخل الإجمالي';
+  }
+}
+
+// ── KPIs ──────────────────────────────────────────────────────────────────────
+function renderKPIs() {
+  var set = function(id, val) { var e=document.getElementById(id); if(e) e.textContent=fmtNum(val); };
+  set('kpi-total',    totalExpenses());
+  set('kpi-fixed',    totalFixed());
+  set('kpi-variable', totalVariable());
+  set('kpi-accrual',  totalAccrual());
+  set('fixed-total-badge',    fmtNum(totalFixed()) + ' ر.س');
+  set('variable-total-badge', fmtNum(totalVariable()) + ' ر.س');
+  set('accrual-total-badge',  fmtNum(totalAccrual()) + ' ر.س/شهر');
+}
+
+// ── Fixed List ────────────────────────────────────────────────────────────────
+function renderFixed() {
+  var el = document.getElementById('fixed-list');
+  if (!el) return;
+  if (!_data.fixed.length) {
+    el.innerHTML = '<div class="empty"><span class="empty-icon">🔒</span>لا توجد مصاريف ثابتة — أضف أول مصروف</div>';
+    return;
+  }
+  el.innerHTML = _data.fixed.map(function(e, i) {
+    return expenseRow(e, i, 'deleteFixed', WF_COLORS.fixed);
+  }).join('');
+}
+
+// ── Variable List ─────────────────────────────────────────────────────────────
+function renderVariable() {
+  var el = document.getElementById('variable-list');
+  if (!el) return;
+  var items = _data.variable[_currentMonth] || [];
+  if (!items.length) {
+    el.innerHTML = '<div class="empty"><span class="empty-icon">🔄</span>لا توجد مصاريف متغيرة هذا الشهر</div>';
+    return;
+  }
+  // ترتيب من الأحدث
+  var sorted = items.slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
+  el.innerHTML = sorted.map(function(e, i) {
+    var realIdx = items.indexOf(e);
+    return expenseRow(e, realIdx, 'deleteVariable', WF_COLORS.variable, e.date);
+  }).join('');
+}
+
+// ── Accrual List ──────────────────────────────────────────────────────────────
+function renderAccrual() {
+  var el = document.getElementById('accrual-list');
+  if (!el) return;
+  if (!_data.accrual.length) {
+    el.innerHTML = '<div class="empty"><span class="empty-icon">📅</span>لا توجد مصاريف دورية — أضف مثل النادي أو التأمين السنوي</div>';
+    return;
+  }
+
+  var now = new Date();
+  el.innerHTML = _data.accrual.map(function(a, i) {
+    var monthly = Math.ceil((a.total || 0) / (a.cycle || 12));
+    var nextDate = a.nextDate ? new Date(a.nextDate) : null;
+    var daysLeft = nextDate ? Math.ceil((nextDate - now) / 86400000) : null;
+
+    // احسب المتراكم من تاريخ الإنشاء حتى الآن
+    var monthsAccrued = 0;
+    if (a.createdAt) {
+      var created = new Date(a.createdAt);
+      monthsAccrued = Math.max(0, Math.floor((now - created) / (30.44 * 86400000)));
+    }
+    var accrued  = Math.min(a.total || 0, monthsAccrued * monthly);
+    var pct      = a.total > 0 ? Math.min(100, Math.round(accrued / a.total * 100)) : 0;
+
+    return '<div class="accrual-item">' +
+      '<div class="accrual-top">' +
+        '<div class="exp-icon" style="background:rgba(155,140,255,0.12)">' + (a.icon || '📅') + '</div>' +
+        '<div class="accrual-info">' +
+          '<div class="accrual-name">' + (a.name || '—') + '</div>' +
+          '<div class="accrual-meta">' +
+            'إجمالي: ' + fmtNum(a.total) + ' ر.س · كل ' + (a.cycle||12) + ' شهر' +
+            (daysLeft !== null ? ' · ' + (daysLeft > 0 ? 'باقي ' + daysLeft + ' يوم' : 'استحقاق اليوم!') : '') +
+          '</div>' +
+        '</div>' +
+        '<div>' +
+          '<div class="accrual-monthly">' + fmtNum(monthly) + ' ر.س</div>' +
+          '<div class="accrual-monthly-label">/ شهر</div>' +
+        '</div>' +
+        '<div class="exp-actions">' +
+          '<button class="exp-btn" onclick="deleteAccrual(' + i + ')" title="حذف">🗑</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="accrual-progress-wrap">' +
+        '<div class="accrual-progress" style="width:' + pct + '%"></div>' +
+      '</div>' +
+      '<div class="accrual-bottom">' +
+        '<span>وعاء ' + (a.name||'') + ': <b>' + fmtNum(accrued) + '</b> ر.س</span>' +
+        '<span>' + pct + '% مكتمل</span>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ── Expense Row Helper ────────────────────────────────────────────────────────
+function expenseRow(e, i, delFn, color, dateStr) {
+  var catColors = {
+    'سكن':'#c9a96e','مواصلات':'#60a5fa','تأمين':'#9b8cff','اتصالات':'#4ecdc4',
+    'اشتراكات':'#f0a500','قروض':'#e07070','طعام':'#f97316','تسوق':'#ec4899',
+    'ترفيه':'#a78bfa','صحة':'#34d399','تعليم':'#60a5fa','وقود':'#fbbf24',
+    'هدايا':'#f43f5e','أخرى':'#6b7280'
+  };
+  var bgColor = catColors[e.cat || ''] || '#6b7280';
+
+  return '<div class="expense-item">' +
+    '<div class="exp-icon" style="background:' + bgColor + '22">' + (e.icon || '📌') + '</div>' +
+    '<div style="flex:1">' +
+      '<div class="exp-name">' + (e.name || '—') + '</div>' +
+      '<div class="exp-sub">' + (e.cat || '') + (dateStr ? ' · ' + dateStr : '') + (e.note ? ' · ' + e.note : '') + '</div>' +
+    '</div>' +
+    '<div style="text-align:left">' +
+      '<div class="exp-amount">' + fmtNum(e.amount) + '</div>' +
+      '<div class="exp-unit">ر.س</div>' +
+    '</div>' +
+    '<div class="exp-actions">' +
+      '<button class="exp-btn" onclick="' + delFn + '(' + i + ')" title="حذف">🗑</button>' +
+    '</div>' +
+  '</div>';
+}
+
+// ── CRUD ──────────────────────────────────────────────────────────────────────
+function onSalaryChange() {
+  _data.salary = parseFloat(document.getElementById('salary-input').value) || 0;
+  renderWaterfall();
+  renderKPIs();
+  clearTimeout(window._salaryTimer);
+  window._salaryTimer = setTimeout(function(){ saveData(true); }, 1200);
+}
+
+function saveFixed() {
+  var name = document.getElementById('f-name').value.trim();
+  var amt  = parseFloat(document.getElementById('f-amount').value) || 0;
+  if (!name || !amt) { showToast('⚠️ أدخل الاسم والمبلغ'); return; }
+  _data.fixed.push({
+    icon: document.getElementById('f-icon').value || '📌',
+    name: name, amount: amt,
+    cat:  document.getElementById('f-cat').value,
+    note: document.getElementById('f-note').value,
+  });
+  closeModal('fixed'); clearModalFixed();
+  saveData();
+}
+
+function saveVariable() {
+  var name = document.getElementById('v-name').value.trim();
+  var amt  = parseFloat(document.getElementById('v-amount').value) || 0;
+  if (!name || !amt) { showToast('⚠️ أدخل الاسم والمبلغ'); return; }
+  if (!_data.variable[_currentMonth]) _data.variable[_currentMonth] = [];
+  _data.variable[_currentMonth].push({
+    icon: document.getElementById('v-icon').value || '📌',
+    name: name, amount: amt,
+    cat:  document.getElementById('v-cat').value,
+    date: document.getElementById('v-date').value,
+  });
+  closeModal('variable'); clearModalVariable();
+  saveData();
+}
+
+function saveAccrual() {
+  var name  = document.getElementById('a-name').value.trim();
+  var total = parseFloat(document.getElementById('a-total').value) || 0;
+  if (!name || !total) { showToast('⚠️ أدخل الاسم والمبلغ'); return; }
+  _data.accrual.push({
+    icon:      document.getElementById('a-icon').value || '📅',
+    name:      name,
+    total:     total,
+    cycle:     parseInt(document.getElementById('a-cycle').value) || 12,
+    nextDate:  document.getElementById('a-next-date').value,
+    note:      document.getElementById('a-note').value,
+    createdAt: new Date().toISOString(),
+  });
+  closeModal('accrual'); clearModalAccrual();
+  saveData();
+}
+
+function saveIncome() {
+  var name = document.getElementById('i-name').value.trim();
+  var amt  = parseFloat(document.getElementById('i-amount').value) || 0;
+  if (!name || !amt) { showToast('⚠️ أدخل الاسم والمبلغ'); return; }
+  _data.incomes.push({ name: name, amount: amt });
+  closeModal('income');
+  document.getElementById('i-name').value = '';
+  document.getElementById('i-amount').value = '';
+  saveData();
+}
+
+function deleteFixed(i)    { _data.fixed.splice(i, 1);                        saveData(); }
+function deleteVariable(i) { (_data.variable[_currentMonth]||[]).splice(i,1); saveData(); }
+function deleteAccrual(i)  { _data.accrual.splice(i, 1);                      saveData(); }
+function deleteIncome(i)   { _data.incomes.splice(i, 1);                      saveData(); }
+
+// ── Accrual Preview ───────────────────────────────────────────────────────────
+function calcAccrualPreview() {
+  var total = parseFloat(document.getElementById('a-total').value) || 0;
+  var cycle = parseInt(document.getElementById('a-cycle').value) || 12;
+  var monthly = Math.ceil(total / cycle);
+  var prev = document.getElementById('accrual-preview');
+  var pm   = document.getElementById('a-monthly-preview');
+  if (prev) prev.style.display = total > 0 ? '' : 'none';
+  if (pm)   pm.textContent = fmtNum(monthly);
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function openModal(type) {
+  // Set today's date for variable
+  if (type === 'variable') {
+    var d = document.getElementById('v-date');
+    if (d && !d.value) d.value = new Date().toISOString().split('T')[0];
+  }
+  var el = document.getElementById('modal-' + type);
+  if (el) el.classList.add('open');
+}
+function closeModal(type) {
+  var el = document.getElementById('modal-' + type);
+  if (el) el.classList.remove('open');
+}
+
+// Close on overlay click
+document.querySelectorAll('.modal-overlay').forEach(function(o) {
+  o.addEventListener('click', function(e) {
+    if (e.target === o) o.classList.remove('open');
+  });
+});
+
+function clearModalFixed()    { ['f-icon','f-name','f-amount','f-note'].forEach(function(id){ var e=document.getElementById(id); if(e)e.value=''; }); }
+function clearModalVariable() { ['v-icon','v-name','v-amount','v-date'].forEach(function(id){ var e=document.getElementById(id); if(e)e.value=''; }); }
+function clearModalAccrual()  { ['a-icon','a-name','a-total','a-next-date','a-note'].forEach(function(id){ var e=document.getElementById(id); if(e)e.value=''; }); var p=document.getElementById('accrual-preview'); if(p) p.style.display='none'; }
+
+// ── Utils ─────────────────────────────────────────────────────────────────────
+function fmtNum(n) {
+  return Math.round(n||0).toLocaleString('en-US');
+}
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2800);
+}
+
+// Set today for variable date default
+document.addEventListener('DOMContentLoaded', function() {
+  var d = document.getElementById('v-date');
+  if (d) d.value = new Date().toISOString().split('T')[0];
+  var ml = document.getElementById('month-label');
+  if (ml) ml.textContent = monthLabel(_currentMonth);
+  var ms = document.getElementById('current-month-short');
+  if (ms) ms.textContent = MONTHS_AR[parseInt(_currentMonth.split('-')[1])-1];
+});
+</script>
+</body>
+</html>
