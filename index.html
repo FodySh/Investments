@@ -1294,6 +1294,10 @@
       <div class="nav-item" id="nav-admin" onclick="showPage('admin',this,'🛡️ الإدارة')" style="display:none;color:#9b8cff;margin-top:4px">
         <span>🛡️</span><span>الإدارة</span>
       </div>
+      <a class="nav-item" href="expenses.html" target="_blank" style="color:#5cb98a;text-decoration:none;display:flex;align-items:center;gap:10px;padding:9px 20px">
+        <span style="font-size:15px;width:18px;text-align:center">💳</span>
+        <span>المصاريف</span>
+      </a>
       <div class="nav-item" onclick="openAppGuide()" style="color:#8e92a3;margin-top:8px;border-top:1px solid rgba(201,185,140,0.08);padding-top:12px">
         <span class="nav-icon">📖</span> دليل التطبيق
       </div>
@@ -3755,11 +3759,15 @@
       <span class="mnav-label">شيكات</span>
     </div>
 
-    <div class="mnav-item" id="mnav-debts" data-nav-page="debts" onclick="window.location.href='debts.html'">
+<div class="mnav-item" id="mnav-debts" data-nav-page="debts" onclick="window.location.href='debts.html'">
       <div class="mnav-icon-wrap"><span class="mnav-icon">💸</span></div>
       <span class="mnav-label">الديون</span>
     </div>
 
+    <a class="mnav-item" href="expenses.html" target="_blank" style="text-decoration:none;color:inherit">
+      <div class="mnav-icon-wrap"><span class="mnav-icon">💳</span></div>
+      <span class="mnav-label">المصاريف</span>
+    </a>
     <div class="mnav-item" id="mnav-reports" data-nav-page="dashboard" onclick="window.location.href='dashboard.html'">
       <div class="mnav-icon-wrap"><span class="mnav-icon">📊</span></div>
       <span class="mnav-label">التقارير</span>
@@ -10852,30 +10860,6 @@ window.IS_FIREBASE_CONFIGURED = true;
         </div>
       </div>
 
-      <!-- الديون -->
-      <div style="border:1px solid rgba(201,185,140,0.12);border-radius:14px;overflow:hidden">
-        <div style="background:rgba(224,112,112,0.08);padding:14px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(201,185,140,0.1)">
-          <span style="font-size:20px">💸</span>
-          <div>
-            <div style="font-size:14px;font-weight:700;color:#e07070">الديون والجمعيات</div>
-            <div style="font-size:11px;color:#8e92a3">تتبع الديون الشخصية وجمعيات الادخار</div>
-          </div>
-        </div>
-        <div style="padding:14px 18px;display:flex;flex-direction:column;gap:6px">
-          <div style="display:flex;gap:8px;align-items:flex-start">
-            <span style="font-size:14px;flex-shrink:0">⚖️</span>
-            <div><span style="font-size:11px;font-weight:700;color:#f0f0ee">اتجاه الدين</span><span style="font-size:11px;color:#8e92a3"> — "عليّ" يعني أنت المدين، "له عندي" يعني أنت الدائن. الصافي يظهر في لوحة التحكم.</span></div>
-          </div>
-          <div style="display:flex;gap:8px;align-items:flex-start">
-            <span style="font-size:14px;flex-shrink:0">📲</span>
-            <div><span style="font-size:11px;font-weight:700;color:#f0f0ee">واتساب تلقائي</span><span style="font-size:11px;color:#8e92a3"> — زر "واتساب" يفتح رسالة تذكير جاهزة للشخص المعني برقمه المحفوظ.</span></div>
-          </div>
-          <div style="display:flex;gap:8px;align-items:flex-start">
-            <span style="font-size:14px;flex-shrink:0">🤝</span>
-            <div><span style="font-size:11px;font-weight:700;color:#f0f0ee">الجمعيات</span><span style="font-size:11px;color:#8e92a3"> — أدخل القسط الشهري وعدد الأعضاء ورقم دورك يحسب تلقائياً موعد استلامك وإجمالي ما دفعت حتى الآن.</span></div>
-          </div>
-        </div>
-      </div>
 
       <!-- نصائح -->
       <div style="background:rgba(201,169,110,0.07);border:1px solid rgba(201,169,110,0.2);border-radius:12px;padding:14px 18px">
