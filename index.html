@@ -675,6 +675,34 @@
   .nav-debts { color: #e07070 !important; }
   .nav-debts:hover { background: rgba(224,112,112,0.08) !important; }
   .nav-debts.active { border-right-color: #e07070 !important; background: rgba(224,112,112,0.1) !important; }
+  /* Hover submenu */
+  .nav-debts-wrap { position: relative; }
+  .nav-debts-sub {
+    display: none;
+    position: absolute;
+    right: 100%;
+    top: 0;
+    background: var(--sidebar-bg, #1a1810);
+    border: 1px solid rgba(224,112,112,0.25);
+    border-radius: 10px;
+    padding: 6px;
+    min-width: 150px;
+    z-index: 200;
+    box-shadow: -4px 4px 20px rgba(0,0,0,0.4);
+    flex-direction: column;
+    gap: 2px;
+  }
+  .nav-debts-wrap:hover .nav-debts-sub { display: flex; }
+  .nav-sub-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px; border-radius: 7px;
+    font-size: 13px; font-weight: 600;
+    color: var(--muted, #d1d5e2);
+    cursor: pointer; text-decoration: none;
+    transition: background .12s;
+    white-space: nowrap;
+  }
+  .nav-sub-item:hover { background: rgba(224,112,112,0.1); color: #e07070; }
 
   /* ── LOAN CARD ───────────────────────────────────────── */
   .loan-card {
@@ -1288,8 +1316,20 @@
       <div class="nav-item" data-nav-page="cheques" onclick="window.open('cheques.html','_blank')" style="color:#4ecdc4;">
         <span class="nav-icon">🧾</span> شيكات وسندات الأمر
       </div>
-      <div class="nav-item nav-debts" onclick="window.location.href='debts.html'">
-        <span class="nav-icon">💸</span> ديون وجمعيات
+      <div class="nav-debts-wrap">
+        <div class="nav-item nav-debts" onclick="window.location.href='debts.html'" style="cursor:pointer">
+          <span class="nav-icon">💸</span>
+          <span>ديون وجمعيات</span>
+          <span style="font-size:10px;opacity:.5;margin-right:auto">‹</span>
+        </div>
+        <div class="nav-debts-sub">
+          <a class="nav-sub-item" href="debts.html#debts">
+            <span>💸</span><span>الديون</span>
+          </a>
+          <a class="nav-sub-item" href="debts.html#jamaa">
+            <span>👥</span><span>الجمعيات</span>
+          </a>
+        </div>
       </div>
       <div class="nav-item" id="nav-admin" onclick="showPage('admin',this,'🛡️ الإدارة')" style="display:none;color:#9b8cff;margin-top:4px">
         <span>🛡️</span><span>الإدارة</span>
@@ -10860,6 +10900,30 @@ window.IS_FIREBASE_CONFIGURED = true;
         </div>
       </div>
 
+      <!-- الديون -->
+      <div style="border:1px solid rgba(201,185,140,0.12);border-radius:14px;overflow:hidden">
+        <div style="background:rgba(224,112,112,0.08);padding:14px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(201,185,140,0.1)">
+          <span style="font-size:20px">💸</span>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:#e07070">الديون والجمعيات</div>
+            <div style="font-size:11px;color:#8e92a3">تتبع الديون الشخصية وجمعيات الادخار</div>
+          </div>
+        </div>
+        <div style="padding:14px 18px;display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;gap:8px;align-items:flex-start">
+            <span style="font-size:14px;flex-shrink:0">⚖️</span>
+            <div><span style="font-size:11px;font-weight:700;color:#f0f0ee">اتجاه الدين</span><span style="font-size:11px;color:#8e92a3"> — "عليّ" يعني أنت المدين، "له عندي" يعني أنت الدائن. الصافي يظهر في لوحة التحكم.</span></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start">
+            <span style="font-size:14px;flex-shrink:0">📲</span>
+            <div><span style="font-size:11px;font-weight:700;color:#f0f0ee">واتساب تلقائي</span><span style="font-size:11px;color:#8e92a3"> — زر "واتساب" يفتح رسالة تذكير جاهزة للشخص المعني برقمه المحفوظ.</span></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start">
+            <span style="font-size:14px;flex-shrink:0">🤝</span>
+            <div><span style="font-size:11px;font-weight:700;color:#f0f0ee">الجمعيات</span><span style="font-size:11px;color:#8e92a3"> — أدخل القسط الشهري وعدد الأعضاء ورقم دورك يحسب تلقائياً موعد استلامك وإجمالي ما دفعت حتى الآن.</span></div>
+          </div>
+        </div>
+      </div>
 
       <!-- نصائح -->
       <div style="background:rgba(201,169,110,0.07);border:1px solid rgba(201,169,110,0.2);border-radius:12px;padding:14px 18px">
