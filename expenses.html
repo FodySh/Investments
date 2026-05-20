@@ -210,7 +210,17 @@ body{background:var(--bg);color:var(--white);font-family:'Cairo',sans-serif;font
     <div id="pane-fixed" class="sec">
       <div class="sec-head">
         <div class="sec-title">🔒 ثابتة <span class="sec-badge" id="fixed-badge">0 ر.س</span></div>
-        <button class="add-btn" onclick="openModal('fixed')" style="background:rgba(201,169,110,0.1);border-color:rgba(201,169,110,0.3);color:var(--gold)">+ إضافة</button>
+        <div style="display:flex;gap:6px">
+          <label style="display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(201,169,110,0.3);color:var(--gold);background:rgba(201,169,110,0.07)" title="رفع CSV">
+            📤 CSV<input type="file" accept=".csv" style="display:none" onchange="uploadFixed(this)"/>
+          </label>
+          <button class="add-btn" onclick="openModal('fixed')" style="background:rgba(201,169,110,0.1);border-color:rgba(201,169,110,0.3);color:var(--gold)">+ إضافة</button>
+        </div>
+      </div>
+      <!-- Fixed CSV template hint -->
+      <div style="padding:6px 16px;font-size:10px;color:var(--muted);border-bottom:1px solid var(--border);direction:ltr;text-align:left">
+        CSV format: <span style="font-family:'JetBrains Mono',monospace;color:rgba(201,169,110,0.6)">icon,name,amount,cat,bank,note</span>
+        &nbsp;·&nbsp; <a onclick="downloadFixedTemplate()" style="color:var(--gold);cursor:pointer;text-decoration:underline">تحميل قالب</a>
       </div>
       <div id="fixed-list"></div>
     </div>
@@ -219,7 +229,16 @@ body{background:var(--bg);color:var(--white);font-family:'Cairo',sans-serif;font
     <div id="pane-variable" class="sec">
       <div class="sec-head">
         <div class="sec-title">🔄 متغيرة — <span id="var-month-label" style="color:var(--cyan)"></span> <span class="sec-badge" id="var-badge">0 ر.س</span></div>
-        <button class="add-btn" onclick="openModal('variable')" style="background:rgba(78,205,196,0.1);border-color:rgba(78,205,196,0.3);color:var(--cyan)">+ تسجيل</button>
+        <div style="display:flex;gap:6px">
+          <label style="display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(78,205,196,0.3);color:var(--cyan);background:rgba(78,205,196,0.07)" title="رفع CSV">
+            📤 CSV<input type="file" accept=".csv" style="display:none" onchange="uploadVariable(this)"/>
+          </label>
+          <button class="add-btn" onclick="openModal('variable')" style="background:rgba(78,205,196,0.1);border-color:rgba(78,205,196,0.3);color:var(--cyan)">+ تسجيل</button>
+        </div>
+      </div>
+      <div style="padding:6px 16px;font-size:10px;color:var(--muted);border-bottom:1px solid var(--border);direction:ltr;text-align:left">
+        CSV format: <span style="font-family:'JetBrains Mono',monospace;color:rgba(78,205,196,0.6)">icon,name,amount,cat,date,bank</span>
+        &nbsp;·&nbsp; <a onclick="downloadVariableTemplate()" style="color:var(--cyan);cursor:pointer;text-decoration:underline">تحميل قالب</a>
       </div>
       <div id="variable-list"></div>
     </div>
@@ -407,6 +426,102 @@ function totalVariable(){return(_D.variable[_cur]||[]).reduce(function(s,x){retu
 function totalAccrual(){return _D.accrual.reduce(function(s,x){return s+monthlyAcc(x);},0);}
 function monthlyAcc(a){return Math.ceil((a.total||0)/(a.months||12));}
 function resolveFixed(x){return x.mode==='pct'?Math.round(_D.salary*(x.pct||0)/100):(x.amount||0);}
+
+
+// ── CSV Upload Functions ─────────────────────────────────────────────────────
+function parseCSV(text) {
+  var lines = text.trim().split('\n').filter(function(l){ return l.trim(); });
+  if (!lines.length) return [];
+  // skip header if first cell is not a number/emoji
+  var start = 0;
+  if (lines[0].toLowerCase().includes('icon') || lines[0].toLowerCase().includes('name') || lines[0].toLowerCase().includes('اسم')) start = 1;
+  return lines.slice(start).map(function(line) {
+    var cols = line.split(',').map(function(c){ return c.trim().replace(/^"|"$/g,''); });
+    return cols;
+  });
+}
+
+function uploadFixed(input) {
+  var file = input.files[0]; if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var rows = parseCSV(e.target.result);
+    var added = 0;
+    rows.forEach(function(cols) {
+      if (cols.length < 2) return;
+      var name = cols[1] || cols[0]; if (!name) return;
+      var amount = parseFloat(cols[2]) || 0;
+      if (!amount) return;
+      _D.fixed.push({
+        icon:   cols[0] || '📌',
+        name:   name,
+        amount: amount,
+        cat:    cols[3] || 'أخرى',
+        bank:   cols[4] || '',
+        note:   cols[5] || '',
+        mode:   'amount'
+      });
+      added++;
+    });
+    if (added > 0) { saveData(true); toast('✅ تم رفع ' + added + ' مصروف ثابت'); }
+    else toast('⚠️ لم يُضف أي بند — تحقق من تنسيق الملف');
+    input.value = '';
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function uploadVariable(input) {
+  var file = input.files[0]; if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var rows = parseCSV(e.target.result);
+    var added = 0;
+    if (!_D.variable[_cur]) _D.variable[_cur] = [];
+    rows.forEach(function(cols) {
+      if (cols.length < 2) return;
+      var name = cols[1] || cols[0]; if (!name) return;
+      var amount = parseFloat(cols[2]) || 0;
+      if (!amount) return;
+      _D.variable[_cur].push({
+        icon:   cols[0] || '📌',
+        name:   name,
+        amount: amount,
+        cat:    cols[3] || 'أخرى',
+        date:   cols[4] || today(),
+        bank:   cols[5] || '',
+      });
+      added++;
+    });
+    if (added > 0) { saveData(true); toast('✅ تم رفع ' + added + ' مصروف متغير لـ ' + monthStr(_cur)); }
+    else toast('⚠️ لم يُضف أي بند — تحقق من تنسيق الملف');
+    input.value = '';
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function downloadFixedTemplate() {
+  var lines = [
+    'icon,name,amount,cat,bank,note',
+    '🏠,إيجار,5000,سكن,الراتب,',
+    '🚗,قسط السيارة,1800,مواصلات,الأهلي,',
+    '📱,اتصالات,200,اتصالات,,',
+  ];
+  var blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8'});
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'قالب-المصاريف-الثابتة.csv'; a.click();
+}
+
+function downloadVariableTemplate() {
+  var lines = [
+    'icon,name,amount,cat,date,bank',
+    '🍽️,مطعم الغداء,85,طعام,' + today() + ',',
+    '🛒,تسوق أسبوعي,320,تسوق,' + today() + ',الراتب',
+    '⛽,وقود,150,وقود,' + today() + ',',
+  ];
+  var blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8'});
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'قالب-المصاريف-المتغيرة.csv'; a.click();
+}
 
 function renderDonut(){
   var tot=totalIncome(), fx=totalFixed(), vr=totalVariable(), ac=totalAccrual(), fr=Math.max(0,tot-fx-vr-ac);
