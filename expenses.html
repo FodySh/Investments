@@ -423,7 +423,18 @@ function monthStr(ym){var p=ym.split('-');return MONTHS[+p[1]-1]+' '+p[0];}
 function totalIncome(){return _D.salary+_D.incomes.reduce(function(s,x){return s+(x.amount||0);},0);}
 function totalFixed(){return _D.fixed.reduce(function(s,x){return s+resolveFixed(x);},0);}
 function totalVariable(){return(_D.variable[_cur]||[]).reduce(function(s,x){return s+(x.amount||0);},0);}
-function totalAccrual(){return _D.accrual.reduce(function(s,x){return s+monthlyAcc(x);},0);}
+function totalAccrual(){
+  var cp=_cur.split('-');
+  var viewMonthStart=new Date(+cp[0],+cp[1]-1,1);
+  return _D.accrual.reduce(function(s,a){
+    if(!a.startDate) return s;
+    var start=new Date(a.startDate);
+    var startMS=new Date(start.getFullYear(),start.getMonth(),1);
+    var endMS=new Date(start.getFullYear(),start.getMonth()+(a.months||12),1);
+    if(viewMonthStart>=startMS && viewMonthStart<endMS) return s+monthlyAcc(a);
+    return s;
+  },0);
+}
 function monthlyAcc(a){return Math.ceil((a.total||0)/(a.months||12));}
 function resolveFixed(x){return x.mode==='pct'?Math.round(_D.salary*(x.pct||0)/100):(x.amount||0);}
 
@@ -600,25 +611,42 @@ function renderVariable(){
 }
 function renderAccrual(){
   var el=document.getElementById('accrual-list');if(!el)return;
-  if(!_D.accrual.length){el.innerHTML='<div class="empty">لا توجد مصاريف دورية</div>';return;}
-  // استخدم نهاية الشهر المعروض كمرجع
-  var curParts=_cur.split('-');
-  var viewDate=new Date(+curParts[0],+curParts[1],0); // آخر يوم في الشهر المعروض
-  var today=new Date();
-  var refDate=viewDate<today?viewDate:today; // لا تحسب ما هو في المستقبل
-  el.innerHTML=_D.accrual.map(function(a,i){
+
+  // مرجع الشهر المعروض: أول يوم من الشهر التالي (= نهاية الشهر الحالي)
+  var cp=_cur.split('-');
+  var viewMonthStart = new Date(+cp[0], +cp[1]-1, 1); // أول الشهر المعروض
+  var viewMonthEnd   = new Date(+cp[0], +cp[1],   1); // أول الشهر التالي = نهاية هذا الشهر
+
+  // فلترة: أظهر فقط المصاريف التي يقع الشهر المعروض ضمن مدتها
+  var visible = _D.accrual.filter(function(a){
+    if(!a.startDate) return false;
+    var start = new Date(a.startDate);
+    var startMonthStart = new Date(start.getFullYear(), start.getMonth(), 1);
+    var endMonthStart   = new Date(start.getFullYear(), start.getMonth() + (a.months||12), 1);
+    // يظهر إذا: viewMonthStart >= startMonthStart && viewMonthStart < endMonthStart
+    return viewMonthStart >= startMonthStart && viewMonthStart < endMonthStart;
+  });
+
+  if(!visible.length){
+    el.innerHTML='<div class="empty">لا توجد مصاريف دورية لهذا الشهر</div>';
+    return;
+  }
+
+  el.innerHTML=visible.map(function(a,i){
+    var realIdx=_D.accrual.indexOf(a);
     var mo=monthlyAcc(a);
     var totalMonths=a.months||12;
-    var start=a.startDate?new Date(a.startDate):refDate;
-    var msElapsed=Math.max(0,refDate-start);
-    var elapsed=msElapsed/(30.44*86400000);
-    var elapsedRounded=Math.round(elapsed*10)/10; // دقة عشرية واحدة
-    var elapsedInt=Math.floor(elapsed);
-    var left=Math.max(0,totalMonths-elapsedInt);
-    var accrued=Math.min(a.total||0, elapsed*mo);
-    var pct=a.total>0?Math.min(100,Math.round(accrued/a.total*100)):0;
-    var expired=elapsedInt>=totalMonths;
-    return '<div class="acc-row"><div class="acc-top"><div class="exp-icon" style="background:rgba(155,140,255,0.1)">'+a.icon+'</div><div class="exp-main"><div class="exp-name">'+a.name+'</div><div class="exp-sub">'+fmt(a.total)+' ر.س · '+a.months+' شهر'+(a.bank?' · '+a.bank:'')+(expired?' · <span style="color:var(--green);font-weight:700">✅ مكتمل</span>':' · متبقي '+left+' شهر')+'</div></div><div style="text-align:left"><div class="exp-amount" style="color:var(--purple)">'+fmt(mo)+'</div><div class="exp-pct">/شهر</div></div><div class="row-btns"><button class="ibtn edit" onclick="editAccrual('+i+')">✏️</button><button class="ibtn del" onclick="delAccrual('+i+')">🗑</button></div></div><div class="acc-prog-wrap"><div class="acc-prog" style="width:'+pct+'%"></div></div><div class="acc-bottom"><span>وعاء: <b style="color:var(--purple)">'+fmt(accrued)+'</b> ر.س</span><span>'+pct+'%</span></div></div>';
+    var start=new Date(a.startDate);
+    // شهر البداية
+    var startMonthStart=new Date(start.getFullYear(),start.getMonth(),1);
+    // عدد الأشهر المنقضية حتى نهاية الشهر المعروض
+    var elapsedMonths = (viewMonthStart.getFullYear()-startMonthStart.getFullYear())*12
+                      + (viewMonthStart.getMonth()-startMonthStart.getMonth());
+    var left = Math.max(0, totalMonths - elapsedMonths - 1); // الأشهر المتبقية بعد هذا الشهر
+    var accrued = Math.min(a.total||0, (elapsedMonths+1)*mo); // +1 لأن هذا الشهر نفسه يُحجز
+    var pct = a.total>0 ? Math.min(100, Math.round(accrued/a.total*100)) : 0;
+    var expired = false; // لا يُعرض أصلاً إذا انتهى (فُلتر أعلاه)
+    return '<div class="acc-row"><div class="acc-top"><div class="exp-icon" style="background:rgba(155,140,255,0.1)">'+a.icon+'</div><div class="exp-main"><div class="exp-name">'+a.name+'</div><div class="exp-sub">'+fmt(a.total)+' ر.س · '+a.months+' شهر'+(a.bank?' · '+a.bank:'')+(expired?' · <span style="color:var(--green);font-weight:700">✅ مكتمل</span>':' · متبقي '+left+' شهر')+'</div></div><div style="text-align:left"><div class="exp-amount" style="color:var(--purple)">'+fmt(mo)+'</div><div class="exp-pct">/شهر</div></div><div class="row-btns"><button class="ibtn edit" onclick="editAccrual('+realIdx+')">✏️</button><button class="ibtn del" onclick="delAccrual('+realIdx+')">🗑</button></div></div><div class="acc-prog-wrap"><div class="acc-prog" style="width:'+pct+'%"></div></div><div class="acc-bottom"><span>وعاء: <b style="color:var(--purple)">'+fmt(accrued)+'</b> ر.س</span><span>'+pct+'%</span></div></div>';
   }).join('');
 }
 function renderBanks(){var el=document.getElementById('banks-list');if(!el)return;if(!_D.banks.length){el.innerHTML='<div class="empty">أضف حساباتك البنكية</div>';return;}el.innerHTML=_D.banks.map(function(b,i){return '<div class="exp-row"><div style="width:12px;height:12px;border-radius:50%;background:'+b.color+';flex-shrink:0"></div><div class="exp-main"><div class="exp-name">'+b.name+'</div></div><div class="row-btns"><button class="ibtn del" onclick="delBank('+i+')">🗑</button></div></div>';}).join('');}
