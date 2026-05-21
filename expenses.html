@@ -295,6 +295,15 @@ body{background:var(--bg);color:var(--white);font-family:'Cairo',sans-serif;font
         <div id="surplus-box" style="border-radius:10px;padding:12px 16px;margin-top:12px;display:flex;align-items:center;justify-content:space-between"></div>
       </div>
 
+      <!-- Fixed expenses by bank -->
+      <div class="sec">
+        <div class="sec-head">
+          <div class="sec-title">🏦 المصاريف الثابتة حسب الحساب</div>
+          <span class="sec-badge" id="fixed-bank-total-badge">0 ر.س</span>
+        </div>
+        <div id="fixed-by-bank-list" style="display:flex;flex-direction:column;gap:0"></div>
+      </div>
+
       <div class="sec">
         <div class="sec-head"><div class="sec-title" style="color:var(--orange)">📈 مقارنة بالشهر السابق</div></div>
         <div id="month-compare" style="padding:12px 16px;display:flex;flex-direction:column;gap:4px"></div>
@@ -853,9 +862,104 @@ function switchExpTab(t) {
     if(pane){ pane.className='exp-pane'; if(p===t) pane.classList.add('active'); }
     if(btn)  btn.className='exp-tab'+(p===t?' active':'');
   });
-  if(t==='analysis'){ setTimeout(function(){ renderAnnualChart(); renderDonut(); },50); }
+  if(t==='analysis'){ setTimeout(function(){ renderAnnualChart(); renderDonut(); renderFixedByBank(); },50); }
   if(t==='settings'){ renderBudgetFields(); }
 }
+
+// ── المصاريف الثابتة حسب الحساب ────────────────────────────────────────────
+function renderFixedByBank() {
+  var el    = document.getElementById('fixed-by-bank-list');
+  var badge = document.getElementById('fixed-bank-total-badge');
+  if (!el) return;
+
+  if (!_D.fixed.length) {
+    el.innerHTML = '<div style="padding:20px;text-align:center;font-size:12px;color:var(--muted)">لا توجد مصاريف ثابتة</div>';
+    return;
+  }
+
+  // Group by bank
+  var banks = {};
+  var noBank = [];
+  _D.fixed.forEach(function(e) {
+    var amt  = resolveFixed(e);
+    var bank = e.bank || '';
+    if (bank) {
+      if (!banks[bank]) banks[bank] = { items: [], total: 0 };
+      banks[bank].items.push({ name: e.name, icon: e.icon || '📌', amount: amt, mode: e.mode, pct: e.pct });
+      banks[bank].total += amt;
+    } else {
+      noBank.push({ name: e.name, icon: e.icon || '📌', amount: amt, mode: e.mode, pct: e.pct });
+    }
+  });
+
+  var grandTotal = _D.fixed.reduce(function(s,e){ return s+resolveFixed(e); }, 0);
+  if (badge) badge.textContent = fmt(grandTotal) + ' ر.س';
+
+  // Find bank color from _D.banks
+  function bankColor(name) {
+    var found = (_D.banks||[]).find(function(b){ return b.name === name; });
+    return found ? found.color : '#6b7280';
+  }
+
+  var html = '';
+
+  // Each bank group
+  Object.keys(banks).forEach(function(bankName) {
+    var grp   = banks[bankName];
+    var color = bankColor(bankName);
+    var pct   = grandTotal > 0 ? (grp.total/grandTotal*100).toFixed(1) : 0;
+
+    html += '<div style="border-bottom:1px solid rgba(255,255,255,0.06)">' +
+
+      // Bank header
+      '<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(255,255,255,0.02)">' +
+        '<div style="width:10px;height:10px;border-radius:50%;background:'+color+';flex-shrink:0"></div>' +
+        '<span style="font-size:13px;font-weight:700;color:var(--white);flex:1">'+bankName+'</span>' +
+        '<span style="font-size:10px;color:var(--muted)">'+pct+'%</span>' +
+        '<span style="font-family:var(--mono);font-size:14px;font-weight:700;color:'+color+';margin-right:8px">'+fmt(grp.total)+' ر.س</span>' +
+      '</div>' +
+
+      // Items
+      grp.items.map(function(item) {
+        var sub = item.mode === 'pct' ? item.pct + '% من الراتب' : '';
+        return '<div style="display:flex;align-items:center;gap:10px;padding:9px 16px 9px 32px;border-top:1px solid rgba(255,255,255,0.03)">' +
+          '<span style="font-size:14px">'+item.icon+'</span>' +
+          '<span style="flex:1;font-size:12px;color:var(--muted)">'+item.name+(sub?' <span style="font-size:10px;color:var(--muted)">('+sub+')</span>':'')+'</span>' +
+          '<span style="font-family:var(--mono);font-size:12px;font-weight:600;color:var(--white)">'+fmt(item.amount)+' ر.س</span>' +
+        '</div>';
+      }).join('') +
+
+    '</div>';
+  });
+
+  // Items without a bank
+  if (noBank.length) {
+    html += '<div style="border-bottom:1px solid rgba(255,255,255,0.06)">' +
+      '<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(255,255,255,0.02)">' +
+        '<div style="width:10px;height:10px;border-radius:50%;background:var(--muted);flex-shrink:0"></div>' +
+        '<span style="font-size:13px;font-weight:700;color:var(--muted);flex:1">بدون حساب محدد</span>' +
+        '<span style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--muted)">'+
+          fmt(noBank.reduce(function(s,x){return s+x.amount;},0))+' ر.س</span>' +
+      '</div>' +
+      noBank.map(function(item){
+        return '<div style="display:flex;align-items:center;gap:10px;padding:9px 16px 9px 32px;border-top:1px solid rgba(255,255,255,0.03)">' +
+          '<span style="font-size:14px">'+item.icon+'</span>' +
+          '<span style="flex:1;font-size:12px;color:var(--muted)">'+item.name+'</span>' +
+          '<span style="font-family:var(--mono);font-size:12px;color:var(--muted)">'+fmt(item.amount)+' ر.س</span>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }
+
+  // Grand total row
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(201,169,110,0.06)">' +
+    '<span style="font-size:13px;font-weight:800;color:var(--white)">الإجمالي</span>' +
+    '<span style="font-family:var(--mono);font-size:16px;font-weight:800;color:var(--gold)">'+fmt(grandTotal)+' ر.س</span>' +
+  '</div>';
+
+  el.innerHTML = html;
+}
+
 function renderDonut(){
   var tot=totalIncome(), fx=totalFixed(), vr=totalVariable(), ac=totalAccrual(), fr=Math.max(0,tot-fx-vr-ac);
   var cl=document.getElementById('chart-month-label'); if(cl) cl.textContent=monthStr(_cur);
@@ -886,7 +990,7 @@ function renderAll(){
   var vl=document.getElementById('var-month-label');if(vl)vl.textContent=MONTHS[+_cur.split('-')[1]-1];
   var bl=document.getElementById('breakdown-month');if(bl)bl.textContent=monthStr(_cur);
   var si=document.getElementById('salary-inp');if(si&&document.activeElement!==si)si.value=_D.salary||'';
-  renderWaterfall();renderSummary();renderBreakdown();renderDonut();renderCategoryAnalysis();renderMonthComparison();renderAnnualChart();renderBudgetFields();
+  renderWaterfall();renderSummary();renderBreakdown();renderDonut();renderCategoryAnalysis();renderMonthComparison();renderAnnualChart();renderBudgetFields();renderFixedByBank();
   renderFixed();renderVariable();renderAccrual();
   renderBanks();renderIncomesSettings();renderExtraChips();
   populateBankSelects();purgeExpiredAccruals();
@@ -1080,7 +1184,7 @@ function toggleSalary(){
   if(inp.type==='number'){ inp.type='password'; if(btn) btn.textContent='🙈'; }
   else { inp.type='number'; if(btn) btn.textContent='👁️'; }
 }
-function onSalaryChange(){_D.salary=parseFloat(gv('salary-inp'))||0;renderWaterfall();renderSummary();renderBreakdown();renderDonut();renderCategoryAnalysis();renderMonthComparison();renderAnnualChart();renderBudgetFields();clearTimeout(window._st);window._st=setTimeout(function(){saveData(true);},1200);}
+function onSalaryChange(){_D.salary=parseFloat(gv('salary-inp'))||0;renderWaterfall();renderSummary();renderBreakdown();renderDonut();renderCategoryAnalysis();renderMonthComparison();renderAnnualChart();renderBudgetFields();renderFixedByBank();clearTimeout(window._st);window._st=setTimeout(function(){saveData(true);},1200);}
 function toast(msg){var t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.classList.add('show');clearTimeout(window._tt);window._tt=setTimeout(function(){t.classList.remove('show');},2800);}
 document.addEventListener('DOMContentLoaded',function(){sv('v-date',today());});
 </script>
