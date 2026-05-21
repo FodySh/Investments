@@ -29,7 +29,12 @@ body{background:var(--bg);color:var(--white);font-family:'Cairo',sans-serif;font
 .tabs-bar{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:52px;z-index:90}
 .tab-btn{flex:1;padding:10px 4px;font-size:11px;font-weight:700;font-family:'Cairo',sans-serif;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
 .tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
-.main{padding:14px;display:flex;flex-direction:column;gap:12px;max-width:820px;margin:0 auto}
+.main{padding:0;display:flex;flex-direction:column;gap:0;max-width:820px;margin:0 auto}
+.exp-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:52px;z-index:90}
+.exp-tab{flex:1;padding:11px 6px;font-size:12px;font-weight:700;font-family:'Cairo',sans-serif;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.exp-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.exp-pane{display:none;padding:14px;display:flex;flex-direction:column;gap:12px}
+.exp-pane.active{display:flex}
 @media(min-width:900px){
   .main{max-width:1280px;padding:24px 32px}
   .desktop-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
@@ -126,7 +131,17 @@ body{background:var(--bg);color:var(--white);font-family:'Cairo',sans-serif;font
 
 <div class="main">
 
-<!-- ═══ SALARY (full width always) ═══ -->
+<!-- ══ TABS ══ -->
+<div class="exp-tabs">
+  <button class="exp-tab active" onclick="switchExpTab('input')" id="exptab-input">📝 إدخال المصاريف</button>
+  <button class="exp-tab" onclick="switchExpTab('analysis')" id="exptab-analysis">📊 التحليل والتقارير</button>
+</div>
+
+<!-- ══ TAB 1: INPUT ══ -->
+<div class="exp-pane active" id="exppane-input">
+
+  <!-- Salary -->
+  <!-- ═══ SALARY (full width always) ═══ -->
 <div id="pane-overview">
   <div class="salary-card">
     <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px">
@@ -157,53 +172,12 @@ body{background:var(--bg);color:var(--white);font-family:'Cairo',sans-serif;font
   </div>
 </div>
 
-<!-- ═══ DESKTOP GRID ═══ -->
-<div class="desktop-grid">
 
-  <!-- COL A: KPIs + Chart + Breakdown -->
-  <div class="desktop-col">
 
-    <div class="summary-grid">
-      <div class="skpi"><div class="skpi-label">إجمالي مصاريف</div><div class="skpi-val" id="kpi-total">0</div><div style="font-size:10px;color:var(--muted)">ر.س</div></div>
-      <div class="skpi"><div class="skpi-label">ثابتة</div><div class="skpi-val" id="kpi-fixed" style="color:var(--gold)">0</div><div style="font-size:10px;color:var(--muted)">ر.س</div></div>
-      <div class="skpi"><div class="skpi-label">متغيرة</div><div class="skpi-val" id="kpi-var" style="color:var(--cyan)">0</div><div style="font-size:10px;color:var(--muted)">هذا الشهر</div></div>
-      <div class="skpi"><div class="skpi-label">دورية</div><div class="skpi-val" id="kpi-acc" style="color:var(--purple)">0</div><div style="font-size:10px;color:var(--muted)">ر.س/شهر</div></div>
-    </div>
-
-    <!-- Donut Chart -->
-    <div class="sec">
-      <div class="sec-head">
-        <div class="sec-title">🍩 توزيع الراتب</div>
-        <span class="sec-badge" id="chart-month-label"></span>
-      </div>
-      <div style="padding:16px;display:flex;gap:20px;align-items:center;flex-wrap:wrap">
-        <div style="position:relative;flex-shrink:0">
-          <svg id="donut-svg" width="140" height="140" viewBox="0 0 140 140">
-            <circle cx="70" cy="70" r="50" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="20"/>
-            <g id="donut-segs"></g>
-          </svg>
-          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
-            <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--gold2)" id="donut-center-val">0</div>
-            <div style="font-size:9px;color:var(--muted)">ر.س</div>
-          </div>
-        </div>
-        <div id="donut-legend" style="display:flex;flex-direction:column;gap:9px;flex:1;min-width:130px"></div>
-      </div>
-    </div>
-
-    <!-- Monthly Breakdown -->
-    <div class="month-breakdown">
-      <div style="font-size:13px;font-weight:700;color:var(--white);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
-        <span>تفصيل <span id="breakdown-month" style="color:var(--gold)"></span></span>
-        <button onclick="exportMonth()" style="padding:5px 12px;background:rgba(92,185,138,0.12);border:1px solid rgba(92,185,138,0.3);border-radius:8px;color:var(--green);font-size:11px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif">📥 تصدير</button>
-      </div>
-      <div id="breakdown-rows"></div>
-      <div id="surplus-box" style="border-radius:10px;padding:12px 16px;margin-top:12px;display:flex;align-items:center;justify-content:space-between"></div>
-    </div>
-
-  </div><!-- /col A -->
-
-  <!-- COL B: Fixed + Variable + Accrual -->
+  <!-- Desktop: 2 cols on big screens -->
+  <div class="desktop-grid">
+    <div class="desktop-col">
+<!-- COL B: Fixed + Variable + Accrual -->
   <div class="desktop-col">
 
     <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">المصاريف الثابتة</div>
@@ -243,6 +217,37 @@ body{background:var(--bg);color:var(--white);font-family:'Cairo',sans-serif;font
       <div id="variable-list"></div>
     </div>
 
+    <!-- Category Analysis -->
+    <div class="sec">
+      <div class="sec-head">
+        <div class="sec-title" style="color:var(--cyan)">📊 تحليل الفئات — <span id="cat-month-label" style="color:var(--muted)"></span></div>
+        <button onclick="openBudgetModal()" style="padding:5px 12px;background:rgba(78,205,196,0.1);border:1px solid rgba(78,205,196,0.3);border-radius:8px;font-size:11px;font-weight:700;color:var(--cyan);cursor:pointer;font-family:'Cairo',sans-serif">⚙️ ميزانيات</button>
+      </div>
+      <div id="cat-analysis" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:12px;color:var(--muted);text-align:center;padding:16px">سجّل مصاريف متغيرة لتظهر التحليل</div>
+      </div>
+    </div>
+
+    <!-- Month Comparison -->
+    <div class="sec">
+      <div class="sec-head">
+        <div class="sec-title" style="color:var(--orange)">📈 مقارنة بالشهر السابق</div>
+      </div>
+      <div id="month-compare" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+
+    <!-- Annual Chart -->
+    <div class="sec">
+      <div class="sec-head">
+        <div class="sec-title" style="color:var(--gold)">📅 مصاريف السنة</div>
+        <span class="sec-badge" id="annual-year"></span>
+      </div>
+      <div style="padding:14px 16px">
+        <canvas id="annual-chart" height="120" style="width:100%"></canvas>
+        <div id="annual-labels" style="display:flex;justify-content:space-between;margin-top:4px;padding:0 2px;font-size:9px;color:var(--muted)"></div>
+      </div>
+    </div>
+
     <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">المصاريف الدورية</div>
     <div id="pane-accrual" class="sec">
       <div class="sec-head">
@@ -255,9 +260,110 @@ body{background:var(--bg);color:var(--white);font-family:'Cairo',sans-serif;font
 
   </div><!-- /col B -->
 
-</div><!-- /desktop-grid -->
 
-<!-- ═══ SETTINGS (full width) ═══ -->
+    </div>
+
+    <div class="desktop-col">
+      <!-- Settings: Banks + Incomes (useful during input) -->
+      <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">الحسابات البنكية</div>
+      <div class="sec" style="margin-bottom:0">
+        <div class="sec-head">
+          <div class="sec-title">🏦 الحسابات البنكية</div>
+          <button class="add-btn" onclick="openModal('bank')" style="background:rgba(78,205,196,0.1);border-color:rgba(78,205,196,0.3);color:var(--cyan)">+ إضافة</button>
+        </div>
+        <div id="banks-list"></div>
+        <div style="padding:8px 16px;font-size:11px;color:var(--muted)">تظهر في القوائم المنسدلة تلقائياً</div>
+      </div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">مصادر دخل إضافية</div>
+      <div class="sec">
+        <div class="sec-head">
+          <div class="sec-title">➕ دخل إضافي</div>
+          <button class="add-btn" onclick="openModal('income')" style="background:rgba(92,185,138,0.1);border-color:rgba(92,185,138,0.3);color:var(--green)">+ إضافة</button>
+        </div>
+        <div id="incomes-settings-list"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ TAB 2: ANALYSIS ══ -->
+<div class="exp-pane" id="exppane-analysis">
+
+  <div class="desktop-grid">
+
+    <!-- LEFT: Summary KPIs + Donut + Annual Chart -->
+    <div class="desktop-col">
+
+      <div class="summary-grid">
+        <div class="skpi"><div class="skpi-label">إجمالي مصاريف</div><div class="skpi-val" id="kpi-total">0</div><div style="font-size:10px;color:var(--muted)">ر.س</div></div>
+        <div class="skpi"><div class="skpi-label">ثابتة</div><div class="skpi-val" id="kpi-fixed" style="color:var(--gold)">0</div><div style="font-size:10px;color:var(--muted)">ر.س</div></div>
+        <div class="skpi"><div class="skpi-label">متغيرة</div><div class="skpi-val" id="kpi-var" style="color:var(--cyan)">0</div><div style="font-size:10px;color:var(--muted)">هذا الشهر</div></div>
+        <div class="skpi"><div class="skpi-label">دورية</div><div class="skpi-val" id="kpi-acc" style="color:var(--purple)">0</div><div style="font-size:10px;color:var(--muted)">ر.س/شهر</div></div>
+      </div>
+
+      <!-- Donut -->
+      <div class="sec">
+        <div class="sec-head"><div class="sec-title">🍩 توزيع الراتب</div><span class="sec-badge" id="chart-month-label"></span></div>
+        <div style="padding:16px;display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+          <div style="position:relative;flex-shrink:0">
+            <svg id="donut-svg" width="140" height="140" viewBox="0 0 140 140">
+              <circle cx="70" cy="70" r="50" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="20"/>
+              <g id="donut-segs"></g>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+              <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--gold2)" id="donut-center-val">0</div>
+              <div style="font-size:9px;color:var(--muted)">ر.س</div>
+            </div>
+          </div>
+          <div id="donut-legend" style="display:flex;flex-direction:column;gap:9px;flex:1;min-width:130px"></div>
+        </div>
+      </div>
+
+      <!-- Annual Chart -->
+      <div class="sec">
+        <div class="sec-head"><div class="sec-title">📅 مصاريف السنة</div><span class="sec-badge" id="annual-year"></span></div>
+        <div style="padding:14px 16px">
+          <canvas id="annual-chart" height="120" style="width:100%"></canvas>
+          <div id="annual-labels" style="display:flex;justify-content:space-between;margin-top:4px;padding:0 2px;font-size:9px;color:var(--muted)"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: Breakdown + Comparison + Category Analysis -->
+    <div class="desktop-col">
+
+      <!-- Monthly Breakdown -->
+      <div class="month-breakdown">
+        <div style="font-size:13px;font-weight:700;color:var(--white);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+          <span>تفصيل <span id="breakdown-month" style="color:var(--gold)"></span></span>
+          <button onclick="exportMonth()" style="padding:5px 12px;background:rgba(92,185,138,0.12);border:1px solid rgba(92,185,138,0.3);border-radius:8px;color:var(--green);font-size:11px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif">📥 تصدير</button>
+        </div>
+        <div id="breakdown-rows"></div>
+        <div id="surplus-box" style="border-radius:10px;padding:12px 16px;margin-top:12px;display:flex;align-items:center;justify-content:space-between"></div>
+      </div>
+
+      <!-- Month Comparison -->
+      <div class="sec">
+        <div class="sec-head"><div class="sec-title" style="color:var(--orange)">📈 مقارنة بالشهر السابق</div></div>
+        <div id="month-compare" style="padding:12px 16px;display:flex;flex-direction:column;gap:4px"></div>
+      </div>
+
+      <!-- Category Analysis -->
+      <div class="sec">
+        <div class="sec-head">
+          <div class="sec-title" style="color:var(--cyan)">📊 تحليل الفئات — <span id="cat-month-label" style="color:var(--muted)"></span></div>
+          <button onclick="openBudgetModal()" style="padding:5px 12px;background:rgba(78,205,196,0.1);border:1px solid rgba(78,205,196,0.3);border-radius:8px;font-size:11px;font-weight:700;color:var(--cyan);cursor:pointer;font-family:'Cairo',sans-serif">⚙️ ميزانيات</button>
+        </div>
+        <div id="cat-analysis" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- iPhone Guide (full width in analysis tab) -->
+  <!-- ═══ SETTINGS (full width) ═══ -->
 <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:4px 0">الإعدادات</div>
 <div id="pane-settings">
   <div class="sec" style="margin-bottom:12px">
@@ -311,6 +417,16 @@ body{background:var(--bg);color:var(--white);font-family:'Cairo',sans-serif;font
 
 </div>
 
+</div>
+
+<!-- Budget Modal -->
+<div class="overlay" id="m-budget">
+  <div class="modal">
+    <div class="modal-title">⚙️ ميزانيات الفئات <button class="xbtn" onclick="closeModal('budget')">×</button></div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px">حدد حداً أقصى لكل فئة (اتركه فارغاً للتجاهل)</div>
+    <div id="budget-fields" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto"></div>
+    <button class="savebtn" onclick="saveBudgets()" style="margin-top:14px">💾 حفظ</button>
+  </div>
 </div>
 
 <!-- MODALS -->
@@ -411,12 +527,13 @@ body{background:var(--bg);color:var(--white);font-family:'Cairo',sans-serif;font
 firebase.initializeApp({apiKey:"AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME",authDomain:"investments-page.firebaseapp.com",projectId:"investments-page",storageBucket:"investments-page.firebasestorage.app",messagingSenderId:"964948881361",appId:"1:964948881361:web:2801b8127489d953717af0"});
 var _auth=firebase.auth(),_db=firebase.firestore(),_uid=null;
 var _cur=new Date().toISOString().slice(0,7);
-var _D={salary:0,incomes:[],fixed:[],variable:{},accrual:[],banks:[]};
+var _D={salary:0,incomes:[],fixed:[],variable:{},accrual:[],banks:[],budgets:{}};
 var _fixedMode='amount';
 var MONTHS=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 _auth.onAuthStateChanged(function(u){if(!u){window.location.href='index.html';return;}_uid=u.uid;var e=document.getElementById('user-disp');if(e)e.textContent=u.email||'';loadData();});
 function docRef(){return _db.collection('users').doc(_uid).collection('portfolio').doc('expenses');}
-function loadData(){docRef().get().then(function(s){if(s.exists){var d=s.data();if(d.salary!==undefined)_D.salary=d.salary;if(d.incomes)_D.incomes=d.incomes;if(d.fixed)_D.fixed=d.fixed;if(d.variable)_D.variable=d.variable;if(d.accrual)_D.accrual=d.accrual;if(d.banks)_D.banks=d.banks;}renderAll();if(window.location.hash==='#add'){openModal('variable');history.replaceState(null,'',window.location.pathname);}}).catch(function(){renderAll();});}
+function loadData(){docRef().get().then(function(s){if(s.exists){var d=s.data();if(d.salary!==undefined)_D.salary=d.salary;if(d.incomes)_D.incomes=d.incomes;if(d.fixed)_D.fixed=d.fixed;if(d.variable)_D.variable=d.variable;if(d.accrual)_D.accrual=d.accrual;if(d.banks)_D.banks=d.banks;
+    if(d.budgets)_D.budgets=d.budgets;}renderAll();if(window.location.hash==='#add'){openModal('variable');history.replaceState(null,'',window.location.pathname);}}).catch(function(){renderAll();});}
 function saveData(q){if(!_uid)return;docRef().set(_D).then(function(){if(!q)toast('✅ تم الحفظ');renderAll();}).catch(function(){toast('❌ خطأ');});}
 function changeMonth(d){var p=_cur.split('-'),dt=new Date(+p[0],+p[1]-1+d,1);_cur=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0');renderAll();}
 function monthStr(ym){var p=ym.split('-');return MONTHS[+p[1]-1]+' '+p[0];}
@@ -534,6 +651,248 @@ function downloadVariableTemplate() {
   a.download = 'قالب-المصاريف-المتغيرة.csv'; a.click();
 }
 
+
+// ── Category Analysis ────────────────────────────────────────────────────────
+var CAT_COLORS = {
+  'طعام':'#f97316','تسوق':'#ec4899','ترفيه':'#a78bfa','صحة':'#34d399',
+  'تعليم':'#60a5fa','وقود':'#fbbf24','هدايا':'#f43f5e','أخرى':'#6b7280'
+};
+
+function renderCategoryAnalysis() {
+  var el = document.getElementById('cat-analysis');
+  var lbl = document.getElementById('cat-month-label');
+  if (lbl) lbl.textContent = MONTHS[+_cur.split('-')[1]-1];
+  if (!el) return;
+
+  var items = _D.variable[_cur] || [];
+  if (!items.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:16px">لا توجد مصاريف متغيرة</div>';
+    return;
+  }
+
+  // Group by category
+  var cats = {};
+  items.forEach(function(e) {
+    var cat = (e.cat || 'أخرى').replace(/[🍽️🛒🎬💊📚⛽🎁📌]/gu, '').trim() || 'أخرى';
+    if (!cats[cat]) cats[cat] = 0;
+    cats[cat] += e.amount || 0;
+  });
+
+  var total = Object.values(cats).reduce(function(s,v){ return s+v; }, 0);
+  var sorted = Object.entries(cats).sort(function(a,b){ return b[1]-a[1]; });
+
+  el.innerHTML = sorted.map(function(entry) {
+    var cat = entry[0], val = entry[1];
+    var pct = total > 0 ? (val/total*100).toFixed(1) : 0;
+    var budget = _D.budgets[cat] || 0;
+    var color = CAT_COLORS[cat] || '#6b7280';
+    var overBudget = budget > 0 && val > budget;
+    var barPct = budget > 0 ? Math.min(100, val/budget*100).toFixed(1) : pct;
+    var barColor = overBudget ? 'var(--red)' : color;
+
+    return '<div style="display:flex;flex-direction:column;gap:4px">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between">' +
+        '<span style="font-size:12px;font-weight:600;color:'+(overBudget?'var(--red)':'var(--white)')+'">'+cat+'</span>' +
+        '<div style="display:flex;align-items:center;gap:8px">' +
+          (budget > 0 ? '<span style="font-size:10px;color:var(--muted)">'+fmt(val)+' / '+fmt(budget)+'</span>' : '<span style="font-size:10px;color:var(--muted)">'+pct+'%</span>') +
+          '<span style="font-family:var(--mono);font-size:12px;font-weight:700;color:'+barColor+'">'+fmt(val)+' ر.س</span>' +
+          (overBudget ? '<span style="font-size:10px;color:var(--red);font-weight:700">⚠️ تجاوز</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div style="height:5px;background:rgba(255,255,255,0.06);border-radius:5px;overflow:hidden">' +
+        '<div style="width:'+barPct+'%;height:100%;background:'+barColor+';border-radius:5px;transition:width .5s"></div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ── Month Comparison ─────────────────────────────────────────────────────────
+function renderMonthComparison() {
+  var el = document.getElementById('month-compare');
+  if (!el) return;
+
+  var cp = _cur.split('-');
+  var prevDate = new Date(+cp[0], +cp[1]-2, 1);
+  var prevKey  = prevDate.getFullYear()+'-'+String(prevDate.getMonth()+1).padStart(2,'0');
+  var prevLabel = monthStr(prevKey);
+
+  // ── حسابات الشهر الحالي ────────────────────────────────────────────────────
+  var curVar   = totalVariable();
+  var curFixed = totalFixed();
+  var curAcc   = totalAccrual();
+  var curTotal = curFixed + curVar + curAcc;
+
+  // ── حسابات الشهر السابق ───────────────────────────────────────────────────
+  var prevItems = _D.variable[prevKey] || [];
+  var prevVar   = prevItems.reduce(function(s,x){ return s+(x.amount||0); }, 0);
+  var prevFixed = curFixed; // الثابتة نفسها
+  var prevAcc   = curAcc;   // الدورية نفسها
+  var prevTotal = prevFixed + prevVar + prevAcc;
+
+  // ── تحليل الفئات: مقارنة ─────────────────────────────────────────────────
+  var curCats = {}, prevCats = {};
+  (_D.variable[_cur]||[]).forEach(function(e){
+    var cat=(e.cat||'أخرى').replace(/\p{Emoji}/gu,'').trim()||'أخرى';
+    curCats[cat]=(curCats[cat]||0)+(e.amount||0);
+  });
+  prevItems.forEach(function(e){
+    var cat=(e.cat||'أخرى').replace(/\p{Emoji}/gu,'').trim()||'أخرى';
+    prevCats[cat]=(prevCats[cat]||0)+(e.amount||0);
+  });
+  var allCats = Object.keys(Object.assign({},curCats,prevCats));
+
+  function diffRow(label, cur, prev, color, bold) {
+    var diff = cur - prev;
+    var pct  = prev > 0 ? (Math.abs(diff)/prev*100).toFixed(0) : null;
+    var up   = diff > 0;
+    var nc   = diff === 0 ? 'var(--muted)' : (up ? 'var(--red)' : 'var(--green)');
+    var arrow = diff === 0 ? '' : (up ? '▲' : '▼');
+    return '<div style="display:flex;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04)">'+
+      '<div style="flex:1;font-size:'+(bold?'13':'12')+'px;font-weight:'+(bold?'700':'500')+';color:'+(bold?color:'var(--muted)')+'">'+label+'</div>'+
+      '<div style="font-family:var(--mono);font-size:11px;color:var(--muted);min-width:70px;text-align:left">'+fmt(prev)+' ر.س</div>'+
+      '<div style="min-width:60px;text-align:center;font-size:11px;font-weight:700;color:'+nc+'">'+
+        (arrow?arrow+' ':'')+(pct?pct+'%':'—')+
+      '</div>'+
+      '<div style="font-family:var(--mono);font-size:'+(bold?'13':'12')+'px;font-weight:'+(bold?'700':'500')+';color:'+color+';min-width:80px;text-align:left">'+fmt(cur)+' ر.س</div>'+
+    '</div>';
+  }
+
+  var html =
+    // Header
+    '<div style="display:flex;padding:0 0 6px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:2px">'+
+      '<div style="flex:1;font-size:10px;color:var(--muted)"></div>'+
+      '<div style="font-size:10px;font-weight:700;color:var(--muted);min-width:70px;text-align:left">'+prevLabel+'</div>'+
+      '<div style="font-size:10px;font-weight:700;color:var(--muted);min-width:60px;text-align:center">التغيير</div>'+
+      '<div style="font-size:10px;font-weight:700;color:var(--gold);min-width:80px;text-align:left">'+monthStr(_cur)+'</div>'+
+    '</div>'+
+
+    // Main rows
+    diffRow('مصاريف ثابتة',   curFixed, prevFixed, 'var(--gold)',   false)+
+    diffRow('مصاريف متغيرة',  curVar,   prevVar,   'var(--cyan)',   false)+
+    (curAcc>0 ? diffRow('مصاريف دورية',  curAcc,   prevAcc,   'var(--purple)', false) : '')+
+    diffRow('الإجمالي',        curTotal, prevTotal, 'var(--white)', true);
+
+  // Category breakdown (only if variable exists)
+  if (allCats.length) {
+    html += '<div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06)">'+
+      '<div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">تفصيل المتغيرة بالفئة</div>'+
+      allCats.sort(function(a,b){ return ((curCats[b]||0)+(prevCats[b]||0))-((curCats[a]||0)+(prevCats[a]||0)); })
+        .map(function(cat){
+          var cc=curCats[cat]||0, pc=prevCats[cat]||0;
+          var color=CAT_COLORS[cat]||'#6b7280';
+          return diffRow(cat, cc, pc, color, false);
+        }).join('')+
+    '</div>';
+  }
+
+  // Surplus comparison
+  var curSurplus  = totalIncome() - curTotal;
+  var prevSurplus = totalIncome() - prevTotal;
+  var surplusPos  = curSurplus >= 0;
+  html += '<div style="margin-top:10px;background:'+(surplusPos?'rgba(92,185,138,0.08)':'rgba(224,112,112,0.08)')+
+    ';border:1px solid '+(surplusPos?'rgba(92,185,138,0.2)':'rgba(224,112,112,0.2)')+
+    ';border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between">'+
+    '<span style="font-size:12px;font-weight:700;color:var(--white)">'+(surplusPos?'✅ فائض':'❌ عجز')+' هذا الشهر</span>'+
+    '<span style="font-family:var(--mono);font-size:16px;font-weight:700;color:'+(surplusPos?'var(--green)':'var(--red)')+'">'+
+      (curSurplus>=0?'+':'')+fmt(curSurplus)+' ر.س'+
+    '</span>'+
+  '</div>';
+
+  el.innerHTML = html;
+}
+
+
+// ── Annual Chart ─────────────────────────────────────────────────────────────
+function renderAnnualChart() {
+  var canvas = document.getElementById('annual-chart');
+  var labelsEl = document.getElementById('annual-labels');
+  var yearEl = document.getElementById('annual-year');
+  if (!canvas) return;
+
+  var year = _cur.split('-')[0];
+  if (yearEl) yearEl.textContent = year;
+
+  // Collect monthly totals
+  var months = [];
+  for (var m=1; m<=12; m++) {
+    var key = year+'-'+String(m).padStart(2,'0');
+    var varTotal = (_D.variable[key]||[]).reduce(function(s,x){ return s+(x.amount||0); }, 0);
+    months.push({ key:key, var:varTotal, fixed:totalFixed(), label:MONTHS[m-1].slice(0,3) });
+  }
+
+  var maxVal = Math.max.apply(null, months.map(function(m){ return m.var + m.fixed; })) || 1;
+  var W = canvas.offsetWidth || 300, H = 120;
+  canvas.width = W; canvas.height = H;
+  var ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+
+  var barW = Math.floor((W - 24) / 12) - 2;
+  var gap = Math.floor((W - 24) / 12);
+
+  months.forEach(function(m, i) {
+    var x = 12 + i * gap;
+    var isCur = m.key === _cur;
+
+    // Fixed bar (bottom)
+    var fh = Math.round((m.fixed / maxVal) * (H-20));
+    ctx.fillStyle = isCur ? '#e2c48a' : '#c9a96e55';
+    ctx.beginPath(); ctx.roundRect(x, H-10-fh, barW, fh, 2); ctx.fill();
+
+    // Variable bar (on top)
+    var vh = Math.round((m.var / maxVal) * (H-20));
+    ctx.fillStyle = isCur ? '#4ecdc4' : '#4ecdc455';
+    ctx.beginPath(); ctx.roundRect(x, H-10-fh-vh, barW, vh, 2); ctx.fill();
+  });
+
+  if (labelsEl) {
+    labelsEl.innerHTML = months.map(function(m,i) {
+      return '<span style="'+(m.key===_cur?'color:var(--gold);font-weight:700;':'')+'">' + m.label + '</span>';
+    }).join('');
+  }
+}
+
+// ── Budget Modal ─────────────────────────────────────────────────────────────
+var VAR_CATS = ['طعام','تسوق','ترفيه','صحة','تعليم','وقود','هدايا','أخرى'];
+
+function openBudgetModal() {
+  var el = document.getElementById('budget-fields');
+  if (el) el.innerHTML = VAR_CATS.map(function(cat) {
+    var color = CAT_COLORS[cat] || '#6b7280';
+    return '<div class="field" style="flex-direction:row;align-items:center;gap:10px;margin-bottom:0">' +
+      '<label style="min-width:80px;font-size:12px;font-weight:600;color:'+color+'">'+cat+'</label>' +
+      '<input type="number" step="50" placeholder="بلا حد" value="'+((_D.budgets||{})[cat]||'')+'" ' +
+        'data-cat="'+cat+'" style="flex:1;font-family:var(--mono);font-size:13px;color:'+color+'" ' +
+        'class="field input"/>' +
+    '</div>';
+  }).join('');
+  openModal('budget');
+}
+
+function saveBudgets() {
+  var fields = document.querySelectorAll('#budget-fields input');
+  if (!_D.budgets) _D.budgets = {};
+  fields.forEach(function(inp) {
+    var cat = inp.getAttribute('data-cat');
+    var val = parseFloat(inp.value) || 0;
+    if (val > 0) _D.budgets[cat] = val;
+    else delete _D.budgets[cat];
+  });
+  closeModal('budget');
+  saveData(true);
+  toast('✅ تم حفظ الميزانيات');
+}
+
+
+function switchExpTab(t) {
+  ['input','analysis'].forEach(function(p){
+    var pane=document.getElementById('exppane-'+p);
+    var btn =document.getElementById('exptab-'+p);
+    if(pane) pane.className='exp-pane'+(p===t?' active':'');
+    if(btn)  btn.className='exp-tab'+(p===t?' active':'');
+  });
+  // Re-render charts when switching to analysis
+  if(t==='analysis'){ setTimeout(function(){ renderAnnualChart(); renderDonut(); },50); }
+}
 function renderDonut(){
   var tot=totalIncome(), fx=totalFixed(), vr=totalVariable(), ac=totalAccrual(), fr=Math.max(0,tot-fx-vr-ac);
   var cl=document.getElementById('chart-month-label'); if(cl) cl.textContent=monthStr(_cur);
@@ -564,7 +923,7 @@ function renderAll(){
   var vl=document.getElementById('var-month-label');if(vl)vl.textContent=MONTHS[+_cur.split('-')[1]-1];
   var bl=document.getElementById('breakdown-month');if(bl)bl.textContent=monthStr(_cur);
   var si=document.getElementById('salary-inp');if(si&&document.activeElement!==si)si.value=_D.salary||'';
-  renderWaterfall();renderSummary();renderBreakdown();renderDonut();
+  renderWaterfall();renderSummary();renderBreakdown();renderDonut();renderCategoryAnalysis();renderMonthComparison();renderAnnualChart();
   renderFixed();renderVariable();renderAccrual();
   renderBanks();renderIncomesSettings();renderExtraChips();
   populateBankSelects();purgeExpiredAccruals();
@@ -758,9 +1117,13 @@ function toggleSalary(){
   if(inp.type==='number'){ inp.type='password'; if(btn) btn.textContent='🙈'; }
   else { inp.type='number'; if(btn) btn.textContent='👁️'; }
 }
-function onSalaryChange(){_D.salary=parseFloat(gv('salary-inp'))||0;renderWaterfall();renderSummary();renderBreakdown();renderDonut();clearTimeout(window._st);window._st=setTimeout(function(){saveData(true);},1200);}
+function onSalaryChange(){_D.salary=parseFloat(gv('salary-inp'))||0;renderWaterfall();renderSummary();renderBreakdown();renderDonut();renderCategoryAnalysis();renderMonthComparison();renderAnnualChart();clearTimeout(window._st);window._st=setTimeout(function(){saveData(true);},1200);}
 function toast(msg){var t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.classList.add('show');clearTimeout(window._tt);window._tt=setTimeout(function(){t.classList.remove('show');},2800);}
 document.addEventListener('DOMContentLoaded',function(){sv('v-date',today());});
 </script>
 </body>
-</html>
+</htm
+  </div>
+</div>
+
+>
