@@ -80,6 +80,12 @@ body{background:var(--bg);color:var(--white);font-family:'Cairo',sans-serif;font
 .acc-prog-wrap{background:rgba(0,0,0,0.3);border-radius:6px;height:5px;overflow:hidden;margin-bottom:4px}
 .acc-prog{height:100%;border-radius:6px;background:linear-gradient(90deg,var(–purple),var(–cyan));transition:width .6s}
 .acc-bottom{display:flex;justify-content:space-between;font-size:10px;color:var(–muted)}
+.acc-check{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none;padding:7px 0 0}
+.acc-check input[type=checkbox]{width:17px;height:17px;accent-color:var(–green);cursor:pointer;flex-shrink:0}
+.acc-check span{font-size:11px;font-weight:700;color:var(–muted)}
+.acc-row.paid{opacity:.6}
+.acc-row.paid .acc-prog{background:linear-gradient(90deg,var(–green),var(–green))}
+.acc-row.paid .exp-amount,.acc-row.paid .exp-name{text-decoration:line-through;color:var(–muted)}
 .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
 .skpi{background:var(–card);border:1px solid var(–border);border-radius:12px;padding:13px}
 .skpi-label{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(–muted);margin-bottom:4px}
@@ -1153,6 +1159,15 @@ function renderVariable(){
   var sorted=items.map(function(e,i){return{e:e,i:i};}).sort(function(a,b){return(b.e.date||'').localeCompare(a.e.date||'');});
   el.innerHTML=sorted.map(function(s){var e=s.e,i=s.i;return '<div class="exp-row"><div class="exp-icon" style="background:rgba(78,205,196,0.1)">'+e.icon+'</div><div class="exp-main"><div class="exp-name">'+e.name+'</div><div class="exp-sub">'+(e.cat||'')+(e.bank?' · '+e.bank:'')+(e.date?' · '+e.date:'')+'</div></div><div style="text-align:left"><div class="exp-amount" style="color:var(--cyan)">'+fmt(e.amount)+'</div></div><div class="row-btns"><button class="ibtn edit" onclick="editVariable('+i+')">✏️</button><button class="ibtn del" onclick="delVariable('+i+')">🗑</button></div></div>';}).join('');
 }
+
+function toggleAccrualPaid(idx, month, checked) {
+  var a = _D.accrual[idx];
+  if (!a) return;
+  if (!a.paid) a.paid = {};
+  if (checked) a.paid[month] = true;
+  else delete a.paid[month];
+  saveData(true);
+}
 function renderAccrual(){
   var el=document.getElementById('accrual-list');if(!el)return;
 
@@ -1190,7 +1205,14 @@ function renderAccrual(){
     var accrued = Math.min(a.total||0, (elapsedMonths+1)*mo); // +1 لأن هذا الشهر نفسه يُحجز
     var pct = a.total>0 ? Math.min(100, Math.round(accrued/a.total*100)) : 0;
     var expired = false; // لا يُعرض أصلاً إذا انتهى (فُلتر أعلاه)
-    return '<div class="acc-row"><div class="acc-top"><div class="exp-icon" style="background:rgba(155,140,255,0.1)">'+a.icon+'</div><div class="exp-main"><div class="exp-name">'+a.name+'</div><div class="exp-sub">'+fmt(a.total)+' ر.س · '+a.months+' شهر'+(a.bank?' · '+a.bank:'')+(expired?' · <span style="color:var(--green);font-weight:700">✅ مكتمل</span>':' · متبقي '+left+' شهر')+'</div></div><div style="text-align:left"><div class="exp-amount" style="color:var(--purple)">'+fmt(mo)+'</div><div class="exp-pct">/شهر</div></div><div class="row-btns"><button class="ibtn edit" onclick="editAccrual('+realIdx+')">✏️</button><button class="ibtn del" onclick="delAccrual('+realIdx+')">🗑</button></div></div><div class="acc-prog-wrap"><div class="acc-prog" style="width:'+pct+'%"></div></div><div class="acc-bottom"><span>وعاء: <b style="color:var(--purple)">'+fmt(accrued)+'</b> ر.س</span><span>'+pct+'%</span></div></div>';
+    var isPaid  = a.paid && a.paid[_cur] === true;
+    return '<div class="acc-row'+(isPaid?' paid':'')+'"><div class="acc-top"><div class="exp-icon" style="background:rgba(155,140,255,0.1)">'+a.icon+'</div><div class="exp-main"><div class="exp-name">'+a.name+'</div><div class="exp-sub">'+fmt(a.total)+' ر.س · '+a.months+' شهر'+(a.bank?' · '+a.bank:'')+(expired?' · <span style="color:var(--green);font-weight:700">✅ مكتمل</span>':' · متبقي '+left+' شهر')+'</div></div><div style="text-align:left"><div class="exp-amount" style="color:var(--purple)">'+fmt(mo)+'</div><div class="exp-pct">/شهر</div></div><div class="row-btns"><button class="ibtn edit" onclick="editAccrual('+realIdx+')">✏️</button><button class="ibtn del" onclick="delAccrual('+realIdx+')">🗑</button></div></div><div class="acc-prog-wrap"><div class="acc-prog" style="width:'+pct+'%"></div></div><div class="acc-bottom"><span>وعاء: <b style="color:var(--purple)">'+fmt(accrued)+'</b> ر.س</span><span>'+pct+'%</span></div>'+
+    '<label class="acc-check">'+
+    '<input type="checkbox" '+(isPaid?'checked':'')+
+    ' onchange="toggleAccrualPaid('+realIdx+',\''+_cur+'\'\',this.checked)"/>'+
+    '<span style="color:'+(isPaid?'var(--green)':'var(--muted)')+'">'+(isPaid?'✅ تم السداد هذا الشهر':'☐ لم يُسدَّد بعد')+'</span>'+
+    '</label>'+
+    '</div>';
   }).join('');
 }
 function renderBanks(){var el=document.getElementById('banks-list');if(!el)return;if(!_D.banks.length){el.innerHTML='<div class="empty">أضف حساباتك البنكية</div>';return;}el.innerHTML=_D.banks.map(function(b,i){return '<div class="exp-row"><div style="width:12px;height:12px;border-radius:50%;background:'+b.color+';flex-shrink:0"></div><div class="exp-main"><div class="exp-name">'+b.name+'</div></div><div class="row-btns"><button class="ibtn del" onclick="delBank('+i+')">🗑</button></div></div>';}).join('');}
