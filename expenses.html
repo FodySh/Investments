@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8"/>
@@ -38,29 +37,29 @@ body{background:var(--bg);color:var(--white);font-family:'Cairo',sans-serif;font
 .exp-pane{display:none;padding:14px;flex-direction:column;gap:12px}.exp-pane.active{display:flex}
 
 @media(min-width:900px){
-.main{max-width:1280px;padding:24px 32px}
-.desktop-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
-.desktop-col{display:flex;flex-direction:column;gap:14px}
+  .main{max-width:1280px;padding:24px 32px}
+  .desktop-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+  .desktop-col{display:flex;flex-direction:column;gap:14px}
 }
 @media(max-width:899px){
-.desktop-grid{display:flex;flex-direction:column;gap:12px}
-.desktop-col{display:flex;flex-direction:column;gap:12px}
+  .desktop-grid{display:flex;flex-direction:column;gap:12px}
+  .desktop-col{display:flex;flex-direction:column;gap:12px}
 }
-.salary-card{background:linear-gradient(135deg,rgba(201,169,110,0.08),rgba(78,205,196,0.04));border:1px solid var(–border2);border-radius:16px;padding:16px;position:relative;overflow:hidden}
-.salary-card::before{content:’’;position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(–gold),var(–cyan),var(–gold))}
-.salary-inp{background:rgba(0,0,0,0.35);border:1px solid var(–border2);border-radius:10px;padding:10px 14px;font-family:var(–mono);font-size:22px;font-weight:600;color:var(–gold2);width:175px;outline:none;direction:ltr;text-align:left;transition:border .15s}
-.salary-inp:focus{border-color:var(–gold)}
+.salary-card{background:linear-gradient(135deg,rgba(201,169,110,0.08),rgba(78,205,196,0.04));border:1px solid var(--border2);border-radius:16px;padding:16px;position:relative;overflow:hidden}
+.salary-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--cyan),var(--gold))}
+.salary-inp{background:rgba(0,0,0,0.35);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;font-family:var(--mono);font-size:22px;font-weight:600;color:var(--gold2);width:175px;outline:none;direction:ltr;text-align:left;transition:border .15s}
+.salary-inp:focus{border-color:var(--gold)}
 .wf-bar{height:10px;border-radius:10px;background:rgba(255,255,255,0.06);overflow:hidden;margin:10px 0 6px;display:flex;gap:1px}
 .wf-seg{height:100%;transition:width .5s cubic-bezier(.16,1,.3,1)}
 .wf-legend{display:flex;flex-wrap:wrap;gap:10px}
 .wf-leg{display:flex;align-items:center;gap:4px;font-size:10px;color:rgba(240,240,238,0.7);font-weight:600}
 .wf-dot{width:8px;height:8px;border-radius:2px}
-.remaining-row{display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,0.25);border-radius:10px;padding:10px 14px;margin-top:12px;border:1px solid var(–border)}
-.sec{background:var(–card);border:1px solid var(–border);border-radius:14px;overflow:hidden}
-.sec-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(–border)}
+.remaining-row{display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,0.25);border-radius:10px;padding:10px 14px;margin-top:12px;border:1px solid var(--border)}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.sec-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)}
 .sec-title{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700}
-.sec-badge{font-family:var(–mono);font-size:11px;color:rgba(240,240,238,0.55)}
-.add-btn{display:flex;align-items:center;gap:4px;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid;font-family:‘Cairo’,sans-serif;transition:all .15s}
+.sec-badge{font-family:var(--mono);font-size:11px;color:rgba(240,240,238,0.55)}
+.add-btn{display:flex;align-items:center;gap:4px;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid;font-family:'Cairo',sans-serif;transition:all .15s}
 .exp-row{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid rgba(255,255,255,0.04);transition:background .12s}
 .exp-row:last-child{border-bottom:none}
 .exp-row:hover{background:rgba(255,255,255,0.02)}
@@ -68,61 +67,60 @@ body{background:var(--bg);color:var(--white);font-family:'Cairo',sans-serif;font
 .exp-main{flex:1;min-width:0}
 .exp-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .exp-sub{font-size:11px;color:rgba(240,240,238,0.58);margin-top:1px}
-.exp-amount{font-family:var(–mono);font-size:13px;font-weight:600;text-align:left;white-space:nowrap}
-.exp-pct{font-size:10px;color:var(–muted);text-align:left}
+.exp-amount{font-family:var(--mono);font-size:13px;font-weight:600;text-align:left;white-space:nowrap}
+.exp-pct{font-size:10px;color:var(--muted);text-align:left}
 .row-btns{display:flex;gap:3px}
-.ibtn{width:26px;height:26px;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid var(–border);color:var(–muted);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .12s}
-.ibtn.edit:hover{border-color:var(–gold);color:var(–gold)}
-.ibtn.del:hover{border-color:var(–red);color:var(–red)}
+.ibtn{width:26px;height:26px;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.ibtn.edit:hover{border-color:var(--gold);color:var(--gold)}
+.ibtn.del:hover{border-color:var(--red);color:var(--red)}
 .acc-row{padding:13px 16px;border-bottom:1px solid rgba(255,255,255,0.04)}
 .acc-row:last-child{border-bottom:none}
 .acc-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .acc-prog-wrap{background:rgba(0,0,0,0.3);border-radius:6px;height:5px;overflow:hidden;margin-bottom:4px}
-.acc-prog{height:100%;border-radius:6px;background:linear-gradient(90deg,var(–purple),var(–cyan));transition:width .6s}
-.acc-bottom{display:flex;justify-content:space-between;font-size:10px;color:var(–muted)}
+.acc-prog{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--purple),var(--cyan));transition:width .6s}
+.acc-bottom{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}
 .acc-check{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none;padding:7px 0 0}
-.acc-check input[type=checkbox]{width:17px;height:17px;accent-color:var(–green);cursor:pointer;flex-shrink:0}
+.acc-check input[type=checkbox]{width:17px;height:17px;accent-color:var(--green);cursor:pointer;flex-shrink:0}
 .acc-check span{font-size:11px;font-weight:700;color:rgba(240,240,238,0.65)}
 .acc-row.paid{opacity:.6}
-.acc-row.paid .acc-prog{background:linear-gradient(90deg,var(–green),var(–green))}
-.acc-row.paid .exp-amount,.acc-row.paid .exp-name{text-decoration:line-through;color:var(–muted)}
+.acc-row.paid .acc-prog{background:linear-gradient(90deg,var(--green),var(--green))}
+.acc-row.paid .exp-amount,.acc-row.paid .exp-name{text-decoration:line-through;color:var(--muted)}
 .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
-.skpi{background:var(–card);border:1px solid var(–border);border-radius:12px;padding:13px}
+.skpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px}
 .skpi-label{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(240,240,238,0.6);margin-bottom:4px}
-.skpi-val{font-family:var(–mono);font-size:20px;font-weight:700;color:var(–gold2)}
-.month-breakdown{background:var(–bg2);border:1px solid var(–border);border-radius:14px;padding:14px}
+.skpi-val{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--gold2)}
+.month-breakdown{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px}
 .mb-row{display:flex;align-items:center;gap:10px;margin-bottom:7px}
 .mb-label{font-size:11px;color:rgba(240,240,238,0.65);min-width:120px}
 .mb-bar-wrap{flex:1;height:6px;background:rgba(255,255,255,0.06);border-radius:6px;overflow:hidden}
 .mb-bar{height:100%;border-radius:6px;transition:width .5s}
-.mb-val{font-family:var(–mono);font-size:11px;font-weight:600;min-width:65px;text-align:left}
+.mb-val{font-family:var(--mono);font-size:11px;font-weight:600;min-width:65px;text-align:left}
 .overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s}
 .overlay.open{opacity:1;pointer-events:all}
-.modal{background:var(–bg2);border:1px solid var(–border2);border-radius:16px;padding:20px;width:100%;max-width:420px;transform:translateY(20px);transition:transform .25s;max-height:90vh;overflow-y:auto}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:20px;width:100%;max-width:420px;transform:translateY(20px);transition:transform .25s;max-height:90vh;overflow-y:auto}
 .overlay.open .modal{transform:none}
-.modal-title{font-size:15px;font-weight:800;color:var(–white);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
-.xbtn{background:none;border:none;color:var(–muted);cursor:pointer;font-size:20px;line-height:1}
+.modal-title{font-size:15px;font-weight:800;color:var(--white);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.xbtn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;line-height:1}
 .field{display:flex;flex-direction:column;gap:4px;margin-bottom:11px}
 .field label{font-size:11px;font-weight:700;color:rgba(240,240,238,0.7);letter-spacing:.04em}
-.field input,.field select{background:rgba(0,0,0,0.3);border:1px solid var(–border);border-radius:9px;padding:9px 12px;font-family:‘Cairo’,sans-serif;font-size:13px;color:var(–white);outline:none;transition:border .15s;width:100%}.field input::placeholder{color:rgba(240,240,238,0.3)}
-.field input:focus,.field select:focus{border-color:var(–gold)}
-.field select option{background:var(–bg2)}
+.field input,.field select{background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:9px;padding:9px 12px;font-family:'Cairo',sans-serif;font-size:13px;color:var(--white);outline:none;transition:border .15s;width:100%}.field input::placeholder{color:rgba(240,240,238,0.3)}
+.field input:focus,.field select:focus{border-color:var(--gold)}
+.field select option{background:var(--bg2)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .toggle-row{display:flex;gap:6px;margin-bottom:11px}
-.toggle-opt{flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(–border);background:transparent;color:var(–muted);font-family:‘Cairo’,sans-serif;transition:all .15s;text-align:center}
-.toggle-opt.active{border-color:var(–gold);background:rgba(201,169,110,0.12);color:var(–gold)}
-.savebtn{width:100%;padding:11px;margin-top:4px;background:var(–gold);border:none;border-radius:10px;font-size:14px;font-weight:800;color:#0d0c09;cursor:pointer;font-family:‘Cairo’,sans-serif;transition:opacity .15s}
+.toggle-opt{flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Cairo',sans-serif;transition:all .15s;text-align:center}
+.toggle-opt.active{border-color:var(--gold);background:rgba(201,169,110,0.12);color:var(--gold)}
+.savebtn{width:100%;padding:11px;margin-top:4px;background:var(--gold);border:none;border-radius:10px;font-size:14px;font-weight:800;color:#0d0c09;cursor:pointer;font-family:'Cairo',sans-serif;transition:opacity .15s}
 .savebtn:hover{opacity:.88}
-.empty{padding:26px;text-align:center;color:var(–muted);font-size:12px}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(14px);background:var(–bg3);border:1px solid var(–border2);border-radius:10px;padding:9px 18px;font-size:12px;font-weight:600;color:var(–white);z-index:999;opacity:0;transition:all .22s;pointer-events:none;white-space:nowrap}
+.empty{padding:26px;text-align:center;color:var(--muted);font-size:12px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:9px 18px;font-size:12px;font-weight:600;color:var(--white);z-index:999;opacity:0;transition:all .22s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.shortcut-box{background:rgba(155,140,255,0.07);border:1px solid rgba(155,140,255,0.22);border-radius:12px;padding:14px;font-size:12px;color:var(–muted);line-height:1.85}
-.shortcut-box b{color:var(–purple)}
-.shortcut-box code{font-family:var(–mono);font-size:10px;background:rgba(155,140,255,0.12);padding:1px 6px;border-radius:4px;color:var(–purple)}
+.shortcut-box{background:rgba(155,140,255,0.07);border:1px solid rgba(155,140,255,0.22);border-radius:12px;padding:14px;font-size:12px;color:var(--muted);line-height:1.85}
+.shortcut-box b{color:var(--purple)}
+.shortcut-box code{font-family:var(--mono);font-size:10px;background:rgba(155,140,255,0.12);padding:1px 6px;border-radius:4px;color:var(--purple)}
 ::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-thumb{background:var(–border);border-radius:4px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
 </style>
-
 </head>
 <body>
 
@@ -136,10 +134,11 @@ body{background:var(--bg);color:var(--white);font-family:'Cairo',sans-serif;font
   <div style="display:flex;align-items:center;gap:8px"><a href="help.html" target="_blank" title="دليل الاستخدام" style="width:30px;height:30px;border-radius:8px;background:rgba(201,169,110,0.1);border:1px solid rgba(201,169,110,0.2);color:var(--gold);display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:14px;font-weight:800">?</a><div style="font-size:11px;color:var(--muted)" id="user-disp"></div></div>
 </div>
 
+
+
 <div class="main">
 
 <!-- ══ TABS ══ -->
-
 <div class="exp-tabs">
   <button class="exp-tab active" onclick="switchExpTab('input')" id="exptab-input">📝 الإدخال</button>
   <button class="exp-tab" onclick="switchExpTab('analysis')" id="exptab-analysis">📊 التحليل</button>
@@ -147,11 +146,9 @@ body{background:var(--bg);color:var(--white);font-family:'Cairo',sans-serif;font
 </div>
 
 <!-- ══ TAB 1: INPUT ══ -->
-
 <div class="exp-pane active" id="exppane-input" style="max-width:900px;margin:0 auto;width:100%;padding:16px">
 
   <!-- ═══ SALARY (full width always) ═══ -->
-
 <div id="pane-overview">
   <div class="salary-card">
     <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px">
@@ -182,65 +179,68 @@ body{background:var(--bg);color:var(--white);font-family:'Cairo',sans-serif;font
   </div>
 </div>
 
+
+
+  
+
   <div style="display:grid;grid-template-columns:1fr;gap:12px">
+  
+    <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(240,240,238,0.6)">المصاريف الثابتة</div>
+    <div id="pane-fixed" class="sec">
+      <div class="sec-head">
+        <div class="sec-title">🔒 ثابتة <span class="sec-badge" id="fixed-badge">0 ر.س</span></div>
+        <div style="display:flex;gap:6px">
+          <button onclick="exportFixedExcel()" style="display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(201,169,110,0.3);color:var(--gold);background:rgba(201,169,110,0.07)">📥 Excel</button>
+          <label style="display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(201,169,110,0.25);color:var(--gold);background:rgba(201,169,110,0.05)" title="استيراد Excel">
+            📤 استيراد<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importFixedExcel(this)"/>
+          </label>
+          <button class="add-btn" onclick="openModal('fixed')" style="background:rgba(201,169,110,0.1);border-color:rgba(201,169,110,0.3);color:var(--gold)">+ إضافة</button>
+        </div>
+      </div>
 
-```
-<div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(240,240,238,0.6)">المصاريف الثابتة</div>
-<div id="pane-fixed" class="sec">
-  <div class="sec-head">
-    <div class="sec-title">🔒 ثابتة <span class="sec-badge" id="fixed-badge">0 ر.س</span></div>
-    <div style="display:flex;gap:6px">
-      <button onclick="exportFixedExcel()" style="display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(201,169,110,0.3);color:var(--gold);background:rgba(201,169,110,0.07)">📥 Excel</button>
-      <label style="display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(201,169,110,0.25);color:var(--gold);background:rgba(201,169,110,0.05)" title="استيراد Excel">
-        📤 استيراد<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importFixedExcel(this)"/>
-      </label>
-      <button class="add-btn" onclick="openModal('fixed')" style="background:rgba(201,169,110,0.1);border-color:rgba(201,169,110,0.3);color:var(--gold)">+ إضافة</button>
+      <div id="fixed-list"></div>
     </div>
-  </div>
 
-  <div id="fixed-list"></div>
-</div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(240,240,238,0.6)">المصاريف المتغيرة</div>
+    <div id="pane-variable" class="sec">
+      <div class="sec-head">
+        <div class="sec-title">🔄 متغيرة — <span id="var-month-label" style="color:var(--cyan)"></span> <span class="sec-badge" id="var-badge">0 ر.س</span></div>
+        <div style="display:flex;gap:6px">
+          <button onclick="exportVariableExcel()" style="display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(78,205,196,0.3);color:var(--cyan);background:rgba(78,205,196,0.07)">📥 Excel</button>
+          <label style="display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(78,205,196,0.25);color:var(--cyan);background:rgba(78,205,196,0.05)" title="استيراد Excel">
+            📤 استيراد<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importVariableExcel(this)"/>
+          </label>
+          <button class="add-btn" onclick="openModal('variable')" style="background:rgba(78,205,196,0.1);border-color:rgba(78,205,196,0.3);color:var(--cyan)">+ تسجيل</button>
+        </div>
+      </div>
 
-<div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(240,240,238,0.6)">المصاريف المتغيرة</div>
-<div id="pane-variable" class="sec">
-  <div class="sec-head">
-    <div class="sec-title">🔄 متغيرة — <span id="var-month-label" style="color:var(--cyan)"></span> <span class="sec-badge" id="var-badge">0 ر.س</span></div>
-    <div style="display:flex;gap:6px">
-      <button onclick="exportVariableExcel()" style="display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(78,205,196,0.3);color:var(--cyan);background:rgba(78,205,196,0.07)">📥 Excel</button>
-      <label style="display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(78,205,196,0.25);color:var(--cyan);background:rgba(78,205,196,0.05)" title="استيراد Excel">
-        📤 استيراد<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importVariableExcel(this)"/>
-      </label>
-      <button class="add-btn" onclick="openModal('variable')" style="background:rgba(78,205,196,0.1);border-color:rgba(78,205,196,0.3);color:var(--cyan)">+ تسجيل</button>
+      <div id="variable-list"></div>
     </div>
-  </div>
 
-  <div id="variable-list"></div>
-</div>
-
-<!-- Category Analysis -->
-<div class="sec">
-  <div class="sec-head">
-    <div class="sec-title" style="color:var(--cyan)">📊 تحليل الفئات — <span id="cat-month-label" style="color:var(--muted)"></span></div>
-    <button onclick="openBudgetModal()" style="padding:5px 12px;background:rgba(78,205,196,0.1);border:1px solid rgba(78,205,196,0.3);border-radius:8px;font-size:11px;font-weight:700;color:var(--cyan);cursor:pointer;font-family:'Cairo',sans-serif">⚙️ ميزانيات</button>
-  </div>
-  <div id="cat-analysis" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px">
-    <div style="font-size:12px;color:var(--muted);text-align:center;padding:16px">سجّل مصاريف متغيرة لتظهر التحليل</div>
-  </div>
-</div>
+    <!-- Category Analysis -->
+    <div class="sec">
+      <div class="sec-head">
+        <div class="sec-title" style="color:var(--cyan)">📊 تحليل الفئات — <span id="cat-month-label" style="color:var(--muted)"></span></div>
+        <button onclick="openBudgetModal()" style="padding:5px 12px;background:rgba(78,205,196,0.1);border:1px solid rgba(78,205,196,0.3);border-radius:8px;font-size:11px;font-weight:700;color:var(--cyan);cursor:pointer;font-family:'Cairo',sans-serif">⚙️ ميزانيات</button>
+      </div>
+      <div id="cat-analysis" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:12px;color:var(--muted);text-align:center;padding:16px">سجّل مصاريف متغيرة لتظهر التحليل</div>
+      </div>
+    </div>
 
 
 
-<div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(240,240,238,0.6)">المصاريف الدورية</div>
-<div id="pane-accrual" class="sec">
-  <div class="sec-head">
-    <div class="sec-title">📅 دورية <span class="sec-badge" id="acc-badge">0 ر.س/شهر</span></div>
-    <button class="add-btn" onclick="openModal('accrual')" style="background:rgba(155,140,255,0.1);border-color:rgba(155,140,255,0.3);color:var(--purple)">+ إضافة</button>
-  </div>
-  <div style="padding:8px 16px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)">تختفي تلقائياً بعد انتهاء المدة</div>
-  <div id="accrual-list"></div>
-</div>
-```
+    <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(240,240,238,0.6)">المصاريف الدورية</div>
+    <div id="pane-accrual" class="sec">
+      <div class="sec-head">
+        <div class="sec-title">📅 دورية <span class="sec-badge" id="acc-badge">0 ر.س/شهر</span></div>
+        <button class="add-btn" onclick="openModal('accrual')" style="background:rgba(155,140,255,0.1);border-color:rgba(155,140,255,0.3);color:var(--purple)">+ إضافة</button>
+      </div>
+      <div style="padding:8px 16px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)">تختفي تلقائياً بعد انتهاء المدة</div>
+      <div id="accrual-list"></div>
+    </div>
 
+  
   </div>
 
 </div>
@@ -248,80 +248,78 @@ body{background:var(--bg);color:var(--white);font-family:'Cairo',sans-serif;font
 
   <div class="desktop-grid">
 
-```
-<!-- LEFT: KPIs + Donut + Annual Chart -->
-<div class="desktop-col">
+    <!-- LEFT: KPIs + Donut + Annual Chart -->
+    <div class="desktop-col">
 
-  <div class="summary-grid">
-    <div class="skpi"><div class="skpi-label">إجمالي مصاريف</div><div class="skpi-val" id="kpi-total">0</div><div style="font-size:10px;color:var(--muted)">ر.س</div></div>
-    <div class="skpi"><div class="skpi-label">ثابتة</div><div class="skpi-val" id="kpi-fixed" style="color:var(--gold)">0</div><div style="font-size:10px;color:var(--muted)">ر.س</div></div>
-    <div class="skpi"><div class="skpi-label">متغيرة</div><div class="skpi-val" id="kpi-var" style="color:var(--cyan)">0</div><div style="font-size:10px;color:var(--muted)">هذا الشهر</div></div>
-    <div class="skpi"><div class="skpi-label">دورية</div><div class="skpi-val" id="kpi-acc" style="color:var(--purple)">0</div><div style="font-size:10px;color:var(--muted)">ر.س/شهر</div></div>
-  </div>
+      <div class="summary-grid">
+        <div class="skpi"><div class="skpi-label">إجمالي مصاريف</div><div class="skpi-val" id="kpi-total">0</div><div style="font-size:10px;color:var(--muted)">ر.س</div></div>
+        <div class="skpi"><div class="skpi-label">ثابتة</div><div class="skpi-val" id="kpi-fixed" style="color:var(--gold)">0</div><div style="font-size:10px;color:var(--muted)">ر.س</div></div>
+        <div class="skpi"><div class="skpi-label">متغيرة</div><div class="skpi-val" id="kpi-var" style="color:var(--cyan)">0</div><div style="font-size:10px;color:var(--muted)">هذا الشهر</div></div>
+        <div class="skpi"><div class="skpi-label">دورية</div><div class="skpi-val" id="kpi-acc" style="color:var(--purple)">0</div><div style="font-size:10px;color:var(--muted)">ر.س/شهر</div></div>
+      </div>
 
-  <div class="sec">
-    <div class="sec-head"><div class="sec-title">🍩 توزيع الراتب</div><span class="sec-badge" id="chart-month-label"></span></div>
-    <div style="padding:16px;display:flex;gap:20px;align-items:center;flex-wrap:wrap">
-      <div style="position:relative;flex-shrink:0">
-        <svg id="donut-svg" width="140" height="140" viewBox="0 0 140 140">
-          <circle cx="70" cy="70" r="50" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="20"/>
-          <g id="donut-segs"></g>
-        </svg>
-        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
-          <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--gold2)" id="donut-center-val">0</div>
-          <div style="font-size:9px;color:var(--muted)">ر.س</div>
+      <div class="sec">
+        <div class="sec-head"><div class="sec-title">🍩 توزيع الراتب</div><span class="sec-badge" id="chart-month-label"></span></div>
+        <div style="padding:16px;display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+          <div style="position:relative;flex-shrink:0">
+            <svg id="donut-svg" width="140" height="140" viewBox="0 0 140 140">
+              <circle cx="70" cy="70" r="50" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="20"/>
+              <g id="donut-segs"></g>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+              <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--gold2)" id="donut-center-val">0</div>
+              <div style="font-size:9px;color:var(--muted)">ر.س</div>
+            </div>
+          </div>
+          <div id="donut-legend" style="display:flex;flex-direction:column;gap:9px;flex:1;min-width:130px"></div>
         </div>
       </div>
-      <div id="donut-legend" style="display:flex;flex-direction:column;gap:9px;flex:1;min-width:130px"></div>
+
+      <div class="sec">
+        <div class="sec-head"><div class="sec-title">📅 مصاريف السنة</div><span class="sec-badge" id="annual-year"></span></div>
+        <div style="padding:14px 16px">
+          <canvas id="annual-chart" height="120" style="width:100%"></canvas>
+          <div id="annual-labels" style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:var(--muted)"></div>
+        </div>
+      </div>
+
     </div>
-  </div>
 
-  <div class="sec">
-    <div class="sec-head"><div class="sec-title">📅 مصاريف السنة</div><span class="sec-badge" id="annual-year"></span></div>
-    <div style="padding:14px 16px">
-      <canvas id="annual-chart" height="120" style="width:100%"></canvas>
-      <div id="annual-labels" style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:var(--muted)"></div>
+    <!-- RIGHT: Breakdown + Comparison + Category Analysis -->
+    <div class="desktop-col">
+
+      <div class="month-breakdown">
+        <div style="font-size:13px;font-weight:700;color:var(--white);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+          <span>تفصيل <span id="breakdown-month" style="color:var(--gold)"></span></span>
+          <button onclick="exportMonth()" style="padding:5px 12px;background:rgba(92,185,138,0.12);border:1px solid rgba(92,185,138,0.3);border-radius:8px;color:var(--green);font-size:11px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif">📥 تصدير</button>
+        </div>
+        <div id="breakdown-rows"></div>
+        <div id="surplus-box" style="border-radius:10px;padding:12px 16px;margin-top:12px;display:flex;align-items:center;justify-content:space-between"></div>
+      </div>
+
+      <!-- Fixed expenses by bank -->
+      <div class="sec">
+        <div class="sec-head">
+          <div class="sec-title">🏦 المصاريف الثابتة حسب الحساب</div>
+          <span class="sec-badge" id="fixed-bank-total-badge">0 ر.س</span>
+        </div>
+        <div id="fixed-by-bank-list" style="display:flex;flex-direction:column;gap:0"></div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-head"><div class="sec-title" style="color:var(--orange)">📈 مقارنة بالشهر السابق</div></div>
+        <div id="month-compare" style="padding:12px 16px;display:flex;flex-direction:column;gap:4px"></div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-head">
+          <div class="sec-title" style="color:var(--cyan)">📊 تحليل الفئات — <span id="cat-month-label" style="color:var(--muted)"></span></div>
+          <button onclick="openBudgetModal()" style="padding:5px 12px;background:rgba(78,205,196,0.1);border:1px solid rgba(78,205,196,0.3);border-radius:8px;font-size:11px;font-weight:700;color:var(--cyan);cursor:pointer;font-family:'Cairo',sans-serif">⚙️ ميزانيات</button>
+        </div>
+        <div id="cat-analysis" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+
     </div>
-  </div>
-
-</div>
-
-<!-- RIGHT: Breakdown + Comparison + Category Analysis -->
-<div class="desktop-col">
-
-  <div class="month-breakdown">
-    <div style="font-size:13px;font-weight:700;color:var(--white);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
-      <span>تفصيل <span id="breakdown-month" style="color:var(--gold)"></span></span>
-      <button onclick="exportMonth()" style="padding:5px 12px;background:rgba(92,185,138,0.12);border:1px solid rgba(92,185,138,0.3);border-radius:8px;color:var(--green);font-size:11px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif">📥 تصدير</button>
-    </div>
-    <div id="breakdown-rows"></div>
-    <div id="surplus-box" style="border-radius:10px;padding:12px 16px;margin-top:12px;display:flex;align-items:center;justify-content:space-between"></div>
-  </div>
-
-  <!-- Fixed expenses by bank -->
-  <div class="sec">
-    <div class="sec-head">
-      <div class="sec-title">🏦 المصاريف الثابتة حسب الحساب</div>
-      <span class="sec-badge" id="fixed-bank-total-badge">0 ر.س</span>
-    </div>
-    <div id="fixed-by-bank-list" style="display:flex;flex-direction:column;gap:0"></div>
-  </div>
-
-  <div class="sec">
-    <div class="sec-head"><div class="sec-title" style="color:var(--orange)">📈 مقارنة بالشهر السابق</div></div>
-    <div id="month-compare" style="padding:12px 16px;display:flex;flex-direction:column;gap:4px"></div>
-  </div>
-
-  <div class="sec">
-    <div class="sec-head">
-      <div class="sec-title" style="color:var(--cyan)">📊 تحليل الفئات — <span id="cat-month-label" style="color:var(--muted)"></span></div>
-      <button onclick="openBudgetModal()" style="padding:5px 12px;background:rgba(78,205,196,0.1);border:1px solid rgba(78,205,196,0.3);border-radius:8px;font-size:11px;font-weight:700;color:var(--cyan);cursor:pointer;font-family:'Cairo',sans-serif">⚙️ ميزانيات</button>
-    </div>
-    <div id="cat-analysis" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px"></div>
-  </div>
-
-</div>
-```
 
   </div>
 
@@ -331,79 +329,72 @@ body{background:var(--bg);color:var(--white);font-family:'Cairo',sans-serif;font
   <div class="desktop-grid">
     <div class="desktop-col">
 
-```
-  <!-- Custom Categories -->
-  <div class="sec" style="margin-bottom:12px">
-    <div class="sec-head">
-      <div class="sec-title">🏷️ فئات المصاريف المتغيرة</div>
-      <button class="add-btn" onclick="addCustomCat()" style="background:rgba(155,140,255,0.1);border-color:rgba(155,140,255,0.3);color:var(--purple)">+ فئة جديدة</button>
-    </div>
-    <div style="padding:8px 16px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)">الفئات الافتراضية + فئاتك المخصصة</div>
-    <div id="custom-cats-list"></div>
-    <div style="padding:10px 16px;display:flex;flex-wrap:wrap;gap:6px" id="default-cats-display">
-```
-
+      <!-- Custom Categories -->
+      <div class="sec" style="margin-bottom:12px">
+        <div class="sec-head">
+          <div class="sec-title">🏷️ فئات المصاريف المتغيرة</div>
+          <button class="add-btn" onclick="addCustomCat()" style="background:rgba(155,140,255,0.1);border-color:rgba(155,140,255,0.3);color:var(--purple)">+ فئة جديدة</button>
+        </div>
+        <div style="padding:8px 16px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)">الفئات الافتراضية + فئاتك المخصصة</div>
+        <div id="custom-cats-list"></div>
+        <div style="padding:10px 16px;display:flex;flex-wrap:wrap;gap:6px" id="default-cats-display">
 <span style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--muted)">طعام</span><span style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--muted)">تسوق</span><span style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--muted)">ترفيه</span><span style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--muted)">صحة</span><span style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--muted)">تعليم</span><span style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--muted)">وقود</span><span style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--muted)">هدايا</span><span style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--muted)">أخرى</span>
-</div>
-</div>
+        </div>
+      </div>
 
-```
-  <!-- Banks -->
-  <div class="sec">
-    <div class="sec-head">
-      <div class="sec-title">🏦 الحسابات البنكية</div>
-      <button class="add-btn" onclick="openModal('bank')" style="background:rgba(78,205,196,0.1);border-color:rgba(78,205,196,0.3);color:var(--cyan)">+ إضافة</button>
+      <!-- Banks -->
+      <div class="sec">
+        <div class="sec-head">
+          <div class="sec-title">🏦 الحسابات البنكية</div>
+          <button class="add-btn" onclick="openModal('bank')" style="background:rgba(78,205,196,0.1);border-color:rgba(78,205,196,0.3);color:var(--cyan)">+ إضافة</button>
+        </div>
+        <div id="banks-list"></div>
+        <div style="padding:8px 16px;font-size:11px;color:var(--muted)">تظهر في القوائم المنسدلة تلقائياً في جميع صفحات الإضافة</div>
+      </div>
+
+      <!-- Incomes -->
+      <div class="sec">
+        <div class="sec-head">
+          <div class="sec-title">➕ مصادر دخل إضافية</div>
+          <button class="add-btn" onclick="openModal('income')" style="background:rgba(92,185,138,0.1);border-color:rgba(92,185,138,0.3);color:var(--green)">+ إضافة</button>
+        </div>
+        <div id="incomes-settings-list"></div>
+      </div>
+
     </div>
-    <div id="banks-list"></div>
-    <div style="padding:8px 16px;font-size:11px;color:var(--muted)">تظهر في القوائم المنسدلة تلقائياً في جميع صفحات الإضافة</div>
-  </div>
 
-  <!-- Incomes -->
-  <div class="sec">
-    <div class="sec-head">
-      <div class="sec-title">➕ مصادر دخل إضافية</div>
-      <button class="add-btn" onclick="openModal('income')" style="background:rgba(92,185,138,0.1);border-color:rgba(92,185,138,0.3);color:var(--green)">+ إضافة</button>
+    <div class="desktop-col">
+
+      <!-- Budgets per category -->
+      <div class="sec">
+        <div class="sec-head">
+          <div class="sec-title">🎯 ميزانية كل فئة</div>
+          <button onclick="saveBudgets()" style="padding:6px 14px;background:var(--gold);border:none;border-radius:8px;font-size:11px;font-weight:700;color:#0d0c09;cursor:pointer;font-family:'Cairo',sans-serif">💾 حفظ</button>
+        </div>
+        <div style="padding:10px 16px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)">حدد حداً أقصى لكل فئة — يظهر تحذير عند التجاوز</div>
+        <div id="budget-fields-inline" style="padding:10px 16px;display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+
+      <!-- iPhone Shortcut guide -->
+      <div class="sec">
+        <div class="sec-head"><div class="sec-title">📱 تسجيل سريع من الجوال</div></div>
+        <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px;font-size:12px;color:var(--muted)">
+          <div style="font-weight:700;color:var(--purple)">⚡ Automation — يفتح عند وصول رسالة البنك</div>
+          <div>١. افتح <b style="color:var(--white)">Shortcuts</b> ← Automation ← +</div>
+          <div>٢. اختر <b style="color:var(--white)">Message</b> ← في From اكتب اسم البنك</div>
+          <div>٣. Next ← New Blank Automation ← Add Action ← <b style="color:var(--white)">Open URLs</b></div>
+          <div>٤. الرابط: <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--purple);word-break:break-all">https://fodysh.github.io/expenses.html#add-variable</span></div>
+          <div>٥. Done ← أوقف <b style="color:var(--white)">Ask Before Running</b></div>
+          <div style="background:rgba(92,185,138,0.08);border:1px solid rgba(92,185,138,0.2);border-radius:8px;padding:8px 10px"><b style="color:var(--green)">النتيجة:</b> عند رسالة البنك يفتح صفحة إضافة المصروف مباشرة</div>
+        </div>
+      </div>
+
     </div>
-    <div id="incomes-settings-list"></div>
-  </div>
-
-</div>
-
-<div class="desktop-col">
-
-  <!-- Budgets per category -->
-  <div class="sec">
-    <div class="sec-head">
-      <div class="sec-title">🎯 ميزانية كل فئة</div>
-      <button onclick="saveBudgets()" style="padding:6px 14px;background:var(--gold);border:none;border-radius:8px;font-size:11px;font-weight:700;color:#0d0c09;cursor:pointer;font-family:'Cairo',sans-serif">💾 حفظ</button>
-    </div>
-    <div style="padding:10px 16px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)">حدد حداً أقصى لكل فئة — يظهر تحذير عند التجاوز</div>
-    <div id="budget-fields-inline" style="padding:10px 16px;display:flex;flex-direction:column;gap:8px"></div>
-  </div>
-
-  <!-- iPhone Shortcut guide -->
-  <div class="sec">
-    <div class="sec-head"><div class="sec-title">📱 تسجيل سريع من الجوال</div></div>
-    <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px;font-size:12px;color:var(--muted)">
-      <div style="font-weight:700;color:var(--purple)">⚡ Automation — يفتح عند وصول رسالة البنك</div>
-      <div>١. افتح <b style="color:var(--white)">Shortcuts</b> ← Automation ← +</div>
-      <div>٢. اختر <b style="color:var(--white)">Message</b> ← في From اكتب اسم البنك</div>
-      <div>٣. Next ← New Blank Automation ← Add Action ← <b style="color:var(--white)">Open URLs</b></div>
-      <div>٤. الرابط: <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--purple);word-break:break-all">https://fodysh.github.io/expenses.html#add-variable</span></div>
-      <div>٥. Done ← أوقف <b style="color:var(--white)">Ask Before Running</b></div>
-      <div style="background:rgba(92,185,138,0.08);border:1px solid rgba(92,185,138,0.2);border-radius:8px;padding:8px 10px"><b style="color:var(--green)">النتيجة:</b> عند رسالة البنك يفتح صفحة إضافة المصروف مباشرة</div>
-    </div>
-  </div>
-
-</div>
-```
-
   </div>
 
 </div>
 
 <!-- Quick Help Modal -->
-
 <div class="overlay" id="m-help" style="align-items:flex-start;padding-top:60px">
   <div class="modal" style="max-width:480px">
     <div class="modal-title">📖 دليل سريع — المصاريف <button class="xbtn" onclick="closeModal('help')">×</button></div>
@@ -1352,11 +1343,10 @@ function onSalaryChange(){_D.salary=parseFloat(gv('salary-inp'))||0;renderWaterf
 function toast(msg){var t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.classList.add('show');clearTimeout(window._tt);window._tt=setTimeout(function(){t.classList.remove('show');},2800);}
 document.addEventListener('DOMContentLoaded',function(){sv('v-date',today());});
 </script>
-
 <script src="tour.js"></script>
-
 </body>
 </htm
   </div>
 </div>
 
+>
