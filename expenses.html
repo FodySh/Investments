@@ -80,6 +80,11 @@ body{background:var(--bg);color:var(--white);font-family:'Cairo',sans-serif;font
 .acc-prog{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--purple),var(--cyan));transition:width .6s}
 .acc-bottom{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}
 .acc-check{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none;padding:7px 0 0}
+.fix-check{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none;margin-top:4px}
+.fix-check input[type=checkbox]{width:16px;height:16px;accent-color:var(--gold);cursor:pointer;flex-shrink:0}
+.fix-check span{font-size:11px;font-weight:700}
+.exp-row.fix-paid{opacity:.55}
+.exp-row.fix-paid .exp-amount{text-decoration:line-through;color:var(--muted)}
 .acc-check input[type=checkbox]{width:17px;height:17px;accent-color:var(--green);cursor:pointer;flex-shrink:0}
 .acc-check span{font-size:11px;font-weight:700;color:rgba(240,240,238,0.65)}
 .acc-row.paid{opacity:.6}
@@ -520,7 +525,12 @@ var _fixedMode='amount';
 var MONTHS=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 _auth.onAuthStateChanged(function(u){if(!u){window.location.href='index.html';return;}_uid=u.uid;var e=document.getElementById('user-disp');if(e)e.textContent=u.email||'';loadData();});
 function docRef(){return _db.collection('users').doc(_uid).collection('portfolio').doc('expenses');}
-function loadData(){docRef().get().then(function(s){if(s.exists){var d=s.data();if(d.salary!==undefined)_D.salary=d.salary;if(d.incomes)_D.incomes=d.incomes;if(d.fixed)_D.fixed=d.fixed;if(d.variable)_D.variable=d.variable;if(d.accrual)_D.accrual=d.accrual;if(d.banks)_D.banks=d.banks;
+function loadData(){docRef().get().then(function(s){if(s.exists){var d=s.data();if(d.salary!==undefined)_D.salary=d.salary;if(d.incomes)_D.incomes=d.incomes;if(d.fixed)_D.fixed=d.fixed;if(d.variable)_D.variable=d.variable;if(d.accrual){
+      _D.accrual=d.accrual.map(function(a){
+        if(!a.paid) a.paid={};
+        return a;
+      });
+    }if(d.banks)_D.banks=d.banks;
     if(d.budgets)_D.budgets=d.budgets;
     if(d.incomesByMonth)_D.incomesByMonth=d.incomesByMonth;
     if(d.customCats)_D.customCats=d.customCats;}renderAll();if(window.location.hash==='#add'){openModal('variable');history.replaceState(null,'',window.location.pathname);}}).catch(function(){renderAll();});}
@@ -1139,8 +1149,30 @@ function renderFixed(){
   var el=document.getElementById('fixed-list');if(!el)return;
   if(!_D.fixed.length){el.innerHTML='<div class="empty">لا توجد مصاريف ثابتة</div>';return;}
   el.innerHTML=_D.fixed.map(function(e,i){
-    var amt=resolveFixed(e),sub=(e.mode==='pct'?e.pct+'% من الراتب':'')+(e.cat?' · '+e.cat:'')+(e.bank?' · '+e.bank:'');
-    return '<div class="exp-row"><div class="exp-icon" style="background:rgba(201,169,110,0.1)">'+e.icon+'</div><div class="exp-main"><div class="exp-name">'+e.name+'</div><div class="exp-sub">'+sub+'</div></div><div style="text-align:left"><div class="exp-amount" style="color:var(--gold2)">'+fmt(amt)+'</div>'+(e.mode==='pct'?'<div class="exp-pct">'+e.pct+'%</div>':'')+'</div><div class="row-btns"><button class="ibtn edit" onclick="editFixed('+i+')">✏️</button><button class="ibtn del" onclick="delFixed('+i+')">🗑</button></div></div>';
+    var amt=resolveFixed(e);
+    var sub=(e.mode==='pct'?e.pct+'% من الراتب':'')+(e.cat?' · '+e.cat:'')+(e.bank?' · '+e.bank:'');
+    var isPaid=e.paid&&e.paid[_cur]===true;
+    var paidColor=isPaid?'var(--green)':'rgba(240,240,238,0.45)';
+    var paidLabel=isPaid?'✅ مدفوع هذا الشهر':'☐ لم يُدفع بعد';
+    return '<div class="exp-row'+(isPaid?' fix-paid':'')+'">'+
+      '<div class="exp-icon" style="background:rgba(201,169,110,0.1)">'+e.icon+'</div>'+
+      '<div class="exp-main">'+
+        '<div class="exp-name">'+e.name+'</div>'+
+        '<div class="exp-sub">'+sub+'</div>'+
+        '<label class="fix-check">'+
+          '<input type="checkbox" '+(isPaid?'checked':'')+' onchange="toggleFixedPaid('+i+',\''+_cur+'\',this.checked)"/>'+
+          '<span style="color:'+paidColor+';">'+paidLabel+'</span>'+
+        '</label>'+
+      '</div>'+
+      '<div style="text-align:left">'+
+        '<div class="exp-amount" style="color:var(--gold2)">'+fmt(amt)+'</div>'+
+        (e.mode==='pct'?'<div class="exp-pct">'+e.pct+'%</div>':'')+
+      '</div>'+
+      '<div class="row-btns">'+
+        '<button class="ibtn edit" onclick="editFixed('+i+')">✏️</button>'+
+        '<button class="ibtn del" onclick="delFixed('+i+')">🗑</button>'+
+      '</div>'+
+    '</div>';
   }).join('');
 }
 function renderVariable(){
@@ -1151,6 +1183,15 @@ function renderVariable(){
   el.innerHTML=sorted.map(function(s){var e=s.e,i=s.i;return '<div class="exp-row"><div class="exp-icon" style="background:rgba(78,205,196,0.1)">'+e.icon+'</div><div class="exp-main"><div class="exp-name">'+e.name+'</div><div class="exp-sub">'+(e.cat||'')+(e.bank?' · '+e.bank:'')+(e.date?' · '+e.date:'')+'</div></div><div style="text-align:left"><div class="exp-amount" style="color:var(--cyan)">'+fmt(e.amount)+'</div></div><div class="row-btns"><button class="ibtn edit" onclick="editVariable('+i+')">✏️</button><button class="ibtn del" onclick="delVariable('+i+')">🗑</button></div></div>';}).join('');
 }
 
+
+function toggleFixedPaid(i, month, checked) {
+  var e = _D.fixed[i];
+  if (!e) return;
+  if (!e.paid) e.paid = {};
+  if (checked) e.paid[month] = true;
+  else delete e.paid[month];
+  saveData(true);
+}
 function toggleAccrualPaid(idx, month, checked) {
   var a = _D.accrual[idx];
   if (!a) return;
@@ -1248,7 +1289,7 @@ function delFixed(i){_D.fixed.splice(i,1);saveData();}
 function saveVariable(){var name=gv('v-name').trim(),amt=parseFloat(gv('v-amount'))||0;if(!name||!amt){toast('⚠️ أدخل الاسم والمبلغ');return;}if(!_D.variable[_cur])_D.variable[_cur]=[];var obj={icon:gv('v-icon')||'📌',name:name,amount:amt,cat:gv('v-cat'),date:gv('v-date'),bank:gv('v-bank')};var idx=parseInt(gv('v-edit-idx'));if(idx>=0)_D.variable[_cur][idx]=obj;else _D.variable[_cur].push(obj);closeModal('variable');saveData();}
 function editVariable(i){var e=(_D.variable[_cur]||[])[i];sv('v-edit-idx',i);sv('v-icon',e.icon||'');sv('v-name',e.name||'');sv('v-amount',e.amount||'');sv('v-cat',e.cat||'');sv('v-date',e.date||'');sv('v-bank',e.bank||'');openModal('variable',true);}
 function delVariable(i){if(_D.variable[_cur])_D.variable[_cur].splice(i,1);saveData();}
-function saveAccrual(){var name=gv('a-name').trim(),total=parseFloat(gv('a-total'))||0,months=parseInt(gv('a-months'))||12;if(!name||!total){toast('⚠️ أدخل الاسم والمبلغ');return;}var obj={icon:gv('a-icon')||'📅',name:name,total:total,months:months,startDate:gv('a-start')||today(),bank:gv('a-bank'),note:gv('a-note')};var idx=parseInt(gv('a-edit-idx'));if(idx>=0)_D.accrual[idx]=obj;else _D.accrual.push(obj);closeModal('accrual');saveData();}
+function saveAccrual(){var name=gv('a-name').trim(),total=parseFloat(gv('a-total'))||0,months=parseInt(gv('a-months'))||12;if(!name||!total){toast('⚠️ أدخل الاسم والمبلغ');return;}var obj={icon:gv('a-icon')||'📅',name:name,total:total,months:months,startDate:gv('a-start')||today(),bank:gv('a-bank'),note:gv('a-note')};var idx=parseInt(gv('a-edit-idx'));if(idx>=0){var existPaidA=_D.accrual[idx].paid||{};obj.paid=existPaidA;_D.accrual[idx]=obj;}else{obj.paid={};_D.accrual.push(obj);}closeModal('accrual');saveData();}
 function editAccrual(i){var a=_D.accrual[i];sv('a-edit-idx',i);sv('a-icon',a.icon||'');sv('a-name',a.name||'');sv('a-total',a.total||'');sv('a-months',a.months||12);sv('a-start',a.startDate||'');sv('a-bank',a.bank||'');sv('a-note',a.note||'');calcAccPreview();openModal('accrual',true);}
 function delAccrual(i){_D.accrual.splice(i,1);saveData();}
 function saveBank(){var name=gv('b-name').trim();if(!name){toast('⚠️ أدخل الاسم');return;}_D.banks.push({name:name,color:gv('b-color')||'#c9a96e'});sv('b-name','');closeModal('bank');saveData();}
