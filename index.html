@@ -10753,19 +10753,11 @@ window.fbSaveDividends = function() {
 
 //  Auth: popup on all platforms (redirect breaks on GitHub Pages / iOS Safari)
 window.googleSignIn = function() {
-  _auth.signInWithPopup(_provider).then(function(result) {
-    // success handled by onAuthStateChanged
-  }).catch(function(e) {
-    if (e.code === "auth/popup-blocked") {
-      // Popup was blocked by browser — show guidance
-      if (typeof showToast === "function")
-        showToast("Please allow popups for this site");
-    } else if (e.code !== "auth/popup-closed-by-user"
-            && e.code !== "auth/cancelled-popup-request") {
-      console.error("SignIn error:", e.code, e.message);
-      if (typeof showToast === "function")
-        showToast("Login failed: " + e.code);
-    }
+  // استخدم Redirect بدل Popup لتجنب مشاكل COOP في المتصفحات الحديثة
+  _auth.signInWithRedirect(_provider).catch(function(e) {
+    console.error("SignIn error:", e.code, e.message);
+    if (typeof showToast === "function")
+      showToast("خطأ في تسجيل الدخول: " + (e.message || e.code));
   });
 };
 
@@ -10777,6 +10769,15 @@ window.googleSignOut = function() {
 };
 
 // Auth state listener
+// معالجة نتيجة الـ Redirect بعد عودة المستخدم من Google
+_auth.getRedirectResult().then(function(result) {
+  // نتيجة الـ redirect — onAuthStateChanged سيتولى الباقي
+}).catch(function(e) {
+  if (e.code && e.code !== 'auth/no-auth-event') {
+    console.error("Redirect result error:", e.code);
+  }
+});
+
 _auth.onAuthStateChanged(function(user) {
   window.__firebaseUser = user;
   _updateUI(user);
@@ -14976,5 +14977,4 @@ document.getElementById('app-guide-modal').addEventListener('click', function(e)
     <div id="admin-save-msg" style="display:none;text-align:center;font-size:12px;color:#5cb98a;padding:4px">&#x2705; &#x62A;&#x645; &#x627;&#x644;&#x62D;&#x641;&#x638; &#x628;&#x646;&#x62C;&#x627;&#x62D;</div>
   </div>
 </div>
-<script src="tour.js"></script>
 </body>
