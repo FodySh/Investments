@@ -534,7 +534,18 @@ function loadData(){docRef().get().then(function(s){if(s.exists){var d=s.data();
     if(d.budgets)_D.budgets=d.budgets;
     if(d.incomesByMonth)_D.incomesByMonth=d.incomesByMonth;
     if(d.customCats)_D.customCats=d.customCats;}renderAll();if(window.location.hash==='#add'){openModal('variable');history.replaceState(null,'',window.location.pathname);}}).catch(function(){renderAll();});}
-function saveData(q){if(!_uid)return;docRef().set(_D).then(function(){if(!q)toast('✅ تم الحفظ');renderAll();}).catch(function(){toast('❌ خطأ');});}
+function saveData(q){
+  if(!_uid)return;
+  // Deep copy to ensure Firestore serializes nested objects (like paid:{}) correctly
+  var payload = JSON.parse(JSON.stringify(_D));
+  docRef().set(payload).then(function(){
+    if(!q)toast('✅ تم الحفظ');
+    renderAll();
+  }).catch(function(e){
+    console.error('saveData error:', e);
+    toast('❌ خطأ في الحفظ');
+  });
+}
 function changeMonth(d){var p=_cur.split('-'),dt=new Date(+p[0],+p[1]-1+d,1);_cur=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0');renderAll();}
 function monthStr(ym){var p=ym.split('-');return MONTHS[+p[1]-1]+' '+p[0];}
 function totalIncome(){
