@@ -1028,7 +1028,7 @@ function renderAllByBank() {
   var lbl   = document.getElementById('all-by-bank-month-label');
   if (!el) return;
 
-  var ym = _selMonth;
+  var ym = _cur; // current month (YYYY-MM)
   if (lbl) lbl.textContent = ym ? 'الشهر: ' + ym : 'كل الشهور';
 
   function bankColor(name) {
