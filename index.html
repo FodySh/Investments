@@ -4291,7 +4291,7 @@ function saveDebtsToStorage() {
 function autoFillPlatformFees(platform) {
   if (!platform) return;
   var settings = {};
-  try { settings = JSON.parse(localStorage.getItem('appSettings') || '{}'); } catch(e) {}
+  try { settings = JSON.parse(localStorage.getItem('appSettings') || '{}'); } catch(e) { console.warn('autoFillPlatformFees: failed to parse appSettings:', e.message); }
   var fees = settings.platformFees || [];
   // Also check Firestore cache if available
   var row = fees.find(function(r){ return r.platform === platform; });
@@ -4338,7 +4338,7 @@ function loadPlatformFeesCache() {
           s.platformFees = doc.data().lists.platformFees;
           _saveSettings(s);
         }
-      }).catch(function(){});
+      }).catch(function(e){ console.warn('Platform fees Firestore fetch failed:', e.message); });
   }
 }
 
@@ -4763,9 +4763,9 @@ function fillOppFormFromAI(data, msgEl, spinnerEl, filledEl) {
   setF('f-face-val',  data.face_val,   'القيمة الاسمية');
   setF('f-notes',     data.notes,      'ملاحظات');
 
-  try { onTypeChange(); } catch(e){}
-  try { calcAuto(); }     catch(e){}
-  try { goStep(1); }      catch(e){}
+  try { onTypeChange(); } catch(e){ console.warn('AI autofill onTypeChange error:', e.message); }
+  try { calcAuto(); }     catch(e){ console.warn('AI autofill calcAuto error:', e.message); }
+  try { goStep(1); }      catch(e){ console.warn('AI autofill goStep error:', e.message); }
 
   spinnerEl.style.display = 'none';
   if (filled.length > 0) {
@@ -4831,7 +4831,8 @@ function loadAdminSettings() {
       applyPageVisibility();
       initAdminNav();
     })
-    .catch(function() {
+    .catch(function(e) {
+      console.warn('loadAdminSettings failed:', e.message);
       applyPageVisibility();
       initAdminNav();
     });
@@ -8082,7 +8083,7 @@ async function fetchCompanyName(ticker) {
         found = true;
       }
     }
-  } catch(e) { /* Worker unavailable */ }
+  } catch(e) { console.warn('Worker lookup failed for', ticker + ':', e.message); }
 
   // 2) Fallback: قاموس الأسهم السعودية
   if (!found && _currentStockMarket === 'sa' && saNames[ticker]) {
@@ -9249,7 +9250,7 @@ var _defaultCapitalSources = ['مستحقات','Cash Flow','رصيد الإجا�
 var _defaultPlatforms       = ['ترميز','منافع','دراية','ابيان','عوائد','منصة الأهلي','رياض المالية','الراجحي المالية','بنك البلاد','إتقان','أخرى'];
 
 function _getSettings() {
-  try { return JSON.parse(localStorage.getItem('appSettings') || '{}'); } catch(e) { return {}; }
+  try { return JSON.parse(localStorage.getItem('appSettings') || '{}'); } catch(e) { console.warn('_getSettings: corrupted appSettings in localStorage:', e.message); return {}; }
 }
 function _saveSettings(s) { localStorage.setItem('appSettings', JSON.stringify(s)); }
 
@@ -9817,7 +9818,7 @@ async function fetchSingleStockPrice(ticker) {
       var q = ((data.quoteResponse || {}).result || [])[0];
       if (q) { price = q.regularMarketPrice; chg = q.regularMarketChangePercent || 0; }
     }
-  } catch(e) {}
+  } catch(e) { console.warn('Yahoo v8 quote failed for', symbol + ':', e.message); }
   // Fallback: chart API
   if (!price) {
     try {
@@ -9829,7 +9830,7 @@ async function fetchSingleStockPrice(ticker) {
         price = meta.regularMarketPrice;
         chg   = meta.regularMarketChangePercent || 0;
       }
-    } catch(e2) {}
+    } catch(e2) { console.warn('Yahoo chart fallback failed for', symbol + ':', e2.message); }
   }
   if (price) {
     if (!window.STOCK_PRICES) window.STOCK_PRICES = {};
@@ -10349,10 +10350,10 @@ function _loadData(uid) {
     _read(uid, "investments"),
     _read(uid, "loans"),
     _read(uid, "dividends"),
-    _ref(uid, "settings").get().catch(function(){ return null; }),
-    _ref(uid, "loan_payments").get().catch(function(){ return null; }),
-    _read(uid, "sa_stocks").catch(function(){ return []; }),
-    _read(uid, "us_stocks").catch(function(){ return []; })
+    _ref(uid, "settings").get().catch(function(e){ console.warn('Settings read failed:', e.message); return null; }),
+    _ref(uid, "loan_payments").get().catch(function(e){ console.warn('Loan payments read failed:', e.message); return null; }),
+    _read(uid, "sa_stocks").catch(function(e){ console.warn('SA stocks read failed:', e.message); return []; }),
+    _read(uid, "us_stocks").catch(function(e){ console.warn('US stocks read failed:', e.message); return []; })
   ]).then(function(results) {
     var inv          = results[0];
     var loans        = results[1];
@@ -10557,7 +10558,8 @@ function openUserPerms(uid, name, email) {
       renderUserPerms(permList);
       panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     })
-    .catch(function() {
+    .catch(function(e) {
+      console.warn('Failed to load permissions for user', uid + ':', e.message);
       _selectedUserPerms = {};
       renderUserPerms(permList);
     });
@@ -10652,8 +10654,10 @@ window.fbSaveInvestments = function() {
     _write(_uid, "us_stocks",   usStocks)
   ]).then(function() {
     setTimeout(function(){ _syncing = false; }, 500);
-  }).catch(function() {
+  }).catch(function(e) {
+    console.error('fbSaveInvestments failed:', e.message || e);
     _syncing = false;
+    if (typeof showToast === 'function') showToast('❌ فشل حفظ الاستثمارات');
   });
 };
 window.fbSaveLoans = function() {
@@ -10708,6 +10712,9 @@ window.googleSignOut = function() {
   _auth.signOut().then(function() {
     if (typeof showToast === "function") showToast("Signed out");
     if (typeof closeMobUserMenu === "function") closeMobUserMenu();
+  }).catch(function(e) {
+    console.error('Sign out failed:', e.message);
+    if (typeof showToast === 'function') showToast('❌ فشل تسجيل الخروج');
   });
 };
 
@@ -10723,13 +10730,13 @@ _auth.onAuthStateChanged(function(user) {
     _db.collection('users_list').doc(user.uid).set({
       uid: user.uid, email: user.email||'', displayName: user.displayName||user.email||'',
       lastSeen: new Date().toISOString(), photoURL: user.photoURL||''
-    }, { merge: true }).catch(function(){});
+    }, { merge: true }).catch(function(e){ console.warn('users_list write failed:', e.message); });
     // حمّل صلاحياته
     _db.collection('users_permissions').doc(user.uid).get()
       .then(function(snap) {
         window.__myPermissions = (snap && snap.exists) ? (snap.data().pages||{}) : {};
         applyMyPermissions();
-      }).catch(function(){ window.__myPermissions = {}; });
+      }).catch(function(e){ console.warn('Failed to load user permissions:', e.message); window.__myPermissions = {}; });
   } else {
     _gate(true);  // Show login banner
     // Clear any stale data shown before login

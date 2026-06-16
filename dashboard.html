@@ -1836,8 +1836,8 @@ function _loadData(uid) {
     _read(uid, "investments"),
     _read(uid, "loans"),
     _read(uid, "dividends"),
-    _ref(uid, "settings").get().catch(function(){ return null; }),
-    _read(uid, "debts").catch(function(){ return []; })
+    _ref(uid, "settings").get().catch(function(e){ console.warn('Settings read failed:', e.message); return null; }),
+    _read(uid, "debts").catch(function(e){ console.warn('Debts read failed:', e.message); return []; })
   ]).then(function(results) {
     var inv          = results[0];
     var loans        = results[1];
@@ -2215,8 +2215,8 @@ function _loadData(uid) {
     _read(uid, "investments"),
     _read(uid, "loans"),
     _read(uid, "dividends"),
-    _ref(uid, "settings").get().catch(function(){ return null; }),
-    _read(uid, "debts").catch(function(){ return []; })
+    _ref(uid, "settings").get().catch(function(e){ console.warn('Settings read failed:', e.message); return null; }),
+    _read(uid, "debts").catch(function(e){ console.warn('Debts read failed:', e.message); return []; })
   ]).then(function(results) {
     var inv          = results[0];
     var loans        = results[1];
@@ -3261,7 +3261,7 @@ function initYearFilter() {
 // Firebase Auth listener
 // ══════════════════════════════════════════════════════
 var isLightMode = localStorage.getItem('theme') === 'light';
-try { applyTheme(); } catch(e) {}
+try { applyTheme(); } catch(e) { console.warn('applyTheme failed:', e.message); }
 
 firebase.auth().onAuthStateChanged(function(user) {
   window.__firebaseUser = user;
