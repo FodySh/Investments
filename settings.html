@@ -139,18 +139,12 @@
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="app-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js" crossorigin="anonymous"></script>
 <script>
-firebase.initializeApp({
-  apiKey:            "AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME",
-  authDomain:        "investments-page.firebaseapp.com",
-  projectId:         "investments-page",
-  storageBucket:     "investments-page.firebasestorage.app",
-  messagingSenderId: "964948881361",
-  appId:             "1:964948881361:web:2801b8127489d953717af0"
-});
+firebase.initializeApp(APP_CONFIG.firebase);
 var auth=firebase.auth(), db=firebase.firestore();
 var prov=new firebase.auth.GoogleAuthProvider();
 prov.setCustomParameters({prompt:'select_account'});
@@ -172,7 +166,7 @@ auth.onAuthStateChanged(function(u){
     document.getElementById('login-banner').style.display='none';
     document.getElementById('app').style.display='block';
     var av=document.getElementById('s-av');
-    if(u.photoURL) av.innerHTML='<img src="'+u.photoURL+'"/>';
+    if(u.photoURL) av.innerHTML='<img src="'+escapeAttr(u.photoURL)+'"/>';
     else av.textContent=(u.displayName||'؟')[0];
     document.getElementById('s-name').textContent=u.displayName||'—';
     document.getElementById('s-email').textContent=u.email||'—';
@@ -218,7 +212,7 @@ function render(k){
   var el=document.getElementById('tg-'+k);
   if(!el) return;
   el.innerHTML=D[k].map(function(v,i){
-    return '<div class="tag"><span>'+v+'</span><button class="tag-x" onclick="del(\''+k+'\','+i+')">×</button></div>';
+    return '<div class="tag"><span>'+escapeHTML(v)+'</span><button class="tag-x" onclick="del(\''+k+'\','+i+')">×</button></div>';
   }).join('');
 }
 
@@ -237,14 +231,14 @@ function renderFeesTable() {
   if (!tbody) return;
   tbody.innerHTML = (D.platformFees||[]).map(function(row, i) {
     return '<tr style="border-bottom:1px solid rgba(255,255,255,0.04)">' +
-      '<td style="padding:8px 12px;font-weight:600">' + row.platform + '</td>' +
+      '<td style="padding:8px 12px;font-weight:600">' + escapeHTML(row.platform) + '</td>' +
       '<td style="padding:8px 12px">' +
-        '<input type="number" step="0.01" min="0" max="100" value="' + row.pct + '" ' +
+        '<input type="number" step="0.01" min="0" max="100" value="' + escapeAttr(row.pct) + '" ' +
         'onchange="D.platformFees['+i+'].pct=parseFloat(this.value)||0" ' +
         'style="width:90px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--gold);font-family:monospace;font-size:13px;font-weight:700;outline:none"> %' +
       '</td>' +
       '<td style="padding:8px 12px">' +
-        '<input type="text" value="' + (row.note||'') + '" placeholder="—" ' +
+        '<input type="text" value="' + escapeAttr(row.note||'') + '" placeholder="—" ' +
         'onchange="D.platformFees['+i+'].note=this.value" ' +
         'style="width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted);font-size:12px;outline:none">' +
       '</td>' +
@@ -287,7 +281,7 @@ function populatePlatformFeeSelect() {
   if (!sel) return;
   sel.innerHTML = '<option value="">— اختر المنصة —</option>' +
     (D.platforms||[]).map(function(p) {
-      return '<option value="' + p + '">' + p + '</option>';
+      return '<option value="' + escapeAttr(p) + '">' + escapeHTML(p) + '</option>';
     }).join('');
 }
 
