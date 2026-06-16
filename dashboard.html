@@ -1661,9 +1661,10 @@
 <div class="toast" id="toast"></div>
 
 
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" onerror="window._firebaseFailed=true"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" onerror="window._firebaseFailed=true"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js" onerror="window._firebaseFailed=true"></script>
+<script src="app-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" crossorigin="anonymous" onerror="window._firebaseFailed=true"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" crossorigin="anonymous" onerror="window._firebaseFailed=true"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js" crossorigin="anonymous" onerror="window._firebaseFailed=true"></script>
 <script>
 // ── applyTheme (defined early so it's available everywhere) ─────────────
 function applyTheme() {
@@ -1685,14 +1686,7 @@ window.debtsData      = debtsData;
 // Firebase init — wrapped in try/catch so app works even if CDN fails
 try {
 if (typeof firebase === 'undefined') throw new Error('Firebase not loaded');
-firebase.initializeApp({
-  apiKey:            "AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME",
-  authDomain:        "investments-page.firebaseapp.com",
-  projectId:         "investments-page",
-  storageBucket:     "investments-page.firebasestorage.app",
-  messagingSenderId: "964948881361",
-  appId:             "1:964948881361:web:2801b8127489d953717af0"
-});
+firebase.initializeApp(APP_CONFIG.firebase);
 
 var _auth     = firebase.auth();
 var _db       = firebase.firestore();
@@ -2804,7 +2798,7 @@ async function runAIAnalysis() {
 
     var summary = 'المحفظة: ' + totalAmt.toLocaleString('en-US') + ' ر.س | عوائد: ' + totalRet.toLocaleString('en-US') + ' ر.س | ROI: '+roi+'% | الفرص: '+inv.length+' (نشطة:'+active+' مستلمة:'+done+') | صكوك:'+Math.round(sukukAmt/1000)+'k صناديق:'+Math.round(fundsAmt/1000)+'k اسهم:'+Math.round(stksAmt/1000)+'k | منصات: '+platStr+' | افضل: '+topGain+' | اسوا: '+topLoss+' | قروض:'+((window.loansData||[]).length);
 
-    var PROXY_URL = 'https://claude-proxy.shaheenhouse1.workers.dev'; // Cloudflare Worker — Claude API key is safe here
+    var PROXY_URL = APP_CONFIG.proxy.claudeProxy;
 
     var payload = {
       model: 'claude-sonnet-4-20250514',

@@ -6,9 +6,10 @@
 <title>شيكات وسندات الأمر</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧾</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Cairo:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="app-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -332,7 +333,7 @@ tbody tr:last-child td{border-bottom:none;}
 // ── FIREBASE ──────────────────────────────────────────────────────────────────
 var _uid=null,_db=null;
 try{
-  firebase.initializeApp({apiKey:"AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME",authDomain:"investments-page.firebaseapp.com",projectId:"investments-page",storageBucket:"investments-page.firebasestorage.app",messagingSenderId:"964948881361",appId:"1:964948881361:web:2801b8127489d953717af0"});
+  firebase.initializeApp(APP_CONFIG.firebase);
   _db=firebase.firestore();
   firebase.auth().onAuthStateChanged(function(user){
     var el=document.getElementById('auth-badge');
@@ -504,8 +505,8 @@ function markPaid(idx){schedule[idx].status='paid';schedule[idx].paid_at=new Dat
 
 // ── SELECTS ────────────────────────────────────────────────────────────────────
 function populateSels(){
-  var opts='<option value="">كل المشاريع</option>'+projects.map(function(p){return '<option value="'+p.id+'">'+p.name+'</option>';}).join('');
-  var payOpts='<option value="">— اختر المشروع —</option>'+projects.map(function(p){return '<option value="'+p.id+'">'+p.name+'</option>';}).join('');
+  var opts='<option value="">كل المشاريع</option>'+projects.map(function(p){return '<option value="'+escapeAttr(p.id)+'">'+escapeHTML(p.name)+'</option>';}).join('');
+  var payOpts='<option value="">— اختر المشروع —</option>'+projects.map(function(p){return '<option value="'+escapeAttr(p.id)+'">'+escapeHTML(p.name)+'</option>';}).join('');
   var sp=_g('sch-proj');if(sp){var cv=sp.value;sp.innerHTML=opts;if(cv)sp.value=cv;}
   var pp=_g('pay-proj');if(pp)pp.innerHTML=payOpts;
 }

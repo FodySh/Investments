@@ -4177,7 +4177,7 @@ async function fetchLiveStockPrices() {
 
   var tickers = saStocks.map(function(x){ return x.ticker; });
   var updated  = 0;
-  var PROXY    = 'https://stockprice.shaheenhouse1.workers.dev';
+  var PROXY    = APP_CONFIG.proxy.stockPrice;
 
   // تقسيم لمجموعات من 15
   var CHUNK  = 15;
@@ -4186,47 +4186,25 @@ async function fetchLiveStockPrices() {
     chunks.push(tickers.slice(i, i + CHUNK));
   }
 
-  var tdKey = localStorage.getItem('td_key') || '';
   for (var ci = 0; ci < chunks.length; ci++) {
-    // الأسهم السعودية: أضف :XSAU لـ Twelve Data
-    var symbols = chunks[ci].map(function(t){ return t + ':XSAU'; }).join(',');
+    var symbols = chunks[ci].join(',');
 
     try {
-      var url, res, data, quotes;
+      var res, data;
 
-      if (tdKey) {
-        // Twelve Data مباشرة (يدعم CORS)
-        url = 'https://api.twelvedata.com/quote?symbol=' + encodeURIComponent(symbols) + '&apikey=' + tdKey + '&dp=2';
-        res = await fetch(url);
-        if (res.ok) {
-          data = await res.json();
-          // Twelve Data يرجع object مفرد أو object بمفاتيح
-          var entries = (data.symbol && data.close) ? [data] : Object.values(data);
-          entries.forEach(function(q) {
-            if (!q || !q.symbol) return;
-            var ticker = (q.symbol || '').replace(':XSAU','').replace('.SR','');
-            var price  = parseFloat(q.close || 0);
-            var prev   = parseFloat(q.previous_close || 0);
-            var chgPct = prev > 0 ? (price - prev) / prev : parseFloat(q.percent_change || 0) / 100;
-            STOCK_PRICES[ticker] = { price: price, chg: chgPct, color: chgPct >= 0 ? 'up' : 'dn' };
-            updated++;
-          });
-        }
-      } else {
-        // بدون مفتاح — جرّب عبر الـ Worker
-        res = await fetch(PROXY, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ _stocks: true, symbols: chunks[ci].join(',') })
+      // Always route through the Worker proxy (avoids exposing API keys client-side)
+      res = await fetch(PROXY, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ _stocks: true, symbols: symbols })
+      });
+      if (res.ok) {
+        data = await res.json();
+        (data.quotes || []).forEach(function(q) {
+          var ticker = (q.symbol||'').replace(':XSAU','').replace('.SR','');
+          if (!ticker) return;
+          STOCK_PRICES[ticker] = { price: q.price, chg: (q.changePercent||0)/100, color: (q.changePercent||0)>=0?'up':'dn' };
+          updated++;
         });
-        if (res.ok) {
-          data = await res.json();
-          (data.quotes || []).forEach(function(q) {
-            var ticker = (q.symbol||'').replace(':XSAU','').replace('.SR','');
-            if (!ticker) return;
-            STOCK_PRICES[ticker] = { price: q.price, chg: (q.changePercent||0)/100, color: (q.changePercent||0)>=0?'up':'dn' };
-            updated++;
-          });
-        }
       }
     } catch(e) {
       console.warn('Stock fetch chunk', ci, 'failed:', e.message);
@@ -4669,7 +4647,7 @@ function analyzeOppImage(event) {
   Promise.all(readers).then(function(imgs) {
     msgEl.textContent = 'جارٍ تحليل ' + imgs.length + (imgs.length === 1 ? ' صورة' : ' صور') + ' بـ Claude...';
 
-    var PROXY = 'https://stockprice.shaheenhouse1.workers.dev';
+    var PROXY = APP_CONFIG.proxy.stockPrice;
 
     var systemPrompt = 'أنت مساعد متخصص في قراءة وثائق الاستثمار السعودية.\n' +
       'ستحصل على صورة واحدة أو أكثر من نفس الوثيقة أو وثائق مترابطة.\n' +
@@ -8046,7 +8024,7 @@ async function fetchCompanyName(ticker) {
   if (fetchingEl) fetchingEl.style.display = 'block';
 
   var symbol = _currentStockMarket === 'sa' ? ticker + '.SR' : ticker;
-  var PROXY  = 'https://stockprice.shaheenhouse1.workers.dev';
+  var PROXY  = APP_CONFIG.proxy.stockPrice;
 
   // قاموس الأسهم السعودية الشائعة (fallback سريع)
   var saNames = {
@@ -8127,35 +8105,29 @@ async function fetchUsStockPrices() {
   if (icon) icon.style.animation = 'spin 1s linear infinite';
 
   var symbols = usStocks.map(function(s){ return s.ticker; }).join(',');
-  var PROXY   = 'https://stockprice.shaheenhouse1.workers.dev';
+  var PROXY   = APP_CONFIG.proxy.stockPrice;
   var updated = 0;
 
-  // ── Twelve Data مباشرة للأسهم الأمريكية (يدعم CORS) ────────────
-  var tdKey = localStorage.getItem('td_key') || '';
-  if (tdKey) {
-    try {
-      var tdUrl = 'https://api.twelvedata.com/quote?symbol=' + encodeURIComponent(symbols) + '&apikey=' + tdKey + '&dp=2';
-      var tdRes = await fetch(tdUrl);
-      if (tdRes.ok) {
-        var tdData = await tdRes.json();
-        // Twelve Data: رمز واحد → object مباشر، أكثر → object بمفاتيح
-        var entries = (tdData.symbol && tdData.close) ? [tdData] : Object.values(tdData);
-        entries.forEach(function(q) {
-          if (!q || !q.symbol || q.status === 'error') return;
-          var price  = parseFloat(q.close || 0);
-          var prev   = parseFloat(q.previous_close || 0);
-          var chgPct = prev > 0 ? (price - prev) / prev : parseFloat(q.percent_change || 0) / 100;
-          US_STOCK_PRICES[q.symbol] = {
-            price: price,
-            chg:   chgPct,
-            color: chgPct >= 0 ? 'up' : 'dn',
-            name:  q.name || q.symbol
-          };
-          updated++;
-        });
-      }
-    } catch(e) { console.warn('Twelve Data US failed:', e.message); }
-  }
+  // ── Route US stock prices through Worker proxy (no API key exposed client-side)
+  try {
+    var res = await fetch(PROXY, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ _stockRequest: true, symbols: symbols })
+    });
+    if (res.ok) {
+      var data = await res.json();
+      (data.quotes || []).forEach(function(q) {
+        if (!q || !q.symbol) return;
+        US_STOCK_PRICES[q.symbol] = {
+          price: q.price || 0,
+          chg:   (q.changePercent || 0) / 100,
+          color: (q.changePercent || 0) >= 0 ? 'up' : 'dn',
+          name:  q.name || q.symbol
+        };
+        updated++;
+      });
+    }
+  } catch(e) { console.warn('US stock fetch failed:', e.message); }
 
   renderUsStocksTable();
   if (icon) icon.style.animation = '';
@@ -9841,20 +9813,21 @@ async function fetchSingleStockPrice(ticker) {
   }
 }
 
-// ── جلب سعر سهم واحد (US) ───────────────────────────────────────────────────
+// ── جلب سعر سهم واحد (US) — via Worker proxy ────────────────────────────────
 async function fetchSingleUsStockPrice(ticker) {
-  var tdKey = localStorage.getItem('td_key') || '';
-  if (!tdKey) { showToast('⚠️ أضف مفتاح Twelve Data في Console'); return; }
   try {
-    var r = await fetch('https://api.twelvedata.com/quote?symbol=' + ticker + '&apikey=' + tdKey + '&dp=2');
+    var r = await fetch(APP_CONFIG.proxy.stockPrice, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ _stockRequest: true, symbols: ticker })
+    });
     var d = await r.json();
-    if (d.close) {
-      var price = parseFloat(d.close);
-      var prev  = parseFloat(d.previous_close || 0);
-      var chg   = prev > 0 ? (price - prev) / prev : parseFloat(d.percent_change || 0) / 100;
-      US_STOCK_PRICES[ticker] = { price: price, chg: chg, color: chg >= 0 ? 'up' : 'dn', name: d.name || ticker };
+    var q = (d.quotes || [])[0];
+    if (q && q.price) {
+      US_STOCK_PRICES[ticker] = { price: q.price, chg: (q.changePercent||0)/100, color: (q.changePercent||0)>=0?'up':'dn', name: q.name || ticker };
       renderUsStocksTable();
-      showToast('✅ ' + ticker + ': $' + price.toFixed(2));
+      showToast('✅ ' + ticker + ': $' + q.price.toFixed(2));
+    } else {
+      showToast('❌ تعذّر جلب سعر ' + ticker);
     }
   } catch(e) { showToast('❌ فشل جلب ' + ticker); }
 }
@@ -10186,22 +10159,17 @@ function closeMobUserMenu() {
   <button class="db-btn db-btn-export" onclick="dbUndo()" style="padding:5px 14px;font-size:11px">↩ تراجع</button>
   <button onclick="dbCloseUndo()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px">×</button>
 </div>
+<!-- Shared App Config (Firebase, Worker URLs, security utils) -->
+<script src="app-config.js"></script>
 <!-- Firebase Compat SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" onerror="window._firebaseFailed=true"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" onerror="window._firebaseFailed=true"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js" onerror="window._firebaseFailed=true"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" integrity="sha384-jS8BXNMR3RO+kEG+1MlyiJDIqnOjRYnOlKqoFfRDGF2OkGBFnVKBm/6yBXlVAZb" crossorigin="anonymous" onerror="window._firebaseFailed=true"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" crossorigin="anonymous" onerror="window._firebaseFailed=true"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js" crossorigin="anonymous" onerror="window._firebaseFailed=true"></script>
 <script>
 // Firebase init — wrapped in try/catch so app works even if CDN fails
 try {
 if (typeof firebase === 'undefined') throw new Error('Firebase not loaded');
-firebase.initializeApp({
-  apiKey:            "AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME",
-  authDomain:        "investments-page.firebaseapp.com",
-  projectId:         "investments-page",
-  storageBucket:     "investments-page.firebasestorage.app",
-  messagingSenderId: "964948881361",
-  appId:             "1:964948881361:web:2801b8127489d953717af0"
-});
+firebase.initializeApp(APP_CONFIG.firebase);
 
 var _auth     = firebase.auth();
 var _db       = firebase.firestore();
