@@ -197,7 +197,7 @@ function load(){
         });
       }
       renderAll();
-    }).catch(function(){ renderAll(); });
+    }).catch(function(e){ console.warn('Failed to load settings from Firestore:', e.message); renderAll(); });
 }
 
 function saveAll(){
