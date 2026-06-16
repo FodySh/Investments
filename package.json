@@ -1,0 +1,13 @@
+{
+  "name": "investments",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Personal investment portfolio tracker",
+  "scripts": {
+    "test": "jest --verbose",
+    "test:coverage": "jest --coverage"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
