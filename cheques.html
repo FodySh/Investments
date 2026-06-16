@@ -9,6 +9,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="shared/firebase-init.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -329,11 +330,8 @@ tbody tr:last-child td{border-bottom:none;}
 </div>
 
 <script>
-// ── FIREBASE ──────────────────────────────────────────────────────────────────
-var _uid=null,_db=null;
+// ── FIREBASE (config via shared/firebase-init.js) ────────────────────────────
 try{
-  firebase.initializeApp({apiKey:"AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME",authDomain:"investments-page.firebaseapp.com",projectId:"investments-page",storageBucket:"investments-page.firebasestorage.app",messagingSenderId:"964948881361",appId:"1:964948881361:web:2801b8127489d953717af0"});
-  _db=firebase.firestore();
   firebase.auth().onAuthStateChanged(function(user){
     var el=document.getElementById('auth-badge');
     if(user){_uid=user.uid;if(el)el.textContent='☁️ '+(user.displayName||user.email||'').split(' ')[0];loadAll();}

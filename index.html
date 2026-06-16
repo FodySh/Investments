@@ -6,97 +6,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>محفظتي المالية</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Cairo:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<!-- Firebase SDK -->
+<!-- Shared CSS (theme variables, base reset, backgrounds, toast, toggle) -->
+<link rel="stylesheet" href="shared/theme.css">
 
 <style>
-  /* ── DARK MODE (default) ── Forest Green Theme ───────── */
-  :root {
-    --navy:   #12110d;
-    --navy2:  #1a1810;
-    --navy3:  #221f14;
-    --gold:   #c9a96e;
-    --gold2:  #e2c48a;
-    --cyan:   #4ecdc4;
-    --green:  #5cb98a;
-    --red:    #e07070;
-    --orange: #f0a500;
-    --white:  #f0f0ee;
-    --muted:  #d1d5e2;
-    --card:   rgba(39,35,26,0.88);
-    --border: rgba(201,185,140,0.22);
-    --glass:  rgba(255,255,255,0.04);
-    --bg-body: #12110d;
-    --sidebar-bg: rgba(26,24,16,0.97);
-    --text-primary: #f0f0ee;
-    --text-muted: #d1d5e2;
-    --input-bg: rgba(39,35,26,0.9);
-    --table-alt: rgba(255,255,255,0.015);
-    --theme-icon: '☀️';
-  }
-
-  /* ── LIGHT MODE ────────────────────────────────────────── */
-  body.light-mode {
-    --navy:   #f5f2ec;
-    --navy2:  #ede9df;
-    --navy3:  #ddd8cc;
-    --gold:   #9a7340;
-    --gold2:  #b89050;
-    --cyan:   #2ba8a0;
-    --green:  #2d8a5c;
-    --red:    #c24040;
-    --orange: #b07800;
-    --white:  #1a1a18;
-    --muted:  #6b7080;
-    --card:   rgba(255,255,255,0.92);
-    --border: rgba(201,169,110,0.25);
-    --glass:  rgba(0,0,0,0.03);
-    --bg-body: #f0f0ee;
-    --sidebar-bg: rgba(240,250,244,0.98);
-    --text-primary: #1a1a18;
-    --text-muted: #6b7080;
-    --input-bg: rgba(255,255,255,0.9);
-    --table-alt: rgba(0,0,0,0.025);
-    --theme-icon: '🌙';
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  html { scroll-padding-top: 64px; }
-  @media (max-width: 768px) { html { scroll-padding-top: 0; } }
-
-  body {
-    font-family: 'Cairo', sans-serif;
-    background: var(--bg-body);
-    color: var(--white);
-    min-height: 100vh;
-    overflow-x: hidden;
-    transition: background .35s ease, color .35s ease;
-  }
-
-  /* ── ANIMATED BACKGROUND ─────────────────────────────── */
-  .bg-mesh {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background:
-      radial-gradient(ellipse 80% 60% at 20% 20%, rgba(201,185,140,0.09) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 80% at 80% 80%, rgba(78,205,196,0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 40% at 60% 10%, rgba(92,185,138,0.05) 0%, transparent 50%);
-    transition: opacity .35s;
-  }
-  body.light-mode .bg-mesh {
-    background:
-      radial-gradient(ellipse 80% 60% at 20% 20%, rgba(201,169,110,0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 80% at 80% 80%, rgba(78,205,196,0.04) 0%, transparent 60%);
-  }
-  .bg-grid {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background-image:
-      linear-gradient(rgba(201,185,140,0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(201,185,140,0.05) 1px, transparent 1px);
-    background-size: 60px 60px;
-    transition: opacity .35s;
-  }
-  body.light-mode .bg-grid { opacity: 0.4; }
-
-  /* ── LAYOUT ──────────────────────────────────────────── */
-  .app { position: relative; z-index: 1; }
 
   /* ── SIDEBAR ─────────────────────────────────────────── */
   /* ── TOP NAVBAR (desktop) ── */
@@ -633,32 +546,7 @@
   .auth-user-email { font-size: 10px; color: var(--muted); }
   .auth-signout-btn:hover { background: rgba(224,112,112,0.2); }
 
-  /* ── THEME TOGGLE ────────────────────────────────────── */
-  .theme-label { display: none; }
-  .theme-toggle {
-    position: relative;
-    width: 44px; height: 24px;
-    background: rgba(201,185,140,0.15);
-    border: 1px solid var(--border);
-    border-radius: 12px; cursor: pointer;
-    transition: all .3s;
-    flex-shrink: 0;
-  }
-  .theme-toggle.light { background: rgba(201,169,110,0.2); }
-  .theme-toggle-knob {
-    position: absolute;
-    top: 3px; right: 3px;
-    width: 16px; height: 16px;
-    border-radius: 50%;
-    background: var(--gold);
-    transition: all .3s cubic-bezier(.34,1.56,.64,1);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 9px;
-  }
-  .theme-toggle.light .theme-toggle-knob {
-    right: calc(100% - 19px);
-    background: var(--gold2);
-  }
+  /* theme-toggle styles now in shared/theme.css */
 
   .nav-db {
     color: #7dd3fc !important;
@@ -1147,27 +1035,7 @@
   }
   .btn-reset:hover { border-color: rgba(136,153,187,0.6); color: var(--white); }
 
-  /* Success toast */
-  .toast {
-    position: fixed;
-    bottom: 32px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: linear-gradient(135deg, #1a3826, #3d9e6e);
-    color: #fff;
-    padding: 14px 28px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    z-index: 999;
-    transition: transform .4s cubic-bezier(.34,1.56,.64,1);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    white-space: nowrap;
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
+  /* toast styles now in shared/theme.css */
 
   /* Saved list in add page */
   .saved-entry {
@@ -4046,16 +3914,7 @@ async function triggerSync(collection) {
   }, 800);
 }
 
-//  RENDER TABLES 
-function fmtNum(n, dec=0){
-  if(n==null || n==undefined || isNaN(n)) return '—';
-  return n.toLocaleString('en-US', {minimumFractionDigits:dec, maximumFractionDigits:dec});
-}
-function fmtPct(p){
-  if(p==null || isNaN(p)) return '—';
-  const cls = p>=0?'up':'dn';
-  return `<span class="${cls}">${p>=0?'+':''}${(p*100).toFixed(2)}%</span>`;
-}
+// fmtNum, fmtPct now in shared/format.js
 function riskPill(r){
   const m = {منخفض:'low',متوسط:'mid',عالي:'high'};
   return `<span class="pill pill-${m[r]||'low'}">${r||'—'}</span>`;
@@ -5174,19 +5033,7 @@ function resetForm() {
   if (stockBox) stockBox.style.display = 'none';
 }
 
-var _toastTimer = null;
-function showToast(msg, duration) {
-  var t = document.getElementById('toast');
-  if (!t) return;
-  // Error messages stay 10s, normal 3.5s
-  var ms = duration || (msg.includes('❌') || msg.includes('فشل') || msg.includes('Load failed') ? 10000 : 3500);
-  t.textContent = msg;
-  t.classList.add('show');
-  if (_toastTimer) clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(function(){ t.classList.remove('show'); }, ms);
-  // Click to dismiss
-  t.onclick = function(){ t.classList.remove('show'); clearTimeout(_toastTimer); };
-}
+// showToast now in shared/toast.js
 
 // Initialize date-in to today
 document.addEventListener('DOMContentLoaded', () => {
@@ -9927,107 +9774,7 @@ function importStocksExcel(event, market) {
   reader.readAsArrayBuffer(file);
 }
 
-var isLightMode = localStorage.getItem('theme') === 'light';
-
-function applyTheme(light) {
-  isLightMode = light;
-  document.body.classList.toggle('light-mode', light);
-  const toggle = document.getElementById('theme-toggle');
-  const knob   = document.getElementById('theme-knob');
-  const label  = document.getElementById('theme-label');
-  if (toggle) toggle.classList.toggle('light', light);
-  if (knob)   knob.textContent  = light ? '☀️' : '🌙';
-  if (label)  label.textContent = light ? '☀️ نهاري' : '🌙 ليلي';
-  localStorage.setItem('theme', light ? 'light' : 'dark');
-}
-
-function toggleTheme() { applyTheme(!isLightMode); }
-
-// Apply saved theme on load
-applyTheme(isLightMode);
-
-//  DEMO AUTH (when Firebase not configured) 
-function demoSignIn() {
-  const name = 'فهد';
-  const email = 'fahad@example.com';
-  // Desktop
-  const signinBtn = document.getElementById('auth-signin-btn');
-  const userCard  = document.getElementById('auth-user-card');
-  if (signinBtn) signinBtn.style.display = 'none';
-  if (userCard)  userCard.classList.add('show');
-  const nameEl   = document.getElementById('auth-user-name');
-  const emailEl  = document.getElementById('auth-user-email');
-  const initials = document.getElementById('auth-avatar-initials');
-  if (nameEl)   nameEl.textContent   = name;
-  if (emailEl)  emailEl.textContent  = email;
-  if (initials) initials.textContent = 'ف';
-  // Mobile
-  const mobSignin = document.getElementById('mob-signin-btn');
-  const mobUser   = document.getElementById('mob-user-card');
-  const mobAvatar = document.getElementById('mob-avatar');
-  const mobName   = document.getElementById('mob-user-name');
-  const mobEmail  = document.getElementById('mob-menu-email');
-  if (mobSignin) mobSignin.style.display = 'none';
-  if (mobUser)   mobUser.style.display   = 'flex';
-  if (mobAvatar) mobAvatar.textContent   = 'ف';
-  if (mobName)   mobName.textContent     = name;
-  if (mobEmail)  mobEmail.textContent    = email;
-  showToast('✅ وضع تجريبي — سجّل Firebase لتفعيل Google');
-}
-
-function demoSignOut() {
-  // Desktop
-  const signinBtn = document.getElementById('auth-signin-btn');
-  const userCard  = document.getElementById('auth-user-card');
-  if (signinBtn) signinBtn.style.display = 'flex';
-  if (userCard)  userCard.classList.remove('show');
-  // Mobile
-  const mobSignin = document.getElementById('mob-signin-btn');
-  const mobUser   = document.getElementById('mob-user-card');
-  if (mobSignin) mobSignin.style.display = 'flex';
-  if (mobUser)   mobUser.style.display   = 'none';
-  closeMobUserMenu();
-  showToast('👋 تم تسجيل الخروج');
-}
-
-// Fallback if Firebase module failed
-if (!window.googleSignIn) window.googleSignIn = demoSignIn;
-if (!window.googleSignOut) window.googleSignOut = demoSignOut;
-
-function toggleDesktopUserMenu() {
-  var menu    = document.getElementById('desktop-user-menu');
-  var overlay = document.getElementById('desktop-menu-overlay');
-  if (!menu) return;
-  var open = menu.style.display === 'block';
-  menu.style.display = open ? 'none' : 'block';
-}
-// Close desktop menu on outside click
-document.addEventListener('click', function(e) {
-  var menu = document.getElementById('desktop-user-menu');
-  if (!menu || menu.style.display !== 'block') return;
-  if (!menu.contains(e.target) && !document.getElementById('auth-avatar-initials').contains(e.target)) {
-    menu.style.display = 'none';
-  }
-});
-
-function toggleMobUserMenu() {
-  const menu    = document.getElementById('mob-user-menu');
-  const overlay = document.getElementById('mob-user-overlay');
-  const isOpen  = menu.style.display === 'block';
-  if (isOpen) { closeMobUserMenu(); }
-  else {
-    menu.style.display    = 'block';
-    overlay.style.display = 'block';
-  }
-}
-
-function closeMobUserMenu() {
-  document.getElementById('mob-user-menu').style.display    = 'none';
-  document.getElementById('mob-user-overlay').style.display = 'none';
-}
-
-// Also update demoSignIn/demoSignOut to update mobile UI
-
+// Theme, demo auth, and user menu functions now in shared/theme.js & shared/auth-ui.js
 
 </script>
 
@@ -10190,147 +9937,21 @@ function closeMobUserMenu() {
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" onerror="window._firebaseFailed=true"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" onerror="window._firebaseFailed=true"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js" onerror="window._firebaseFailed=true"></script>
+<!-- Shared utilities (firebase-init, toast, format, theme, auth-ui) -->
+<script src="shared/firebase-init.js"></script>
+<script src="shared/toast.js"></script>
+<script src="shared/format.js"></script>
+<script src="shared/theme.js"></script>
+<script src="shared/auth-ui.js"></script>
 <script>
-// Firebase init — wrapped in try/catch so app works even if CDN fails
-try {
-if (typeof firebase === 'undefined') throw new Error('Firebase not loaded');
-firebase.initializeApp({
-  apiKey:            "AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME",
-  authDomain:        "investments-page.firebaseapp.com",
-  projectId:         "investments-page",
-  storageBucket:     "investments-page.firebasestorage.app",
-  messagingSenderId: "964948881361",
-  appId:             "1:964948881361:web:2801b8127489d953717af0"
-});
-
-var _auth     = firebase.auth();
-var _db       = firebase.firestore();
-var _provider = new firebase.auth.GoogleAuthProvider();
-_provider.setCustomParameters({ prompt: "select_account" });
-
-var _unsubSnap = null;
-var _syncing   = false;
-var _uid       = null;
-
-//  Helpers 
-function _ref(uid, col) {
-  return _db.collection("users").doc(uid)
-            .collection("portfolio").doc(col);
-}
-
-function _write(uid, col, data) {
-  if (!uid) return;
-  _badge("loading");
-  _ref(uid, col).set(
-    { data: data, uid: uid, ts: new Date().toISOString() },
-    { merge: true }
-  )
-  .then(function() { _badge("synced"); })
-  .catch(function(e) {
-    console.error("Firestore write error [" + col + "]:", e.code, e.message);
-    if (e.code === "permission-denied") {
-      _badge("rules");
-    } else {
-      _badge("error");
-    }
-  });
-}
-
-function _read(uid, col) {
-  return _ref(uid, col).get().then(function(snap) {
-    if (!snap.exists) return null;
-    var d = snap.data();
-    if (d.uid && d.uid !== uid) return null;
-    return d.data || null;
-  }).catch(function(e) { console.warn("read:", e.message); return null; });
-}
-
-function _badge(state) {
-  var labels = {
-    loading: "syncing...",
-    synced:  "synced",
-    error:   "error - check console",
-    rules:   "permission denied - set Firestore rules",
-    offline: "offline"
-  };
-  var colors = {
-    loading: "#4ecdc4",
-    synced:  "var(--green)",
-    error:   "var(--red)",
-    rules:   "var(--orange)",
-    offline: "var(--orange)"
-  };
-  var b = document.getElementById("sync-badge");
-  var m = document.getElementById("mob-sync-status");
-  var t = labels[state] || state;
-  var k = colors[state] || "var(--orange)";
-  if (b) { b.textContent = t; b.style.color = k; b.style.display = "flex"; }
-  if (m) { m.textContent = t; m.style.color = k; }
-}
-
-function _gate(show) {
-  var g = document.getElementById("auth-gate");
-  if (g) g.style.display = show ? "flex" : "none";
-  // Adjust top offset for auth banner
-  var sidebar   = document.querySelector(".sidebar");
-  var main      = document.querySelector(".main");
-  var mobTopbar = document.querySelector(".mobile-topbar");
-  var banner    = document.getElementById("auth-gate");
-  if (show && banner) {
-    // Use a fixed height of 44px to avoid layout flicker on mobile
-    var h = 44;
-    if (sidebar)   sidebar.style.top   = h + "px";
-    if (mobTopbar) mobTopbar.style.top = h + "px";
-    if (main)      main.style.paddingTop = (h + 8) + "px";
-  } else {
-    if (sidebar)   sidebar.style.top   = "0";
-    if (mobTopbar) mobTopbar.style.top = "0";
-    if (main)      main.style.paddingTop = "";
-  }
-}
-
+// Page-specific: _rerender for index.html
 function _rerender() {
   ["renderAll","renderSukuk","renderFunds","renderStocks",
    "renderLoans","renderUsStocksTable","renderMetals","renderJamaa"].forEach(function(fn) {
     if (typeof window[fn] === "function") window[fn]();
   });
 }
-
-function _updateUI(user) {
-  function el(id)    { return document.getElementById(id); }
-  function show(id,d){ var e=el(id); if(e) e.style.display=d; }
-  function text(id,v){ var e=el(id); if(e) e.textContent=v; }
-  function html(id,v){ var e=el(id); if(e) e.innerHTML=v; }
-
-  if (user) {
-    var name  = user.displayName || "User";
-    var first = name.split(" ")[0];
-    var p     = user.photoURL;
-    var img   = function(s) {
-      return p
-        ? "<img src='"+p+"' style='width:"+s+"px;height:"+s+"px;border-radius:50%;object-fit:cover' referrerpolicy='no-referrer'/>"
-        : name[0];
-    };
-    show("auth-signin-btn","none");
-    var uc=el("auth-user-card"); if(uc) uc.classList.add("show");
-    text("auth-user-name",  name);
-    text("auth-user-email", user.email||"");
-    html("auth-avatar-initials", img(32));
-    show("mob-signin-btn","none");
-    show("mob-user-card","flex");
-    text("mob-user-name",  first);
-    text("mob-menu-email", user.email||"");
-    html("mob-avatar", img(30));
-    _gate(false);
-    if (typeof showToast === "function") showToast("Welcome " + first);
-  } else {
-    show("auth-signin-btn","flex");
-    var uc2=el("auth-user-card"); if(uc2) uc2.classList.remove("show");
-    var bd=el("sync-badge"); if(bd) bd.style.display="none";
-    show("mob-signin-btn","flex");
-    show("mob-user-card","none");
-  }
-}
+if (_auth && _db) {
 
 function _loadData(uid) {
   _badge("loading");
@@ -10686,30 +10307,7 @@ window.fbSaveDividends = function() {
   _write(_uid, "dividends", Array.from(window.dividendsData || dividendsData));
 };
 
-//  Auth: popup on all platforms (redirect breaks on GitHub Pages / iOS Safari)
-window.googleSignIn = function() {
-  _auth.signInWithPopup(_provider).then(function(result) {
-    // success handled by onAuthStateChanged
-  }).catch(function(e) {
-    if (e.code === "auth/popup-blocked") {
-      // Popup was blocked by browser — show guidance
-      if (typeof showToast === "function")
-        showToast("Please allow popups for this site");
-    } else if (e.code !== "auth/popup-closed-by-user"
-            && e.code !== "auth/cancelled-popup-request") {
-      console.error("SignIn error:", e.code, e.message);
-      if (typeof showToast === "function")
-        showToast("Login failed: " + e.code);
-    }
-  });
-};
-
-window.googleSignOut = function() {
-  _auth.signOut().then(function() {
-    if (typeof showToast === "function") showToast("Signed out");
-    if (typeof closeMobUserMenu === "function") closeMobUserMenu();
-  });
-};
+// googleSignIn/googleSignOut now in shared/auth-ui.js
 
 // Auth state listener
 _auth.onAuthStateChanged(function(user) {
@@ -10741,11 +10339,9 @@ _auth.onAuthStateChanged(function(user) {
   }
 });
 
-window.IS_FIREBASE_CONFIGURED = true;
-} catch(e) {
-  console.warn('Firebase init failed:', e.message);
-  window._firebaseFailed = true;
-  // Show login banner but app still works with local data
+} // end if (_auth && _db)
+else {
+  // Firebase not available — show login banner, app works with local data
   var g = document.getElementById('auth-gate');
   if (g) g.style.display = 'flex';
 }
