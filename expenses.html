@@ -9,6 +9,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="shared/firebase-init.js"></script>
 <style>
 :root{
   --bg:#12110d;--bg2:#1a1810;--bg3:#221f14;
@@ -535,8 +536,8 @@ body{background:var(--bg);color:var(--white);font-family:'Cairo',sans-serif;font
 <div class="toast" id="toast"></div>
 
 <script>
-firebase.initializeApp({apiKey:"AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME",authDomain:"investments-page.firebaseapp.com",projectId:"investments-page",storageBucket:"investments-page.firebasestorage.app",messagingSenderId:"964948881361",appId:"1:964948881361:web:2801b8127489d953717af0"});
-var _auth=firebase.auth(),_db=firebase.firestore(),_uid=null;
+// Firebase config via shared/firebase-init.js (_auth, _db already defined)
+var _uid=null;
 var _cur=new Date().toISOString().slice(0,7);
 var _D={salary:0,currency:"SAR",incomes:[],incomesByMonth:{},fixed:[],variable:{},accrual:[],banks:[],budgets:{},customCats:[]};
 var _fixedMode='amount';
