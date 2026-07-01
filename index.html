@@ -4476,7 +4476,7 @@ function onTypeChange() {
   // إظهار نوع الصك في step 1 إذا كان الاختيار صك أو سند أو مرابحة
   var sukukTypeEl = document.getElementById('sukuk-type-in-step1');
   if (sukukTypeEl) {
-    var showSukukType = ['صك','سند','مرابحة','وديعة','عقد آجل'].includes(val);
+    var showSukukType = ['صك','سند','مرابحة','وديعة','عقد آجل'].includes(type);
     sukukTypeEl.style.display = showSukukType ? 'block' : 'none';
   }
   const panels = ['panel-sukuk', 'panel-stock', 'panel-estate', 'panel-default'];
