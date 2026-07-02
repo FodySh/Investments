@@ -4352,6 +4352,8 @@ function g(id) {
 function calcFinancialFields() {}
 
 // Global gv/gf (also defined locally inside other save functions — harmless)
+var savedOpportunities = window.savedOpportunities || [];
+window.savedOpportunities = savedOpportunities;
 function gv(id) { var e = document.getElementById(id); return e ? e.value : ''; }
 function gf(id) { return parseFloat(gv(id)) || 0; }
 window.gv = gv; window.gf = gf;
