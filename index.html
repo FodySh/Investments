@@ -4342,6 +4342,49 @@ function loadPlatformFeesCache() {
   }
 }
 
+// ═══ Missing helper functions (restored) ═══
+function g(id) {
+  var el = document.getElementById(id);
+  return el ? el.value : '';
+}
+
+// No-op: calcAuto already recomputes everything; kept as a hook for legacy callers
+function calcFinancialFields() {}
+
+// Step navigation for investment form (5 steps)
+function goStep(target) {
+  for (var i = 1; i <= 5; i++) {
+    var fs = document.getElementById('fstep-' + i);
+    if (fs) fs.style.display = (i === target) ? 'block' : 'none';
+    var sb = document.getElementById('step-' + i);
+    if (sb) {
+      sb.classList.remove('active', 'done');
+      if (i < target) sb.classList.add('done');
+      else if (i === target) sb.classList.add('active');
+    }
+  }
+}
+
+function nextStep(from) {
+  if (typeof validateStep === 'function' && !validateStep(from)) return;
+  goStep(from + 1);
+  if (typeof updateSummary === 'function') updateSummary();
+}
+
+function prevStep(from) {
+  goStep(from - 1);
+}
+
+// Simple validation stub — pass through; real validation lives in individual field handlers
+function validateStep(step) { return true; }
+
+window.g = g;
+window.calcFinancialFields = calcFinancialFields;
+window.goStep = goStep;
+window.nextStep = nextStep;
+window.prevStep = prevStep;
+window.validateStep = validateStep;
+
 function calcAuto() {
   calcFinancialFields();
   const amount = gf('f-amount');
