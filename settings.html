@@ -142,18 +142,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="shared/firebase-init.js"></script>
 <script>
-firebase.initializeApp({
-  apiKey:            "AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME",
-  authDomain:        "investments-page.firebaseapp.com",
-  projectId:         "investments-page",
-  storageBucket:     "investments-page.firebasestorage.app",
-  messagingSenderId: "964948881361",
-  appId:             "1:964948881361:web:2801b8127489d953717af0"
-});
-var auth=firebase.auth(), db=firebase.firestore();
-var prov=new firebase.auth.GoogleAuthProvider();
-prov.setCustomParameters({prompt:'select_account'});
+var auth = _auth, db = _db, prov = _provider;
 
 var D = {
   platformFees: [], // [{platform, pct, note}]

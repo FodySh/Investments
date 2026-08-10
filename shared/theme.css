@@ -1,0 +1,162 @@
+/* ══════════════════════════════════════════════════════════
+   shared/theme.css
+   Common CSS variables, base reset, backgrounds, sidebar,
+   theme toggle, toast, and auth-gate styles.
+   ══════════════════════════════════════════════════════════ */
+
+/* ── DARK MODE (default) ── */
+:root {
+  --navy:   #12110d;
+  --navy2:  #1a1810;
+  --navy3:  #221f14;
+  --gold:   #c9a96e;
+  --gold2:  #e2c48a;
+  --cyan:   #4ecdc4;
+  --green:  #5cb98a;
+  --red:    #e07070;
+  --orange: #f0a500;
+  --white:  #f0f0ee;
+  --muted:  #d1d5e2;
+  --card:   rgba(39,35,26,0.88);
+  --border: rgba(201,185,140,0.22);
+  --glass:  rgba(255,255,255,0.04);
+  --bg-body: #12110d;
+  --sidebar-bg: rgba(26,24,16,0.97);
+  --text-primary: #f0f0ee;
+  --text-muted: #d1d5e2;
+  --input-bg: rgba(39,35,26,0.9);
+  --table-alt: rgba(255,255,255,0.015);
+  --theme-icon: '\2600\FE0F';
+  --rose:       #e07070;
+  --amber:      #f0a500;
+  --purple:     #9b8cff;
+  --rose-dim:   rgba(224,112,112,0.12);
+  --teal-dim:   rgba(78,205,196,0.12);
+  --gold-dim:   rgba(201,169,110,0.15);
+  --green-dim:  rgba(92,185,138,0.12);
+}
+
+/* ── LIGHT MODE ── */
+body.light-mode {
+  --navy:   #f5f2ec;
+  --navy2:  #ede9df;
+  --navy3:  #ddd8cc;
+  --gold:   #9a7340;
+  --gold2:  #b89050;
+  --cyan:   #2ba8a0;
+  --green:  #2d8a5c;
+  --red:    #c24040;
+  --orange: #b07800;
+  --white:  #1a1a18;
+  --muted:  #6b7080;
+  --card:   rgba(255,255,255,0.92);
+  --border: rgba(201,169,110,0.25);
+  --glass:  rgba(0,0,0,0.03);
+  --bg-body: #f0f0ee;
+  --sidebar-bg: rgba(240,250,244,0.98);
+  --text-primary: #1a1a18;
+  --text-muted: #6b7080;
+  --input-bg: rgba(255,255,255,0.9);
+  --table-alt: rgba(0,0,0,0.025);
+  --theme-icon: '\1F319';
+  --rose:       #c24040;
+  --amber:      #b07800;
+  --purple:     #6d5ce7;
+  --rose-dim:   rgba(194,64,64,0.1);
+  --teal-dim:   rgba(43,168,160,0.1);
+  --gold-dim:   rgba(154,115,64,0.12);
+  --green-dim:  rgba(45,138,92,0.1);
+}
+
+/* ── RESET ── */
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-padding-top: 64px; }
+@media (max-width: 768px) { html { scroll-padding-top: 0; } }
+
+body {
+  font-family: 'Cairo', sans-serif;
+  background: var(--bg-body);
+  color: var(--white);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background .35s ease, color .35s ease;
+}
+
+/* ── ANIMATED BACKGROUND ── */
+.bg-mesh {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 20%, rgba(201,185,140,0.09) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 80%, rgba(78,205,196,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 60% 10%, rgba(92,185,138,0.05) 0%, transparent 50%);
+  transition: opacity .35s;
+}
+body.light-mode .bg-mesh {
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 20%, rgba(201,169,110,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 80%, rgba(78,205,196,0.04) 0%, transparent 60%);
+}
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(201,185,140,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,185,140,0.05) 1px, transparent 1px);
+  background-size: 60px 60px;
+  transition: opacity .35s;
+}
+body.light-mode .bg-grid { opacity: 0.4; }
+
+/* ── LAYOUT ── */
+.app { position: relative; z-index: 1; }
+
+/* ── THEME TOGGLE ── */
+.theme-label { display: none; }
+.theme-toggle {
+  position: relative;
+  width: 44px; height: 24px;
+  background: rgba(201,185,140,0.15);
+  border: 1px solid var(--border);
+  border-radius: 12px; cursor: pointer;
+  transition: all .3s;
+  flex-shrink: 0;
+}
+.theme-toggle.light { background: rgba(201,169,110,0.2); }
+.theme-toggle-knob {
+  position: absolute;
+  top: 3px; right: 3px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--gold);
+  transition: all .3s cubic-bezier(.34,1.56,.64,1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px;
+}
+.theme-toggle.light .theme-toggle-knob {
+  right: calc(100% - 19px);
+  background: var(--gold2);
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: linear-gradient(135deg, #1a3826, #3d9e6e);
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 999;
+  transition: transform .4s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── LIGHT MODE sidebar footer border ── */
+body.light-mode .sidebar-footer { border-top: 1px solid rgba(0,0,0,0.08); }

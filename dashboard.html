@@ -7,110 +7,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Shared CSS (theme variables, base reset, backgrounds, toast, toggle) -->
+  <link rel="stylesheet" href="shared/theme.css">
   <style>
-
-  /* ══ DARK MODE — Warm Dark Gold ══ */
-  :root {
-    --navy:       #12110d;
-    --navy2:      #1a1810;
-    --navy3:      #221f14;
-    --gold:       #c9a96e;
-    --gold2:      #e2c48a;
-    --cyan:       #4ecdc4;
-    --green:      #5cb98a;
-    --red:        #e07070;
-    --rose:       #e07070;
-    --orange:     #f0a500;
-    --amber:      #f0a500;
-    --purple:     #9b8cff;
-    --white:      #f0f0ee;
-    --muted:      #d1d5e2;
-    --card:       rgba(39,35,26,0.88);
-    --border:     rgba(201,185,140,0.22);
-    --glass:      rgba(255,255,255,0.04);
-    --bg-body:    #12110d;
-    --sidebar-bg: rgba(26,24,16,0.97);
-    --text-primary: #f0f0ee;
-    --text-muted:   #d1d5e2;
-    --input-bg:   rgba(39,35,26,0.9);
-    --table-alt:  rgba(255,255,255,0.015);
-    --theme-icon: '☀️';
-    --rose-dim:   rgba(224,112,112,0.12);
-    --teal-dim:   rgba(78,205,196,0.12);
-    --gold-dim:   rgba(201,169,110,0.15);
-    --green-dim:  rgba(92,185,138,0.12);
-  }
-
-  /* ══ LIGHT MODE ══ */
-  body.light-mode {
-    --navy:       #f5f2ec;
-    --navy2:      #ede9df;
-    --navy3:      #ddd8cc;
-    --gold:       #9a7340;
-    --gold2:      #b89050;
-    --cyan:       #2ba8a0;
-    --green:      #2d8a5c;
-    --red:        #c24040;
-    --rose:       #c24040;
-    --orange:     #b07800;
-    --amber:      #b07800;
-    --purple:     #6d5ce7;
-    --white:      #1a1a18;
-    --muted:      #6b7080;
-    --card:       rgba(255,255,255,0.95);
-    --border:     rgba(0,0,0,0.1);
-    --glass:      rgba(0,0,0,0.03);
-    --bg-body:    #f0ede6;
-    --sidebar-bg: rgba(245,242,236,0.98);
-    --text-primary: #1a1a18;
-    --text-muted:   #6b7080;
-    --input-bg:   rgba(255,255,255,0.9);
-    --table-alt:  rgba(0,0,0,0.025);
-    --theme-icon: '🌙';
-    --rose-dim:   rgba(194,64,64,0.1);
-    --teal-dim:   rgba(43,168,160,0.1);
-    --gold-dim:   rgba(154,115,64,0.12);
-    --green-dim:  rgba(45,138,92,0.1);
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  html { scroll-padding-top: 64px; }
-  @media (max-width: 768px) { html { scroll-padding-top: 0; } }
-
-  body {
-    font-family: 'Cairo', sans-serif;
-    background: var(--bg-body);
-    color: var(--white);
-    min-height: 100vh;
-    overflow-x: hidden;
-    transition: background .35s ease, color .35s ease;
-  }
-
-  /* ── ANIMATED BACKGROUND ─────────────────────────────── */
-  .bg-mesh {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background:
-      radial-gradient(ellipse 80% 60% at 20% 20%, rgba(201,185,140,0.09) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 80% at 80% 80%, rgba(78,205,196,0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 40% at 60% 10%, rgba(92,185,138,0.05) 0%, transparent 50%);
-    transition: opacity .35s;
-  }
-  body.light-mode .sidebar-footer { border-top: 1px solid rgba(0,0,0,0.08); }
-
-  body.light-mode .bg-mesh {
-    opacity: 0.4;
-  }
-  .bg-grid {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background-image:
-      linear-gradient(rgba(201,185,140,0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(201,185,140,0.05) 1px, transparent 1px);
-    background-size: 60px 60px;
-    transition: opacity .35s;
-  }
-  body.light-mode .bg-grid { opacity: 0.4; }
-
-  /* ── LAYOUT ──────────────────────────────────────────── */
-  .app { position: relative; z-index: 1; }
+  /* dashboard.html light-mode overrides */
+  body.light-mode { --bg-body: #f0ede6; --card: rgba(255,255,255,0.95); --border: rgba(0,0,0,0.1); --sidebar-bg: rgba(245,242,236,0.98); }
+  body.light-mode .bg-mesh { opacity: 0.4; }
 
   /* ── SIDEBAR ─────────────────────────────────────────── */
   /* ── TOP NAVBAR (desktop) ── */
@@ -644,32 +546,7 @@
   .auth-user-email { font-size: 10px; color: var(--muted); }
   .auth-signout-btn:hover { background: rgba(224,112,112,0.2); }
 
-  /* ── THEME TOGGLE ────────────────────────────────────── */
-  .theme-label { display: none; }
-  .theme-toggle {
-    position: relative;
-    width: 44px; height: 24px;
-    background: rgba(201,185,140,0.15);
-    border: 1px solid var(--border);
-    border-radius: 12px; cursor: pointer;
-    transition: all .3s;
-    flex-shrink: 0;
-  }
-  .theme-toggle.light { background: rgba(201,169,110,0.2); }
-  .theme-toggle-knob {
-    position: absolute;
-    top: 3px; right: 3px;
-    width: 16px; height: 16px;
-    border-radius: 50%;
-    background: var(--gold);
-    transition: all .3s cubic-bezier(.34,1.56,.64,1);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 9px;
-  }
-  .theme-toggle.light .theme-toggle-knob {
-    right: calc(100% - 19px);
-    background: var(--gold2);
-  }
+  /* theme-toggle styles now in shared/theme.css */
 
   .nav-db {
     color: var(--cyan) !important;
@@ -1156,28 +1033,7 @@
   }
   .btn-reset:hover { border-color: rgba(136,153,187,0.6); color: var(--white); }
 
-  /* Success toast */
-  .toast {
-    position: fixed;
-    bottom: 32px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: linear-gradient(135deg, var(--navy2), var(--navy3));
-    border: 1px solid var(--border);
-    color: var(--white);
-    padding: 14px 28px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    z-index: 999;
-    transition: transform .4s cubic-bezier(.34,1.56,.64,1);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    white-space: nowrap;
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
+  /* toast styles now in shared/theme.css */
 
   /* Saved list in add page */
   .saved-entry {
@@ -1661,18 +1517,18 @@
 <div class="toast" id="toast"></div>
 
 
+<!-- Firebase Compat SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" onerror="window._firebaseFailed=true"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" onerror="window._firebaseFailed=true"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js" onerror="window._firebaseFailed=true"></script>
+<!-- Shared utilities -->
+<script src="shared/firebase-init.js"></script>
+<script src="shared/toast.js"></script>
+<script src="shared/format.js"></script>
+<script src="shared/theme.js"></script>
+<script src="shared/auth-ui.js"></script>
 <script>
-// ── applyTheme (defined early so it's available everywhere) ─────────────
-function applyTheme() {
-  var light = localStorage.getItem('theme') === 'light';
-  document.documentElement.setAttribute('data-theme', light ? 'light' : 'dark');
-}
-applyTheme();
-
-// ── Global Data Arrays (needed by _loadData) ───────────────────────────── (needed by _loadData) ─────────────────────────────
+// ── Global Data Arrays (needed by _loadData) ─────────────────────────────
 var investments   = [];
 var loansData     = [];
 var dividendsData = [];
@@ -1682,141 +1538,13 @@ window.loansData      = loansData;
 window.dividendsData  = dividendsData;
 window.debtsData      = debtsData;
 
-// Firebase init — wrapped in try/catch so app works even if CDN fails
-try {
-if (typeof firebase === 'undefined') throw new Error('Firebase not loaded');
-firebase.initializeApp({
-  apiKey:            "AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME",
-  authDomain:        "investments-page.firebaseapp.com",
-  projectId:         "investments-page",
-  storageBucket:     "investments-page.firebasestorage.app",
-  messagingSenderId: "964948881361",
-  appId:             "1:964948881361:web:2801b8127489d953717af0"
-});
-
-var _auth     = firebase.auth();
-var _db       = firebase.firestore();
-var _provider = new firebase.auth.GoogleAuthProvider();
-_provider.setCustomParameters({ prompt: "select_account" });
-
-var _unsubSnap = null;
-var _syncing   = false;
-var _uid       = null;
-
-//  Helpers 
-function _ref(uid, col) {
-  return _db.collection("users").doc(uid)
-            .collection("portfolio").doc(col);
-}
-
-function _write(uid, col, data) {
-  if (!uid) return;
-  _badge("loading");
-  _ref(uid, col).set(
-    { data: data, uid: uid, ts: new Date().toISOString() },
-    { merge: true }
-  )
-  .then(function() { _badge("synced"); })
-  .catch(function(e) {
-    console.error("Firestore write error [" + col + "]:", e.code, e.message);
-    if (e.code === "permission-denied") {
-      _badge("rules");
-    } else {
-      _badge("error");
-    }
-  });
-}
-
-function _read(uid, col) {
-  return _ref(uid, col).get().then(function(snap) {
-    if (!snap.exists) return null;
-    var d = snap.data();
-    if (d.uid && d.uid !== uid) return null;
-    return d.data || null;
-  }).catch(function(e) { console.warn("read:", e.message); return null; });
-}
-
-function _badge(state) {
-  var labels = {
-    loading: "syncing...",
-    synced:  "synced",
-    error:   "error - check console",
-    rules:   "permission denied - set Firestore rules",
-    offline: "offline"
-  };
-  var colors = {
-    loading: "#4ecdc4",
-    synced:  "var(--green)",
-    error:   "var(--red)",
-    rules:   "var(--orange)",
-    offline: "var(--orange)"
-  };
-  var b = document.getElementById("sync-badge");
-  var m = document.getElementById("mob-sync-status");
-  var t = labels[state] || state;
-  var k = colors[state] || "var(--orange)";
-  if (b) { b.textContent = t; b.style.color = k; b.style.display = "flex"; }
-  if (m) { m.textContent = t; m.style.color = k; }
-}
-
-function _gate(show) {
-  var g = document.getElementById("auth-gate");
-  if (g) g.style.display = show ? "flex" : "none";
-  // Adjust top offset of sidebar/main for banner
-  var sidebar = document.querySelector(".sidebar");
-  var main    = document.querySelector(".main");
-  var banner  = document.getElementById("auth-gate");
-  if (show && banner) {
-    var h = banner.offsetHeight || 48;
-    if (sidebar) sidebar.style.top = h + "px";
-    if (main)    main.style.paddingTop = (h + 8) + "px";
-  } else {
-    if (sidebar) sidebar.style.top = "0";
-    if (main)    main.style.paddingTop = "";
-  }
-}
+if (_auth && _db) {
 
 function _rerender() {
   ["renderAll","renderSukuk","renderFunds","renderStocks",
    "renderLoans","renderUsStocksTable","renderMetals","renderJamaa"].forEach(function(fn) {
     if (typeof window[fn] === "function") window[fn]();
   });
-}
-
-function _updateUI(user) {
-  function el(id)    { return document.getElementById(id); }
-  function show(id,d){ var e=el(id); if(e) e.style.display=d; }
-  function text(id,v){ var e=el(id); if(e) e.textContent=v; }
-  function html(id,v){ var e=el(id); if(e) e.innerHTML=v; }
-
-  if (user) {
-    var name  = user.displayName || "User";
-    var first = name.split(" ")[0];
-    var p     = user.photoURL;
-    var img   = function(s) {
-      return p
-        ? "<img src='"+p+"' style='width:"+s+"px;height:"+s+"px;border-radius:50%;object-fit:cover' referrerpolicy='no-referrer'/>"
-        : name[0];
-    };
-    show("auth-signin-btn","none");
-    var uc=el("auth-user-card"); if(uc) uc.classList.add("show");
-    text("auth-user-name",  name);
-    text("auth-user-email", user.email||"");
-    html("auth-avatar-initials", img(32));
-    show("mob-signin-btn","none");
-    show("mob-user-card","flex");
-    text("mob-user-name",  first);
-    text("mob-menu-email", user.email||"");
-    html("mob-avatar", img(30));
-    _gate(false);
-    if (typeof showToast === "function") showToast("Welcome " + first);
-  } else {
-    show("auth-signin-btn","flex");
-    var uc2=el("auth-user-card"); if(uc2) uc2.classList.remove("show");
-    var bd=el("sync-badge"); if(bd) bd.style.display="none";
-    show("mob-signin-btn","flex");
-    show("mob-user-card","none");
-  }
 }
 
 function _loadData(uid) {
@@ -1938,30 +1666,7 @@ window.fbSaveDividends = function() {
   _write(_uid, "dividends", Array.from(window.dividendsData || dividendsData));
 };
 
-//  Auth: popup on all platforms (redirect breaks on GitHub Pages / iOS Safari)
-window.googleSignIn = function() {
-  _auth.signInWithPopup(_provider).then(function(result) {
-    // success handled by onAuthStateChanged
-  }).catch(function(e) {
-    if (e.code === "auth/popup-blocked") {
-      // Popup was blocked by browser — show guidance
-      if (typeof showToast === "function")
-        showToast("Please allow popups for this site");
-    } else if (e.code !== "auth/popup-closed-by-user"
-            && e.code !== "auth/cancelled-popup-request") {
-      console.error("SignIn error:", e.code, e.message);
-      if (typeof showToast === "function")
-        showToast("Login failed: " + e.code);
-    }
-  });
-};
-
-window.googleSignOut = function() {
-  _auth.signOut().then(function() {
-    if (typeof showToast === "function") showToast("Signed out");
-    if (typeof closeMobUserMenu === "function") closeMobUserMenu();
-  });
-};
+// googleSignIn/googleSignOut now in shared/auth-ui.js
 
 // Auth state listener
 _auth.onAuthStateChanged(function(user) {
@@ -1982,11 +1687,8 @@ _auth.onAuthStateChanged(function(user) {
   }
 });
 
-window.IS_FIREBASE_CONFIGURED = true;
-} catch(e) {
-  console.warn('Firebase init failed:', e.message);
-  window._firebaseFailed = true;
-  // Show login banner but app still works with local data
+} // end if (_auth && _db)
+else {
   var g = document.getElementById('auth-gate');
   if (g) g.style.display = 'flex';
 }
@@ -2001,27 +1703,7 @@ function parseDate(str) {
   return isNaN(d.getTime()) ? null : d;
 }
 
-function showToast(msg, duration) {
-  var t = document.getElementById('toast');
-  if (!t) return;
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(function() { t.classList.remove('show'); }, duration || 3000);
-}
-
-function fmtNum(n, decimals) {
-  if (n == null || isNaN(n)) return '—';
-  return Number(n).toLocaleString('en-US', {
-    minimumFractionDigits: decimals || 0,
-    maximumFractionDigits: decimals || 0
-  });
-}
-
-function fmtPct(p) {
-  if (p == null || isNaN(p)) return '—';
-  var cls = p >= 0 ? 'up' : 'dn';
-  return '<span class="' + cls + '">' + (p >= 0 ? '+' : '') + (p * 100).toFixed(2) + '%</span>';
-}
+// showToast, fmtNum, fmtPct now in shared/toast.js & shared/format.js
 
 
 // ── Global Data Arrays ──────────────────────────────────────────────────────
@@ -2035,153 +1717,8 @@ window.dividendsData  = dividendsData;
 window.debtsData      = debtsData;
 
 
-// ── Theme ──────────────────────────────────────────────────────────────────
-// applyTheme defined in firebase script block above
-function toggleTheme() {
-  var light = localStorage.getItem('theme') === 'light';
-  localStorage.setItem('theme', light ? 'dark' : 'light');
-  applyTheme();
-}
-
-// ── Google Auth ─────────────────────────────────────────────────────────────
-function googleSignIn() {
-  var provider = new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithPopup(provider).catch(function(e){ showToast('❌ '+e.message); });
-}
-function googleSignOut() {
-  firebase.auth().signOut().then(function(){ window.location.reload(); }).catch(function(e){ showToast('❌ '+e.message); });
-}
-
-var _unsubSnap = null;
-var _syncing   = false;
-var _uid       = null;
-
-//  Helpers 
-
-function toggleMobUserMenu() {
-  const menu    = document.getElementById('mob-user-menu');
-  const overlay = document.getElementById('mob-user-overlay');
-  const isOpen  = menu.style.display === 'block';
-  if (isOpen) { closeMobUserMenu(); }
-  else {
-    menu.style.display    = 'block';
-    overlay.style.display = 'block';
-  }
-}
-
-
-function _gate(show) {
-  var g = document.getElementById("auth-gate");
-  if (g) g.style.display = show ? "flex" : "none";
-  // Adjust top offset of sidebar/main for banner
-  var sidebar = document.querySelector(".sidebar");
-  var main    = document.querySelector(".main");
-  var banner  = document.getElementById("auth-gate");
-  if (show && banner) {
-    var h = banner.offsetHeight || 48;
-    if (sidebar) sidebar.style.top = h + "px";
-    if (main)    main.style.paddingTop = (h + 8) + "px";
-  } else {
-    if (sidebar) sidebar.style.top = "0";
-    if (main)    main.style.paddingTop = "";
-  }
-}
-
-
-function _updateUI(user) {
-  function el(id)    { return document.getElementById(id); }
-  function show(id,d){ var e=el(id); if(e) e.style.display=d; }
-  function text(id,v){ var e=el(id); if(e) e.textContent=v; }
-  function html(id,v){ var e=el(id); if(e) e.innerHTML=v; }
-
-  if (user) {
-    var name  = user.displayName || "User";
-    var first = name.split(" ")[0];
-    var p     = user.photoURL;
-    var img   = function(s) {
-      return p
-        ? "<img src='"+p+"' style='width:"+s+"px;height:"+s+"px;border-radius:50%;object-fit:cover' referrerpolicy='no-referrer'/>"
-        : name[0];
-    };
-    show("auth-signin-btn","none");
-    var uc=el("auth-user-card"); if(uc) uc.classList.add("show");
-    text("auth-user-name",  name);
-    text("auth-user-email", user.email||"");
-    html("auth-avatar-initials", img(32));
-    show("mob-signin-btn","none");
-    show("mob-user-card","flex");
-    text("mob-user-name",  first);
-    text("mob-menu-email", user.email||"");
-    html("mob-avatar", img(30));
-    _gate(false);
-    if (typeof showToast === "function") showToast("Welcome " + first);
-  } else {
-    show("auth-signin-btn","flex");
-    var uc2=el("auth-user-card"); if(uc2) uc2.classList.remove("show");
-    var bd=el("sync-badge"); if(bd) bd.style.display="none";
-    show("mob-signin-btn","flex");
-    show("mob-user-card","none");
-  }
-}
-
-
-function _badge(state) {
-  var labels = {
-    loading: "syncing...",
-    synced:  "synced",
-    error:   "error - check console",
-    rules:   "permission denied - set Firestore rules",
-    offline: "offline"
-  };
-  var colors = {
-    loading: "#4ecdc4",
-    synced:  "var(--green)",
-    error:   "var(--red)",
-    rules:   "var(--orange)",
-    offline: "var(--orange)"
-  };
-  var b = document.getElementById("sync-badge");
-  var m = document.getElementById("mob-sync-status");
-  var t = labels[state] || state;
-  var k = colors[state] || "var(--orange)";
-  if (b) { b.textContent = t; b.style.color = k; b.style.display = "flex"; }
-  if (m) { m.textContent = t; m.style.color = k; }
-}
-
-
-function _ref(uid, col) {
-  return _db.collection("users").doc(uid)
-            .collection("portfolio").doc(col);
-}
-
-
-function _read(uid, col) {
-  return _ref(uid, col).get().then(function(snap) {
-    if (!snap.exists) return null;
-    var d = snap.data();
-    if (d.uid && d.uid !== uid) return null;
-    return d.data || null;
-  }).catch(function(e) { console.warn("read:", e.message); return null; });
-}
-
-
-function _write(uid, col, data) {
-  if (!uid) return;
-  _badge("loading");
-  _ref(uid, col).set(
-    { data: data, uid: uid, ts: new Date().toISOString() },
-    { merge: true }
-  )
-  .then(function() { _badge("synced"); })
-  .catch(function(e) {
-    console.error("Firestore write error [" + col + "]:", e.code, e.message);
-    if (e.code === "permission-denied") {
-      _badge("rules");
-    } else {
-      _badge("error");
-    }
-  });
-}
+// toggleTheme, googleSignIn/Out, toggleMobUserMenu, _gate, _updateUI,
+// _badge, _ref, _read, _write — all now in shared/*.js
 
 
 function triggerSync(collection) {
@@ -2196,99 +1733,7 @@ function triggerSync(collection) {
   }, 800);
 }
 
-//  RENDER TABLES 
-
-function _loadData(uid) {
-  _badge("loading");
-  _gate(false);
-
-  var user = window.__firebaseUser;
-  var isNewUser = false;
-  if (user && user.metadata) {
-    var created   = new Date(user.metadata.creationTime).getTime();
-    var lastLogin = new Date(user.metadata.lastSignInTime).getTime();
-    isNewUser = (lastLogin - created) < 120000;
-  }
-
-  // ✅ جميع الطلبات بالتوازي بدل التسلسل
-  Promise.all([
-    _read(uid, "investments"),
-    _read(uid, "loans"),
-    _read(uid, "dividends"),
-    _ref(uid, "settings").get().catch(function(){ return null; }),
-    _read(uid, "debts").catch(function(){ return []; })
-  ]).then(function(results) {
-    var inv          = results[0];
-    var loans        = results[1];
-    var divs         = results[2];
-    var settingsSnap = results[3];
-    var debtsArr     = results[4] || [];
-
-    // Debts
-    if (!Array.isArray(window.debtsData)) window.debtsData = [];
-    window.debtsData.length = 0;
-    debtsArr.forEach(function(r){ window.debtsData.push(r); });
-
-    // Investments
-    if (inv && inv.length > 0) {
-      window.__investments.length = 0;
-      inv.forEach(function(r){ window.__investments.push(r); });
-    } else {
-      window.__investments.length = 0;
-      investments.length = 0;
-      if (isNewUser) _write(uid, "investments", []);
-    }
-
-    // Loans
-    if (loans && loans.length) {
-      if (!Array.isArray(window.loansData)) window.loansData = [];
-      window.loansData.length = 0;
-      loans.forEach(function(r){ window.loansData.push(r); });
-      loansData = window.loansData;
-    } else if (isNewUser) {
-      window.loansData = []; loansData = [];
-      _write(uid, "loans", []);
-    }
-
-    // Dividends
-    if (divs && divs.length) {
-      dividendsData.length = 0;
-      divs.forEach(function(r){ dividendsData.push(r); });
-      window.dividendsData = dividendsData;
-    }
-
-    // Settings
-    if (settingsSnap && settingsSnap.exists) {
-      var L = settingsSnap.data().lists || {};
-      if (L.platforms && L.platforms.length) { window._settingsPlatforms = L.platforms; if (typeof populatePlatformSelects === "function") populatePlatformSelects(); }
-      if (L.banks && L.banks.length) { window._settingsBanks = L.banks; if (typeof populateBankSelect === "function") populateBankSelect(); }
-      if (L.capital && L.capital.length) { window._settingsCapital = L.capital; if (typeof populateCapitalSrcSelect === "function") populateCapitalSrcSelect(); }
-      if (L.types && L.types.length) { window._settingsTypes = L.types; if (typeof populateTypeSelect === "function") populateTypeSelect(); }
-    }
-
-    _rerender();
-    initYearFilter();
-    buildDashboard();
-    if (typeof renderStocks === "function") renderStocks();
-    _badge("synced");
-
-    // Realtime listener على investments فقط
-    if (_unsubSnap) _unsubSnap();
-    _unsubSnap = _ref(uid, "investments").onSnapshot(function(snap) {
-      if (!snap.exists || _syncing) return;
-      var d = snap.data();
-      if (d.uid && d.uid !== uid) return;
-      if (!Array.isArray(d.data)) return;
-      window.__investments.length = 0;
-      d.data.forEach(function(r){ window.__investments.push(r); });
-      if (typeof renderAll    === "function") renderAll();
-      if (typeof renderSukuk  === "function") renderSukuk();
-      if (typeof renderStocks === "function") renderStocks();
-      if (typeof renderFunds  === "function") renderFunds();
-    });
-
-  }).catch(function(e){ console.error("loadData:", e); _badge("error"); });
-}
+// _loadData defined in the firebase init script block above
 
 
 
@@ -2306,15 +1751,7 @@ function statusPill(s){
 
 
 
-// Google Sign-in
-function googleSignIn() {
-  var provider = new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithPopup(provider).catch(function(e){ showToast('❌ '+e.message); });
-}
-function googleSignOut() {
-  firebase.auth().signOut().catch(function(e){ showToast('❌ '+e.message); });
-}
-function toggleMobUserMenu() { toggleDesktopUserMenu(); }
+// googleSignIn, googleSignOut, toggleMobUserMenu now in shared/auth-ui.js
 
 // ══════════════════════════════════════════════════════
 // UTILS
@@ -3260,8 +2697,7 @@ function initYearFilter() {
 // ══════════════════════════════════════════════════════
 // Firebase Auth listener
 // ══════════════════════════════════════════════════════
-var isLightMode = localStorage.getItem('theme') === 'light';
-try { applyTheme(); } catch(e) {}
+// theme applied via shared/theme.js
 
 firebase.auth().onAuthStateChanged(function(user) {
   window.__firebaseUser = user;
