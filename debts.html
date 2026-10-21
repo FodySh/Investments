@@ -2156,9 +2156,10 @@
 <div class="toast" id="toast"></div>
 
 
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="app-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js" crossorigin="anonymous"></script>
 
 <script>
 
@@ -2166,14 +2167,7 @@
 var _auth = null, _db = null, _provider = null;
 try {
 if (typeof firebase === 'undefined') throw new Error('Firebase not loaded');
-firebase.initializeApp({
-  apiKey:            "AIzaSyAE9VvmxCorzJ8d1MUAZds6TyQC1gw67ME",
-  authDomain:        "investments-page.firebaseapp.com",
-  projectId:         "investments-page",
-  storageBucket:     "investments-page.firebasestorage.app",
-  messagingSenderId: "964948881361",
-  appId:             "1:964948881361:web:2801b8127489d953717af0"
-});
+firebase.initializeApp(APP_CONFIG.firebase);
 
 _auth     = firebase.auth();
 _db       = firebase.firestore();
@@ -3061,7 +3055,7 @@ async function fetchCompanyName(ticker) {
   if (fetchingEl) fetchingEl.style.display = 'block';
 
   var symbol = _currentStockMarket === 'sa' ? ticker + '.SR' : ticker;
-  var PROXY  = 'https://claude-proxy.shaheenhouse1.workers.dev';
+  var PROXY  = APP_CONFIG.proxy.claudeProxy;
 
   // قاموس الأسهم السعودية الشائعة (fallback سريع)
   var saNames = {
@@ -3142,7 +3136,7 @@ async function fetchUsStockPrices() {
   if (icon) icon.style.animation = 'spin 1s linear infinite';
 
   var symbols = usStocks.map(function(s){ return s.ticker; }).join(',');
-  var PROXY   = 'https://claude-proxy.shaheenhouse1.workers.dev';
+  var PROXY   = APP_CONFIG.proxy.claudeProxy;
   var updated = 0;
 
   // ── الطلب عبر Cloudflare Worker (يتجاوز CORS) ──────────────────
