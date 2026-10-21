@@ -2325,7 +2325,7 @@ function _loadData(uid) {
     _read(uid, "debts"),
     _read(uid, "jamaa"),
     _read(uid, "loans"),
-    _ref(uid, "settings").get().catch(function(){ return null; })
+    _ref(uid, "settings").get().catch(function(e){ console.warn('Settings read failed:', e.message); return null; })
   ]).then(function(results) {
     var debtsFirestore = results[0];
     var jamaaFirestore = results[1];
@@ -2437,6 +2437,9 @@ window.googleSignOut = function() {
   _auth.signOut().then(function() {
     if (typeof showToast === "function") showToast("Signed out");
     if (typeof closeMobUserMenu === "function") closeMobUserMenu();
+  }).catch(function(e) {
+    console.error('Sign out failed:', e.message);
+    if (typeof showToast === "function") showToast('❌ فشل تسجيل الخروج');
   });
 };
 
@@ -3097,7 +3100,7 @@ async function fetchCompanyName(ticker) {
         found = true;
       }
     }
-  } catch(e) { /* Worker unavailable */ }
+  } catch(e) { console.warn('Worker lookup failed for', ticker + ':', e.message); }
 
   // 2) Fallback: قاموس الأسهم السعودية
   if (!found && _currentStockMarket === 'sa' && saNames[ticker]) {
@@ -4226,7 +4229,7 @@ function getCapitalSources() {
   try {
     var stored = JSON.parse(localStorage.getItem('capitalSources') || 'null');
     return stored && stored.length ? stored : _defaultCapitalSources.slice();
-  } catch(e) { return _defaultCapitalSources.slice(); }
+  } catch(e) { console.warn('getCapitalSources: corrupted localStorage data:', e.message); return _defaultCapitalSources.slice(); }
 }
 
 function saveCapitalSources(list) {
@@ -4334,7 +4337,7 @@ var _defaultCapitalSources  = ['مستحقات','Cash Flow','رصيد الإجا
 var _defaultPlatforms       = ['ترميز','منافع','دراية','ابيان','عوائد','منصة الأهلي','رياض المالية','الراجحي المالية','بنك البلاد','إتقان','أخرى'];
 
 function _getSettings() {
-  try { return JSON.parse(localStorage.getItem('appSettings') || '{}'); } catch(e) { return {}; }
+  try { return JSON.parse(localStorage.getItem('appSettings') || '{}'); } catch(e) { console.warn('_getSettings: corrupted appSettings in localStorage:', e.message); return {}; }
 }
 function _saveSettings(s) { localStorage.setItem('appSettings', JSON.stringify(s)); }
 

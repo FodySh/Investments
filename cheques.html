@@ -339,13 +339,13 @@ try{
     if(user){_uid=user.uid;if(el)el.textContent='☁️ '+(user.displayName||user.email||'').split(' ')[0];loadAll();}
     else{_uid=null;if(el)el.textContent='🔒 غير مسجّل';loadAll();}
   });
-}catch(e){loadAll();}
+}catch(e){ console.warn('Firebase init failed:', e.message); loadAll(); }
 
 function _ref(col){return _db.collection('users').doc(_uid).collection('portfolio').doc(col);}
 function _fbSave(col,data){if(!_uid||!_db)return;_ref(col).set({data:data,ts:new Date().toISOString()},{merge:true}).catch(console.warn);}
-async function _fbLoad(col){if(!_uid||!_db)return null;try{var s=await _ref(col).get();return s.exists?s.data().data:null;}catch(e){return null;}}
+async function _fbLoad(col){if(!_uid||!_db)return null;try{var s=await _ref(col).get();return s.exists?s.data().data:null;}catch(e){ console.warn('_fbLoad('+col+') failed:', e.message); return null;}}
 function _ls(k,d){localStorage.setItem('chq_'+k,JSON.stringify(d));}
-function _lg(k){try{return JSON.parse(localStorage.getItem('chq_'+k)||'null');}catch(e){return null;}}
+function _lg(k){try{return JSON.parse(localStorage.getItem('chq_'+k)||'null');}catch(e){ console.warn('_lg: corrupted localStorage key chq_'+k+':', e.message); return null;}}
 
 // ── DATA ──────────────────────────────────────────────────────────────────────
 var projects=[],schedule=[],_iRows=[],_ePI=null,_eSI=null;

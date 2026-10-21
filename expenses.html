@@ -551,7 +551,7 @@ function loadData(){docRef().get().then(function(s){if(s.exists){var d=s.data();
     }if(d.banks)_D.banks=d.banks;
     if(d.budgets)_D.budgets=d.budgets;
     if(d.incomesByMonth)_D.incomesByMonth=d.incomesByMonth;
-    if(d.customCats)_D.customCats=d.customCats;if(d.currency)_D.currency=d.currency;}renderAll();if(window.location.hash==='#add'){openModal('variable');history.replaceState(null,'',window.location.pathname);}}).catch(function(){renderAll();});}
+    if(d.customCats)_D.customCats=d.customCats;if(d.currency)_D.currency=d.currency;}renderAll();if(window.location.hash==='#add'){openModal('variable');history.replaceState(null,'',window.location.pathname);}}).catch(function(e){ console.warn('Failed to load expenses from Firestore:', e.message); renderAll(); });}
 function saveData(q){
   if(!_uid)return;
   // Deep copy to ensure Firestore serializes nested objects (like paid:{}) correctly
