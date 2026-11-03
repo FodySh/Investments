@@ -1252,6 +1252,18 @@ body.pal-royal.light-mode{--navy:#f6f5fc;--navy2:#eeecf8;--navy3:#dfdbf0;--gold:
 #pal-switch button:hover{transform:scale(1.12)}
 #pal-switch button.on{border-color:var(--text-primary)}
 </style>
+<style id="skeleton-css">
+.main{position:relative}
+#skel{position:absolute;inset:0;z-index:60;background:var(--bg-body);padding:60px 36px 32px;display:flex;flex-direction:column;gap:20px;min-height:100vh;transition:opacity .3s}
+#skel.hide{opacity:0;pointer-events:none}
+#skel .sk{border-radius:14px;background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.11) 50%,rgba(255,255,255,.04) 75%);background-size:200% 100%;animation:skShimmer 1.4s infinite linear}
+#skel .sk-title{height:30px;width:260px;max-width:60%}
+#skel .sk-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px}
+#skel .sk-kpi{height:110px}
+#skel .sk-chart{height:260px}
+#skel .sk-line{height:44px}
+@keyframes skShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+</style>
 </head>
 <body>
 <!-- AUTH GATE — shown to unauthenticated users -->
@@ -1358,6 +1370,8 @@ body.pal-royal.light-mode{--navy:#f6f5fc;--navy2:#eeecf8;--navy3:#dfdbf0;--gold:
   </aside>
 
   <main class="main">
+<div id="skel" aria-hidden="true"><div class="sk sk-title"></div><div class="sk-row"><div class="sk sk-kpi"></div><div class="sk sk-kpi"></div><div class="sk sk-kpi"></div><div class="sk sk-kpi"></div></div><div class="sk sk-chart"></div><div class="sk sk-line"></div><div class="sk sk-line"></div><div class="sk sk-line"></div></div>
+
 
     <!-- MOBILE TOP BAR -->
     <div class="mobile-topbar">
@@ -11015,4 +11029,25 @@ document.getElementById('app-guide-modal').addEventListener('click', function(e)
 <button data-p="pal-royal" title="ملكي" style="background:linear-gradient(135deg,#151229 50%,#a594ff 50%)"></button>
 </div>
 <script>(function(){var ps=['pal-ocean','pal-graphite','pal-royal'],w=document.getElementById('pal-switch');function set(p){ps.forEach(function(c){document.body.classList.remove(c)});if(p)document.body.classList.add(p);try{localStorage.setItem('palette',p)}catch(e){}w.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.p===p)})}var s='pal-ocean';try{var v=localStorage.getItem('palette');if(v!==null)s=v}catch(e){}set(s);w.addEventListener('click',function(e){var b=e.target.closest('button');if(b)set(b.dataset.p)})})();</script>
+<script>
+// Skeleton loading — SKELETON_DELAY_MS = 3000 للتجربة؛ غيّرها إلى 0 لإلغاء التأخير
+var SKELETON_DELAY_MS = 3000;
+function showSkeleton(){
+  var el=document.getElementById('skel'); if(!el) return;
+  el.classList.remove('hide'); el.style.display='flex';
+  clearTimeout(window.__skelT);
+  window.__skelT=setTimeout(function(){
+    el.classList.add('hide');
+    setTimeout(function(){ if(el.classList.contains('hide')) el.style.display='none'; },320);
+  }, SKELETON_DELAY_MS);
+}
+(function(){
+  var orig=window.showPage;
+  if(typeof orig==='function'){
+    var prev=null;
+    window.showPage=function(id){ if(id!==prev){ prev=id; showSkeleton(); } return orig.apply(this,arguments); };
+  }
+  showSkeleton();
+})();
+</script>
 </body>

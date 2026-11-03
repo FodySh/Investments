@@ -1263,6 +1263,18 @@
   .progress-fill { height:100%;border-radius:4px;transition:width .6s ease; }
   @media(max-width:900px){ .dash-grid-2,.dash-grid-3{ grid-template-columns:1fr; } }
   </style>
+<style id="skeleton-css">
+.main{position:relative}
+#skel{position:absolute;inset:0;z-index:60;background:var(--bg-body);padding:60px 36px 32px;display:flex;flex-direction:column;gap:20px;min-height:100vh;transition:opacity .3s}
+#skel.hide{opacity:0;pointer-events:none}
+#skel .sk{border-radius:14px;background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.11) 50%,rgba(255,255,255,.04) 75%);background-size:200% 100%;animation:skShimmer 1.4s infinite linear}
+#skel .sk-title{height:30px;width:260px;max-width:60%}
+#skel .sk-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px}
+#skel .sk-kpi{height:110px}
+#skel .sk-chart{height:260px}
+#skel .sk-line{height:44px}
+@keyframes skShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+</style>
 </head>
 <body>
 
@@ -1321,6 +1333,8 @@
   </aside>
 
   <main class="main">
+<div id="skel" aria-hidden="true"><div class="sk sk-title"></div><div class="sk-row"><div class="sk sk-kpi"></div><div class="sk sk-kpi"></div><div class="sk sk-kpi"></div><div class="sk sk-kpi"></div></div><div class="sk sk-chart"></div><div class="sk sk-line"></div><div class="sk sk-line"></div><div class="sk sk-line"></div></div>
+
     <!-- تبويبات لوحة التحكم -->
     <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:20px;overflow-x:auto">
       <button id="dtab-dashboard" onclick="switchDashTab('dashboard')"
@@ -3482,6 +3496,27 @@ function renderYearlyChart(allInv) {
     '</div>';
 }
 
+</script>
+<script>
+// Skeleton loading — SKELETON_DELAY_MS = 3000 للتجربة؛ غيّرها إلى 0 لإلغاء التأخير
+var SKELETON_DELAY_MS = 3000;
+function showSkeleton(){
+  var el=document.getElementById('skel'); if(!el) return;
+  el.classList.remove('hide'); el.style.display='flex';
+  clearTimeout(window.__skelT);
+  window.__skelT=setTimeout(function(){
+    el.classList.add('hide');
+    setTimeout(function(){ if(el.classList.contains('hide')) el.style.display='none'; },320);
+  }, SKELETON_DELAY_MS);
+}
+(function(){
+  var orig=window.showPage;
+  if(typeof orig==='function'){
+    var prev=null;
+    window.showPage=function(id){ if(id!==prev){ prev=id; showSkeleton(); } return orig.apply(this,arguments); };
+  }
+  showSkeleton();
+})();
 </script>
 </body>
 </html>
