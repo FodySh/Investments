@@ -5,37 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>الإعدادات — محفظتي المالية</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Cairo:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:#050e0a; --navy:#0a1a12; --card:#0f2218;
-      --border:rgba(255,255,255,0.07);
-      --gold:#c9a84c; --gold2:#e8c97a;
-      --green:#00e676; --red:#ff4444;
-      --muted:#8899bb; --white:#f0f4ff;
+      --bg:#12110d; --navy:#1a1810; --card:rgba(39,35,26,0.88);
+      --border:rgba(201,185,140,0.22);
+      --gold:#c9a96e; --gold2:#e2c48a;
+      --green:#5cb98a; --red:#e07070;
+      --muted:#d1d5e2; --white:#f0f0ee;
     }
     * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:'IBM Plex Sans Arabic',sans-serif; background:var(--bg); color:var(--white); min-height:100vh; padding:24px 16px 80px; }
-    #login-banner { position:fixed; inset:0; background:rgba(5,14,10,0.98); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; z-index:200; }
-    .google-btn { background:#fff; color:#222; border:none; border-radius:12px; padding:14px 28px; font-size:15px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:10px; font-family:'IBM Plex Sans Arabic',sans-serif; }
+    body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--white); min-height:100vh; padding:24px 16px 80px; }
+    #login-banner { position:fixed; inset:0; background:rgba(18,17,13,0.98); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; z-index:200; }
+    .google-btn { background:#fff; color:#222; border:none; border-radius:12px; padding:14px 28px; font-size:15px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:10px; font-family:'Cairo',sans-serif; }
     .wrap { max-width:680px; margin:0 auto; }
     .top-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; }
-    .top-bar h1 { font-size:22px; font-weight:700; color:var(--gold); }
-    .back-btn { background:rgba(201,168,76,0.1); border:1px solid rgba(201,168,76,0.25); border-radius:10px; padding:9px 18px; color:var(--gold); font-family:inherit; font-size:13px; cursor:pointer; }
+    .top-bar h1 { font-family:'DM Serif Display','Cairo',serif; font-size:24px; font-weight:400; color:var(--gold); }
+    .back-btn { background:rgba(201,169,110,0.1); border:1px solid rgba(201,169,110,0.25); border-radius:10px; padding:9px 18px; color:var(--gold); font-family:inherit; font-size:13px; cursor:pointer; }
     .user-bar { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px 20px; margin-bottom:24px; display:flex; align-items:center; gap:14px; }
-    .avatar { width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,var(--gold),var(--gold2)); display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; color:#0a1628; flex-shrink:0; overflow:hidden; }
+    .avatar { width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,var(--gold),var(--gold2)); display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; color:#12110d; flex-shrink:0; overflow:hidden; }
     .avatar img { width:100%; height:100%; object-fit:cover; }
     .section { background:var(--card); border:1px solid var(--border); border-radius:16px; margin-bottom:20px; overflow:hidden; }
     .sec-title { padding:15px 20px 13px; font-size:13px; font-weight:700; color:var(--gold); border-bottom:1px solid var(--border); }
     .tags-wrap { display:flex; flex-wrap:wrap; gap:8px; padding:14px 20px 8px; min-height:50px; }
-    .tag { background:rgba(201,168,76,0.08); border:1px solid rgba(201,168,76,0.2); border-radius:20px; padding:5px 10px 5px 14px; font-size:12px; color:var(--gold); display:flex; align-items:center; gap:6px; }
+    .tag { background:rgba(201,169,110,0.08); border:1px solid rgba(201,169,110,0.2); border-radius:20px; padding:5px 10px 5px 14px; font-size:12px; color:var(--gold); display:flex; align-items:center; gap:6px; }
     .tag-x { background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; line-height:1; padding:0; }
     .tag-x:hover { color:var(--red); }
     .add-row { display:flex; gap:8px; padding:8px 20px 14px; }
     .f-input { background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:10px; padding:9px 14px; color:var(--white); font-family:inherit; font-size:13px; flex:1; outline:none; }
     .f-input:focus { border-color:var(--gold); }
-    .add-btn { background:rgba(201,168,76,0.15); border:1px solid rgba(201,168,76,0.3); border-radius:10px; padding:9px 18px; color:var(--gold); font-family:inherit; font-size:13px; cursor:pointer; font-weight:600; }
-    .save-btn { width:100%; background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#0a1628; border:none; border-radius:14px; padding:15px; font-size:15px; font-weight:700; font-family:inherit; cursor:pointer; margin-top:8px; }
+    .add-btn { background:rgba(201,169,110,0.15); border:1px solid rgba(201,169,110,0.3); border-radius:10px; padding:9px 18px; color:var(--gold); font-family:inherit; font-size:13px; cursor:pointer; font-weight:600; }
+    .save-btn { width:100%; background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#12110d; border:none; border-radius:14px; padding:15px; font-size:15px; font-weight:700; font-family:inherit; cursor:pointer; margin-top:8px; }
     .toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); background:var(--navy); border:1px solid var(--green); border-radius:12px; padding:12px 24px; font-size:13px; color:var(--green); z-index:999; display:none; }
   </style>
 <style id="skeleton-css">
